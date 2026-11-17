@@ -30,6 +30,7 @@ type CardEffectType = 'NORMAL' | 'COUNTER' | 'PUSH' | 'PULL' | 'RECOIL' | 'DASH_
 interface KCard {
     fusionParts?:KCard[];
     fusionSuper?:FusionSuper;
+    fusionFinishers?:FusionSuper[];
     technique?: HeroTechnique;
     id: string;
     name: string;
@@ -2395,6 +2396,16 @@ const KochoShowdown: React.FC<{
                     if (!voiceMountedRef.current) return;
                     setSuperCutin(null);
                 }
+            }
+            for(const key of card.fusionFinishers??[]){
+                const move=kochoSupers(key.hero).find(m=>m.id===key.id);if(!move)continue;
+                const finish=resolveKochoSuper(move,currentState.player,currentState.enemies);
+                currentState={...currentState,player:finish.player,enemies:finish.enemies};
+                setGameState(prev=>({...prev,player:finish.player,enemies:finish.enemies}));
+                setSuperCutin(move);audioService.playAttackEffectSound('explosion',Math.max(1,finish.targets.length));
+                if(!debugPreview&&!isUiPreview)void audioService.playKochoSuperVoice(key.hero,move.id);
+                finish.targets.forEach(pos=>{addVfx('BLAST',pos,{durationMs:700});addVfx('TEXT',pos,{text:move.damage,color:'text-cyan-200'});});
+                await new Promise(resolve=>setTimeout(resolve,650));if(!voiceMountedRef.current)return;setSuperCutin(null);
             }
             // Check pickup after move
             setGameState(prev => handlePickup(prev.player.pos, prev));

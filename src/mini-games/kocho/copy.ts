@@ -1,6 +1,7 @@
 import { SUPER_ENGLISH, SUPER_HIRAGANA } from './superCopy';
 import { KOCHO_TECHNIQUE_ENGLISH, KOCHO_TECHNIQUE_HIRAGANA } from './techniques';
 const rows = [
+ ['合計4アクションまで合成できます','Combine up to 4 component actions','ごうけい4アクションまでごうせいできます'],
  ["カード合成", "Card fusion", "カードごうせい"],
  ["このショップでは合成済み", "Fusion used in this shop", "このショップではごうせいずみ"],
  ["各ショップで1回だけ", "Once per shop", "かくショップで1かいだけ"],

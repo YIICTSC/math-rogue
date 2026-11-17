@@ -12,11 +12,11 @@ export default function FusionWorkshop<C extends FusionCard<C>>({hand,hero,money
  return <div className="kocho-fusion-overlay" data-gamepad-modal data-gamepad-initial-scope="kocho-fusion" role="dialog" aria-modal="true" aria-label={tr('カード合成')}>
   <section className="kocho-fusion-workshop"><header><div><h2>{tr('カード合成')}</h2><small>{money} G · {tr(used?'このショップでは合成済み':'各ショップで1回だけ')}</small></div><button data-gamepad-back onClick={onClose}>{tr('閉じる')} ×</button></header>
   <p>{tr('2〜3枚を選んだ順に合成。最大4アクション。CDは素材の最大値。')}</p>
-  <div className="kocho-fusion-columns"><div className="kocho-fusion-ingredients">{hand.map((c,i)=><button key={c.id} data-fusion-ingredient={c.id} data-gamepad-zone="kocho-fusion-ingredients" data-gamepad-order={i} disabled={used||c.currentCooldown>0||Boolean(c.fusionSuper)||(!ids.includes(c.id)&&ids.length>=3)} aria-pressed={ids.includes(c.id)} onClick={()=>setIds(v=>v.includes(c.id)?v.filter(id=>id!==c.id):[...v,c.id])}>
+  <div className="kocho-fusion-columns"><div className="kocho-fusion-ingredients">{hand.map((c,i)=><button key={c.id} data-fusion-ingredient={c.id} data-gamepad-zone="kocho-fusion-ingredients" data-gamepad-order={i} disabled={used||(!ids.includes(c.id)&&ids.length>=3)} aria-pressed={ids.includes(c.id)} onClick={()=>setIds(v=>v.includes(c.id)?v.filter(id=>id!==c.id):[...v,c.id])}>
    <CardArt card={c} className="kocho-fusion-ingredient-art"/><b>{fusionName(c,language,tr)}</b><small>CD {c.cooldown}</small>{ids.includes(c.id)&&<span className="kocho-fusion-order">{ids.indexOf(c.id)+1}</span>}
   </button>)}</div>
   <aside className="kocho-fusion-result" data-fusion-preview><h3>{tr('選んだ順に発動')}</h3><ol>{cards.map(c=><li key={c.id}>{fusionName(c,language,tr)}</li>)}</ol>
-   {result?<><CardArt card={result} className="kocho-fusion-preview-art"/><strong>{fusionName(result,language,tr)}</strong>{result.fusionSuper&&<b className="kocho-fusion-super-tag">{tr('1枚で超必殺技！')}</b>}<p>{fusionDescription(result,language,tr)}</p><small>CD {result.cooldown}</small></>:<p>{tr('素材を2〜3枚選ぼう')}</p>}
+   {result?<><CardArt card={result} className="kocho-fusion-preview-art"/><strong>{fusionName(result,language,tr)}</strong>{result.fusionSuper&&<b className="kocho-fusion-super-tag">{tr('1枚で超必殺技！')}</b>}<p>{fusionDescription(result,language,tr)}</p><small>CD {result.cooldown}</small></>:<p>{tr(cards.length>=2?'合計4アクションまで合成できます':'素材を2〜3枚選ぼう')}</p>}
    <button data-fusion-confirm data-gamepad-initial-choice disabled={!canFuse} onClick={()=>onConfirm(ids)}>{tr('この順で合成する')} · {KOCHO_FUSION_PRICE} G</button>
    {money<KOCHO_FUSION_PRICE&&<small>{tr('お金が足りません')}</small>}
   </aside></div>
