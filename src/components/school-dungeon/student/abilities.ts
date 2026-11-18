@@ -46,8 +46,16 @@ export interface AbilityEntity {id:number|string;x:number;y:number;hp:number;def
 export function resolveStudentAbility(a:StudentAbility,player:{x:number;y:number;attack:number;hp:number;maxHp:number;dir:{x:number;y:number}},enemies:AbilityEntity[],map:string[][],terrain:Record<string,string>,multiplier=1){
  const direction=player.dir.x||player.dir.y?player.dir:{x:0,y:1};
  const clearLine=(tx:number,ty:number)=>{let x=player.x,y=player.y;const distance=Math.max(Math.abs(tx-x),Math.abs(ty-y));for(let i=1;i<=distance;i++){const nx=Math.round(player.x+(tx-player.x)*i/distance),ny=Math.round(player.y+(ty-player.y)*i/distance);if(map[ny]?.[nx]==='WALL'||!map[ny]?.[nx])return false;if(nx!==x&&ny!==y&&(map[y]?.[nx]==='WALL'||map[ny]?.[x]==='WALL'))return false;x=nx;y=ny;}return true;};
+ const radius = a.radius || 1;
+ const candidates = a.line
+   ? Array.from({ length: a.line }, (_, i) => ({ x: player.x + direction.x * (i + 1), y: player.y + direction.y * (i + 1) }))
+   : Array.from({ length: (2 * radius + 1) ** 2 }, (_, i) => ({
+       x: player.x - radius + i % (2 * radius + 1), y: player.y - radius + Math.floor(i / (2 * radius + 1)),
+     }));
+ const cells = candidates.filter(({ x, y }) => clearLine(x, y));
+ const area = new Set(cells.map(({ x, y }) => `${x},${y}`));
  const hits:{x:number;y:number;damage:number}[]=[];
- const result=enemies.map(e=>{if(e.hp<=0||e.enemyType==='SHOPKEEPER')return e;const dx=e.x-player.x,dy=e.y-player.y,distance=Math.max(Math.abs(dx),Math.abs(dy));const onRay=a.line?Array.from({length:a.line},(_,i)=>[direction.x*(i+1),direction.y*(i+1)]).some(([x,y])=>dx===x&&dy===y):distance<=(a.radius||1);if(!onRay||!clearLine(e.x,e.y))return e;const damage=a.power?Math.max(1,Math.floor(Math.max(1,Math.floor(player.attack*a.power-(e.defense||0)*.5))*multiplier)):0;hits.push({x:e.x,y:e.y,damage});return {...e,hp:e.hp-damage,status:{...e.status,...(a.status?{[a.status]:Math.max(e.status?.[a.status]||0,a.turns||2)}:{})}};});
+ const result=enemies.map(e=>{if(e.hp<=0||e.enemyType==='SHOPKEEPER')return e;if(!area.has(`${e.x},${e.y}`))return e;const damage=a.power?Math.max(1,Math.floor(Math.max(1,Math.floor(player.attack*a.power-(e.defense||0)*.5))*multiplier)):0;hits.push({x:e.x,y:e.y,damage});return {...e,hp:e.hp-damage,status:{...e.status,...(a.status?{[a.status]:Math.max(e.status?.[a.status]||0,a.turns||2)}:{})}};});
  let x=player.x,y=player.y;for(let i=0;i<(a.dash||0);i++){const nx=x+direction.x,ny=y+direction.y,k=`${nx},${ny}`;if(!map[ny]?.[nx]||map[ny][nx]!=='FLOOR'||terrain[k]||result.some(e=>e.hp>0&&e.x===nx&&e.y===ny)||nx!==x&&ny!==y&&(map[y]?.[nx]==='WALL'||map[ny]?.[x]==='WALL'))break;x=nx;y=ny;}
- return {enemies:result.filter(e=>e.hp>0),dead:result.filter(e=>e.hp<=0&&enemies.some(old=>old.id===e.id&&old.hp>0)),hits,x,y,hp:Math.min(player.maxHp,player.hp+(a.heal||0))};
+ return {enemies:result.filter(e=>e.hp>0),dead:result.filter(e=>e.hp<=0&&enemies.some(old=>old.id===e.id&&old.hp>0)),hits,cells,x,y,hp:Math.min(player.maxHp,player.hp+(a.heal||0))};
 }

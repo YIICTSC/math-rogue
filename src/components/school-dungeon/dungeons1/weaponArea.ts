@@ -17,8 +17,35 @@ export function weaponArea(kind:WeaponKind,p:Point,dir:Point,map:readonly (reado
  const clear=(q:Point)=>{const steps=Math.max(Math.abs(q.x-p.x),Math.abs(q.y-p.y));let last=p;for(let i=1;i<=steps;i++){const x=Math.round(p.x+(q.x-p.x)*i/steps),y=Math.round(p.y+(q.y-p.y)*i/steps);if(!map[y]?.[x]||['WALL','DOOR'].includes(map[y][x]))return false;if(x!==last.x&&y!==last.y&&(['WALL','DOOR'].includes(map[last.y]?.[x])||['WALL','DOOR'].includes(map[y]?.[last.x])))return false;last={x,y};}return true;};
  return offsets.map(o=>({x:p.x+o.x,y:p.y+o.y})).filter(clear).sort((a,b)=>Math.max(Math.abs(a.x-p.x),Math.abs(a.y-p.y))-Math.max(Math.abs(b.x-p.x),Math.abs(b.y-p.y)));
 }
-export function weaponTargets<T extends Point&{hp:number;enemyType?:string}>(kind:WeaponKind,p:Point,dir:Point,map:readonly (readonly string[])[],enemies:readonly T[]):T[]{
- const targets=weaponArea(kind,p,dir,map).flatMap(cell=>enemies.filter(e=>e.x===cell.x&&e.y===cell.y&&e.hp>0&&e.enemyType!=='SHOPKEEPER'));
- if(kind==='bow'){const first=weaponArea(kind,p,dir,map).flatMap(cell=>enemies.filter(e=>e.x===cell.x&&e.y===cell.y&&e.hp>0))[0];return first&&first.enemyType!=='SHOPKEEPER'?[first]:[];}
- return [...new Set(targets)];
+/** The projectile footprint stops at the same first actor as the damage. */
+export function techniqueArea(kind: WeaponKind, origin: Point, dir: Point,
+ map: readonly (readonly string[])[], enemies: readonly (Point & {hp: number})[]) {
+ const cells = weaponArea(kind, origin, dir, map);
+ const limit = kind === 'bow' ? cells.findIndex(cell => enemies.some(e => e.hp > 0 && e.x === cell.x && e.y === cell.y)) : -1;
+ return limit < 0 ? cells : cells.slice(0, limit + 1);
+}
+export function weaponTargets<T extends Point & {hp: number; enemyType?: string}>(kind: WeaponKind, p: Point,
+ dir: Point, map: readonly (readonly string[])[], enemies: readonly T[]): T[] {
+ const cells = techniqueArea(kind, p, dir, map, enemies);
+ const targets = cells.flatMap(cell => enemies.filter(e => e.x === cell.x && e.y === cell.y && e.hp > 0));
+ if (kind === 'bow') return targets[0] && targets[0].enemyType !== 'SHOPKEEPER' ? [targets[0]] : [];
+ return [...new Set(targets.filter(e => e.enemyType !== 'SHOPKEEPER'))];
+}
+
+/** Normal swings stay adjacent. Techniques and arrows show the full travelled area. */
+export function weaponAttackArea(kind: WeaponKind, origin: Point, dir: Point,
+ map: readonly (readonly string[])[], enemies: readonly (Point & {hp: number})[],
+ hits: readonly Point[], extraCells: readonly Point[], technique: boolean) {
+ const target = hits[0];
+ let cells = [{ x: origin.x + dir.x, y: origin.y + dir.y }];
+ if (technique || kind === 'bow') cells = techniqueArea(kind, origin, dir, map, enemies);
+ if (kind === 'bow' && !technique && target) {
+   // A standard shot has its own targeting rules. Use its resolved impact as the endpoint.
+   const distance = Math.max(Math.abs(target.x - origin.x), Math.abs(target.y - origin.y));
+   cells = Array.from({ length: distance }, (_, i) => ({
+     x: origin.x + dir.x * (i + 1), y: origin.y + dir.y * (i + 1),
+   }));
+ }
+ const unique = new Map([...cells, ...extraCells, ...hits].map(({ x, y }) => [`${x},${y}`, { x, y }]));
+ return [...unique.values()].filter(({ x, y }) => map[y]?.[x] && map[y][x] !== 'WALL');
 }

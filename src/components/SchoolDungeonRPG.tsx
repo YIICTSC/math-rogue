@@ -1,4 +1,4 @@
-import {weaponTargets} from './school-dungeon/dungeons1/weaponArea';
+import {weaponAttackArea, weaponTargets} from './school-dungeon/dungeons1/weaponArea';
 import {debugRewardsUnlocked} from '../point-exchange/debug';
 import {TechniqueBar} from './school-dungeon/techniques/TechniqueBar';
 import {DungeonInventoryMenu} from './school-dungeon/DungeonInventoryMenu';
@@ -9,7 +9,7 @@ import {createPortal} from 'react-dom';
 import {traceUmbrella,resolveUmbrella,type UmbrellaKind} from './school-dungeon/umbrella';
 import {drawUmbrellaEffect} from './school-dungeon/umbrellaEffects';
 import {equippedWeaponKind,WEAPONS,TRAINING_WEAPONS,type WeaponKind} from './school-dungeon/dungeons1/mastery';
-import {drawMartialEffect} from './school-dungeon/dungeons1/martialEffects';
+import {drawAttackFootprint, weaponFootprint, type AttackFootprint} from './school-dungeon/dungeons1/martialEffects';
 import {cueStudentAction} from './school-dungeon/dungeons1/heroActions';
 import {AbilityDetails} from './school-dungeon/student/AbilityDetails';
 import {drawStudentAbilityEffect} from './school-dungeon/student/abilityEffects';
@@ -160,7 +160,7 @@ type TrapType = 'BOMB' | 'SLEEP' | 'POISON' | 'WARP' | 'RUST' | 'SUMMON';
 interface VisualEffect {
   umbrellaKind?: UmbrellaKind;
   impactValue?: string;
-  weaponKind?:WeaponKind; martialTier?:number;
+  footprint?: AttackFootprint;
   id: number;
   type: VisualEffectType;
   x: number; 
@@ -522,7 +522,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
   // 引き継ぎ対象アイテム一覧（装備中を含む全所持品）
   const adventure = useSchoolAdventure({
-    umbrellaEffect:effect=>addVisualEffect('UMBRELLA',effect.targetX,effect.targetY,{...effect,duration:20,maxDuration:20}),revealMap:()=>setFloorMapRevealed(true),awardXp:amount=>gainXp(amount),abilityEffect:(x,y,color)=>addVisualEffect('ABILITY',x,y,{color,duration:28,maxDuration:28}),abilityAudio:(effect,finish)=>studentCue('ultimate',finish,effect),bossVictory:()=>{setGameClear(true);saveDungeonScore('Cleared');storageService.clearDungeonState();},
+    umbrellaEffect:effect=>addVisualEffect('UMBRELLA',effect.targetX,effect.targetY,{...effect,duration:20,maxDuration:20}),revealMap:()=>setFloorMapRevealed(true),awardXp:amount=>gainXp(amount),abilityEffect:(x,y,color,footprint)=>addVisualEffect('ABILITY',x,y,{color,footprint,duration:footprint?14:10,maxDuration:footprint?14:10}),abilityAudio:(effect,finish)=>studentCue('ultimate',finish,effect),bossVictory:()=>{setGameClear(true);saveDungeonScore('Cleared');storageService.clearDungeonState();},
     actionBlocked:menuOpen||shopState.active||showMap||showStatus||showHelp,game: 1, known:item=>itemKnown(item), suspended:launch!=='PLAY'||showMathChallenge, stairs:()=>setShowMathChallenge(true), debug: Boolean(debugPreview), language: languageMode, map, player, inventory, enemies, traps, floorItems, floor, belly, gameOver, gameClear,
     setPlayer, setInventory, setEnemies, setTraps, setFloorItems, setMap, setGameOver, setGameClear, setMenuOpen, setBelly, setIdentifiedTypes,
     log: message => addLog(message), restart: () => startNewGame(),
@@ -1880,8 +1880,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           }
       }
       triggerPlayerAttackAnim(player.dir);
-      if(adventure.series===1){const kind=equippedWeaponKind(player.equipment?.weapon);addVisualEffect('MARTIAL',tx,ty,{dir:player.dir,weaponKind:kind,duration:32,maxDuration:32});}
-      else addVisualEffect('SLASH', tx, ty, { dir: player.dir });
+      showWeaponAttack([]);
       addLog("素振りをした。");
       audioService.playSound('select');
       processTurn(player.x, player.y);
@@ -2089,6 +2088,17 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       setTimeout(() => setPlayer(p => ({ ...p, offset: { x: 0, y: 0 } })), 100);
   };
 
+  const showWeaponAttack = (hits: readonly {x: number; y: number}[], tier = 0, extraCells: readonly {x: number; y: number}[] = []) => {
+      const kind = equippedWeaponKind(player.equipment?.weapon);
+      const origin = { x: player.x, y: player.y };
+      const cells = weaponAttackArea(kind, origin, player.dir, map, enemies, hits, extraCells, tier > 0);
+      if (!cells.length) return;
+      const duration = tier ? 13 : 8;
+      addVisualEffect('MARTIAL', origin.x, origin.y, {
+          footprint: weaponFootprint(kind, origin, player.dir, cells, hits, tier), duration, maxDuration: duration,
+      });
+  };
+
   const attackEnemy = (target: Entity, techniqueId?:string) => {
       if(target.hp<=0)return;
       const martial=adventure.series===1&&target.enemyType!=='SHOPKEEPER'?adventure.practiceMartialAttack(techniqueId):null;
@@ -2099,8 +2109,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       if (equipmentHas(player.equipment?.weapon, 'HEAL_SWORD')) setPlayer(p => ({...p, hp: Math.min(p.maxHp, p.hp + 3)}));
       triggerPlayerAttackAnim(player.dir);
       const targets = [target];
-      if(adventure.series===1)addVisualEffect('MARTIAL',target.x,target.y,{dir:player.dir,weaponKind,martialTier:technique?.tier||0,duration:32,maxDuration:32});
-      else addVisualEffect('SLASH', target.x, target.y, { dir: player.dir });
       if(technique){
           studentCue.technique(technique.id,technique.tier===5?'finisher':'normal');
           addLog(adventure.text(technique.ja,technique.en),'#ffe396');
@@ -2108,6 +2116,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       }
 
 
+      const extraCells: { x: number; y: number }[] = [];
       if (equipmentHas(player.equipment?.weapon, 'PROTRACTOR_EDGE')) {
           const {x: dx, y: dy} = player.dir;
           const others = [];
@@ -2122,17 +2131,15 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
           others.forEach(offset => {
               const tx = player.x + offset.x;
-              const ty = player.y + offset.y;
-              addVisualEffect('SLASH', tx, ty, { dir: offset as Direction }); 
-              addVisualEffect('EXPLOSION', tx, ty, { duration: 10, maxDuration: 10, scale: 0.5 });
+              const ty = player.y + offset.y; extraCells.push({ x: tx, y: ty });
               const t = enemies.find(e => e.x === tx && e.y === ty);
               if (t&&!targets.some(e=>e.id===t.id)) targets.push(t);
           });
       }
 
+      showWeaponAttack(targets, technique?.tier, extraCells);
       let newEnemies = [...enemies];
       targets.filter((t,i)=>targets.findIndex(e=>e.id===t.id)===i).forEach(t => {
-          if(adventure.series===1&&t.id!==target.id)addVisualEffect('MARTIAL',t.x,t.y,{dir:player.dir,weaponKind,martialTier:technique?.tier||0,duration:32,maxDuration:32});
           let dmg = Math.max(1, Math.floor(player.attack*(technique?.power||1)) - Math.floor(t.defense*(technique?.pattern==='pierce'?.5:1))); if (equipmentHas(player.equipment?.weapon, 'DRAGON_KILLER') && t.enemyType === 'DRAGON') dmg *= 2;
           
           const wType = player.equipment?.weapon?.type;
@@ -2921,6 +2928,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       }
 
       adventure.drawCompanion(ctx, startX, startY, ts, spriteCache.current['PLAYER']);
+      const visibleEffectTile = (x: number, y: number) =>
+          x >= startX && y >= startY && x < startX + VIEW_W && y < startY + VIEW_H &&
+          (adventure.state.scene !== undefined || (adventure.visibleTile(x, y) && Boolean(floorMapRevealed || visitedMap[y]?.[x])));
+      const reducedMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
       visualEffects.current.forEach((fx, i) => {
           fx.duration--;
           
@@ -2955,7 +2966,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           const sx = (fx.x - startX) * ts;
           const sy = (fx.y - startY) * ts;
           
-          if(fx.type==='MARTIAL'){drawMartialEffect(ctx,sx,sy,ts,1-fx.duration/Math.max(1,fx.maxDuration),fx.weaponKind||'fist',fx.dir,fx.martialTier||0);}
+          if (fx.footprint) {
+              drawAttackFootprint(ctx, fx.footprint, startX, startY, ts, 1 - fx.duration / fx.maxDuration,
+                  visibleEffectTile, reducedMotion);
+          }
           else if(fx.type==='ABILITY'){drawStudentAbilityEffect(ctx,sx,sy,ts,1-fx.duration/Math.max(1,fx.maxDuration),fx.color);}
           else if (fx.type === 'FLASH' || fx.type === 'THUNDER') {
               ctx.fillStyle = fx.type === 'THUNDER' ? 'yellow' : 'white';

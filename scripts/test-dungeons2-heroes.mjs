@@ -14,3 +14,14 @@ for(const hero of ABYSS_HEROES){assert.equal(signatureHero(signatureId(hero.id))
  for(const p of [hero.portrait,hero.afterPortrait,`sprites/dungeons2/${hero.id.slice(10)}-directions.webp`,`sprites/dungeons2/${hero.id.slice(10)}-transformed-directions.webp`])await access('public/'+p);
 }
 assert.equal(signatureHero('THRUST'),undefined);console.log('PASS: nine original heroes (5F/4M), sequential 1–9 unlocks and legacy selection migration, all 27 skills and 9 signature cards, doubled transformation damage, shop protection, healing/status, and 36 production art assets.');
+
+const slash=studentAbility('elementary-warrior');
+map[5][7]='WALL';
+const line=resolveStudentAbility(slash,player,[...enemies,{id:3,x:8,y:5,hp:500}],map,{});
+assert.deepEqual(line.cells,[{x:6,y:5}],'Both the effect and damage stop at the wall');
+assert.equal(line.enemies.find(e=>e.id===3).hp,500);
+const blast=resolveStudentAbility(studentAbility('magic-madoka'),player,[],map,{});
+assert(blast.cells.some(p=>p.x===1&&p.y===1),'A large skill covers the far corners even with no enemies');
+assert(!blast.cells.some(p=>p.x>=7&&p.y===5),'A radius attack does not paint through a wall');
+assert.deepEqual(blast.hits,[]);
+console.log('PASS: skill footprints include empty ground and obey the same walls as damage.');

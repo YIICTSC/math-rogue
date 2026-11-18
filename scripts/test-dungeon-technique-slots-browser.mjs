@@ -7,10 +7,10 @@ try{
  await fs.mkdir(out,{recursive:true});
  await fs.writeFile(entry,`import React from 'react';import{createRoot}from'react-dom/client';import D1 from'./src/components/SchoolDungeonRPG';import D2 from'./src/components/SchoolDungeonRPG2';import './src/styles.css';createRoot(document.getElementById('root')).render(new URLSearchParams(location.search).get('series')==='2'?<D2 languageMode="ENGLISH" onBack={()=>{}}/>:<D1 languageMode="ENGLISH" onBack={()=>{}}/>);`);
  server=await createServer({cacheDir:'node_modules/.vite-technique-slots',optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','three']},server:{host:'127.0.0.1',port:0,hmr:false},logLevel:'error',plugins:[{name:'technique-fixture',enforce:'pre',transform(code,id){
-  if(/\/components\/SchoolDungeonRPG2?\.tsx$/.test(id))return code.replace('  const { C0, C1, C2, C3 } = currentTheme.colors;', '(window as any).__game={player,enemies,map,attackEnemy,useMartialTechnique,handleActionBtn};\n  const { C0, C1, C2, C3 } = currentTheme.colors;');
+  if(/\/components\/SchoolDungeonRPG2?\.tsx$/.test(id)){const cards=id.endsWith('/SchoolDungeonRPG2.tsx')?',handleCardUse,setDungeonHand,dungeonHand':'';return code.replace('  const { C0, C1, C2, C3 } = currentTheme.colors;', '(window as any).__game={player,enemies,map,attackEnemy,useMartialTechnique,handleActionBtn,visualEffects'+cards+'};\n  const { C0, C1, C2, C3 } = currentTheme.colors;');}
   if(id.endsWith('/school-dungeon/useSchoolAdventure.ts'))return code.replace(' return {known:', ' const api={known:').replace('\n };\n}\nexport type','\n };\n(window as any).__adventure=api;(window as any).__bridge=b.current;return api;\n}\nexport type');
  },configureServer(s){s.middlewares.use('/__techniques',async(req,res)=>{res.setHeader('Content-Type','text/html');res.end(await s.transformIndexHtml('/__techniques',`<html><head><meta name="viewport" content="width=device-width,initial-scale=1"/><style>body{margin:0}#root{height:100dvh;width:100vw}</style></head><body><div id="root"></div><script type="module" src="/${entry}"></script></body></html>`));});}}]});
- await server.listen();browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+ await server.listen();browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH,headless:true,args:['--no-sandbox']});
  for(const series of (process.argv.includes('--d2')?[2]:[1,2])){
  const page=await browser.newPage({viewport:{width:390,height:844}}),errors=[];page.on('pageerror',e=>errors.push(e.message));page.setDefaultTimeout(60000);
  await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/__techniques?series=${series}`,{timeout:180000,waitUntil:'domcontentloaded'});
@@ -27,6 +27,9 @@ try{
  assert.equal(await page.evaluate(()=>window.__adventure.martialProgress.techniqueUses['sword-1']),1,'normal attacks no longer automatically use learned techniques');
  const before=await page.evaluate(()=>window.__adventure.state.floorTurns);
  const result=await page.evaluate(()=>[window.__game.useMartialTechnique('sword-1'),window.__game.useMartialTechnique('sword-1')]);assert.deepEqual(result,[true,false],'same-frame taps consume one technique only');
+ const fieldEffect=await page.evaluate(()=>window.__game.visualEffects.current.filter(fx=>fx.type==='MARTIAL').at(-1)?.footprint);
+ assert.deepEqual(fieldEffect.cells.map(({x,y})=>[x,y]).sort(),[[7,6],[7,7],[7,8]],'Sword cut covers both empty side tiles');
+ assert.equal(fieldEffect.hits.length,1,'Only the occupied tile sparks on impact');
  await page.waitForFunction(()=>window.__adventure.martialProgress.techniqueUses['sword-1']===2);
  assert.equal(await page.evaluate(()=>window.__adventure.techniqueGauge),70);assert.equal(await page.evaluate(()=>window.__adventure.state.floorTurns),before+1);
  // Leave native D2 skills independent of the new TP system.
@@ -41,6 +44,21 @@ try{
  await page.screenshot({path:`${out}/d${series}-menu.png`});await page.getByRole('button',{name:'Close ×'}).click();
  for(const [width,height]of [[390,844],[844,390],[1280,800]]){await page.setViewportSize({width,height});await page.waitForTimeout(200);const rect=await page.locator('.dungeon-technique-bar').boundingBox();assert(rect.x>=0&&rect.x+rect.width<=width+1);const style=await page.locator('.dungeon-log-strip').evaluate(e=>({bg:getComputedStyle(e).backgroundColor,color:getComputedStyle(e).color}));assert.deepEqual(style,{bg:'rgb(0, 0, 0)',color:'rgb(255, 255, 255)'});await page.screenshot({path:`${out}/d${series}-${width}.png`});}
  await page.evaluate(()=>{window.__adventure.state.techniqueGauge=0;window.__adventure.setPanel(null);});await page.waitForFunction(()=>window.__adventure.techniqueGauge===0);const snapshot=await page.evaluate(()=>({turn:window.__adventure.state.floorTurns,uses:window.__adventure.martialProgress.techniqueUses['sword-1']}));assert.equal(await page.evaluate(()=>window.__game.useMartialTechnique('sword-1')),false);assert.deepEqual(await page.evaluate(()=>({turn:window.__adventure.state.floorTurns,uses:window.__adventure.martialProgress.techniqueUses['sword-1']})),snapshot);
+ if(series===2){
+  await page.evaluate(()=>{
+   const g=window.__game,b=window.__bridge;
+   b.setPlayer(p=>({...p,x:6,y:7,dir:{x:1,y:0}}));b.setEnemies([]);
+   b.setMap(g.map.map((row,y)=>row.map((tile,x)=>x===11&&y===7?'WALL':tile)));
+   g.setDungeonHand([{id:'qa-pierce',templateId:'PIERCE',name:'Pierce',type:'ATTACK',power:10}]);
+  });
+  await page.waitForFunction(()=>window.__game.map[7][11]==='WALL'&&window.__game.dungeonHand.some(c=>c.id==='qa-pierce'));
+  const pierce=await page.evaluate(()=>{
+   const g=window.__game;g.handleCardUse(0);
+   return g.visualEffects.current.filter(fx=>fx.type==='ABILITY').at(-1)?.footprint;
+  });
+  assert.deepEqual(pierce.cells.map(({x,y})=>[x,y]),[[7,7],[8,7],[9,7],[10,7]],'The card paints every empty tile up to the first wall');
+  assert.deepEqual(pierce.hits,[]);
+ }
  assert.deepEqual(errors,[]);await page.close();console.log('PASS D'+series+': free discovery, manual TP consumption, double-tap guard, slot swap, long press, responsive layout, black/white logs, existing ability separation.');
  }
 }finally{await browser?.close();await server?.close();await fs.rm(entry,{force:true});}

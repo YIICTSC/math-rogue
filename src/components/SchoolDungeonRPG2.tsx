@@ -1,8 +1,9 @@
-import {weaponTargets} from './school-dungeon/dungeons1/weaponArea';
+import type { AbilityEffect } from './school-dungeon/student/abilities';
+import {weaponAttackArea, weaponTargets} from './school-dungeon/dungeons1/weaponArea';
 import {debugRewardsUnlocked} from '../point-exchange/debug';
 import {TechniqueBar} from './school-dungeon/techniques/TechniqueBar';
-import {equippedWeaponKind,WEAPONS,TRAINING_WEAPONS,type WeaponKind} from './school-dungeon/dungeons1/mastery';
-import {drawMartialEffect} from './school-dungeon/dungeons1/martialEffects';
+import {equippedWeaponKind,WEAPONS,TRAINING_WEAPONS} from './school-dungeon/dungeons1/mastery';
+import {abilityFootprint, drawAttackFootprint, weaponFootprint, type AttackFootprint} from './school-dungeon/dungeons1/martialEffects';
 import {DungeonInventoryMenu} from './school-dungeon/DungeonInventoryMenu';
 import {TrapControls} from './school-dungeon/TrapControls';
 import {FacingButton} from './school-dungeon/FacingButton';
@@ -227,7 +228,7 @@ interface DungeonCard {
 }
 
 interface VisualEffect {
-  weaponKind?:WeaponKind; martialTier?:number;
+  footprint?: AttackFootprint;
   umbrellaKind?: UmbrellaKind;
   impactValue?: string;
   id: number;
@@ -597,7 +598,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
 
   // 引き継ぎ対象アイテム一覧（装備中を含む全所持品）
   const adventure = useSchoolAdventure({
-    umbrellaEffect:effect=>addVisualEffect('UMBRELLA',effect.targetX,effect.targetY,{...effect,duration:20,maxDuration:20}),revealMap:()=>setFloorMapRevealed(true),awardXp:amount=>gainXp(amount),abilityEffect:(x,y,color)=>addVisualEffect('ABILITY',x,y,{color,duration:28,maxDuration:28}),abilityAudio:(effect,finish,abilityName)=>studentCue('ultimate',finish,effect,abilityName),bossVictory:()=>{setGameClear(true);saveDungeonScore('Cleared');storageService.clearDungeonState2();},
+    umbrellaEffect:effect=>addVisualEffect('UMBRELLA',effect.targetX,effect.targetY,{...effect,duration:20,maxDuration:20}),revealMap:()=>setFloorMapRevealed(true),awardXp:amount=>gainXp(amount),abilityEffect:(x,y,color,footprint)=>addVisualEffect('ABILITY',x,y,{color,footprint,duration:footprint?14:10,maxDuration:footprint?14:10}),abilityAudio:(effect,finish,abilityName)=>studentCue('ultimate',finish,effect,abilityName),bossVictory:()=>{setGameClear(true);saveDungeonScore('Cleared');storageService.clearDungeonState2();},
     actionBlocked:menuOpen||shopState.active||showMap||showStatus||showHelp,game: 2, known:item=>itemKnown(item), suspended:launch!=='PLAY'||showMathChallenge, stairs:()=>setShowMathChallenge(true), debug: Boolean(debugPreview), language: languageMode, map, player, inventory, enemies, traps, floorItems, floor, belly, gameOver, gameClear,
     setPlayer, setInventory, setEnemies, setTraps, setFloorItems, setMap, setGameOver, setGameClear, setMenuOpen, setBelly, setIdentifiedTypes,
     log: message => addLog(message), restart: () => startNewGame(), descend: next => { setFloor(next); generateFloor(next); }, turn: overrides => processTurn(player.x, player.y, overrides),
@@ -983,8 +984,17 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   const addCardEffect = (effectKey: CardEffectSpriteKey, x: number, y: number, options: Partial<VisualEffect> = {}) => {
       addVisualEffect('CARD_EFFECT', x, y, { effectKey, duration: 14, maxDuration: 14, ...options });
   };
-  const addDirectedCardEffect = (effectKey: CardEffectSpriteKey, originX: number, originY: number, dir: Direction, distance: number, options: Partial<VisualEffect> = {}) => {
-      addCardEffect(effectKey, originX + dir.x * distance, originY + dir.y * distance, { dir: { x: -dir.x as any, y: -dir.y as any }, ...options });
+  const cardRectangle = (x: number, y: number, width: number, height: number) =>
+      Array.from({ length: width * height }, (_, i) => ({ x: x + i % width, y: y + Math.floor(i / width) }));
+  const showCardArea = (cells: readonly { x: number; y: number }[], effect: AbilityEffect, color: string, line = false) => {
+      const origin = { x: player.x, y: player.y };
+      const floor = cells.filter(({ x, y }) => map[y]?.[x] && map[y][x] !== 'WALL');
+      if (!floor.length) return;
+      const hits = enemies.filter(e => e.hp > 0 && floor.some(p => p.x === e.x && p.y === e.y));
+      addVisualEffect('ABILITY', origin.x, origin.y, {
+          footprint: abilityFootprint(effect, color, origin, player.dir, floor, hits, line),
+          duration: 13, maxDuration: 13,
+      });
   };
   const triggerShake = (duration: number) => { shake.current.duration = duration; };
   const addLog = (msg: string, color?: string) => {
@@ -1077,7 +1087,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
               if (nhp <= 0) gainXp(target.xp); used = true;
           } else msg = "空振り。";
       } else if (card.templateId === 'EXPLOSION') {
-          addCardEffect('explosion3', player.x, player.y, { duration: 18, maxDuration: 18 });
+          showCardArea(cardRectangle(player.x - 1, player.y - 1, 3, 3), 'fire', '#ff9966');
           setEnemies(prev => prev.map(e => {
               if (Math.abs(e.x - player.x) <= 1 && Math.abs(e.y - player.y) <= 1) {
                   const dmg = adventure.damage(card.power); const nhp = e.hp - dmg;
@@ -1092,11 +1102,10 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           if (isPointInRoom(player.x, player.y)) {
               const currentRoom = roomsRef.current.find(r => player.x >= r.x && player.x < r.x + r.w && player.y >= r.y && player.y < r.y + r.h);
               if (currentRoom) {
-                  addVisualEffect('FLASH', 0, 0, { color: 'white', duration: 10 });
+                  showCardArea(cardRectangle(currentRoom.x, currentRoom.y, currentRoom.w, currentRoom.h), 'thunder', '#ffe29c');
                   setEnemies(prev => prev.map(e => {
                       if (e.x >= currentRoom.x && e.x < currentRoom.x + currentRoom.w && e.y >= currentRoom.y && e.y < currentRoom.y + currentRoom.h) {
                           const dmg = adventure.damage(card.power); const nhp = e.hp - dmg;
-                          addCardEffect('thunder', e.x, e.y);
                           if (nhp <= 0) { gainXp(e.xp); return { ...e, hp: 0, dead: true }; }
                           return { ...e, hp: nhp };
                       }
@@ -1107,13 +1116,15 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           } else { msg = "通路では使えない。"; audioService.playSound('wrong'); }
       } else if (card.templateId === 'THRUST') {
           const { x: dx, y: dy } = player.dir; const targets: Entity[] = [];
-          addDirectedCardEffect('thrust2', player.x, player.y, player.dir, 1.5);
+          const cells: { x: number; y: number }[] = [];
           for (let i=1; i<=2; i++) {
               const tx = player.x + dx * i; const ty = player.y + dy * i;
-              if (map[ty][tx] === 'WALL') break;
+              if (!map[ty]?.[tx] || map[ty][tx] === 'WALL') break;
+              cells.push({ x: tx, y: ty });
               const target = enemies.find(e => e.x === tx && e.y === ty);
               if (target) targets.push(target);
           }
+          showCardArea(cells, 'ice', '#a9f3f7', true);
           triggerPlayerAttackAnim(player.dir);
           if (targets.length > 0) {
               setEnemies(prev => prev.map(e => {
@@ -1130,13 +1141,15 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           used = true;
       } else if (card.templateId === 'PIERCE') {
           const { x: dx, y: dy } = player.dir; const targets: Entity[] = [];
-          addDirectedCardEffect('beam5', player.x, player.y, player.dir, 3, { duration: 12, maxDuration: 12 });
+          const cells: { x: number; y: number }[] = [];
           for (let i=1; i<=8; i++) {
               const tx = player.x + dx * i; const ty = player.y + dy * i;
-              if (map[ty][tx] === 'WALL') break;
+              if (!map[ty]?.[tx] || map[ty][tx] === 'WALL') break;
+              cells.push({ x: tx, y: ty });
               const target = enemies.find(e => e.x === tx && e.y === ty);
               if (target) targets.push(target);
           }
+          showCardArea(cells, 'ice', '#a9f3f7', true);
           triggerPlayerAttackAnim(player.dir);
           if (targets.length > 0) {
               setEnemies(prev => prev.map(e => {
@@ -1152,7 +1165,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           } else { msg = "空を裂いた。"; audioService.playSound('select'); }
           used = true;
       } else if (card.templateId === 'SPIN') {
-          addCardEffect('spin3', player.x, player.y, { duration: 16, maxDuration: 16 });
+          showCardArea(cardRectangle(player.x - 1, player.y - 1, 3, 3), 'slash', '#86e6ff');
           let hits = 0;
           setEnemies(prev => prev.map(e => {
               if (Math.abs(e.x - player.x) <= 1 && Math.abs(e.y - player.y) <= 1) {
@@ -1168,21 +1181,22 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           const { x: dx, y: dy } = player.dir; let targets: {x:number, y:number}[] = [];
           if (card.templateId === 'WAVE') {
               targets = [{x: player.x+dx, y: player.y+dy}, {x: player.x+dx+dy, y: player.y+dy+dx}, {x: player.x+dx-dy, y: player.y+dy-dx}];
-              addDirectedCardEffect('wave3', player.x, player.y, player.dir, 1);
+              showCardArea(targets, 'water', '#8de6ff');
           } else if (card.templateId === 'SNIPE') {
               let hit = false;
               for(let i=1; i<=6; i++) {
                   const tx = player.x + dx*i; const ty = player.y + dy*i;
-                  if (map[ty][tx] === 'WALL') break; targets.push({x:tx, y:ty});
+                  if (!map[ty]?.[tx] || map[ty][tx] === 'WALL') break; targets.push({x:tx, y:ty});
                   if (enemies.some(e => e.x === tx && e.y === ty)) { hit = true; break; }
               }
-              if (!hit) targets = []; addDirectedCardEffect('beam5', player.x, player.y, player.dir, 3, { duration: 12, maxDuration: 12 });
+              showCardArea(targets, 'star', '#b8f68c', true);
+              if (!hit) targets = [];
           } else if (card.templateId === 'CROSS') {
               targets = [{x: player.x, y: player.y-1}, {x: player.x, y: player.y+1}, {x: player.x-1, y: player.y}, {x: player.x+1, y: player.y}];
-              addCardEffect('cross3', player.x, player.y);
+              showCardArea(targets, 'thunder', '#ffe29c');
           } else if (card.templateId === 'X_ATK') {
               targets = [{x: player.x-1, y: player.y-1}, {x: player.x+1, y: player.y-1}, {x: player.x-1, y: player.y+1}, {x: player.x+1, y: player.y+1}];
-              addCardEffect('x3', player.x, player.y);
+              showCardArea(targets, 'slash', '#c8a8ff');
           } else if (card.templateId === 'DRAIN') {
               targets = [{x: player.x+dx, y: player.y+dy}]; addCardEffect('drain', targets[0].x, targets[0].y, { dir: player.dir });
           } else if (card.templateId === 'FREEZE') {
@@ -1191,7 +1205,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
               if (isPointInRoom(player.x, player.y)) {
                   const currentRoom = roomsRef.current.find(r => player.x >= r.x && player.x < r.x + r.w && player.y >= r.y && player.y < r.y + r.h);
                   if (currentRoom) {
-                      addCardEffect('explosion3', player.x, player.y); triggerShake(15);
+                      showCardArea(cardRectangle(currentRoom.x, currentRoom.y, currentRoom.w, currentRoom.h), 'fire', '#eaaa72'); triggerShake(15);
                       enemies.forEach(e => { if (e.x >= currentRoom.x && e.x < currentRoom.x + currentRoom.w && e.y >= currentRoom.y && e.y < currentRoom.y + currentRoom.h) targets.push({x:e.x, y:e.y}); });
                   }
               }
@@ -1218,8 +1232,15 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           addCardEffect('barrier', player.x, player.y); msg = "防御を固めた！"; audioService.playSound('block'); used = true;
       } else if (card.templateId === 'FIRE') {
           const { x: dx, y: dy } = player.dir; let tx = player.x, ty = player.y; let target = null;
-          for(let i=1; i<=5; i++) { tx += dx; ty += dy; if (map[ty][tx] === 'WALL') break; const e = enemies.find(en => en.x === tx && en.y === ty); if (e) { target = e; break; } }
-          addDirectedCardEffect('beam5', player.x, player.y, player.dir, 3, { duration: 12, maxDuration: 12 }); 
+          const cells: { x: number; y: number }[] = [];
+          for (let i = 1; i <= 5; i++) {
+              tx += dx; ty += dy;
+              if (!map[ty]?.[tx] || map[ty][tx] === 'WALL') break;
+              cells.push({ x: tx, y: ty });
+              target = enemies.find(e => e.x === tx && e.y === ty) ?? null;
+              if (target) break;
+          }
+          showCardArea(cells, 'fire', '#ffab79', true);
           if (target) { const dmg = adventure.damage(baseDmg); const nhp = target.hp - dmg; setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0)); if (nhp <= 0) { gainXp(target.xp); msg = `${target.name}を燃やした！`; } else msg = `${target.name}に${dmg}ダメージ！`; } else msg = "炎を放った！";
           audioService.playSound('attack'); used = true;
       } else if (card.templateId === 'DASH') { setPlayer(p => ({ ...p, status: { ...p.status, speed: 5 } })); msg = "ダッシュ！"; used = true; 
@@ -1229,7 +1250,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           let attempts = 0; while (attempts < 20) { attempts++; const rx = Math.floor(Math.random() * MAP_W); const ry = Math.floor(Math.random() * MAP_H); if (map[ry][rx] === 'FLOOR' && !enemies.find(e => e.x === rx && e.y === ry)) { addCardEffect('warp', player.x, player.y); setPlayer(p => ({ ...p, x: rx, y: ry })); addLog("ワープした！"); addCardEffect('warp', rx, ry); break; } }
           used = true;
       } else if (card.templateId === 'DISARM') {
-          addCardEffect('thunder', player.x, player.y); setEnemies(prev => prev.map(e => { if (Math.abs(e.x - player.x) <= 3 && Math.abs(e.y - player.y) <= 3) return { ...e, attack: Math.max(1, Math.floor(e.attack * 0.7)) }; return e; })); msg = "周囲の敵の攻撃力を下げた！"; used = true;
+          showCardArea(cardRectangle(player.x - 3, player.y - 3, 7, 7), 'thunder', '#b8c9ff'); setEnemies(prev => prev.map(e => { if (Math.abs(e.x - player.x) <= 3 && Math.abs(e.y - player.y) <= 3) return { ...e, attack: Math.max(1, Math.floor(e.attack * 0.7)) }; return e; })); msg = "周囲の敵の攻撃力を下げた！"; used = true;
       } else if (card.templateId === 'POISON') {
           const { x: dx, y: dy } = player.dir; const target = enemies.find(e => e.x === player.x + dx && e.y === player.y + dy);
           if (target) { setEnemies(prev => prev.map(e => { if (e.id === target.id) { addCardEffect('poison', e.x, e.y); addVisualEffect('TEXT', e.x, e.y, { value: 'POISON', color: 'purple' }); return { ...e, status: { ...e.status, poison: (e.status.poison || 0) + 5 } }; } return e; })); msg = `${target.name}に毒を吐いた！`; used = true;
@@ -1640,7 +1661,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
               if(rangedTarget){if(rangedTarget.enemyType!=='SHOPKEEPER'){attackEnemy(rangedTarget);processTurn(player.x,player.y);}return;}
           }
       }
-      triggerPlayerAttackAnim(player.dir); addVisualEffect('SLASH', tx, ty, { dir: player.dir }); addLog("素振りをした。"); audioService.playSound('select'); processTurn(player.x, player.y);
+      triggerPlayerAttackAnim(player.dir); showWeaponAttack([]); addLog("素振りをした。"); audioService.playSound('select'); processTurn(player.x, player.y);
   };
 
   const activateTrap = (trap: Entity) => {
@@ -1717,14 +1738,26 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   };
 
   const triggerPlayerAttackAnim = (dir: Direction) => { cueD2HeroAction(adventure.hero.id,'attack'); const shift = 6; setPlayer(p => ({ ...p, offset: { x: dir.x * shift, y: dir.y * shift } })); setTimeout(() => setPlayer(p => ({ ...p, offset: { x: 0, y: 0 } })), 100); };
+  const showWeaponAttack = (hits: readonly {x: number; y: number}[], tier = 0, extraCells: readonly {x: number; y: number}[] = []) => {
+      const kind = equippedWeaponKind(player.equipment?.weapon);
+      const origin = { x: player.x, y: player.y };
+      const cells = weaponAttackArea(kind, origin, player.dir, map, enemies, hits, extraCells, tier > 0);
+      if (!cells.length) return;
+      const duration = tier ? 13 : 8;
+      addVisualEffect('MARTIAL', origin.x, origin.y, {
+          footprint: weaponFootprint(kind, origin, player.dir, cells, hits, tier), duration, maxDuration: duration,
+      });
+  };
+
   const attackEnemy = (target: Entity, techniqueId?:string) => {
       if(target.hp<=0)return;
       const martial=target.enemyType!=='SHOPKEEPER'?adventure.practiceMartialAttack(techniqueId):null;
       if(techniqueId&&!martial)return false;
-      const technique=martial?.technique,weaponKind=equippedWeaponKind(player.equipment?.weapon);
+      const technique = martial?.technique;
+      const weaponKind = equippedWeaponKind(player.equipment?.weapon);
 
       if (equipmentHas(player.equipment?.weapon, 'HEAL_SWORD')) setPlayer(p => ({...p, hp: Math.min(p.maxHp, p.hp + 3)}));
-      triggerPlayerAttackAnim(player.dir); const targets = [target]; addVisualEffect('MARTIAL',target.x,target.y,{dir:player.dir,weaponKind,martialTier:technique?.tier||0,duration:32,maxDuration:32});
+      triggerPlayerAttackAnim(player.dir); const targets = [target];
       if(technique){
           studentCue.technique(technique.id,technique.tier===5?'finisher':'normal');
           addLog(adventure.text(technique.ja,technique.en),'#ffe396');
@@ -1732,14 +1765,15 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       }
 
 
+      const extraCells: { x: number; y: number }[] = [];
       if (equipmentHas(player.equipment?.weapon, 'PROTRACTOR_EDGE')) {
           const {x: dx, y: dy} = player.dir; const others = [];
           if (dx === 0 && dy === -1) others.push({x: -1, y: -1}, {x: 1, y: -1}); else if (dx === 0 && dy === 1) others.push({x: 1, y: 1}, {x: -1, y: 1}); else if (dx === -1 && dy === 0) others.push({x: -1, y: 1}, {x: -1, y: -1}); else if (dx === 1 && dy === 0) others.push({x: 1, y: -1}, {x: 1, y: 1}); else if (dx === -1 && dy === -1) others.push({x: 0, y: -1}, {x: -1, y: 0}); else if (dx === 1 && dy === -1) others.push({x: 0, y: -1}, {x: 1, y: 0}); else if (dx === -1 && dy === 1) others.push({x: -1, y: 0}, {x: 0, y: 1}); else if (dx === 1 && dy === 1) others.push({x: 1, y: 0}, {x: 0, y: 1}); 
-          others.forEach(offset => { const tx = player.x + offset.x; const ty = player.y + offset.y; addVisualEffect('SLASH', tx, ty, { dir: offset as Direction }); addVisualEffect('EXPLOSION', tx, ty, { duration: 10, maxDuration: 10, scale: 0.5 }); const t = enemies.find(e => e.x === tx && e.y === ty); if (t) targets.push(t); });
+          others.forEach(offset => { const tx = player.x + offset.x; const ty = player.y + offset.y; extraCells.push({ x: tx, y: ty }); const t = enemies.find(e => e.x === tx && e.y === ty); if (t) targets.push(t); });
       }
+      showWeaponAttack(targets, technique?.tier, extraCells);
       let newEnemies = [...enemies];
       targets.filter((t,i)=>targets.findIndex(e=>e.id===t.id)===i).forEach(t => {
-          if(t.id!==target.id)addVisualEffect('MARTIAL',t.x,t.y,{dir:player.dir,weaponKind,martialTier:technique?.tier||0,duration:32,maxDuration:32});
           let dmg = Math.max(1, Math.floor(player.attack*(technique?.power||1))-Math.floor(t.defense*(technique?.pattern==='pierce'?.5:1))); if (equipmentHas(player.equipment?.weapon, 'DRAGON_KILLER') && t.enemyType === 'DRAGON') dmg *= 2; const wType = player.equipment?.weapon?.type;
           if (equipmentHas(player.equipment?.weapon, 'OFUDA_RULER') && t.enemyType === 'GHOST') { dmg = Math.floor(dmg * 1.5); addLog("成仏！", "yellow"); } if (equipmentHas(player.equipment?.weapon, 'VITAMIN_INJECT') && t.enemyType === 'DRAIN') { dmg = Math.floor(dmg * 1.5); addLog("特効！", "yellow"); } if (equipmentHas(player.equipment?.weapon, 'STAINLESS_PEN') && t.enemyType === 'METAL') dmg = 1; if (equipmentHas(player.equipment?.weapon, 'RICH_WATCH') && player.gold && player.gold >= 10) { dmg += 10; setPlayer(p => ({...p, gold: (p.gold||0) - 10})); } if (Math.random() < 0.1) { dmg *= 2; addLog("会心の一撃！", "red"); triggerShake(5); }
           dmg = adventure.damage(dmg); newEnemies = newEnemies.map(e => { if (e.id === t.id) { const nhp = e.hp - dmg; addLog(`${e.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', e.x, e.y, { value: `${dmg}`, color: 'white' }); if (nhp <= 0 && equipmentHas(player.equipment?.weapon, 'LADLE') && Math.random() < 0.3) { const meat = { ...ITEM_DB['FOOD_MEAT'], name: `${e.name}の肉`, value: 100, id: `meat-${Date.now()}` }; setFloorItems(prev => [...prev, { id: Date.now()+Math.random(), type:'ITEM', x: e.x, y: e.y, char: '!', name: meat.name, hp:0,maxHp:0,baseAttack:0,baseDefense:0,attack:0,defense:0,xp:0,dir:{x:0,y:0}, status:e.status, itemData: meat }]); addLog(`${e.name}を肉に変えた！`, currentTheme.colors.C2); } return { ...e, hp: nhp }; } return e; });
@@ -2031,11 +2065,18 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           }
       }
       adventure.drawCompanion(ctx, startX, startY, ts, spriteCache.current['PLAYER']);
+      const visibleEffectTile = (x: number, y: number) =>
+          x >= startX && y >= startY && x < startX + VIEW_W && y < startY + VIEW_H &&
+          (adventure.state.scene !== undefined || (adventure.visibleTile(x, y) && Boolean(floorMapRevealed || visitedMap[y]?.[x])));
+      const reducedMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
       visualEffects.current.forEach((fx, i) => {
           fx.duration--; let currentX = fx.x; let currentY = fx.y;
           const sx = (fx.x - startX) * ts; const sy = (fx.y - startY) * ts;
           
-          if(fx.type==='MARTIAL'){drawMartialEffect(ctx,sx,sy,ts,1-fx.duration/Math.max(1,fx.maxDuration),fx.weaponKind||'fist',fx.dir,fx.martialTier||0);}
+          if (fx.footprint) {
+              drawAttackFootprint(ctx, fx.footprint, startX, startY, ts, 1 - fx.duration / fx.maxDuration,
+                  visibleEffectTile, reducedMotion);
+          }
           else if(fx.type==='ABILITY'){drawStudentAbilityEffect(ctx,sx,sy,ts,1-fx.duration/Math.max(1,fx.maxDuration),fx.color);}
           else if(fx.type==='UMBRELLA'&&fx.umbrellaKind&&fx.startX!==undefined&&fx.startY!==undefined&&fx.targetX!==undefined&&fx.targetY!==undefined){drawUmbrellaEffect(ctx,{startX:fx.startX,startY:fx.startY,targetX:fx.targetX,targetY:fx.targetY,umbrellaKind:fx.umbrellaKind,impactValue:fx.impactValue},1-fx.duration/fx.maxDuration,startX,startY,ts);return;}
           else if (fx.type === 'FLASH' || fx.type === 'THUNDER') {
