@@ -1,6 +1,7 @@
 import { AIRPORTS, DISCIPLINES, type Lesson } from './courses';
 import type { Medal, Report } from './simulation';
 
+export const FLIGHT_ROUTE_LOG_KEY='learning-rogue:flight-school:routes:v1';
 export const FLIGHT_COMBAT_LOG_KEY = 'learning-rogue:flight-school:sorties:v1';
 export const FLIGHT_LOG_KEY = 'learning-rogue:flight-school:v1';
 export type RecordBook = Record<string, { score: number; medal: Medal }>;

@@ -1,3 +1,4 @@
+import { cruiseRate, onStrip, runwayOffset, surfaceHeight, type Route } from './routes';
 import { RUNWAY, type Lesson, type Point, type Position } from './courses';
 import { clamp, groundHeight, hitsBuilding, SEA_LEVEL } from './terrain';
 
@@ -14,14 +15,7 @@ export const neutralInput = (): FlightInput => ({
   brake: false,
 });
 export type FinishReason =
-  | 'landed'
-  | 'water'
-  | 'impact'
-  | 'boundary'
-  | 'timeout'
-  | 'runway'
-  | 'target'
-  | 'route';
+  'landed' | 'water' | 'impact' | 'boundary' | 'timeout' | 'runway' | 'target' | 'route';
 export type Medal = 'gold' | 'silver' | 'bronze';
 export interface Report {
   reason: FinishReason;
@@ -69,7 +63,7 @@ export function beginFlight(lesson: Lesson): Flight {
   return {
     lesson,
     ...lesson.start,
-    heading: 0,
+    heading: lesson.route ? Math.atan2(lesson.route.from.ux, -lesson.route.from.uz) : 0,
     bank: 0,
     pitch: 0,
     speed: lesson.aircraft === 'glider' ? 20 : lesson.aircraft === 'parachute' ? 12 : 0,
@@ -89,12 +83,21 @@ export function beginFlight(lesson: Lesson): Flight {
     result: null,
   };
 }
-export const aimPoint = (s: Flight): Position =>
-  s.lesson.gates[s.nextGate] ?? { ...s.lesson.target, y: 0 };
+export function aimPoint(s: Flight): Position {
+  const gate = s.lesson.gates[s.nextGate];
+  if (gate) return gate;
+  const r = s.lesson.route;
+  if (r) {
+    const lead = Math.max(0, runwayOffset(r.to, s).along + 260);
+    return { x: r.to.x + r.to.ux * lead, z: r.to.z + r.to.uz * lead, y: r.to.elevation };
+  }
+  return { ...s.lesson.target, y: 0 };
+}
 export function bearingTo(s: Flight, target: Point) {
   return angleDifference(Math.atan2(target.x - s.x, s.z - target.z), s.heading);
 }
 export function altitude(s: Flight) {
+  if (s.lesson.route) return Math.max(0, s.y - surfaceHeight(s.lesson.route, s.x, s.z));
   return Math.max(0, s.y - Math.max(SEA_LEVEL, groundHeight(s.lesson.airport, s.x, s.z)));
 }
 export function windAt(s: Flight): Point {
@@ -229,7 +232,7 @@ function plane(s: Flight, i: FlightInput, dt: number) {
     if (s.speed >= 20.5 && i.pitch > 0.2) {
       s.airborne = true;
       s.vertical = 3;
-      s.y = 0.2;
+      s.y = (s.lesson.route?.from.elevation ?? 0) + 0.2;
       cue(s, 'launch');
     }
     return;
@@ -260,11 +263,92 @@ function collectGate(s: Flight, dt: number) {
   cue(s, 'gate');
 }
 
+function stepRoute(s: Flight, i: FlightInput, dt: number, r: Route) {
+  const { from, to, region } = r,
+    target = aimPoint(s),
+    gate = s.lesson.gates[s.nextGate];
+  const rate = cruiseRate(s, r);
+  if (r.assist && s.airborne) {
+    const bearing = bearingTo(s, target);
+    const landing = !gate;
+    const remain = runwayOffset(to, s.lesson.target).along - runwayOffset(to, s).along;
+    const desired = landing ? to.elevation + Math.max(0, remain - 40) * 0.056 : target.y;
+    if (!i.turn) i.turn = clamp(bearing * 2.4, -1, 1);
+    if (!i.pitch) {
+      const ahead = Math.min(2200, s.speed * rate * 1.6);
+      const terrain = surfaceHeight(
+        r,
+        s.x + Math.sin(s.heading) * ahead,
+        s.z - Math.cos(s.heading) * ahead,
+      );
+      const clearance = landing ? desired : Math.max(desired, terrain + 160);
+      const climb =
+        landing && remain < 70 ? -1.5 : ((clearance - s.y) * 0.55) / Math.max(1, rate * 0.42);
+      i.pitch = clamp((climb + 0.65) / (Math.max(20, s.speed) * 0.31), -1, 1);
+    }
+    if (!i.primary && !i.brake) {
+      if (landing) i.brake = true;
+      else i.primary = true;
+    }
+  }
+  plane(s, i, dt);
+  const w = s.airborne ? windAt(s) : { x: 0, z: 0 };
+  s.x += (Math.sin(s.heading) * s.speed + w.x) * dt * rate;
+  s.z += (-Math.cos(s.heading) * s.speed + w.z) * dt * rate;
+  s.y += s.airborne ? s.vertical * dt * rate : 0;
+  if (gate && s.airborne && Math.hypot(gate.x - s.x, gate.z - s.z) < gate.radius) {
+    s.nextGate++;
+    cue(s, 'gate');
+  }
+  const ground = surfaceHeight(r, s.x, s.z);
+  let reason: FinishReason | undefined;
+  const offset = runwayOffset(to, s);
+  const sink = Math.abs(s.vertical);
+  const angle = Math.abs(angleDifference(s.heading, Math.atan2(to.ux, -to.uz)));
+  if (Math.abs(s.x) > region.width / 2 || Math.abs(s.z) > region.height / 2) reason = 'boundary';
+  else if (!s.airborne && !onStrip(from, s)) reason = 'runway';
+  else if (s.airborne && s.y <= ground) {
+    s.y = ground;
+    reason = !onStrip(to, s)
+      ? ground <= 0
+        ? 'water'
+        : Math.abs(offset.cross) < 300 && Math.abs(offset.along) < to.length + 500
+          ? 'runway'
+          : 'impact'
+      : sink > 6 || s.speed > 37 || Math.abs(s.bank) > 0.58 || angle > 0.64
+        ? 'impact'
+        : 'landed';
+  }
+  if (!reason) return;
+  const landed = reason === 'landed',
+    rings = landed ? 40 : Math.round((30 * s.nextGate) / s.lesson.gates.length);
+  const precision = landed
+    ? Math.round(35 * clamp(1 - Math.abs(offset.cross) / to.width, 0, 1))
+    : 0;
+  const handling = landed ? Math.round(25 * clamp(1 - sink / 10 - angle * 0.28, 0, 1)) : 0;
+  const score = rings + precision + handling;
+  s.result = {
+    reason,
+    rings,
+    precision,
+    handling,
+    score,
+    medal: landed ? (score >= 85 ? 'gold' : score >= 65 ? 'silver' : 'bronze') : null,
+    distance: Math.abs(offset.cross),
+    sink,
+    time: s.elapsed,
+  };
+}
+
 /** All movement runs at a fixed step; the UI, camera and scoring share this state. */
 export function stepFlight(s: Flight, control: FlightInput, dt = STEP) {
   if (s.result || !Number.isFinite(dt) || dt <= 0 || dt > 0.05) return;
   s.elapsed += dt;
   const i = { ...control, turn: clamp(control.turn, -1, 1), pitch: clamp(control.pitch, -1, 1) };
+  if (s.lesson.route) {
+    stepRoute(s, i, dt, s.lesson.route);
+    return;
+  }
   const aircraft = s.lesson.aircraft;
   if (aircraft === 'plane') plane(s, i, dt);
   else if (aircraft === 'jetpack') jetpack(s, i, dt);

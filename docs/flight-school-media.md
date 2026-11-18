@@ -23,3 +23,11 @@
 | 衝突・被弾・標的撃破 | 打撃2 |
 | 訓練機の射撃 | ビーム発射音 |
 | 演習失敗 | 短い音 ズッコケ |
+
+## 空港間フライトの地形
+
+関西国際―神戸、羽田―成田、松本―富山、那覇―久米島の各航路は、地理院タイルの全国ランドサットモザイク（巡航）、全国最新写真（空港周辺）、DEM10B（標高）を加工して使用している。データソース：Landsat8画像（GSI,TSIC,GEO Grid/AIST）, Landsat8画像（courtesy of the U.S. Geological Survey）, 海底地形（GEBCO）。[国土地理院のタイル一覧](https://maps.gsi.go.jp/development/ichiran.html#seamlessphoto)・[国土地理院コンテンツ利用規約](https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html)
+
+滑走路の両端座標・幅・標高はOurAirportsの公開データに基づく。地形は約480 m間隔に再標本化し、滑走路付近を平坦化した。巡航の時間倍率と誘導はゲーム用に調整している。画像と標高をゲーム資材に同梱するため、プレイ時に外部の地図サービスへ接続する必要はない。[OurAirportsデータ](https://ourairports.com/data/)
+
+画像と標高はリポジトリのルートから `python scripts/prepare-flight-routes.py` で再生成できる（Pillow、NumPyを使用）。

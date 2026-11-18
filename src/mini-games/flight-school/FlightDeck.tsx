@@ -18,6 +18,9 @@ import { audioService } from '../../services/audioService';
 import { PAD, useGameplayGamepad } from '../../hooks/useGameplayGamepad';
 import type { LanguageMode } from '../../types';
 import { DISCIPLINES, RUNWAY, localize, type Lesson, type Phrase } from './courses';
+import { makeRouteScene, type RouteImages } from './routeScene';
+import { center, cruiseRate, photo } from './routes';
+import { assetUrl } from '../../utils/assetPaths';
 import { makeFlightScene } from './FlightScene';
 import {
   aimPoint,
@@ -58,9 +61,50 @@ type Props = {
   onDone: (r: Report) => void;
   onExit: () => void;
   onRetry: () => void;
+  routeImages?: RouteImages;
 };
 
 function CourseMap({ flight: s, label }: { flight: Flight; label: string }) {
+  const route = s.lesson.route;
+  if (route) {
+    const { region } = route,
+      w = 150,
+      h = (w * region.height) / region.width;
+    const pos = (p: { x: number; z: number }) => [
+      (0.5 + p.x / region.width) * w,
+      (0.5 + p.z / region.height) * h,
+    ];
+    const pts = [center(route.from), ...s.lesson.gates, center(route.to)];
+    const [x, y] = pos(s);
+    return (
+      <svg
+        className="fs-map fs-route-map"
+        viewBox={'0 0 ' + w + ' ' + h}
+        aria-label={label}
+        role="img"
+      >
+        <image href={assetUrl(photo(region.key))} width={w} height={h} preserveAspectRatio="none" />
+        <polyline
+          points={pts.map((p) => pos(p).join(',')).join(' ')}
+          fill="none"
+          stroke="#ffe698"
+          strokeWidth="2"
+          strokeDasharray="4 2"
+        />
+        {[route.from, route.to].map((port) => {
+          const [cx, cy] = pos(center(port));
+          return <circle key={port.code} cx={cx} cy={cy} r="3.5" fill="#ffd768" stroke="#142d38" />;
+        })}
+        <path
+          d="M0 -7 L4 5 L0 3 L-4 5Z"
+          transform={'translate(' + x + ' ' + y + ') rotate(' + (s.heading * 180) / Math.PI + ')'}
+          fill="white"
+          stroke="#163f50"
+          strokeWidth="1.5"
+        />
+      </svg>
+    );
+  }
   const { lesson } = s,
     plane = lesson.aircraft === 'plane';
   const extent = plane ? 610 : lesson.aircraft === 'jetpack' ? 147 : 260;
@@ -125,7 +169,14 @@ function CourseMap({ flight: s, label }: { flight: Flight; label: string }) {
   );
 }
 
-export default function FlightDeck({ lesson, language, onDone, onExit, onRetry }: Props) {
+export default function FlightDeck({
+  lesson,
+  language,
+  onDone,
+  onExit,
+  onRetry,
+  routeImages,
+}: Props) {
   const t = (...p: Phrase) => localize(p, language);
   const discipline = DISCIPLINES.find((d) => d.id === lesson.aircraft)!;
   const s = useMemo(() => beginFlight(lesson), [lesson]);
@@ -169,7 +220,10 @@ export default function FlightDeck({ lesson, language, onDone, onExit, onRetry }
     const surface = canvas.current!;
     let scene: ReturnType<typeof makeFlightScene>;
     try {
-      scene = makeFlightScene(surface, lesson);
+      scene =
+        lesson.route && routeImages
+          ? makeRouteScene(surface, lesson.route, routeImages)
+          : makeFlightScene(surface, lesson);
     } catch {
       setLost(true);
       pause(true);
@@ -271,7 +325,7 @@ export default function FlightDeck({ lesson, language, onDone, onExit, onRetry }
       document.removeEventListener('visibilitychange', hidden);
       surface.removeEventListener('webglcontextlost', contextLost);
     };
-  }, [s, lesson, clear, pause]);
+  }, [s, lesson, clear, pause, routeImages]);
   function press(action: string, face: React.ReactNode, label: string, shortcut?: string) {
     const release = (e: React.PointerEvent<HTMLButtonElement>) => {
       touches.current.delete(e.pointerId);
@@ -310,6 +364,10 @@ export default function FlightDeck({ lesson, language, onDone, onExit, onRetry }
       return t('輪の中でホバー', 'Hover inside the hoop', 'わの なかで ホバー');
     if (lesson.aircraft === 'plane' && !s.airborne)
       return t('加速 ＋ ↑ で離陸', 'Power + ↑ to lift off', 'かそく ＋ ↑ で りりく');
+    if (lesson.route)
+      return gate
+        ? t('航路を巡航', 'Follow the route', 'こうろを じゅんこう')
+        : t('着陸進入・減速', 'Final approach · slow down', 'ちゃくりくしんにゅう・げんそく');
     if (lesson.aircraft === 'parachute' && !s.canopy)
       return t('高度115 m付近で開傘', 'Open near 115 m', 'こうど 115 m ふきんで かいさん');
     if (lesson.aircraft === 'glider' && s.thermalTime < 1)
@@ -333,9 +391,17 @@ export default function FlightDeck({ lesson, language, onDone, onExit, onRetry }
       />
       <header className="fs-hudtop">
         <div className="fs-flight-id">
-          <b>{lesson.airport.code}</b>
+          <b>
+            {lesson.route
+              ? lesson.route.from.code + ' → ' + lesson.route.to.code
+              : lesson.airport.code}
+          </b>
           <span>
-            {localize(lesson.airport.name, language)} · {localize(discipline.name, language)}
+            {lesson.route
+              ? t('空港間フライト', 'Airport routes', 'くうこうかんフライト')
+              : localize(lesson.airport.name, language) +
+                ' · ' +
+                localize(discipline.name, language)}
           </span>
         </div>
         <div className="fs-tools">
@@ -389,7 +455,18 @@ export default function FlightDeck({ lesson, language, onDone, onExit, onRetry }
         <div>
           <b>{nextInstruction()}</b>
           <small>
-            {s.nextGate}/{lesson.gates.length} ◇ · {distance} m{gate && ` · ↥ ${gate.y} m`}
+            {lesson.route ? (
+              <>
+                {(Math.hypot(s.x - lesson.target.x, s.z - lesson.target.z) / 1000).toFixed(1)} km ·{' '}
+                {t('海抜', 'MSL', 'かいばつ')} {Math.round(s.y)} m{' '}
+                {gate && ' → ' + Math.round(gate.y) + ' m'} · ×
+                {Math.round(cruiseRate(s, lesson.route))}
+              </>
+            ) : (
+              <>
+                {s.nextGate}/{lesson.gates.length} ◇ · {distance} m{gate && ` · ↥ ${gate.y} m`}
+              </>
+            )}
           </small>
           {lesson.aircraft === 'jetpack' && s.dwell > 0 && (
             <progress aria-label={t('ホバー', 'Hover', 'ホバー')} value={s.dwell} max={0.65} />
@@ -398,7 +475,9 @@ export default function FlightDeck({ lesson, language, onDone, onExit, onRetry }
       </div>
       {s.lastAction && s.lastAction !== 'thermal' && s.elapsed - s.lastCueTime < 1.4 && (
         <div className="fs-cue" key={s.serial}>
-          {localize(CUES[s.lastAction], language)}
+          {lesson.route && s.lastAction === 'gate'
+            ? t('経由地点を通過', 'Waypoint reached', 'けいゆちてんを つうか')
+            : localize(CUES[s.lastAction], language)}
         </div>
       )}
       {s.inThermal && (
@@ -406,6 +485,15 @@ export default function FlightDeck({ lesson, language, onDone, onExit, onRetry }
           <Wind size={14} />
           {localize(CUES.thermal, language)}
         </div>
+      )}
+      {lesson.route && (
+        <small className="fs-route-credit">
+          {t(
+            '地形・写真：国土地理院',
+            'Terrain & imagery · GSI Japan',
+            'ちけい・しゃしん：こくどちりいん',
+          )}
+        </small>
       )}
       <div className="fs-touch">
         <div className="fs-dpad">
@@ -468,7 +556,11 @@ export default function FlightDeck({ lesson, language, onDone, onExit, onRetry }
               <RotateCcw size={16} />
               {t('やり直す', 'Retry flight', 'やりなおす')}
             </button>
-            <button onClick={onExit}>{t('格納庫へ', 'Back to hangar', 'かくのうこへ')}</button>
+            <button onClick={onExit}>
+              {lesson.route
+                ? t('航路選択へ', 'Route selection', 'こうろせんたくへ')
+                : t('格納庫へ', 'Back to hangar', 'かくのうこへ')}
+            </button>
           </section>
         </div>
       )}

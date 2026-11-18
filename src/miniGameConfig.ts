@@ -2,7 +2,7 @@
 import { GameScreen } from './types';
 import { storageService } from './services/storageService';
 import { Plane, Club, Skull, Compass, Mountain, Crown, Send, LucideIcon, Rocket, Gem, Dice5, Sparkles, CircleDot, Grid3X3, Layers3, Heart } from 'lucide-react';
-import { FLIGHT_COMBAT_LOG_KEY, FLIGHT_LOG_KEY } from './mini-games/flight-school/logbook';
+import { FLIGHT_COMBAT_LOG_KEY, FLIGHT_LOG_KEY, FLIGHT_ROUTE_LOG_KEY } from './mini-games/flight-school/logbook';
 import { clearSchoolTrpgCampaign } from './mini-games/school-trpg/schoolTrpgSave';
 import { RUSH_BEST_KEY, STORY_KEY } from './mini-games/after-school-rush/rules';
 
@@ -206,7 +206,7 @@ export const MINI_GAMES: MiniGameConfig[] = [
     typeColor: 'bg-cyan-800',
     glowColor: 'rgba(85,187,204,0.55)',
     icon: Plane,
-    clearAction: () => { localStorage.removeItem(FLIGHT_LOG_KEY); localStorage.removeItem(FLIGHT_COMBAT_LOG_KEY); },
+    clearAction: () => { localStorage.removeItem(FLIGHT_LOG_KEY); localStorage.removeItem(FLIGHT_COMBAT_LOG_KEY); localStorage.removeItem(FLIGHT_ROUTE_LOG_KEY); },
   },
   {
     id: 'SHOGI',

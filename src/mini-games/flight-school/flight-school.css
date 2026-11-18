@@ -875,3 +875,80 @@
 .fs-actions .fs-burst {
   background: #18536a;
 }
+
+.fs-route-plan {
+  overflow: hidden;
+}
+.fs-route-chart {
+  background-color: #234550;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  isolation: isolate;
+  padding: 16px;
+  border-radius: 7px;
+  color: #fff7df;
+}
+.fs-route-chart::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(95deg, #102936df, transparent);
+}
+.fs-route-chart h1 {
+  margin: 0;
+}
+.fs-route-chart strong,
+.fs-route-leg,
+.fs-route-leg button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fs-route-chart strong {
+  font:
+    700 22px/1.5 ui-monospace,
+    monospace;
+  letter-spacing: 0.05em;
+}
+.fs-route-leg {
+  margin-top: 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.fs-route-leg button {
+  border: 1px solid #99a69e;
+  border-radius: 5px;
+  background: #fff9e8;
+  padding: 8px;
+}
+.fs-route-plan input {
+  accent-color: #145668;
+}
+.fs-chart-source {
+  margin-top: 14px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.fs-chart-source summary {
+  cursor: pointer;
+}
+.fs-chart-source a {
+  text-decoration: underline;
+}
+.fs-route-map {
+  width: clamp(80px, 16vmin, 150px);
+  max-height: 22dvh;
+}
+.fs-route-credit {
+  position: absolute;
+  top: calc(max(8px, env(safe-area-inset-top)) + 84px);
+  left: max(10px, env(safe-area-inset-left));
+  padding: 2px 5px;
+  border-radius: 3px;
+  color: white;
+  background: #123441c9;
+  font-size: 10px;
+  pointer-events: none;
+}

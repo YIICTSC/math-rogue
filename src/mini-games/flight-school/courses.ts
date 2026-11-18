@@ -233,6 +233,7 @@ export interface Gate extends Position {
   radius: number;
 }
 export interface Lesson {
+  route?: import('./routes').Route;
   airport: Airport;
   aircraft: Aircraft;
   mode: Training;

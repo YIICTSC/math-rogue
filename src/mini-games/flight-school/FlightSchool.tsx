@@ -31,6 +31,7 @@ import {
 } from './courses';
 import { readLog, recordFlight } from './logbook';
 import type { FinishReason, Report } from './simulation';
+import RouteSchool from './RouteSchool';
 import CombatSchool from './CombatSchool';
 import { useFlightMusic } from './music';
 import FlightDeck from './FlightDeck';
@@ -95,9 +96,9 @@ export default function FlightSchool({
   onAnswerResult,
 }: MiniGameComponentProps) {
   const t = (...p: Phrase) => localize(p, languageMode);
-  const [stage, setStage] = useState<'hangar' | 'log' | 'quiz' | 'flight' | 'result' | 'combat'>(
-    'hangar',
-  );
+  const [stage, setStage] = useState<
+    'hangar' | 'log' | 'quiz' | 'flight' | 'result' | 'combat' | 'routes'
+  >('hangar');
   const [port, setPort] = useState(AIRPORTS[0]);
   const [craft, setCraft] = useState<Aircraft>('parachute');
   const [lesson, setLesson] = useState<Lesson>(() =>
@@ -167,7 +168,9 @@ export default function FlightSchool({
   }
   return (
     <main className="flight-school" data-flight-screen={stage}>
-      {stage === 'combat' ? (
+      {stage === 'routes' ? (
+        <RouteSchool home={port.code} language={languageMode} exit={() => setStage('hangar')} />
+      ) : stage === 'combat' ? (
         <CombatSchool
           airport={port}
           language={languageMode}
@@ -304,6 +307,11 @@ export default function FlightSchool({
                     );
                   })}
                 </div>
+                <button className="fs-combat-entry" onClick={() => setStage('routes')}>
+                  <Plane size={18} />
+                  {t('空港間フライト', 'Airport routes', 'くうこうかんフライト')}
+                  <ChevronRight size={17} />
+                </button>
                 <button className="fs-combat-entry" onClick={() => setStage('combat')}>
                   <Flag size={18} />
                   {t('戦闘訓練', 'Combat training', 'せんとうくんれん')}

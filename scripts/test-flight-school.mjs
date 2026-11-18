@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 const base = './src/mini-games/flight-school/';
 const { outputFiles } = await build({
   stdin: {
-    contents: ['courses', 'simulation', 'logbook', 'combat']
+    contents: ['courses', 'simulation', 'logbook', 'combat', 'routes']
       .map((n) => 'export * from ' + JSON.stringify(base + n))
       .join('\n'),
     resolveDir: process.cwd(),
@@ -214,3 +214,65 @@ assert.equal(sim.shielded(baseDefense, fort), false);
 console.log(
   'PASS 12 complete combat sorties, relay shields, burst, hull, escort and timeout outcomes.',
 );
+
+for (const region of sim.ROUTES) {
+  for (const reverse of [false, true]) {
+    const lesson = sim.makeRouteLesson(region, reverse, true),
+      s = sim.beginFlight(lesson);
+    while (!s.result && s.elapsed < 600) {
+      sim.stepFlight(s, { turn: 0, pitch: s.airborne ? 0 : 1, primary: !s.airborne, brake: false });
+    }
+    assert.equal(
+      s.result?.reason,
+      'landed',
+      JSON.stringify([
+        region.key,
+        reverse,
+        s.nextGate,
+        s.elapsed,
+        s.x,
+        s.y,
+        s.z,
+        s.speed,
+        s.vertical,
+        s.result,
+      ]),
+    );
+    assert.equal(s.nextGate, lesson.gates.length);
+    assert(s.result.score > 60);
+  }
+}
+console.log('PASS eight airport routes from takeoff through touchdown on actual terrain.');
+
+const manual = sim.makeRouteLesson(sim.ROUTES[0], false, false);
+const departure = sim.beginFlight(manual);
+const stationary = { x: departure.x, z: departure.z };
+for (let i = 0; i < 120; i++) sim.stepFlight(departure, sim.neutralInput());
+assert.equal(departure.x, stationary.x);
+assert.equal(departure.z, stationary.z);
+while (!departure.airborne)
+  sim.stepFlight(departure, { turn: 0, pitch: 1, primary: true, brake: false });
+const originalHeading = departure.heading;
+for (let i = 0; i < 60; i++)
+  sim.stepFlight(departure, { turn: 1, pitch: 1, primary: true, brake: false });
+assert(departure.heading > originalHeading && sim.altitude(departure) > 0);
+
+function routeContact(strip, cross, speed) {
+  const s = sim.beginFlight(manual);
+  Object.assign(s, {
+    airborne: true,
+    x: strip.x + strip.ux * 300 + strip.uz * cross,
+    z: strip.z + strip.uz * 300 - strip.ux * cross,
+    y: strip.elevation,
+    heading: Math.atan2(strip.ux, -strip.uz),
+    speed,
+    vertical: -2,
+  });
+  sim.stepFlight(s, sim.neutralInput());
+  return s.result?.reason;
+}
+assert.equal(routeContact(manual.route.to, 0, 25), 'landed');
+assert.equal(routeContact(manual.route.from, 0, 25), 'impact');
+assert.equal(routeContact(manual.route.to, 80, 25), 'runway');
+assert.equal(routeContact(manual.route.to, 0, 60), 'impact');
+console.log('PASS manual controls, destination-only landing, missed runway and unsafe touchdown.');
