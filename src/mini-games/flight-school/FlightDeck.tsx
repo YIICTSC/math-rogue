@@ -234,9 +234,15 @@ export default function FlightDeck({ lesson, language, onDone, onExit, onRetry }
       scene.draw(s, input, survey.current, dt);
       if (cueSerial !== s.serial) {
         cueSerial = s.serial;
-        audioService.playSound(
-          s.lastAction === 'gate' ? 'correct' : s.lastAction === 'reserve' ? 'select' : 'buff',
-        );
+        const action = s.lastAction;
+        if (action)
+          audioService.playFlightSound(
+            action === 'reserve'
+              ? 'canopy'
+              : action === 'launch' && lesson.aircraft === 'jetpack'
+                ? 'thrust'
+                : action,
+          );
       }
       if (s.result) {
         done.current(s.result);

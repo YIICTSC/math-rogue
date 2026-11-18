@@ -31,6 +31,8 @@ import {
 } from './courses';
 import { readLog, recordFlight } from './logbook';
 import type { FinishReason, Report } from './simulation';
+import CombatSchool from './CombatSchool';
+import { useFlightMusic } from './music';
 import FlightDeck from './FlightDeck';
 import './flight-school.css';
 
@@ -93,7 +95,9 @@ export default function FlightSchool({
   onAnswerResult,
 }: MiniGameComponentProps) {
   const t = (...p: Phrase) => localize(p, languageMode);
-  const [stage, setStage] = useState<'hangar' | 'log' | 'quiz' | 'flight' | 'result'>('hangar');
+  const [stage, setStage] = useState<'hangar' | 'log' | 'quiz' | 'flight' | 'result' | 'combat'>(
+    'hangar',
+  );
   const [port, setPort] = useState(AIRPORTS[0]);
   const [craft, setCraft] = useState<Aircraft>('parachute');
   const [lesson, setLesson] = useState<Lesson>(() =>
@@ -109,26 +113,33 @@ export default function FlightSchool({
     mode === 'practice'
       ? t('練習飛行', 'Practice flight', 'れんしゅうひこう')
       : t('技能検定', 'Flight test', 'ぎのうけんてい');
+  const flightTracks = {
+    parachute: 'paper_plane_vacation',
+    glider: 'star_tide_sky',
+    jetpack: 'paper_plane_battle',
+    plane: 'map',
+  } as const;
   const track =
     stage === 'flight'
-      ? 'star_tide_sky'
+      ? flightTracks[lesson.aircraft]
       : stage === 'quiz'
         ? 'math'
         : stage === 'result' && report?.medal
           ? 'victory'
-          : 'paper_plane_setup';
+          : 'rest';
+  useFlightMusic(
+    track,
+    track === 'map' || track === 'math' || stage === 'hangar' || stage === 'log'
+      ? 'high-school'
+      : 'elementary',
+  );
   useEffect(() => {
-    const mode = audioService.getBgmMode();
-    return audioService.acquireBgmScene(
-      track,
-      { theme: 'elementary', mode: mode === 'STUDY' ? undefined : mode === 'OLD' ? 'OLD' : 'NEW' },
-      25,
-    );
-  }, [track]);
+    void audioService.preloadFlightSounds();
+  }, []);
   function start(mode: Training) {
     audioService.init();
     audioService.resumeBGM();
-    audioService.playSound('select');
+    audioService.playFlightSound('start');
     setLesson(makeLesson(port, craft, mode));
     setReport(null);
     setTurn((n) => n + 1);
@@ -143,12 +154,33 @@ export default function FlightSchool({
   function finished(result: Report) {
     setBook(recordFlight(lesson, result));
     setReport(result);
-    audioService.playSound(result.medal ? 'correct' : 'select');
+    audioService.playFlightSound(
+      result.reason === 'water'
+        ? 'water'
+        : result.reason === 'impact'
+          ? 'hit'
+          : ['landed', 'target', 'route'].includes(result.reason)
+            ? 'land'
+            : 'end',
+    );
     setStage('result');
   }
   return (
     <main className="flight-school" data-flight-screen={stage}>
-      {stage === 'flight' ? (
+      {stage === 'combat' ? (
+        <CombatSchool
+          airport={port}
+          language={languageMode}
+          study={{
+            mode: problemMode,
+            modePool: problemModePool,
+            assignment,
+            answerMode,
+            onAnswerResult,
+          }}
+          onExit={() => setStage('hangar')}
+        />
+      ) : stage === 'flight' ? (
         <FlightDeck
           key={turn}
           lesson={lesson}
@@ -272,6 +304,11 @@ export default function FlightSchool({
                     );
                   })}
                 </div>
+                <button className="fs-combat-entry" onClick={() => setStage('combat')}>
+                  <Flag size={18} />
+                  {t('戦闘訓練', 'Combat training', 'せんとうくんれん')}
+                  <ChevronRight size={17} />
+                </button>
                 <div className="fs-briefing">
                   <b>
                     <Flag size={16} />

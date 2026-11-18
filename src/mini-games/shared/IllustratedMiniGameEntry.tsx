@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import { audioService } from '../../services/audioService';
+import React, { useEffect, useState } from 'react';
 import { GameScreen, type LanguageMode } from '../../types';
 import ResponsiveTitleArt, { type MiniGameTitleArt } from './ResponsiveTitleArt';
 import './illustratedEntry.css';
 
 const entries: Partial<Record<GameScreen, { art: MiniGameTitleArt; title: [string, string, string] }>> = {
+  [GameScreen.MINI_GAME_FLIGHT_SCHOOL]: { art: 'flight-school', title: ['にっぽんフライトスクール', 'Japan Flight School', 'にっぽんフライトスクール'] },
   [GameScreen.MINI_GAME_SHOGI]: { art: 'shogi', title: ['ミニ将棋', 'Mini Shogi', 'ミニしょうぎ'] },
   [GameScreen.MINI_GAME_GO]: { art: 'go', title: ['九路盤 囲碁', 'Nine-line Go', 'きゅうろばん いご'] },
   [GameScreen.MINI_GAME_CHESS]: { art: 'chess', title: ['スクールチェス', 'School Chess', 'スクールチェス'] },
@@ -19,6 +21,12 @@ export default function IllustratedMiniGameEntry({ screen, languageMode = 'JAPAN
 }) {
   const [entered, setEntered] = useState(false);
   const entry = entries[screen];
+  const flightTitle = entry?.art === 'flight-school' && !entered && !bypass;
+  useEffect(() => {
+    if (!flightTitle) return;
+    void audioService.preloadFlightSounds();
+    return audioService.acquireBgmScene('paper_plane_setup', {theme:'elementary'}, 25);
+  }, [flightTitle]);
   if (!entry || entered || bypass) return <>{children}</>;
   const index = languageMode === 'ENGLISH' ? 1 : languageMode === 'HIRAGANA' ? 2 : 0;
   return <section className="illustrated-mini-entry" data-gamepad-navigation-root

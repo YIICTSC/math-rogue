@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 const base = './src/mini-games/flight-school/';
 const { outputFiles } = await build({
   stdin: {
-    contents: ['courses', 'simulation', 'logbook']
+    contents: ['courses', 'simulation', 'logbook', 'combat']
       .map((n) => 'export * from ' + JSON.stringify(base + n))
       .join('\n'),
     resolveDir: process.cwd(),
@@ -156,4 +156,61 @@ assert.deepEqual(sim.readLog()[sim.flightKey(lesson)], {
 assert.equal(Object.keys(sim.readLog()).length, 1);
 console.log(
   'PASS 64 full flights, all landing disciplines, failure scoring, reserve, energy and logbook persistence.',
+);
+
+const neutral = { x: 0, y: 0, fire: false, burst: false };
+for (const mission of sim.MISSIONS) {
+  for (const mode of ['practice', 'exam']) {
+    const flight = sim.newSortie(mission, mode);
+    while (!flight.finished) {
+      const target = flight.targets.find((t) => t.hp > 0 && !sim.shielded(flight, t));
+      const warning = flight.warnings.find(
+        (w) => w.life < 0.55 && Math.hypot(flight.x - w.x, flight.y - w.y) < 0.25,
+      );
+      const x = warning ? (warning.x > 0 ? -0.94 : 0.94) : target.x;
+      const y = warning ? (warning.y > 0 ? -0.82 : 0.86) : target.y;
+      sim.stepSortie(
+        flight,
+        {
+          x: clamp((x - flight.x) * 30),
+          y: clamp((y - flight.y) * 30),
+          fire: sim.underSight(flight, target),
+          burst: flight.energy === 5,
+        },
+        1 / 60,
+      );
+    }
+    assert.equal(flight.finished, 'clear', mission.id + '/' + mode);
+    assert.equal(flight.kills, mission.waves.flat().length);
+    assert(sim.scoreSortie(flight) > 0 && sim.scoreSortie(flight) <= 100);
+  }
+}
+const escort = sim.newSortie(
+  sim.MISSIONS.find((m) => m.escort),
+  'exam',
+);
+escort.hull = 100;
+while (!escort.finished) sim.stepSortie(escort, neutral, 1 / 60);
+assert.equal(escort.finished, 'escort');
+const failed = sim.newSortie(sim.MISSIONS[0], 'exam');
+while (!failed.finished) sim.stepSortie(failed, neutral, 1 / 60);
+assert.equal(failed.finished, 'shield');
+const expired = sim.newSortie(sim.MISSIONS[0], 'exam');
+expired.time = expired.mission.seconds;
+sim.stepSortie(expired, neutral, 1 / 60);
+assert.equal(expired.finished, 'time');
+const baseMission = sim.MISSIONS.find((m) => m.id === 'base');
+const baseDefense = sim.newSortie({ ...baseMission, waves: [['fort', 'relay']] }, 'exam');
+const [fort, relay] = baseDefense.targets;
+baseDefense.x = fort.x;
+baseDefense.y = fort.y;
+sim.stepSortie(baseDefense, { ...neutral, fire: true }, 1 / 60);
+assert.equal(fort.hp, 7);
+baseDefense.energy = 5;
+sim.stepSortie(baseDefense, { ...neutral, burst: true }, 1 / 60);
+assert.equal(relay.hp, 0);
+assert.equal(fort.hp, 7);
+assert.equal(sim.shielded(baseDefense, fort), false);
+console.log(
+  'PASS 12 complete combat sorties, relay shields, burst, hull, escort and timeout outcomes.',
 );

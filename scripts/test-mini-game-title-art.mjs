@@ -4,7 +4,7 @@ import { createServer } from 'vite';
 import { chromium } from 'playwright';
 
 const games = [
-  ['card-club', 'CARD_CLUB'], ['kocho', 'KOCHO'], ['poker', 'POKER'], ['survivor', 'SURVIVOR'],
+  ['flight-school', 'FLIGHT_SCHOOL'], ['card-club', 'CARD_CLUB'], ['kocho', 'KOCHO'], ['poker', 'POKER'], ['survivor', 'SURVIVOR'],
   ['dungeons', 'DUNGEON'], ['dungeons2', 'DUNGEON_2'], ['paper-plane', 'PAPER_PLANE'],
   ['go-home', 'GO_HOME'], ['shogi', 'SHOGI'], ['go', 'GO'], ['chess', 'CHESS'],
   ['mahjong', 'MAHJONG'], ['stone-glow', 'STONE_GLOW'], ['school-trpg', 'SCHOOL_TRPG'],

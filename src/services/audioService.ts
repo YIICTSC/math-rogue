@@ -47,6 +47,8 @@ const THEMED_BGM_TYPES = new Set([
     'rest', 'reward', 'victory', 'game_over', 'math', 'relic_select', 'star_tide_sky',
 ]);
 
+const FLIGHT_SOUNDS = { start:700, canopy:750, thermal:1550, launch:1600, thrust:850, gate:850, land:500, water:1250, hit:550, pulse:410, end:850 } as const;
+
 type CommonSoundEffect =
   | 'select'
   | 'attack'
@@ -2081,6 +2083,15 @@ class AudioService {
   public playVrSound(kind: 'select'|'alert'|'bubble'|'hold'|'reload'|'collect'|'door'|'correct'|'wrong'|'clear'|'fail'|'countdown') {
       if(this.isMuted || this.sfxVolume <= 0) return;
       this.playSfxMp3(`gakuro-vr/${kind}`,()=>this.playSound(kind==='wrong'||kind==='fail'?'wrong':'select'),{maxDurationMs:kind==='clear'?2500:kind==='countdown'?2000:1600,overlap:false});
+  }
+
+  public preloadFlightSounds() {
+      return this.preloadSfx(Object.keys(FLIGHT_SOUNDS).map(cue => 'flight-school/' + cue));
+  }
+
+  public playFlightSound(cue: keyof typeof FLIGHT_SOUNDS) {
+      if (!this.canPlaySfx()) return;
+      this.playSfxMp3('flight-school/' + cue, () => this.playSound('select'), {maxDurationMs: FLIGHT_SOUNDS[cue]});
   }
 
   public playGolfSound(kind: 'swing'|'putt'|'land'|'cup'|'birdie'|'water'|'ob'|'start') {

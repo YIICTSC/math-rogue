@@ -786,3 +786,92 @@
   height: 5px;
   accent-color: #ffc45e;
 }
+
+.fs-combat-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 6px 12px;
+  border: 1px solid #375d71;
+  border-radius: 6px;
+  color: #fff4d6;
+  background: #234a5b;
+  font-weight: 700;
+}
+.fs-combat-entry svg:last-child {
+  margin-left: auto;
+}
+.fs-sorties h1 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fs-sorties .fs-crafts {
+  margin: 12px 0 16px;
+}
+.fs-sorties select {
+  background: #fffaf0;
+  padding: 6px 12px;
+  border: 1px solid #829b90;
+  border-radius: 4px;
+}
+.fs-sorties label {
+  display: block;
+  margin-top: 12px;
+}
+.fs-sight,
+.fs-contact,
+.fs-danger {
+  position: absolute;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+.fs-sight {
+  width: clamp(25px, 5vmin, 46px);
+  height: auto;
+  color: #f7fff8;
+  filter: drop-shadow(0 1px 2px #082b40);
+}
+.fs-sight.locked {
+  color: #d5ff4f;
+}
+.fs-contact {
+  transform: translate(-50%, calc(-100% - 2.6vmin));
+  border-radius: 3px;
+  padding: 0 4px;
+  font:
+    700 12px/1.3 ui-monospace,
+    monospace;
+  background: #452223e6;
+  color: #fff2ce;
+}
+.fs-contact.protected {
+  background: #173953ed;
+  color: #b8f7ff;
+}
+.fs-danger {
+  width: 15.6%;
+  height: 13.6%;
+  border-radius: 50%;
+  border: 2px dashed #ff6658;
+  background: #d42b321f;
+  box-shadow: 0 0 0 1px #4b2533;
+}
+.fs-battle.fs-hurt::after,
+.fs-battle.fs-bursting::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 9vmin 1vmin #e54b3b88;
+}
+.fs-battle.fs-bursting::after {
+  box-shadow: inset 0 0 18vmin 3vmin #7fffe999;
+}
+.fs-actions .fs-fire {
+  background: #964530;
+}
+.fs-actions .fs-burst {
+  background: #18536a;
+}

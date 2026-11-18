@@ -2,7 +2,7 @@
 import { GameScreen } from './types';
 import { storageService } from './services/storageService';
 import { Plane, Club, Skull, Compass, Mountain, Crown, Send, LucideIcon, Rocket, Gem, Dice5, Sparkles, CircleDot, Grid3X3, Layers3, Heart } from 'lucide-react';
-import { FLIGHT_LOG_KEY } from './mini-games/flight-school/logbook';
+import { FLIGHT_COMBAT_LOG_KEY, FLIGHT_LOG_KEY } from './mini-games/flight-school/logbook';
 import { clearSchoolTrpgCampaign } from './mini-games/school-trpg/schoolTrpgSave';
 import { RUSH_BEST_KEY, STORY_KEY } from './mini-games/after-school-rush/rules';
 
@@ -55,19 +55,6 @@ export const MINI_GAMES: MiniGameConfig[] = [
     glowColor: 'rgba(168,200,160,0.5)',
     icon: Heart,
     clearAction: () => localStorage.removeItem('learning-rogue:kotoba-life:v1'),
-  },
-  {
-    id: 'FLIGHT_SCHOOL',
-    name: 'にっぽんフライトスクール',
-    titleLines: ['にっぽんフライトスクール'],
-    description: '日本の空港で、パラシュートから軽飛行機まで4種の飛行に挑戦。',
-    screen: GameScreen.MINI_GAME_FLIGHT_SCHOOL,
-    threshold: 0,
-    typeLabel: 'FLIGHT',
-    typeColor: 'bg-cyan-800',
-    glowColor: 'rgba(85,187,204,0.55)',
-    icon: Plane,
-    clearAction: () => localStorage.removeItem(FLIGHT_LOG_KEY),
   },
   {
     id: 'GAKURO',
@@ -208,6 +195,19 @@ export const MINI_GAMES: MiniGameConfig[] = [
   },
   {id:'STAR_TIDE',name:'星潮の航路',titleLines:['星潮の','航路'],description:'風と火を活かし、探索と料理を楽しむ冒険RPG。',screen:GameScreen.MINI_GAME_STAR_TIDE,threshold:4000,typeLabel:'ARPG',typeColor:'bg-teal-800',glowColor:'rgba(121,211,197,0.5)',icon:Compass,clearAction:()=>localStorage.removeItem('learning-rogue:star-tide:v1')},
   {id:'LANTERN_WAR',name:'継界戦記 灯を継ぐ者たち',titleLines:['継界戦記','灯を継ぐ者たち'],description:'仲間を編成し、作戦と部隊指揮で戦場を切り開こう。',screen:GameScreen.MINI_GAME_LANTERN_WAR,threshold:4500,typeLabel:'SRPG',typeColor:'bg-emerald-950',glowColor:'rgba(215,188,128,0.5)',icon:Crown,clearAction:()=>localStorage.removeItem('learning-rogue:lantern-war:v1')},
+  {
+    id: 'FLIGHT_SCHOOL',
+    name: 'にっぽんフライトスクール',
+    titleLines: ['にっぽんフライトスクール'],
+    description: '日本各地で4種の飛行と空中戦闘訓練に挑戦。',
+    screen: GameScreen.MINI_GAME_FLIGHT_SCHOOL,
+    threshold: 5000,
+    typeLabel: 'FLIGHT',
+    typeColor: 'bg-cyan-800',
+    glowColor: 'rgba(85,187,204,0.55)',
+    icon: Plane,
+    clearAction: () => { localStorage.removeItem(FLIGHT_LOG_KEY); localStorage.removeItem(FLIGHT_COMBAT_LOG_KEY); },
+  },
   {
     id: 'SHOGI',
     name: 'ミニ将棋',

@@ -3936,7 +3936,7 @@ const ENGLISH_DICTIONARY: Record<string, string> = {
     "あと": "Need",
     "帰宅ダッシュ": "Go Home Dash",
     "にっぽんフライトスクール": "Japan Flight School",
-    "日本の空港で、パラシュートから軽飛行機まで4種の飛行に挑戦。": "Fly four disciplines at Japanese airports, from parachuting to piloting a light plane.",
+    "日本各地で4種の飛行と空中戦闘訓練に挑戦。": "Practice four flight disciplines and aerial combat exercises across Japan.",
     "放課後ミニラッシュ": "After-School Mini Rush",
     "スティックとA・Bで、走る・跳ぶ・よける！ 全240本の瞬間アクション。": "Run, jump, and dodge with the stick and A/B. 240 quick action games.",
     "障害物をよけて帰宅せよ！レベルアップで教科を強化。": "Dodge obstacles and get home! Level up to strengthen subjects.",
