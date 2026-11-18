@@ -58,6 +58,7 @@ export function DungeonInventoryMenu(p: Props) {
   const classic = Boolean(p.classicPalette && preferClassic);
   const dialogRef = useRef<HTMLElement>(null);
   const collectionRef = useRef<HTMLElement>(null);
+  const lastMenuFocus = useRef<HTMLButtonElement>(null);
   const restoreLayoutButton = useRef(false);
   const focus = useRef(document.activeElement as HTMLElement | null);
   useEffect(() => () => {
@@ -113,6 +114,13 @@ export function DungeonInventoryMenu(p: Props) {
     button?.focus({ preventScroll: true });
     if (button) revealRow(button);
   };
+  const focusedMenuButton = () => {
+    const active = document.activeElement;
+    const inside = (button: Element | null): button is HTMLButtonElement =>
+      button instanceof HTMLButtonElement && Boolean(dialogRef.current?.contains(button));
+    // Tapping the external D-pad or A button may temporarily move DOM focus out of the menu.
+    return inside(active) ? active : inside(lastMenuFocus.current) ? lastMenuFocus.current : null;
+  };
   const buttons = (selector: string) => Array.from(dialogRef.current?.querySelectorAll<HTMLButtonElement>(selector) ?? [])
     .filter(button => !button.disabled);
 
@@ -146,7 +154,7 @@ export function DungeonInventoryMenu(p: Props) {
       const shopTabs = buttons('.dungeon-pouch-shop-tabs button');
       const detail = buttons('.item-menu-actions button');
       const firstRow = selectedRow() ?? itemRows[0];
-      const active = document.activeElement as HTMLButtonElement | null;
+      const active = focusedMenuButton();
       const moveIn = (group: HTMLButtonElement[], offset: number) => {
         const current = active ? group.indexOf(active) : -1;
         focusButton(group[current + offset]);
@@ -168,28 +176,27 @@ export function DungeonInventoryMenu(p: Props) {
         if (dy > 0) focusButton(tools[0] ?? shopTabs[0] ?? firstRow);
         return;
       }
-      if (active && detail.includes(active)) {
-        if (dy < 0) focusButton(tools[0] ?? firstRow);
-        else if (dx < 0 && active === detail[0]) focusButton(firstRow);
-        else if (dx) moveIn(detail, dx);
+      if (active && detail.includes(active) && !dy) {
+        if (dx) {
+          const next = (detail.indexOf(active) + dx + detail.length) % detail.length;
+          focusButton(detail[next]);
+        }
         return;
       }
 
-      const index = active && itemRows.includes(active) ? itemRows.indexOf(active) : (firstRow ? itemRows.indexOf(firstRow) : -1);
+      const row = active && itemRows.includes(active) ? active : firstRow;
+      const index = row ? itemRows.indexOf(row) : -1;
       if (dy < 0 && index <= 0) {
         focusButton(shopTabs.find(tab => tab.getAttribute('aria-pressed') === 'true') ?? tools[0]);
       } else if (dy) {
-        focusButton(itemRows[index + dy]);
-      } else if (shop && dx) {
-        const tab = shopTabs.find(button => button.dataset.menuShopMode === (dx < 0 ? 'BUY' : 'SELL'));
-        if (tab?.getAttribute('aria-pressed') !== 'true') tab?.click();
-      } else if (dx > 0) {
-        focusButton(detail[0]);
+        focusButton(itemRows[index + dy] ?? row);
+      } else if (dx) {
+        focusButton(dx > 0 ? detail[0] : detail.at(-1));
       }
     },
     confirm() {
-      const active = document.activeElement;
-      if (active instanceof HTMLButtonElement && dialogRef.current?.contains(active) && !active.hasAttribute('data-menu-row')) {
+      const active = focusedMenuButton();
+      if (active && !active.hasAttribute('data-menu-row')) {
         active.click();
       } else {
         // Confirm on a row uses the primary action for its current selection.
@@ -203,6 +210,9 @@ export function DungeonInventoryMenu(p: Props) {
     role="dialog" aria-modal="true" aria-label={t(shop ? heading : '持ち物')}
     data-gamepad-modal data-gamepad-navigation-root data-gamepad-keyboard-navigation
     onPointerDown={e => e.stopPropagation()}
+    onFocusCapture={event => {
+      if (event.target instanceof HTMLButtonElement) lastMenuFocus.current = event.target;
+    }}
     onKeyDown={e => {
       if (e.key === 'Escape') {
         e.preventDefault();
@@ -218,15 +228,15 @@ export function DungeonInventoryMenu(p: Props) {
     }}>
     <header>
       <div>{!classic && <small>DUNGEONS · POUCH</small>}<h2>{t(heading)} <span>{rows.length}/{p.max}</span></h2></div>
+      {(palette || (!synth.active && p.sortInventory)) && <div className="dungeon-pouch-tools">
+        {palette && <button type="button" data-menu-tool data-menu-layout onClick={switchLayout}>{t(classic ? '標準表示' : 'レトロ')}</button>}
+        {!synth.active && p.sortInventory && <>
+          <button type="button" data-menu-tool onClick={() => p.sortInventory?.(sortDungeonItems(inventory, 'type', name, known))}>{t('種類順')}</button>
+          <button type="button" data-menu-tool onClick={() => p.sortInventory?.(sortDungeonItems(inventory, 'name', name, known))}>{t('名前順')}</button>
+        </>}
+      </div>}
       <button type="button" data-gamepad-back onClick={p.close} aria-label={t('閉じる')}><X size={classic ? 15 : 22}/></button>
     </header>
-    {(palette || (!synth.active && p.sortInventory)) && <div className="dungeon-pouch-tools">
-      {palette && <button type="button" data-menu-tool data-menu-layout onClick={switchLayout}>{t(classic ? '標準表示' : 'レトロ')}</button>}
-      {!synth.active && p.sortInventory && <>
-        <button type="button" data-menu-tool onClick={() => p.sortInventory?.(sortDungeonItems(inventory, 'type', name, known))}>{t('種類順')}</button>
-        <button type="button" data-menu-tool onClick={() => p.sortInventory?.(sortDungeonItems(inventory, 'name', name, known))}>{t('名前順')}</button>
-      </>}
-    </div>}
     {p.extra}
     <div className="dungeon-pouch-body">
       <section className="dungeon-pouch-collection" ref={collectionRef}>
@@ -235,7 +245,11 @@ export function DungeonInventoryMenu(p: Props) {
           <div className="item-menu-grid dungeon-equipped-grid">
             {Object.entries(equipment).filter(([, item]) => item).map(([slot, item]) => <InspectSlot
               key={slot} data-menu-row className="item-menu-slot" aria-label={name(item)} aria-pressed={selectedSlot === slot}
-              onFocus={() => p.selectSlot(slot)} onInspect={() => p.selectSlot(slot)}>
+              data-menu-equipped={slot} onFocus={() => p.selectSlot(slot)}
+              onInspect={() => {
+                p.selectSlot(slot);
+                focusButton(buttons(`[data-menu-equipped="${slot}"]`)[0]);
+              }}>
               {!classic && <SchoolSupplyIcon type={known(item) ? item.type : 'UNKNOWN'} size={38}/>}
               <span className="item-menu-label">{name(item)}</span><small className="item-menu-badge">✓</small>
             </InspectSlot>)}
@@ -246,7 +260,10 @@ export function DungeonInventoryMenu(p: Props) {
           {rows.map((item, i) => <InspectSlot key={item.id || item.type}
             className={`item-menu-slot${blocked(i) ? ' dungeon-slot-unavailable' : ''}`}
             data-menu-row data-menu-item={i} aria-label={name(item)} aria-pressed={!selectedSlot && (blank ? p.blankIndex : selectedIndex) === i}
-            onFocus={() => inspect(i)} onInspect={() => inspect(i)}>
+            onFocus={() => inspect(i)} onInspect={() => {
+              inspect(i);
+              focusButton(buttons(`[data-menu-item="${i}"]`)[0]);
+            }}>
             {!classic && <SchoolSupplyIcon type={known(item) ? item.type : 'UNKNOWN'} size={38}/>}
             <span className="item-menu-label">{name(item)}</span>
             <small className="item-menu-count">{itemCount(item)}</small>
@@ -256,11 +273,13 @@ export function DungeonInventoryMenu(p: Props) {
       </section>
       <aside className="dungeon-pouch-detail" aria-live="polite">
         {current ? <>
-          {!classic && <SchoolSupplyIcon type={known(current) ? current.type : 'UNKNOWN'} size={72}/>}
-          <h3>{name(current)}</h3>
-          <p>{description(current)}</p>
-          {known(current) && <p>{current.power !== undefined && `${t(current.category === 'ARMOR' ? '防御' : '威力')}: ${current.power + (current.plus || 0)}`} {current.charges !== undefined && `[${current.charges}]`}</p>}
-          {!selectedSlot && known(current) && p.switchDiff(current) && <p>{p.switchDiff(current)}</p>}
+          <div className="dungeon-pouch-info">
+            {!classic && <SchoolSupplyIcon type={known(current) ? current.type : 'UNKNOWN'} size={72}/>}
+            <h3>{name(current)}</h3>
+            <p>{description(current)}</p>
+            {known(current) && <p>{current.power !== undefined && `${t(current.category === 'ARMOR' ? '防御' : '威力')}: ${current.power + (current.plus || 0)}`} {current.charges !== undefined && `[${current.charges}]`}</p>}
+            {!selectedSlot && known(current) && p.switchDiff(current) && <p>{p.switchDiff(current)}</p>}
+          </div>
           <div className="item-menu-actions">
             {shop ? <button disabled={shop === 'SELL' ? !!(current.shopOwner || current.cursed) : (current.price || 0) > (p.coins ?? Infinity) || p.spaceAvailable === false}
               onClick={() => p.shopAction?.(selectedIndex)}>{t(shop === 'BUY' ? '買う' : '売る')}</button>
