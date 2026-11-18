@@ -1,9 +1,8 @@
-import type { AbilityEffect } from './school-dungeon/student/abilities';
 import {weaponAttackArea, weaponTargets} from './school-dungeon/dungeons1/weaponArea';
 import {debugRewardsUnlocked} from '../point-exchange/debug';
 import {TechniqueBar} from './school-dungeon/techniques/TechniqueBar';
 import {equippedWeaponKind,WEAPONS,TRAINING_WEAPONS} from './school-dungeon/dungeons1/mastery';
-import {abilityFootprint, drawAttackFootprint, weaponFootprint, type AttackFootprint} from './school-dungeon/dungeons1/martialEffects';
+import {abilityFootprint, drawAttackFootprint, weaponFootprint, type AttackFootprint, type CombatAbilityEffect} from './school-dungeon/dungeons1/martialEffects';
 import {DungeonInventoryMenu} from './school-dungeon/DungeonInventoryMenu';
 import {TrapControls} from './school-dungeon/TrapControls';
 import {FacingButton} from './school-dungeon/FacingButton';
@@ -986,13 +985,13 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   };
   const cardRectangle = (x: number, y: number, width: number, height: number) =>
       Array.from({ length: width * height }, (_, i) => ({ x: x + i % width, y: y + Math.floor(i / width) }));
-  const showCardArea = (cells: readonly { x: number; y: number }[], effect: AbilityEffect, color: string, line = false) => {
+  const showCardArea = (cells: readonly { x: number; y: number }[], effect: CombatAbilityEffect, line = false) => {
       const origin = { x: player.x, y: player.y };
       const floor = cells.filter(({ x, y }) => map[y]?.[x] && map[y][x] !== 'WALL');
       if (!floor.length) return;
       const hits = enemies.filter(e => e.hp > 0 && floor.some(p => p.x === e.x && p.y === e.y));
       addVisualEffect('ABILITY', origin.x, origin.y, {
-          footprint: abilityFootprint(effect, color, origin, player.dir, floor, hits, line),
+          footprint: abilityFootprint(effect, origin, player.dir, floor, hits, line),
           duration: 13, maxDuration: 13,
       });
   };
@@ -1087,7 +1086,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
               if (nhp <= 0) gainXp(target.xp); used = true;
           } else msg = "空振り。";
       } else if (card.templateId === 'EXPLOSION') {
-          showCardArea(cardRectangle(player.x - 1, player.y - 1, 3, 3), 'fire', '#ff9966');
+          showCardArea(cardRectangle(player.x - 1, player.y - 1, 3, 3), 'fire');
           setEnemies(prev => prev.map(e => {
               if (Math.abs(e.x - player.x) <= 1 && Math.abs(e.y - player.y) <= 1) {
                   const dmg = adventure.damage(card.power); const nhp = e.hp - dmg;
@@ -1102,7 +1101,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           if (isPointInRoom(player.x, player.y)) {
               const currentRoom = roomsRef.current.find(r => player.x >= r.x && player.x < r.x + r.w && player.y >= r.y && player.y < r.y + r.h);
               if (currentRoom) {
-                  showCardArea(cardRectangle(currentRoom.x, currentRoom.y, currentRoom.w, currentRoom.h), 'thunder', '#ffe29c');
+                  showCardArea(cardRectangle(currentRoom.x, currentRoom.y, currentRoom.w, currentRoom.h), 'thunder');
                   setEnemies(prev => prev.map(e => {
                       if (e.x >= currentRoom.x && e.x < currentRoom.x + currentRoom.w && e.y >= currentRoom.y && e.y < currentRoom.y + currentRoom.h) {
                           const dmg = adventure.damage(card.power); const nhp = e.hp - dmg;
@@ -1124,7 +1123,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
               const target = enemies.find(e => e.x === tx && e.y === ty);
               if (target) targets.push(target);
           }
-          showCardArea(cells, 'ice', '#a9f3f7', true);
+          showCardArea(cells, 'thrust', true);
           triggerPlayerAttackAnim(player.dir);
           if (targets.length > 0) {
               setEnemies(prev => prev.map(e => {
@@ -1149,7 +1148,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
               const target = enemies.find(e => e.x === tx && e.y === ty);
               if (target) targets.push(target);
           }
-          showCardArea(cells, 'ice', '#a9f3f7', true);
+          showCardArea(cells, 'pierce', true);
           triggerPlayerAttackAnim(player.dir);
           if (targets.length > 0) {
               setEnemies(prev => prev.map(e => {
@@ -1165,7 +1164,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           } else { msg = "空を裂いた。"; audioService.playSound('select'); }
           used = true;
       } else if (card.templateId === 'SPIN') {
-          showCardArea(cardRectangle(player.x - 1, player.y - 1, 3, 3), 'slash', '#86e6ff');
+          showCardArea(cardRectangle(player.x - 1, player.y - 1, 3, 3), 'spin');
           let hits = 0;
           setEnemies(prev => prev.map(e => {
               if (Math.abs(e.x - player.x) <= 1 && Math.abs(e.y - player.y) <= 1) {
@@ -1181,7 +1180,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           const { x: dx, y: dy } = player.dir; let targets: {x:number, y:number}[] = [];
           if (card.templateId === 'WAVE') {
               targets = [{x: player.x+dx, y: player.y+dy}, {x: player.x+dx+dy, y: player.y+dy+dx}, {x: player.x+dx-dy, y: player.y+dy-dx}];
-              showCardArea(targets, 'water', '#8de6ff');
+              showCardArea(targets, 'water');
           } else if (card.templateId === 'SNIPE') {
               let hit = false;
               for(let i=1; i<=6; i++) {
@@ -1189,14 +1188,14 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                   if (!map[ty]?.[tx] || map[ty][tx] === 'WALL') break; targets.push({x:tx, y:ty});
                   if (enemies.some(e => e.x === tx && e.y === ty)) { hit = true; break; }
               }
-              showCardArea(targets, 'star', '#b8f68c', true);
+              showCardArea(targets, 'snipe', true);
               if (!hit) targets = [];
           } else if (card.templateId === 'CROSS') {
               targets = [{x: player.x, y: player.y-1}, {x: player.x, y: player.y+1}, {x: player.x-1, y: player.y}, {x: player.x+1, y: player.y}];
-              showCardArea(targets, 'thunder', '#ffe29c');
+              showCardArea(targets, 'thunder');
           } else if (card.templateId === 'X_ATK') {
               targets = [{x: player.x-1, y: player.y-1}, {x: player.x+1, y: player.y-1}, {x: player.x-1, y: player.y+1}, {x: player.x+1, y: player.y+1}];
-              showCardArea(targets, 'slash', '#c8a8ff');
+              showCardArea(targets, 'slash');
           } else if (card.templateId === 'DRAIN') {
               targets = [{x: player.x+dx, y: player.y+dy}]; addCardEffect('drain', targets[0].x, targets[0].y, { dir: player.dir });
           } else if (card.templateId === 'FREEZE') {
@@ -1205,7 +1204,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
               if (isPointInRoom(player.x, player.y)) {
                   const currentRoom = roomsRef.current.find(r => player.x >= r.x && player.x < r.x + r.w && player.y >= r.y && player.y < r.y + r.h);
                   if (currentRoom) {
-                      showCardArea(cardRectangle(currentRoom.x, currentRoom.y, currentRoom.w, currentRoom.h), 'fire', '#eaaa72'); triggerShake(15);
+                      showCardArea(cardRectangle(currentRoom.x, currentRoom.y, currentRoom.w, currentRoom.h), 'quake'); triggerShake(15);
                       enemies.forEach(e => { if (e.x >= currentRoom.x && e.x < currentRoom.x + currentRoom.w && e.y >= currentRoom.y && e.y < currentRoom.y + currentRoom.h) targets.push({x:e.x, y:e.y}); });
                   }
               }
@@ -1240,7 +1239,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
               target = enemies.find(e => e.x === tx && e.y === ty) ?? null;
               if (target) break;
           }
-          showCardArea(cells, 'fire', '#ffab79', true);
+          showCardArea(cells, 'fire', true);
           if (target) { const dmg = adventure.damage(baseDmg); const nhp = target.hp - dmg; setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0)); if (nhp <= 0) { gainXp(target.xp); msg = `${target.name}を燃やした！`; } else msg = `${target.name}に${dmg}ダメージ！`; } else msg = "炎を放った！";
           audioService.playSound('attack'); used = true;
       } else if (card.templateId === 'DASH') { setPlayer(p => ({ ...p, status: { ...p.status, speed: 5 } })); msg = "ダッシュ！"; used = true; 
@@ -1250,7 +1249,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           let attempts = 0; while (attempts < 20) { attempts++; const rx = Math.floor(Math.random() * MAP_W); const ry = Math.floor(Math.random() * MAP_H); if (map[ry][rx] === 'FLOOR' && !enemies.find(e => e.x === rx && e.y === ry)) { addCardEffect('warp', player.x, player.y); setPlayer(p => ({ ...p, x: rx, y: ry })); addLog("ワープした！"); addCardEffect('warp', rx, ry); break; } }
           used = true;
       } else if (card.templateId === 'DISARM') {
-          showCardArea(cardRectangle(player.x - 3, player.y - 3, 7, 7), 'thunder', '#b8c9ff'); setEnemies(prev => prev.map(e => { if (Math.abs(e.x - player.x) <= 3 && Math.abs(e.y - player.y) <= 3) return { ...e, attack: Math.max(1, Math.floor(e.attack * 0.7)) }; return e; })); msg = "周囲の敵の攻撃力を下げた！"; used = true;
+          showCardArea(cardRectangle(player.x - 3, player.y - 3, 7, 7), 'thunder'); setEnemies(prev => prev.map(e => { if (Math.abs(e.x - player.x) <= 3 && Math.abs(e.y - player.y) <= 3) return { ...e, attack: Math.max(1, Math.floor(e.attack * 0.7)) }; return e; })); msg = "周囲の敵の攻撃力を下げた！"; used = true;
       } else if (card.templateId === 'POISON') {
           const { x: dx, y: dy } = player.dir; const target = enemies.find(e => e.x === player.x + dx && e.y === player.y + dy);
           if (target) { setEnemies(prev => prev.map(e => { if (e.id === target.id) { addCardEffect('poison', e.x, e.y); addVisualEffect('TEXT', e.x, e.y, { value: 'POISON', color: 'purple' }); return { ...e, status: { ...e.status, poison: (e.status.poison || 0) + 5 } }; } return e; })); msg = `${target.name}に毒を吐いた！`; used = true;

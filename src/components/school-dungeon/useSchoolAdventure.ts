@@ -1,4 +1,4 @@
-import { abilityFootprint, type AttackFootprint } from './dungeons1/martialEffects';
+import { abilityFootprint, preloadAttackArt, type AttackFootprint } from './dungeons1/martialEffects';
 import {syncOptionalNpcs,isConversationNpc} from './chronicles/optionalNpcs';
 import {drawChronicleNpc,loadChronicleNpc} from './chronicles/npcArt';
 import {isPickaxe} from './pickaxe';
@@ -33,6 +33,7 @@ const id=()=>`school-${Date.now()}-${Math.random()}`;
 const emptyEntity=(x:number,y:number)=>({id:Date.now()+Math.random(),type:'ITEM',x,y,char:'!',hp:0,maxHp:0,baseAttack:0,baseDefense:0,attack:0,defense:0,xp:0,dir:{x:0,y:0},status:{sleep:0,confused:0,frozen:0,blind:0,speed:0,poison:0}});
 function loadBase(key:string):SchoolBase {try{const data=JSON.parse(localStorage.getItem(key)||'null');if(data?.version===1&&Array.isArray(data.warehouse))return data;}catch{}return newBase();}
 export function useSchoolAdventure(bridge:AdventureBridge){
+ useEffect(() => { preloadAttackArt(); }, []);
  useEffect(()=>{loadSchoolSprites();loadD2WorldArt();},[bridge.game]);
  const b=useRef(bridge);b.current=bridge;
  const key=`learning-rogue:school-base:${bridge.game}`;
@@ -454,7 +455,8 @@ export function useSchoolAdventure(bridge:AdventureBridge){
   const dir = ctx.player.dir.x || ctx.player.dir.y ? ctx.player.dir : { x: 0, y: 1 };
   const cells = a.power || a.status ? outcome.cells : [origin];
   ctx.abilityEffect?.(origin.x, origin.y, a.color,
-    abilityFootprint(a.effect, a.color, origin, dir, cells, outcome.hits, Boolean(a.line)));
+    abilityFootprint(a.effect, origin, dir, cells, outcome.hits, Boolean(a.line),
+      signature ? 'signature' : a.dash ? 'dash' : a.status ? 'status' : undefined));
   ctx.abilityAudio?.(a.effect,outcome.dead.length>0,a.en);setAbilityBurst({id:Date.now(),ability:a});
   say(text(a.name,a.en)+'！',a.en+'!');
   if(outcome.dead.some(e=>e.enemyType==='BOSS')){ctx.bossVictory?.();finish();refresh();return true;}

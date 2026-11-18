@@ -1,18 +1,43 @@
-import { WEAPONS, type WeaponKind } from './mastery';
+import { assetUrl } from '../../../utils/assetPaths';
+import type { WeaponKind } from './mastery';
 import type { AbilityEffect } from '../student/abilities';
 
 type Point = { x: number; y: number };
-type Motion = 'cut' | 'cleave' | 'hew' | 'flame' | 'bolt' | 'needle' | 'lance' | 'arrow' | 'punch' | 'quake' | 'lash' | 'rim' | 'surge';
-type Palette = { motion: Motion; color: string };
+type Wave = 'line' | 'sweep' | 'field' | 'cross' | 'ring';
+type FrameArt = keyof typeof SEQUENCES;
+export type CombatAbilityEffect = AbilityEffect | 'thrust' | 'pierce' | 'snipe' | 'spin' | 'quake';
 
-const weaponMotion: Record<WeaponKind, Motion> = {
-  fist: 'punch', sword: 'cut', greatsword: 'cleave', rapier: 'needle',
-  axe: 'hew', spear: 'lance', staff: 'surge', hammer: 'quake',
-  bow: 'arrow', whip: 'lash', chakram: 'rim',
+export const ATTACK_ATLAS_PATH = 'sprites/dungeon-combat/action-frames-v1.webp';
+const CELL = 160;
+const FRAME_COUNT = 4;
+
+// Each ImageGen sequence occupies four consecutive cels in the packed WebP.
+const SEQUENCES = {
+  sword: 0, greatsword: 1, axe: 2, hammer: 3,
+  rapier: 4, spear: 5, bow: 6, fist: 7,
+  staff: 8, whip: 9, chakram: 10, sparks: 11,
+  fire: 12, ice: 13, thunder: 14, water: 15,
+  leaf: 16, star: 17, shadow: 18, song: 19,
+  alchemy: 20, dawn: 21, break: 22, pulse: 23,
+} as const;
+
+const weaponWaves: Record<WeaponKind, Wave> = {
+  fist: 'line', sword: 'sweep', greatsword: 'sweep', axe: 'sweep',
+  rapier: 'line', spear: 'line', bow: 'line', whip: 'sweep',
+  staff: 'cross', hammer: 'sweep', chakram: 'ring',
 };
-const abilityMotion: Record<AbilityEffect, Motion> = {
-  slash: 'cut', fire: 'flame', ice: 'lance', leaf: 'lash', star: 'surge',
-  shadow: 'cleave', thunder: 'bolt', water: 'surge', song: 'rim', alchemy: 'surge',
+const abilityArt: Record<CombatAbilityEffect, FrameArt> = {
+  slash: 'dawn', fire: 'fire', ice: 'ice', leaf: 'leaf', star: 'star', shadow: 'shadow',
+  thunder: 'thunder', water: 'water', song: 'song', alchemy: 'alchemy',
+  thrust: 'rapier', pierce: 'break', snipe: 'bow', spin: 'chakram', quake: 'hammer',
+};
+const finishArt: Record<WeaponKind, FrameArt> = {
+  fist: 'pulse', sword: 'dawn', greatsword: 'shadow', axe: 'fire', rapier: 'break',
+  spear: 'thunder', bow: 'star', whip: 'leaf', staff: 'alchemy', hammer: 'thunder', chakram: 'pulse',
+};
+
+const secretArt: Partial<Record<WeaponKind, FrameArt>> = {
+  sword: 'star', spear: 'dawn', hammer: 'pulse', fist: 'break',
 };
 
 export type AttackFootprint = {
@@ -20,247 +45,156 @@ export type AttackFootprint = {
   cells: readonly Point[];
   hits: readonly Point[];
   direction: Point;
-  palette: Palette;
-  wave: 'line' | 'sweep' | 'outward';
-  strength: number;
+  art: FrameArt;
+  wave: Wave;
+  accent?: FrameArt;
+  weaponTier?: number;
 };
 
 export function weaponFootprint(kind: WeaponKind, origin: Point, direction: Point,
   cells: readonly Point[], hits: readonly Point[], tier = 0): AttackFootprint {
-  const motion = weaponMotion[kind];
   return {
-    origin, direction, cells, hits, palette: { motion, color: WEAPONS[kind].color }, strength: tier,
-    wave: motion === 'cut' || motion === 'cleave' || motion === 'hew' || motion === 'lash' ? 'sweep'
-      : motion === 'needle' || motion === 'lance' || motion === 'arrow' ? 'line' : 'outward',
+    origin, direction, cells, hits, art: kind, weaponTier: tier,
+    wave: tier ? weaponWaves[kind] : kind === 'sword' || kind === 'axe' || kind === 'greatsword' || kind === 'whip'
+      ? 'sweep' : 'line',
+    accent: tier === 5 ? secretArt[kind] ?? finishArt[kind]
+      : tier === 4 ? finishArt[kind] : tier === 3 ? 'pulse' : tier === 1 ? 'sparks' : undefined,
   };
 }
 
-export function abilityFootprint(effect: AbilityEffect, color: string, origin: Point, direction: Point,
-  cells: readonly Point[], hits: readonly Point[], line = false): AttackFootprint {
+export function abilityFootprint(effect: CombatAbilityEffect, origin: Point, direction: Point,
+  cells: readonly Point[], hits: readonly Point[], line = false, accent?: 'dash' | 'signature' | 'status'): AttackFootprint {
   return {
-    origin, direction, cells, hits, strength: 3,
-    palette: { motion: abilityMotion[effect], color }, wave: line ? 'line' : 'outward',
+    origin, direction, cells, hits, art: abilityArt[effect],
+    wave: line ? 'line' : effect === 'song' || effect === 'star' || effect === 'alchemy' || effect === 'spin' ? 'ring' : 'field',
+    accent: accent === 'dash' ? 'break' : accent === 'signature' ? 'star' : accent === 'status' ? 'pulse' : undefined,
   };
 }
 
-const clamp = (n: number) => Math.max(0, Math.min(1, n));
-const TAU = 2 * Math.PI;
+let atlas: HTMLImageElement | undefined;
+let atlasRetryAt = 0;
 
-function paintTrail(ctx: CanvasRenderingContext2D, motion: Motion, color: string, t: number, strength: number, span: number) {
-  const advance = 1 - (1 - clamp(t * 2.4)) ** 3;
-  ctx.lineJoin = 'round';
-  ctx.lineCap = 'round';
-  ctx.fillStyle = color;
-  ctx.strokeStyle = '#fff8dc';
-  ctx.lineWidth = strength >= 3 ? .055 : .032;
-  ctx.beginPath();
+export function preloadAttackArt(): HTMLImageElement | undefined {
+  if (typeof Image === 'undefined') return;
+  if (atlas && (!atlas.complete || atlas.naturalWidth)) return atlas;
+  if (Date.now() < atlasRetryAt) return;
+  atlasRetryAt = Date.now() + 2000;
+  atlas = new Image();
+  atlas.src = assetUrl(ATTACK_ATLAS_PATH);
+  return atlas;
+}
 
-  switch (motion) {
-    case 'cut':
-    case 'cleave': {
-      const wide = motion === 'cleave' ? .29 : .16;
-      const tip = .12 + advance * .64;
-      ctx.moveTo(-.69, -.36);
-      ctx.quadraticCurveTo(-.08, -.44 - wide, tip, .39);
-      ctx.quadraticCurveTo(.06, -.25 + wide, -.69, -.36);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(-.63, -.36);
-      ctx.quadraticCurveTo(-.08, -.44 - wide, tip, .39);
-      ctx.stroke();
-      break;
-    }
-    case 'hew': {
-      const drop = -.48 + advance * .66;
-      ctx.moveTo(-.48, drop - .35);
-      ctx.quadraticCurveTo(.46, drop - .29, .53, drop + .11);
-      ctx.quadraticCurveTo(.30, drop + .29, .12, drop + .38);
-      ctx.quadraticCurveTo(.20, drop - .04, -.48, drop - .35);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(-.48, drop - .35);
-      ctx.quadraticCurveTo(.46, drop - .29, .53, drop + .11);
-      ctx.stroke();
-      break;
-    }
-    case 'flame':
-      ctx.moveTo(-span, .25);
-      ctx.quadraticCurveTo(-.36, -.42, .56 * advance, -.32);
-      ctx.lineTo(.20, -.10);
-      ctx.quadraticCurveTo(.38, -.22, .68 * advance, -.03);
-      ctx.quadraticCurveTo(.33, .48, -span, .25);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(-.43, .20);
-      ctx.quadraticCurveTo(-.13, -.08, .54 * advance, -.04);
-      ctx.stroke();
-      break;
-    case 'bolt':
-      ctx.moveTo(-span, 0);
-      ctx.lineTo(-.20, -.20);
-      ctx.lineTo(-.03, .14);
-      ctx.lineTo(.16, -.16);
-      ctx.lineTo(span * advance, 0);
-      ctx.strokeStyle = color;
-      ctx.lineWidth = .13;
-      ctx.stroke();
-      ctx.strokeStyle = '#fff8dc';
-      ctx.lineWidth = .042;
-      ctx.stroke();
-      break;
-    case 'needle':
-    case 'lance':
-    case 'arrow': {
-      const width = motion === 'needle' ? .085 : motion === 'arrow' ? .055 : .22;
-      const tip = -span + 2 * span * advance;
-      ctx.moveTo(-span, -width * .22);
-      ctx.lineTo(tip - .23, -width);
-      ctx.lineTo(tip, 0);
-      ctx.lineTo(tip - .23, width);
-      ctx.lineTo(-span, width * .22);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(-span, 0);
-      ctx.lineTo(tip, 0);
-      ctx.stroke();
-      if (motion === 'arrow') {
-        ctx.beginPath();
-        ctx.moveTo(tip - .21, -.16);
-        ctx.lineTo(tip, 0);
-        ctx.lineTo(tip - .21, .16);
-        ctx.stroke();
-      }
-      break;
-    }
-    case 'lash':
-      ctx.moveTo(-.72, .31);
-      ctx.bezierCurveTo(-.42, -.8, .13, .73, -.38 + advance * 1.12, -.28);
-      ctx.strokeStyle = color;
-      ctx.lineWidth = .12;
-      ctx.stroke();
-      ctx.strokeStyle = '#fff8dc';
-      ctx.lineWidth = .033;
-      ctx.stroke();
-      break;
-    case 'punch':
-    case 'quake': {
-      ctx.moveTo(-.56, 0);
-      ctx.lineTo(.16 + advance * .43, -.19);
-      ctx.lineTo(.34, -.065);
-      ctx.lineTo(.68, 0);
-      ctx.lineTo(.34, .065);
-      ctx.lineTo(.16 + advance * .43, .19);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      if (motion === 'quake') {
-        ctx.beginPath();
-        ctx.moveTo(-.52, -.49);
-        ctx.lineTo(-.08, -.19);
-        ctx.lineTo(-.17, .27);
-        ctx.lineTo(.38, .57);
-        ctx.moveTo(-.17, .27);
-        ctx.lineTo(.51, .05);
-        ctx.stroke();
-      }
-      break;
-    }
-    case 'rim':
-    case 'surge':
-      for (const offset of [0, .19]) {
-        const x = -.46 + advance * .92 - offset;
-        ctx.beginPath();
-        ctx.moveTo(x - .14, -.63);
-        ctx.quadraticCurveTo(x + .50, 0, x - .14, .63);
-        ctx.strokeStyle = offset ? color : '#fff8dc';
-        ctx.lineWidth = motion === 'rim' ? .07 : .11;
-        ctx.stroke();
-      }
-      break;
+type ArtBox = Point & { angle: number; width: number; height: number };
+
+function fitArt(cells: readonly Point[], direction: Point, strip = false): ArtBox {
+  const angle = Math.atan2(direction.y, direction.x);
+  const cos = Math.cos(angle), sin = Math.sin(angle);
+  let left = Infinity, top = Infinity, right = -Infinity, bottom = -Infinity;
+  for (const { x, y } of cells) {
+    const u = x * cos + y * sin, v = y * cos - x * sin;
+    left = Math.min(left, u);
+    right = Math.max(right, u);
+    top = Math.min(top, v);
+    bottom = Math.max(bottom, v);
   }
+  const u = (left + right) / 2, v = (top + bottom) / 2;
+  const cellSpan = Math.abs(cos) + Math.abs(sin);
+  return {
+    x: u * cos - v * sin, y: u * sin + v * cos, angle,
+    width: right - left + cellSpan,
+    height: bottom - top + cellSpan * (strip ? .78 : 1),
+  };
+}
+
+function paintFrame(ctx: CanvasRenderingContext2D, sheet: HTMLImageElement, art: FrameArt,
+  box: ArtBox, progress: number, opacity = 1, flip = false) {
+  if (progress < 0 || progress >= 1) return;
+  const frame = Math.min(FRAME_COUNT - 1, Math.floor(progress * FRAME_COUNT));
+  const sequence = SEQUENCES[art];
+  ctx.save();
+  ctx.translate(box.x, box.y);
+  ctx.rotate(box.angle);
+  if (flip) ctx.scale(1, -1);
+  ctx.globalAlpha *= opacity * Math.min(1, (1 - progress) * 7);
+  ctx.drawImage(sheet, (sequence % 2 * FRAME_COUNT + frame) * CELL, Math.floor(sequence / 2) * CELL,
+    CELL, CELL, -box.width / 2, -box.height / 2, box.width, box.height);
+  ctx.restore();
+}
+
+const right = { x: 1, y: 0 };
+const arms = [{ x: 1, y: 0 }, { x: 0, y: 1 }, { x: -1, y: 0 }, { x: 0, y: -1 }];
+
+function paintMain(ctx: CanvasRenderingContext2D, sheet: HTMLImageElement,
+  effect: AttackFootprint, progress: number, opacity = 1, flip = false) {
+  const { cells, origin, direction, art, wave } = effect;
+  if (wave === 'cross') {
+    // Each staff ray has a fixed heading, including the two away from the facing direction.
+    for (const dir of arms) {
+      const ray = cells.filter(p => {
+        const dx = p.x - origin.x, dy = p.y - origin.y;
+        return dx * dir.y === dy * dir.x && dx * dir.x + dy * dir.y > 0;
+      });
+      if (ray.length) paintFrame(ctx, sheet, art, fitArt(ray, dir, true), progress, opacity, flip);
+    }
+    return;
+  }
+  if (wave === 'field' && cells.length > 1) {
+    // The eight parts share the same footprint and fan outward, even where there are no targets.
+    const sectors: Point[][] = Array.from({ length: 8 }, () => []);
+    for (const cell of cells) {
+      const dx = cell.x - origin.x, dy = cell.y - origin.y;
+      if (!dx && !dy) continue;
+      const index = (Math.round(Math.atan2(dy, dx) * 4 / Math.PI) + 8) % 8;
+      sectors[index].push(cell);
+    }
+    for (const [i, sector] of sectors.entries()) {
+      if (!sector.length) continue;
+      const angle = i * Math.PI / 4;
+      paintFrame(ctx, sheet, art, fitArt(sector, { x: Math.cos(angle), y: Math.sin(angle) }), progress, opacity, flip);
+    }
+    if (cells.some(p => p.x === origin.x && p.y === origin.y)) {
+      paintFrame(ctx, sheet, art, fitArt([origin], direction), progress, opacity, flip);
+    }
+    return;
+  }
+  paintFrame(ctx, sheet, art, fitArt(cells, wave === 'ring' ? right : direction, wave === 'line'), progress, opacity, flip);
 }
 
 export function drawAttackFootprint(ctx: CanvasRenderingContext2D, effect: AttackFootprint, startX: number,
   startY: number, tileSize: number, progress: number, visible: (x: number, y: number) => boolean,
   reducedMotion = false) {
-  const { origin, direction, cells, hits, palette, wave, strength } = effect;
-  if (!cells.length) return;
-  const angle = Math.atan2(direction.y, direction.x);
-  const facing = { x: Math.cos(angle), y: Math.sin(angle) };
-  const delay = ({ x, y }: Point) => {
-    const dx = x - origin.x, dy = y - origin.y;
-    if (wave === 'sweep') return dx * facing.y - dy * facing.x + Math.hypot(dx, dy) * .55;
-    return Math.max(Math.abs(dx), Math.abs(dy));
-  };
-  const offsets = cells.map(delay);
-  const first = Math.min(...offsets);
-  const spread = Math.max(...offsets) - first || 1;
-  const hitKeys = new Set(hits.map(({ x, y }) => `${x},${y}`));
-  const sharedSweep = wave === 'sweep' && cells.length > 1;
-  const active = cells.flatMap(({ x, y }, i) => {
-    const start = reducedMotion ? 0 : (offsets[i] - first) / spread * .32;
-    return visible(x, y) && progress >= start && progress < 1 ? [{ x, y, start }] : [];
-  });
+  const { cells, hits, accent, weaponTier: tier = 0 } = effect;
+  if (!cells.length || progress >= 1) return;
+  const sheet = preloadAttackArt();
+  if (!sheet?.complete || !sheet.naturalWidth) return;
+  const visibleCells = cells.filter(({ x, y }) => visible(x, y));
+  if (!visibleCells.length) return;
 
-  active.forEach(({ x, y, start }) => {
-    const t = clamp((progress - start) / (1 - start));
-    const fade = 1 - t;
-    ctx.save();
-    ctx.translate((x - startX) * tileSize, (y - startY) * tileSize);
-    ctx.scale(tileSize, tileSize);
-    ctx.beginPath();
-    ctx.rect(0, 0, 1, 1);
-    ctx.clip();
+  ctx.save();
+  ctx.imageSmoothingEnabled = true;
+  ctx.translate((.5 - startX) * tileSize, (.5 - startY) * tileSize);
+  ctx.scale(tileSize, tileSize);
+  // The path clips transparent art at walls and the edge of vision. It never paints the grid.
+  ctx.beginPath();
+  for (const { x, y } of visibleCells) ctx.rect(x - .5, y - .5, 1, 1);
+  ctx.clip();
 
-    // Entire hit cell reads under a short-lived, high-contrast trail.
-    ctx.globalAlpha = fade * (strength ? .38 : .2);
-    ctx.fillStyle = palette.color;
-    ctx.fillRect(0, 0, 1, 1);
-    ctx.globalAlpha = fade * .62;
-    ctx.lineWidth = .026;
-    ctx.strokeStyle = palette.color;
-    ctx.strokeRect(.022, .022, .956, .956);
-    ctx.translate(.5, .5);
-    const radial = wave === 'outward' && (x !== origin.x || y !== origin.y);
-    const heading = radial ? Math.atan2(y - origin.y, x - origin.x) : angle;
-    ctx.rotate(heading);
-    ctx.globalAlpha = fade ** .72;
-    const span = .5 / Math.max(Math.abs(Math.cos(heading)), Math.abs(Math.sin(heading)));
-    if (!sharedSweep) paintTrail(ctx, palette.motion, palette.color, reducedMotion ? .28 : t, strength, span);
-
-    if (hitKeys.has(`${x},${y}`) && t < .62) {
-      ctx.globalAlpha = 1 - t / .62;
-      ctx.fillStyle = '#fff4bc';
-      for (let spark = 0; spark < 6; spark++) {
-        const a = spark * TAU / 6 + .2;
-        ctx.save();
-        ctx.rotate(a);
-        const distance = reducedMotion ? .24 : .06 + t * .62;
-        ctx.fillRect(distance, -.025, .15, .05);
-        ctx.restore();
-      }
+  const t = reducedMotion ? .38 : Math.max(0, progress);
+  paintMain(ctx, sheet, effect, t, reducedMotion ? Math.max(0, 1 - progress) : 1);
+  if (!reducedMotion) {
+    if (tier === 2) paintMain(ctx, sheet, effect, (t - .27) / .72, .79, true);
+    if (tier === 3) paintMain(ctx, sheet, effect, (t - .20) / .70, .65, true);
+    if (accent) {
+      const delay = tier === 5 ? .16 : tier === 4 ? .33 : .24;
+      const box = fitArt(cells, effect.wave === 'line' || effect.wave === 'sweep' ? effect.direction : right,
+        effect.wave === 'line');
+      paintFrame(ctx, sheet, accent, box, (t - delay) / (1 - delay), tier >= 4 ? .88 : tier === 1 ? .37 : .61);
     }
-    ctx.restore();
-  });
-  if (sharedSweep && active.length) {
-    // Project one blade or whip trail across the whole footprint, clipped to affected cells.
-    const local = cells.map(({ x, y }) => {
-      const dx = x - origin.x, dy = y - origin.y;
-      return { f: dx * facing.x + dy * facing.y, side: dy * facing.x - dx * facing.y };
-    });
-    const fMin = Math.min(...local.map(p => p.f)), fMax = Math.max(...local.map(p => p.f));
-    const sideMin = Math.min(...local.map(p => p.side)), sideMax = Math.max(...local.map(p => p.side));
-    ctx.save();
-    ctx.beginPath();
-    for (const { x, y } of active) ctx.rect((x - startX) * tileSize, (y - startY) * tileSize, tileSize, tileSize);
-    ctx.clip();
-    ctx.translate((origin.x - startX + .5) * tileSize, (origin.y - startY + .5) * tileSize);
-    ctx.rotate(angle);
-    ctx.translate((fMin + fMax) * tileSize / 2, (sideMin + sideMax) * tileSize / 2);
-    ctx.scale((fMax - fMin + 1) * tileSize, (sideMax - sideMin + 1) * tileSize);
-    ctx.globalAlpha = (1 - progress) ** .72;
-    paintTrail(ctx, palette.motion, palette.color, reducedMotion ? .28 : progress, strength, .5);
-    ctx.restore();
   }
-
+  for (const { x, y } of hits) {
+    if (!visible(x, y)) continue;
+    const localTime = reducedMotion ? t : (t - .20) / .62;
+    paintFrame(ctx, sheet, 'sparks', { x, y, angle: (x + y) * .7, width: .85, height: .85 }, localTime, .92);
+  }
+  ctx.restore();
 }
