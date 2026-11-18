@@ -1,0 +1,31 @@
+.dungeon-facing-toggle {
+  position: absolute;
+  top: calc(100% + var(--facing-gap, 20px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  min-height: 32px;
+  padding: 3px 10px;
+  border: 1px solid #687c87;
+  border-radius: 6px;
+  background: #18252e;
+  color: #f3f2df;
+  font-size: 11px;
+  white-space: nowrap;
+  touch-action: manipulation;
+}
+
+.dungeon-facing-toggle[aria-pressed=true] {
+  border-color: #fff0a0;
+  background: #345e6b;
+}
+
+.dungeon-landscape-dpad {
+  --dpad-lift: clamp(18px, 5dvh, 28px);
+  --facing-gap: calc(5px + var(--dpad-lift));
+  top: calc(-1 * var(--dpad-lift));
+}
+
+.dungeon-landscape-dpad-panel .dungeon-dpad-label {
+  visibility: hidden;
+}

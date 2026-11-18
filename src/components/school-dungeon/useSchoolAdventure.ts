@@ -200,14 +200,21 @@ export function useSchoolAdventure(bridge:AdventureBridge){
  const identify=(item:SchoolItem)=>b.current.setIdentifiedTypes((old:Set<string>)=>new Set([...old,item.type]));
  const canEquip=(item:SchoolItem)=>{if(panelRef.current)return false;if(state.current.mode==='NO_GEAR'&&['WEAPON','ARMOR'].includes(item.category)){say('体操服の挑戦では武器と防具は装備できません。','Weapons and armor are disabled in this challenge.');return false;}const slot=item.category==='WEAPON'?'weapon':item.category==='ARMOR'?'armor':item.category==='ACCESSORY'?'accessory':'ranged';if(b.current.player.equipment?.[slot]?.cursed){say('いたずら封印で外せません。お清め消しゴムを使おう。','The slot is sealed. Use a cleansing eraser.');return false;}return true;};
  const canUnequip=(item?:SchoolItem)=>{if(item?.cursed){say('いたずら封印で外せません。','This equipment is sealed.');return false;}return !panelRef.current;};
+ const openContainer = (item: SchoolItem) => {
+  if (!item.capacity || item.cursed || item.shopOwner) return;
+  identify(item);
+  b.current.setMenuOpen(false);
+  setContainer(item.id);
+  setPanel('BAG');
+ };
  const beforeUse=(item:SchoolItem)=>{
   if(panelRef.current)return true;
   if(item.wet&&item.type!=='SUPPLY_REPAIR'){say('道具が濡れています。町の宿かお手入れセットで乾かそう。','This supply is wet. Dry it at an inn or use a repair kit.');return true;}
   if(item.cursed){say('いたずら封印で使えません。','This supply is sealed.');return true;}
     if(blessing.current){blessing.current=false;identify(item);updateInventory((a:any[])=>a.map(i=>i.id===item.id?{...i,blessed:true}:i));say('先生の応援印がついた！','Teacher blessing applied!');b.current.turn();return true;}
   if(item.blessed&&!['WEAPON','ARMOR','ACCESSORY'].includes(item.category))b.current.setPlayer((p:any)=>({...p,hp:Math.min(p.maxHp,p.hp+20)}));
+  if (item.capacity) { openContainer(item); return true; }
   identify(item);
-  if(item.capacity){setContainer(item.id);setPanel('BAG');return true;}
   if(item.type==='SUPPLY_CLEAN'){updateInventory((a:any[])=>a.map(i=>({...i,cursed:false})));b.current.setPlayer((p:any)=>({...p,equipment:Object.fromEntries(Object.entries(p.equipment).map(([slot,e]:any)=>[slot,e?{...e,cursed:false}:null]))}));consume(item);say('いたずら封印が全部消えた！','All seals removed!');b.current.turn();return true;}
   if(item.type==='SUPPLY_BLESS'){consume(item);blessing.current=true;say('応援する道具を次に選んでください。','Select a supply to bless next.');return true;}
   if(item.type==='SUPPLY_RETURN'){returnHome(item);return true;}
@@ -504,7 +511,7 @@ export function useSchoolAdventure(bridge:AdventureBridge){
   drawTrap:(ctx:CanvasRenderingContext2D,trap:any,x:number,y:number,size:number)=>(drawD2GroundFeature(ctx,'TRAP',x,y,size))||((trap.schoolPlaced||state.current.mode==='TRAPS')&&drawSchoolSprite(ctx,'items',12,x,y,size)),
   drawItem:(ctx:CanvasRenderingContext2D,item:any,x:number,y:number,size:number)=>drawItemArt(ctx,item?.type,x,y,size)||(EXTRA_ITEM_SPRITES[item?.type]!==undefined?drawExpansionSprite(ctx,EXTRA_ITEM_SPRITES[item.type],x,y,size):SCHOOL_ITEM_SPRITES[item?.type]!==undefined&&drawSchoolSprite(ctx,'items',SCHOOL_ITEM_SPRITES[item.type],x,y,size)),
   drawEnemy:(ctx:CanvasRenderingContext2D,enemy:any,x:number,y:number,size:number)=>(b.current.game===2&&drawD2Monster(ctx,enemy,x,y,size))||(EXTRA_ENEMIES[enemy?.schoolKind]?drawExpansionSprite(ctx,EXTRA_ENEMIES[enemy.schoolKind].sprite,x,y,size):SCHOOL_ACTOR_SPRITES[enemy?.schoolKind]!==undefined&&drawSchoolSprite(ctx,'actors',SCHOOL_ACTOR_SPRITES[enemy.schoolKind],x,y,size)),
-  openContainer:(item:SchoolItem)=>{if(item.capacity&&!item.cursed&&!item.shopOwner){identify(item);setContainer(item.id);setPanel('BAG');}},
+  openContainer,
   resume:()=>{if(chronicleReplay){setChronicleReplay(null);setPanel(chronicleReplayReturn.current);return;}if(!dojoRef.current)(state.current as any).departed=true;setPanel(null);refresh();},
   slide:(x:number,y:number,dx:number,dy:number)=>{
    const ctx=b.current,s=state.current,nx=x+dx,ny=y+dy;

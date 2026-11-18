@@ -9,3 +9,105 @@
 .dungeon-pouch-detail [data-menu-action=true]{outline:2px solid #fff0ba;outline-offset:-3px}
 
 .dungeon-sort-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px}.dungeon-sort-heading h3{margin:0}.dungeon-sort-buttons{display:flex;gap:6px}.dungeon-pouch .dungeon-sort-buttons button{font-size:11px;padding:5px 9px;min-height:36px}
+
+.dungeon-pouch-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dungeon-pouch-header-actions button {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+.dungeon-pouch-header-actions button svg { margin: auto; }
+
+/* The compact list sits over the right of the board, using its LCD palette. */
+.dungeon-pouch.dungeon-pouch-classic {
+  position: absolute;
+  z-index: 31;
+  inset: 52px 0 0 auto;
+  width: min(86%, 550px);
+  height: auto;
+  color: var(--classic-text);
+  background: var(--classic-bg);
+  border: 2px solid var(--classic-border);
+  box-shadow: -3px 0 0 #0009;
+  font: 12px/1.35 ui-monospace, monospace;
+}
+.dungeon-pouch-classic > header { padding: 3px 6px; border-color: var(--classic-border); }
+.dungeon-pouch-classic h2 { font: inherit; font-size: 13px; font-weight: bold; margin: 0; }
+.dungeon-pouch-classic h2 span { color: inherit; margin-left: 3px; font: inherit; font-weight: normal; }
+.dungeon-pouch-classic .dungeon-pouch-body {
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+.dungeon-pouch-classic .dungeon-pouch-collection,
+.dungeon-pouch-classic .dungeon-pouch-detail { padding: 6px; }
+.dungeon-pouch-classic .dungeon-pouch-detail {
+  min-width: 0;
+  border: 0;
+  border-left: 1px solid var(--classic-border);
+}
+.dungeon-pouch-classic .dungeon-pouch-collection h3,
+.dungeon-pouch-classic .dungeon-pouch-detail h3,
+.dungeon-pouch-classic .dungeon-pouch-detail p {
+  color: inherit;
+  font: inherit;
+  letter-spacing: normal;
+  overflow-wrap: anywhere;
+}
+.dungeon-pouch-classic .dungeon-pouch-detail h3 { font-weight: bold; margin: 0 0 5px; }
+.dungeon-pouch-classic .dungeon-pouch-detail p { margin: 0 0 5px; }
+.dungeon-pouch-classic button {
+  min-width: 0;
+  min-height: 32px;
+  border-color: var(--classic-border);
+  background: transparent;
+}
+.dungeon-pouch-classic .dungeon-pouch-header-actions button,
+.dungeon-pouch-classic .dungeon-sort-buttons button,
+.dungeon-pouch-classic .item-menu-actions button { padding: 3px 6px; font-size: 11px; }
+.dungeon-pouch-classic .item-menu-grid { display: flex; flex-direction: column; gap: 2px; }
+.dungeon-pouch-classic .dungeon-equipped-grid { margin-bottom: 5px; }
+.dungeon-pouch-classic .dungeon-sort-heading { gap: 4px; margin-bottom: 4px; }
+.dungeon-pouch-classic .dungeon-sort-buttons { gap: 3px; flex-wrap: wrap; }
+.dungeon-pouch-classic .item-menu-slot {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  aspect-ratio: auto;
+  padding: 3px 4px;
+  border: 1px solid transparent;
+  border-radius: 0;
+  text-align: left;
+}
+.dungeon-pouch-classic .item-menu-slot::before { content: '▶'; visibility: hidden; font-size: 9px; }
+.dungeon-pouch-classic .item-menu-slot[aria-pressed=true]::before { visibility: visible; }
+.dungeon-pouch-classic .item-menu-slot[aria-pressed=true] {
+  color: var(--classic-bg);
+  background: var(--classic-selection);
+  border-color: var(--classic-text);
+}
+.dungeon-pouch-classic .item-menu-label {
+  position: static;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+.dungeon-pouch-classic .item-menu-count,
+.dungeon-pouch-classic .item-menu-badge { position: static; color: inherit; background: none; }
+.dungeon-pouch-classic .item-menu-actions { gap: 3px; }
+.dungeon-pouch-classic .dungeon-pouch-empty { margin: 6px 0; }
+
+@media (max-width: 430px) and (orientation: portrait) {
+  .dungeon-pouch.dungeon-pouch-classic { width: 92%; }
+}

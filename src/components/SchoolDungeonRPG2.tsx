@@ -2325,7 +2325,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
             <button onClick={handleQuit} className="dungeon-quit-button absolute left-2 right-2 top-2 flex items-center justify-center gap-1 rounded border border-[#444] bg-[#222] px-2 py-1 text-[10px] font-bold text-[#777] transition-colors hover:border-gray-500 hover:text-white">
                 <LogOut size={12}/> {tr('退出')}
             </button>
-            <div className="w-40 h-40 relative flex items-center justify-center">
+            <div className="dungeon-landscape-dpad w-40 h-40 relative flex items-center justify-center">
                 <div className="w-12 h-12 bg-[#333] z-10 rounded-sm"></div>
                 {/* D-PAD Buttons */}
                 <div className="absolute top-0 w-12 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={24}/></div>
@@ -2342,7 +2342,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                 <FacingButton active={facingOnly} onToggle={()=>setFacingOnly(v=>!v)} text={adventure.text}/>
                 <div className="absolute w-10 h-10 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
             </div>
-            <div className="mt-8 text-[#444] font-black tracking-widest text-[10px] italic">D-PAD</div>
+            <div className="dungeon-dpad-label mt-8 text-[#444] font-black tracking-widest text-[10px] italic">D-PAD</div>
         </div>
 
         <div className="dungeon-game-panel w-full max-w-md md:max-w-full md:flex-1 flex flex-col gap-2 min-h-0 order-2">
@@ -2397,6 +2397,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
  blankItems={[]} blankIndex={0} selectBlank={()=>{}} extra={<nav className="dungeon-pouch-shop-tabs">{(['BUY','SELL'] as const).map(mode=><button key={mode} aria-pressed={shopState.mode===mode} onClick={()=>{setShopState(prev=>({...prev,mode}));setSelectedItemIndex(0);}}>{tr(mode==='BUY'?'買う':'売る')}</button>)}<span>{player.gold} G</span>{!shopRemovedThisFloor&&<button aria-pressed={selectedItemIndex===-1} disabled={(player.gold||0)<100} onFocus={()=>setSelectedItemIndex(-1)} onClick={()=>handleShopAction(-1)}>{tr('カード除外')} (100 G)</button>}</nav>}/>}
 
                     {menuOpen && !adventure.dojoRun && <DungeonInventoryMenu
+ classicPalette={{ background: C0, border: C1, selection: C2, text: C3 }}
  sortInventory={items=>{const selected=inventory[selectedItemIndex];setInventory(items);if(selected){const next=items.findIndex(item=>item.id===selected.id);setSelectedItemIndex(Math.max(0,next));}}}
  inventory={inventory} equipment={player.equipment||{}} selectedIndex={selectedItemIndex} selectedSlot={selectedEquipmentSlot} activeAction={selectedItemActionIndex} selectAction={setSelectedItemActionIndex} listRef={menuListRef}
  name={getItemName} description={i=>tr(getInspectedDescription(i))} known={itemKnown} text={tr} close={toggleMenu} max={MAX_INVENTORY}
@@ -2496,7 +2497,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
         <div className="dungeon-portrait-controls d2-portrait-controls portrait:flex landscape:hidden md:hidden order-4 w-full max-w-md h-[220px] relative rounded-t-xl border-t-2 border-[#333] bg-[#1a1a2a] shrink-0 overflow-hidden">
             <TrapControls adventure={adventure} blocked={menuOpen||shopState.active||gameOver||gameClear}/>
             <div className="d2-portrait-notebook" ref={setPortraitControlsHost}/>
-            <div className="absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 flex items-center justify-center">
+            <div className="dungeon-portrait-dpad absolute left-6 top-1/2 -translate-y-1/2 w-32 h-32 flex items-center justify-center">
                 <div className="w-10 h-10 bg-[#333] z-10"></div>
                 <div className="absolute top-0 w-10 h-16 bg-[#333] rounded-t-md border-t border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center pt-2 z-0" onClick={() => handleMoveInput(0, -1)}><ArrowUp className="text-[#666]" size={20}/></div>
                 <div className="absolute bottom-0 w-10 h-16 bg-[#333] rounded-b-md border-b border-l border-r border-[#444] shadow-lg active:bg-[#222] cursor-pointer flex justify-center items-end pb-2 z-0" onClick={() => handleMoveInput(0, 1)}><ArrowDown className="text-[#666]" size={20}/></div>
