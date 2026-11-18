@@ -100,7 +100,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
   "被ダメージ半減・120秒": "Half damage for 120s",
 
   "ショット設定": "Shot settings",
-  'ゲームボーイ風': 'Game Boy style', '標準表示': 'Standard view',
+  'レトロ': 'Retro', '標準表示': 'Standard view',
   '並び替え': 'Sort', '種類順': 'Sort by type', '名前順': 'Sort by name', '元の順': 'Original order',
   "招待された種目": "Invited sport",
   "参加名と6桁コードで参加": "Join with your name and 6-digit code",
@@ -531,7 +531,7 @@ export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
   "被ダメージ半減・120秒": "ひダメージはんげん・120びょう",
 
   "ショット設定": "しょっとせってい",
-  'ゲームボーイ風': 'げーむぼーいふう', '標準表示': 'ひょうじゅんひょうじ',
+  'レトロ': 'れとろ', '標準表示': 'ひょうじゅんひょうじ',
   '並び替え': 'ならびかえ', '種類順': 'しゅるいじゅん', '名前順': 'なまえじゅん', '元の順': 'もとのじゅん',
   "招待された種目": "しょうたいされたしゅもく",
   "参加名と6桁コードで参加": "さんかなまえと6けたのコードでさんか",

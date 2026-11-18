@@ -1013,6 +1013,10 @@ export const useXboxControllerNavigation = () => {
         return;
       }
       if (action === 'cancel' && clickCancelShortcut()) return;
+      const modal = getTopmostVisibleGamepadModal();
+      if (modal?.hasAttribute('data-gamepad-keyboard-navigation')
+        && ['up', 'down', 'left', 'right', 'confirm'].includes(action)
+        && dispatchKeyboardEvent(getKeyboardActionKey(action))) return;
       // Interactive overlays sit on top of real-time mini games whose global
       // key handlers may prevent Arrow key events. Navigate the focused modal
       // or question grid first so those underlying handlers cannot swallow

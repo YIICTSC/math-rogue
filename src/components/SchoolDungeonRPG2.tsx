@@ -3,7 +3,7 @@ import {debugRewardsUnlocked} from '../point-exchange/debug';
 import {TechniqueBar} from './school-dungeon/techniques/TechniqueBar';
 import {equippedWeaponKind,WEAPONS,TRAINING_WEAPONS} from './school-dungeon/dungeons1/mastery';
 import {abilityFootprint, drawAttackFootprint, weaponFootprint, type AttackFootprint, type CombatAbilityEffect} from './school-dungeon/dungeons1/martialEffects';
-import {DungeonInventoryMenu} from './school-dungeon/DungeonInventoryMenu';
+import {DungeonInventoryMenu, type DungeonInventoryInput} from './school-dungeon/DungeonInventoryMenu';
 import {TrapControls} from './school-dungeon/TrapControls';
 import {FacingButton} from './school-dungeon/FacingButton';
 import {retireShopTheft} from './school-dungeon/shops';
@@ -575,7 +575,6 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   const [idMap, setIdMap] = useState<Record<string, string>>({}); 
   const [identifiedTypes, setIdentifiedTypes] = useState<Set<string>>(new Set());
   const [selectedItemIndex, setSelectedItemIndex] = useState(0);
-  const [selectedItemActionIndex, setSelectedItemActionIndex] = useState(0);
   const [selectedEquipmentSlot, setSelectedEquipmentSlot] = useState<'weapon'|'armor'|'ranged'|'accessory' | null>(null);
   useEffect(() => {
       if (selectedEquipmentSlot && !player.equipment?.[selectedEquipmentSlot]) {
@@ -584,7 +583,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       }
   }, [player.equipment, selectedEquipmentSlot]);
   const [blankScrollSelectionIndex, setBlankScrollSelectionIndex] = useState(0);
-  const menuListRef = useRef<HTMLDivElement>(null);
+  const menuInput = useRef<DungeonInventoryInput>(null);
   const lastInputType = useRef<'KEY' | 'MOUSE'>('KEY');
   const [inspectedItem, setInspectedItem] = useState<Item | null>(null);
   const longPressTimer = useRef<any>(null);
@@ -950,19 +949,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
 
   useEffect(() => { if (!gameOver && (!gameClear || adventure.state.pendingStory!==undefined || Boolean(adventure.state.chronicle?.pending))) saveData(true); }, [player, inventory, floor, level, belly, enemies, floorItems, traps, shopState, synthState, gameOver, gameClear, saveData]);
 
-  useEffect(() => {
-      const list = menuListRef.current;
-      if (!list) return;
-      const revealSelection = () => {
-          const activeIndex = menuOpen && synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT' ? blankScrollSelectionIndex : selectedItemIndex;
-          const row = list.querySelector<HTMLElement>(`[data-menu-item="${activeIndex}"]`) || list.children[activeIndex] as HTMLElement | undefined;
-          row?.scrollIntoView({block:'nearest',behavior:'instant'});
-      };
-      revealSelection();
-      const observer = new ResizeObserver(revealSelection);
-      observer.observe(list);
-      return () => observer.disconnect();
-  }, [selectedItemIndex, blankScrollSelectionIndex, menuOpen, shopState.active, shopState.mode, synthState.step, inventory, enemies]);
+
 
   useEffect(() => {
       setPlayer(p => {
@@ -1543,60 +1530,11 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       const nextTheme = getTheme(nextFloor); audioService.playBGM(nextTheme.bgm);
   };
 
-  const moveItemMenuSelection = (direction: -1 | 1) => {
-      const equippedSlots = (['weapon', 'armor', 'ranged', 'accessory'] as const).filter(slot => player.equipment?.[slot]);
-      if (selectedEquipmentSlot) {
-          const currentIndex = equippedSlots.indexOf(selectedEquipmentSlot);
-          const nextIndex = currentIndex + direction;
-          if (nextIndex >= 0 && nextIndex < equippedSlots.length) setSelectedEquipmentSlot(equippedSlots[nextIndex]);
-          else if (direction > 0 && inventory.length > 0) { setSelectedEquipmentSlot(null); setSelectedItemIndex(0); }
-      } else if (direction < 0 && selectedItemIndex === 0 && equippedSlots.length > 0) {
-          setSelectedEquipmentSlot(equippedSlots[equippedSlots.length - 1]);
-          setSelectedItemActionIndex(0);
-      } else if (inventory.length > 0) {
-          setSelectedItemIndex(prev => Math.max(0, Math.min(inventory.length - 1, prev + direction)));
-      } else if (equippedSlots.length > 0) {
-          setSelectedEquipmentSlot(direction > 0 ? equippedSlots[0] : equippedSlots[equippedSlots.length - 1]);
-      }
-      audioService.playSound('select');
-  };
-
   const movePlayer = (dx: 0|1|-1, dy: 0|1|-1) => {
       if (adventure.dojoStep({type:'MOVE',dx,dy})) return;
       if (adventure.townControl(dx,dy)) return;
       if (adventure.blocksInput()) return;
       if(gameOver || gameClear) return;
-      if (shopState.active) {
-          if (dx < 0 && shopState.mode !== 'BUY') { setShopState(prev => ({ ...prev, mode: 'BUY' })); setSelectedItemIndex(0); audioService.playSound('select'); return; }
-          if (dx > 0 && shopState.mode !== 'SELL') { setShopState(prev => ({ ...prev, mode: 'SELL' })); setSelectedItemIndex(0); audioService.playSound('select'); return; }
-          if (dy !== 0) {
-              const shopkeeper = enemies.find(e => e.id === shopState.merchantId);
-              const listLength = shopState.mode === 'BUY' ? (shopkeeper?.shopItems?.length || 0) : inventory.length;
-              const minIndex = !shopRemovedThisFloor ? -1 : 0;
-              const maxIndex = Math.max(minIndex, listLength - 1);
-              setSelectedItemIndex(prev => Math.max(minIndex, Math.min(maxIndex, prev + dy)));
-              audioService.playSound('select');
-          }
-          return;
-      }
-      if (menuOpen) {
-          if (dy !== 0) {
-              if (synthState.active && synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') {
-                  const knownCount = Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).length;
-                  if (knownCount > 0) setBlankScrollSelectionIndex(prev => Math.max(0, Math.min(knownCount - 1, prev + dy)));
-              } else if (!synthState.active) {
-                  moveItemMenuSelection(dy as -1 | 1);
-              } else if (inventory.length > 0) {
-                  setSelectedItemIndex(prev => Math.max(0, Math.min(inventory.length - 1, prev + dy)));
-              }
-              if (synthState.active) audioService.playSound('select');
-          }
-          if (!synthState.active && dx !== 0 && inventory.length > 0 && !selectedEquipmentSlot) {
-              setSelectedItemActionIndex(prev => Math.max(0, Math.min(2, prev + dx)));
-              audioService.playSound('select');
-          }
-          return;
-      }
       if (deckViewMode === 'REMOVE' && showDeck) return; 
       if(dx === 0 && dy === 0) { addLog("足踏みした。"); processTurn(player.x, player.y); return; }
       setPlayer(p => ({ ...p, dir: {x: dx, y: dy} }));
@@ -1636,18 +1574,11 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       if (adventure.blocksInput()) return;
       if (gameOver) { handleRestart(); return; }
       if (gameClear) return;
-      if (shopState.active) { handleShopAction(); return; }
-      if (menuOpen) {
-          if (synthState.active) handleSynthesisStep();
-          else if (selectedEquipmentSlot) handleUnequip(selectedEquipmentSlot);
-          else if (inventory.length > 0) {
-              if (selectedItemActionIndex === 0) handleItemAction(selectedItemIndex);
-              else if (selectedItemActionIndex === 1) handleThrowItem(selectedItemIndex);
-              else if (selectedItemActionIndex === 2) handleDropItem(selectedItemIndex);
-              else setInspectedItem(inventory[selectedItemIndex]);
-          }
+      if (shopState.active || menuOpen) {
+          menuInput.current?.confirm();
           return;
       }
+
       if (map[player.y][player.x] === 'STAIRS') {
            if (!adventure.canDescend()) return; addLog("階段を降りる..."); audioService.playSound('select'); setShowMathChallenge(true); return; }
       const tx = player.x + player.dir.x; const ty = player.y + player.dir.y; const target = enemies.find(e => e.x === tx && e.y === ty);
@@ -1812,7 +1743,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
 
   const toggleMenu = () => {
       if (adventure.townControl(0,0,true)) return;
-      if (adventure.dojoMenu()) return; if (shopState.active) { setShopState(prev => ({ ...prev, active: false })); return; } if (menuOpen) { setMenuOpen(false); setSynthState({ active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null }); } else { setMenuOpen(true); setSelectedItemIndex(0); setSelectedItemActionIndex(0); const firstEquippedSlot = (['weapon', 'armor', 'ranged', 'accessory'] as const).find(slot => player.equipment?.[slot]) ?? null; setSelectedEquipmentSlot(firstEquippedSlot); } audioService.playSound('select'); };
+      if (adventure.dojoMenu()) return; if (shopState.active) { setShopState(prev => ({ ...prev, active: false })); return; } if (menuOpen) { setMenuOpen(false); setSynthState({ active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null }); } else { setMenuOpen(true); setSelectedItemIndex(0); const firstEquippedSlot = (['weapon', 'armor', 'ranged', 'accessory'] as const).find(slot => player.equipment?.[slot]) ?? null; setSelectedEquipmentSlot(firstEquippedSlot); } audioService.playSound('select'); };
   const startEndlessMode = () => { if (adventure.state.mode !== 'STORY' && !debugRewardsUnlocked()) { adventure.returnHome(); return; } const next=Math.max(21,floor+1); setIsEndless(true); setGameClear(false); setFloor(next); generateFloor(next,true); addLog("中学生編(エンドレス)開始！"); };
   const handleSynthesisStep = () => {
       const idx = synthState.mode === 'BLANK' ? blankScrollSelectionIndex : selectedItemIndex; const item = inventory[idx];
@@ -1923,6 +1854,10 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   const handleTouchStart = (item: Item) => { longPressTimer.current = setTimeout(() => setInspectedItem(item), 500); };
   const handleTouchEnd = () => { if (longPressTimer.current) clearTimeout(longPressTimer.current); };
   const handleMoveInput = (dx: 0|1|-1, dy: 0|1|-1) => {
+      if (shopState.active || menuOpen) {
+          menuInput.current?.move(dx, dy);
+          return;
+      }
       if(facingOnlyRef.current&&adventure.isDojoActive()){adventure.dojoStep({type:'FACE',dx,dy});return;}
       if(facingOnlyRef.current&&adventure.state.place==='DUNGEON'&&!adventure.dojoRun){if(!adventure.blocksInput()&&!menuOpen&&!shopState.active&&!gameOver&&!gameClear&&(dx||dy))setPlayer(p=>({...p,dir:{x:dx,y:dy}}));return;}
       movePlayer(dx,dy);
@@ -1930,6 +1865,13 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (showDeck && deckViewMode === 'REMOVE') {
+        if (['Escape', 'Backspace', 'x', 'c'].includes(e.key)) {
+          e.preventDefault();
+          setShowDeck(false);
+        }
+        return;
+      }
       if (adventure.townKey(e)) return;
       if (adventure.isDojoActive() && facingOnlyRef.current) {
         const direction:Record<string,number[]>={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]};
@@ -1944,17 +1886,15 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
         if (['x', 'c', 'Escape'].includes(e.key)) { toggleMenu(); return; }
         if ((menuOpen || shopState.active) && (e.key === 'Backspace' || e.key === 'x')) { if (shopState.active) { setShopState(prev => ({...prev, active: false})); return; } if (synthState.active) setSynthState({ active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null }); else setMenuOpen(false); return; }
         if (menuOpen || shopState.active) {
-            const listLength = shopState.active && shopState.mode === 'BUY' ? (enemies.find(e=>e.id===shopState.merchantId)?.shopItems?.length||0) : inventory.length;
-            const minIndex = shopState.active && !shopRemovedThisFloor ? -1 : 0;
-            const maxIndex = Math.max(minIndex, listLength - 1);
-            if (menuOpen && !synthState.active && e.key === 'ArrowUp') moveItemMenuSelection(-1);
-            else if (menuOpen && !synthState.active && e.key === 'ArrowDown') moveItemMenuSelection(1);
-            else if (e.key === 'ArrowUp') setSelectedItemIndex(prev => Math.max(minIndex, prev - 1));
-            else if (e.key === 'ArrowDown') setSelectedItemIndex(prev => Math.min(maxIndex, prev + 1));
-            if (menuOpen && !synthState.active && !selectedEquipmentSlot && e.key === 'ArrowLeft') setSelectedItemActionIndex(prev => Math.max(0, prev - 1));
-            if (menuOpen && !synthState.active && !selectedEquipmentSlot && e.key === 'ArrowRight') setSelectedItemActionIndex(prev => Math.min(3, prev + 1));
-            if (shopState.active) { if (e.key === 'ArrowLeft' && shopState.mode === 'SELL') { setShopState(prev => ({ ...prev, mode: 'BUY' })); setSelectedItemIndex(0); audioService.playSound('select'); } if (e.key === 'ArrowRight' && shopState.mode === 'BUY') { setShopState(prev => ({ ...prev, mode: 'SELL' })); setSelectedItemIndex(0); audioService.playSound('select'); } }
-            if (e.key === 'z' || e.key === 'Enter' || e.key === ' ') handleActionBtn(); return;
+            if (e.key === 'ArrowUp') menuInput.current?.move(0, -1);
+            else if (e.key === 'ArrowDown') menuInput.current?.move(0, 1);
+            else if (e.key === 'ArrowLeft') menuInput.current?.move(-1, 0);
+            else if (e.key === 'ArrowRight') menuInput.current?.move(1, 0);
+            else if (['z', 'Enter', ' '].includes(e.key)) {
+                e.preventDefault();
+                menuInput.current?.confirm();
+            }
+            return;
         }
         switch(e.key) {
             case 'ArrowUp': case 'w': case '8': case 'k': handleMoveInput(0, -1); break;
@@ -1970,7 +1910,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
         }
     };
     window.addEventListener('keydown', handleKeyDown); return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [player, map, enemies, floorItems, menuOpen, gameOver, gameClear, inventory, selectedItemIndex, selectedItemActionIndex, selectedEquipmentSlot, synthState, shopState]);
+  }, [player, map, enemies, floorItems, menuOpen, gameOver, gameClear, inventory, selectedItemIndex, selectedEquipmentSlot, synthState, shopState, showDeck, deckViewMode]);
 
   const frameCountRef = useRef(0);
   useEffect(() => { const loop = setInterval(() => { frameCountRef.current++; renderGame(); }, 50); return () => clearInterval(loop); }, [map, player, enemies, floorItems, traps, menuOpen, visitedMap, floorMapRevealed, currentTheme, adventure.revision, adventure.dojoRun, identifiedTypes]);
@@ -2198,6 +2138,17 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   };
 
   const getInspectedDescription = (item: Item) => { if ((adventure.isMystery || item.category === 'STAFF') && !identifiedTypes.has(item.type)) return "振ってみるまで分からない。"; return languageMode==='ENGLISH'&&STUDENT_ITEM_DB[item.type]?STUDENT_ITEM_DB[item.type].englishDesc:item.desc; };
+  const shopRows = shopState.mode === 'BUY'
+      ? (enemies.find(e => e.id === shopState.merchantId)?.shopItems ?? []) : inventory;
+  const sortShopRows = (items: Item[]) => {
+      const selection = shopRows[selectedItemIndex];
+      if (shopState.mode === 'BUY') {
+          setEnemies(previous => previous.map(e => e.id === shopState.merchantId ? { ...e, shopItems: items } : e));
+      } else {
+          setInventory(items);
+      }
+      if (selection) setSelectedItemIndex(Math.max(0, items.indexOf(selection)));
+  };
   const { C0, C1, C2, C3 } = currentTheme.colors;
 
   return (
@@ -2389,20 +2340,21 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                         </div>
                     )}
                 </div>
-                {shopState.active && <DungeonInventoryMenu
- inventory={shopState.mode==='BUY'?(enemies.find(e=>e.id===shopState.merchantId)?.shopItems||[]):inventory} equipment={{}} selectedIndex={selectedItemIndex} selectedSlot={null} listRef={menuListRef}
+                {shopState.active && !(showDeck && deckViewMode === 'REMOVE') && <DungeonInventoryMenu
+ classicPalette={{ background: C0, border: C1, selection: C2, text: C3 }}
+ sortInventory={sortShopRows} inventory={shopRows} equipment={{}} selectedIndex={selectedItemIndex} selectedSlot={null} inputRef={menuInput}
  name={getItemName} description={i=>tr(getInspectedDescription(i))} known={itemKnown} text={tr} close={()=>setShopState(prev=>({...prev,active:false}))} max={MAX_INVENTORY}
  select={setSelectedItemIndex} selectSlot={()=>{}} primary={handleShopAction} shop={shopState.mode} shopAction={handleShopAction} coins={player.gold||0} spaceAvailable={inventory.length<MAX_INVENTORY}
  unequip={handleUnequip} throwItem={handleThrowItem} drop={handleDropItem} switchDiff={i=>getEquipmentSwitchDiffLabel(i,player.equipment)} synth={{active:false}}
- blankItems={[]} blankIndex={0} selectBlank={()=>{}} extra={<nav className="dungeon-pouch-shop-tabs">{(['BUY','SELL'] as const).map(mode=><button key={mode} aria-pressed={shopState.mode===mode} onClick={()=>{setShopState(prev=>({...prev,mode}));setSelectedItemIndex(0);}}>{tr(mode==='BUY'?'買う':'売る')}</button>)}<span>{player.gold} G</span>{!shopRemovedThisFloor&&<button aria-pressed={selectedItemIndex===-1} disabled={(player.gold||0)<100} onFocus={()=>setSelectedItemIndex(-1)} onClick={()=>handleShopAction(-1)}>{tr('カード除外')} (100 G)</button>}</nav>}/>}
+ blankItems={[]} blankIndex={0} selectBlank={()=>{}} extra={<nav className="dungeon-pouch-shop-tabs">{(['BUY','SELL'] as const).map(mode=><button key={mode} data-menu-shop-mode={mode} aria-pressed={shopState.mode===mode} onClick={()=>{setShopState(prev=>({...prev,mode}));setSelectedItemIndex(0);}}>{tr(mode==='BUY'?'買う':'売る')}</button>)}<span>{player.gold} G</span>{!shopRemovedThisFloor&&<button aria-pressed={selectedItemIndex===-1} disabled={(player.gold||0)<100} onFocus={()=>setSelectedItemIndex(-1)} onClick={()=>handleShopAction(-1)}>{tr('カード除外')} (100 G)</button>}</nav>}/>}
 
                     {menuOpen && !adventure.dojoRun && <DungeonInventoryMenu
  classicPalette={{ background: C0, border: C1, selection: C2, text: C3 }}
  sortInventory={items=>{const selected=inventory[selectedItemIndex];setInventory(items);if(selected){const next=items.findIndex(item=>item.id===selected.id);setSelectedItemIndex(Math.max(0,next));}}}
- inventory={inventory} equipment={player.equipment||{}} selectedIndex={selectedItemIndex} selectedSlot={selectedEquipmentSlot} activeAction={selectedItemActionIndex} selectAction={setSelectedItemActionIndex} listRef={menuListRef}
+ inventory={inventory} equipment={player.equipment||{}} selectedIndex={selectedItemIndex} selectedSlot={selectedEquipmentSlot} inputRef={menuInput}
  name={getItemName} description={i=>tr(getInspectedDescription(i))} known={itemKnown} text={tr} close={toggleMenu} max={MAX_INVENTORY}
- select={i=>{lastInputType.current='MOUSE';setSelectedItemIndex(i);setSelectedEquipmentSlot(null);setSelectedItemActionIndex(0);}}
- selectSlot={slot=>{setSelectedEquipmentSlot(slot);setSelectedItemActionIndex(0);}} primary={i=>synthState.active?handleSynthesisStep():handleItemAction(i)}
+ select={i=>{lastInputType.current='MOUSE';setSelectedItemIndex(i);setSelectedEquipmentSlot(null);}}
+ selectSlot={setSelectedEquipmentSlot} primary={i=>synthState.active?handleSynthesisStep():handleItemAction(i)}
  unequip={handleUnequip} throwItem={handleThrowItem} drop={handleDropItem} switchDiff={i=>getEquipmentSwitchDiffLabel(i,player.equipment)} synth={synthState}
  blankItems={Array.from(identifiedTypes).filter((type:any)=>type.startsWith('SCROLL')).map((type:any)=>({...ITEM_DB[type],id:type}))}
  blankIndex={blankScrollSelectionIndex} selectBlank={setBlankScrollSelectionIndex}/>}
