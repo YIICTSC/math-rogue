@@ -1,0 +1,788 @@
+.flight-school {
+  --ink: #153a43;
+  --navy: #102e38;
+  --paper: #faf3df;
+  --line: #c7c4aa;
+  --teal: #176775;
+  --orange: #ae4528;
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+  overflow: hidden;
+  color: var(--ink);
+  background: #123d49;
+  font-family: 'Barlow', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
+}
+.flight-school * {
+  box-sizing: border-box;
+}
+.flight-school button,
+.flight-school select {
+  font: inherit;
+  line-height: 1.2;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+.flight-school button:focus-visible,
+.flight-school select:focus-visible {
+  outline: 3px solid #ed9c41;
+  outline-offset: 2px;
+}
+.fs-shell {
+  height: 100%;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: env(safe-area-inset-top) max(14px, env(safe-area-inset-right))
+    max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+  background: radial-gradient(ellipse at top left, #27616b, transparent 77%), #112f39;
+}
+.fs-nav {
+  max-width: 1180px;
+  margin: 0 auto;
+  min-height: 57px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  color: #fcf4d9;
+}
+.fs-nav > span,
+.fs-nav button,
+.fs-air-label,
+.fs-bookhead > div,
+.fs-briefing b,
+.fs-flight-time,
+.fs-lift {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.fs-nav > span {
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  justify-content: center;
+}
+.fs-nav button,
+.fs-tools button {
+  border: 1px solid #8ea99e80;
+  border-radius: 7px;
+  background: #163f49;
+  color: #f5edcf;
+  min-height: 36px;
+  padding: 7px 12px;
+}
+.fs-nav button:first-child {
+  justify-self: start;
+}
+.fs-nav button:last-child {
+  justify-self: end;
+}
+.fs-hangar {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(330px, 0.92fr);
+  width: min(100%, 1180px);
+  min-height: min(580px, calc(100% - 60px));
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid #e1d5ae;
+  border-radius: 15px;
+  background: var(--paper);
+  box-shadow: 0 18px 44px #0a222b45;
+}
+.fs-poster {
+  min-height: 320px;
+  position: relative;
+  isolation: isolate;
+  background-size: cover;
+  background-position: 63% center;
+  color: #fff5db;
+}
+.fs-poster:before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(0deg, #102e3af0, transparent 45%);
+}
+.fs-poster > div {
+  position: absolute;
+  bottom: clamp(17px, 4vw, 42px);
+  left: clamp(18px, 4vw, 42px);
+  right: 12px;
+  text-shadow: 0 2px 7px #123849;
+}
+.fs-aircode,
+.fs-result-port {
+  font-family: 'Barlow Condensed', ui-monospace, monospace;
+  letter-spacing: 0.13em;
+  font-weight: 800;
+}
+.fs-aircode {
+  font-size: clamp(18px, 2.5vw, 27px);
+  color: #ffe4a0;
+}
+.fs-poster h1 {
+  font-size: clamp(28px, 4.2vw, 61px);
+  font-weight: 850;
+  line-height: 1.12;
+  letter-spacing: 0.025em;
+  margin: 4px 0 9px;
+}
+.fs-poster p,
+.fs-briefing p {
+  margin: 0;
+}
+.fs-poster p {
+  font-size: clamp(13px, 1.6vw, 21px);
+}
+.fs-panel {
+  background: var(--paper);
+  color: var(--ink);
+}
+.fs-brief {
+  padding: clamp(18px, 2.65vw, 37px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 13px;
+  border-top: 5px solid #e98a55;
+}
+.fs-air-label,
+.fs-brief h2 {
+  font-size: 15px;
+  font-weight: 800;
+  margin: 0;
+}
+.fs-local {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #496263;
+  font-size: 12px;
+  margin: 0;
+}
+.fs-local span {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.fs-brief select,
+.fs-book select {
+  background: #fffaf0;
+  color: var(--ink);
+  border: 1px solid #8d9f93;
+  border-radius: 6px;
+  font-weight: 700;
+  padding: 10px;
+  min-height: 42px;
+}
+.fs-brief h2 {
+  margin-top: 2px;
+}
+.fs-crafts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.fs-crafts button,
+.fs-which button,
+.fs-dialog button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid #9baea2;
+  color: var(--ink);
+  background: #fffaf0;
+  border-radius: 7px;
+  min-height: 42px;
+  padding: 9px 8px;
+  font-weight: 700;
+}
+.fs-crafts button {
+  justify-content: flex-start;
+  font-size: clamp(12px, 1.18vw, 16px);
+  padding-left: 10px;
+}
+.fs-crafts button[aria-pressed='true'] {
+  border-color: var(--teal);
+  box-shadow: inset 0 0 0 1px var(--teal);
+  color: #fff8dc;
+  background: var(--teal);
+}
+.fs-briefing {
+  border-left: 3px solid #d9804c;
+  padding: 4px 0 4px 10px;
+  margin: 3px 0;
+}
+.fs-briefing b {
+  align-items: flex-start;
+  font-size: 14px;
+}
+.fs-briefing svg,
+.fs-crafts svg {
+  flex-shrink: 0;
+}
+.fs-briefing p,
+.fs-brief-note {
+  color: #3f5b5d;
+  font-size: 13px;
+}
+.fs-briefing p {
+  margin-top: 4px;
+}
+.fs-which {
+  display: grid;
+  gap: 7px;
+}
+.flight-school button.fs-main {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: #fff7dc;
+}
+.fs-main:hover {
+  filter: brightness(1.1);
+}
+.fs-brief-note {
+  line-height: 1.4;
+}
+.fs-book,
+.fs-result {
+  margin: 0 auto 18px;
+  border-radius: 12px;
+  padding: clamp(15px, 3vw, 30px);
+  max-width: 870px;
+  border-top: 5px solid #db804c;
+}
+.fs-book h1,
+.fs-result h1,
+.fs-dialog h2 {
+  font-size: clamp(19px, 3vw, 33px);
+  font-weight: 800;
+  margin: 0;
+}
+.fs-bookhead,
+.fs-award {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.fs-book table {
+  width: 100%;
+  margin-top: 12px;
+  text-align: center;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.fs-book th,
+.fs-book td {
+  border-bottom: 1px solid #c6cbb7;
+  padding: 3px;
+}
+.fs-book th:first-child {
+  text-align: left;
+}
+.fs-book th em {
+  font-style: normal;
+  color: var(--teal);
+  font-weight: 800;
+}
+.fs-book th svg {
+  display: inline-block;
+  margin-right: 3px;
+  vertical-align: middle;
+}
+.fs-book td button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  min-height: 33px;
+  background: #edead7;
+  border: 0;
+  border-radius: 3px;
+  color: var(--ink);
+}
+.fs-result {
+  max-width: 610px;
+}
+.fs-result-port,
+.fs-flight-time {
+  font-size: 13px;
+  color: #456366;
+}
+.fs-award {
+  padding: 23px 0;
+  justify-content: flex-start;
+}
+.fs-award > strong {
+  margin-left: auto;
+  font-size: 38px;
+  font-variant-numeric: tabular-nums;
+}
+.fs-award small,
+.fs-scores small {
+  font-size: 13px;
+}
+.fs-medal-gold {
+  color: #a26d13;
+}
+.fs-medal-silver {
+  color: #59818a;
+}
+.fs-medal-bronze {
+  color: #a05d42;
+}
+.fs-scores {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-block: 1px solid var(--line);
+}
+.fs-scores > div {
+  display: grid;
+  padding: 10px;
+}
+.fs-scores span {
+  font-size: 12px;
+}
+.fs-scores b {
+  font-size: 22px;
+}
+.fs-result p {
+  margin: 17px 0 8px;
+}
+.fs-result .fs-which {
+  margin-top: 18px;
+}
+.fs-deck {
+  position: absolute;
+  inset: 0;
+  background: #80b8ce;
+  touch-action: none;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.fs-deck > canvas,
+.fs-quiz {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.fs-hudtop,
+.fs-telemetry,
+.fs-map,
+.fs-waypoint,
+.fs-touch,
+.fs-lift,
+.fs-cue {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+}
+.fs-hudtop {
+  top: max(8px, env(safe-area-inset-top));
+  left: max(10px, env(safe-area-inset-left));
+  right: max(10px, env(safe-area-inset-right));
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.fs-flight-id,
+.fs-telemetry,
+.fs-map,
+.fs-waypoint,
+.fs-lift {
+  background: #133641df;
+  border: 1px solid #d7e8cf73;
+  color: #fff5d6;
+  border-radius: 7px;
+  box-shadow: 0 2px 7px #12363b38;
+}
+.fs-flight-id {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  font-size: 13px;
+}
+.fs-flight-id b {
+  background: #f4c66b;
+  color: #133a44;
+  font:
+    850 19px/1.1 ui-monospace,
+    monospace;
+  letter-spacing: 0.04em;
+  padding: 7px;
+}
+.fs-flight-id span {
+  padding: 4px 8px;
+}
+.fs-tools {
+  display: flex;
+  gap: 5px;
+  pointer-events: auto;
+}
+.fs-tools button {
+  display: grid;
+  place-items: center;
+  padding: 6px;
+  width: 38px;
+  min-height: 36px;
+}
+.fs-tools button[aria-pressed='true'] {
+  color: #ffd277;
+  border-color: #ffd277;
+}
+.fs-telemetry {
+  top: calc(max(8px, env(safe-area-inset-top)) + 43px);
+  left: max(10px, env(safe-area-inset-left));
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
+}
+.fs-telemetry > div {
+  padding: 4px 8px;
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  border-right: 1px solid #b7ccc044;
+}
+.fs-telemetry > div:last-child {
+  border: 0;
+}
+.fs-telemetry span,
+.fs-telemetry small {
+  font-size: 11px;
+}
+.fs-telemetry b {
+  font-size: 17px;
+}
+.fs-telemetry i {
+  display: inline-block;
+  font-size: 16px;
+  font-weight: bold;
+  font-style: normal;
+  color: #ffd277;
+}
+.fs-map {
+  width: clamp(64px, 10vmin, 103px);
+  right: max(10px, env(safe-area-inset-right));
+  top: calc(max(8px, env(safe-area-inset-top)) + 44px);
+}
+.fs-waypoint {
+  left: 50%;
+  bottom: calc(max(13px, env(safe-area-inset-bottom)) + 4px);
+  transform: translateX(-50%);
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 45%;
+  white-space: normal;
+}
+.fs-way-arrow {
+  display: block;
+  font: 800 22px/1 ui-sans-serif;
+  color: #ffd079;
+}
+.fs-waypoint b,
+.fs-waypoint small {
+  display: block;
+}
+.fs-waypoint b {
+  font-size: 13px;
+}
+.fs-waypoint small {
+  color: #ffdf96;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.fs-cue,
+.fs-lift {
+  left: 50%;
+  transform: translateX(-50%);
+}
+.fs-cue {
+  top: 26%;
+  color: #fff3bc;
+  font-weight: 900;
+  font-size: clamp(21px, 4vw, 42px);
+  text-shadow:
+    0 2px 3px #804824,
+    0 0 12px #ab582d;
+  animation: fs-cue-pop 0.35s ease-out;
+}
+@keyframes fs-cue-pop {
+  from {
+    opacity: 0;
+    scale: 0.8;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+.fs-lift {
+  top: 16%;
+  font-size: 12px;
+  padding: 3px 8px;
+}
+.fs-touch {
+  left: max(12px, env(safe-area-inset-left));
+  right: max(12px, env(safe-area-inset-right));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+.fs-dpad,
+.fs-actions {
+  display: grid;
+  gap: 4px;
+}
+.fs-dpad {
+  grid-template-columns: repeat(3, var(--ctl, 43px));
+  grid-template-rows: repeat(2, var(--ctl, 43px));
+}
+.fs-up {
+  grid-column: 2;
+}
+.fs-left {
+  grid-column: 1;
+  grid-row: 2;
+}
+.fs-down {
+  grid-column: 2;
+  grid-row: 2;
+}
+.fs-right {
+  grid-column: 3;
+  grid-row: 2;
+}
+.fs-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
+.fs-ctl {
+  pointer-events: auto;
+  touch-action: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: #fff8db;
+  background: #133c49db;
+  border: 1.5px solid #f8ebcdaa;
+  border-radius: 10px;
+  box-shadow: 0 2px 3px #12363b55;
+  -webkit-touch-callout: none;
+}
+.fs-ctl[data-held='true'],
+.fs-ctl:active {
+  background: #ffe1a1;
+  color: #153d46;
+  transform: translateY(1px);
+}
+.fs-actions button {
+  min-width: 57px;
+  min-height: 56px;
+  padding: 5px;
+  flex-direction: column;
+  font-weight: 700;
+  font-size: 12px;
+}
+.fs-actions small {
+  font-size: 9px;
+  color: inherit;
+}
+.fs-actions svg {
+  width: 18px;
+  height: 18px;
+}
+.fs-primary {
+  background: #a44c32ec;
+}
+.fs-cover {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  background: #0a2639a3;
+  padding: 12px;
+}
+.fs-dialog {
+  width: min(100%, 388px);
+  max-height: 100%;
+  overflow: auto;
+  padding: 20px;
+  border-radius: 12px;
+  display: grid;
+  gap: 8px;
+}
+.fs-dialog > svg {
+  color: var(--teal);
+}
+.fs-dialog p {
+  font-size: 14px;
+  margin: 3px 0 10px;
+}
+@media (max-aspect-ratio: 1/1) {
+  .fs-hangar {
+    grid-template-columns: 1fr;
+  }
+  .fs-poster {
+    min-height: clamp(130px, 25dvh, 300px);
+    background-position: 60% 42%;
+  }
+  .fs-poster > div {
+    bottom: 12px;
+    left: 17px;
+  }
+  .fs-poster h1 {
+    font-size: 34px;
+    margin: 0 0 3px;
+  }
+  .fs-aircode {
+    font-size: 15px;
+  }
+  .fs-brief {
+    padding: 16px;
+    gap: 9px;
+  }
+  .fs-nav {
+    min-height: 48px;
+  }
+  .fs-nav > span {
+    font-size: 12px;
+  }
+  .fs-nav button {
+    font-size: 12px;
+    padding: 5px 7px;
+  }
+  .fs-book th span {
+    display: block;
+    font-size: 10px;
+  }
+  .fs-book table {
+    font-size: 12px;
+  }
+  .fs-book th em {
+    display: block;
+  }
+  .fs-waypoint {
+    bottom: calc(max(12px, env(safe-area-inset-bottom)) + 108px);
+    max-width: 90%;
+  }
+  .fs-lift {
+    top: 21%;
+  }
+}
+@media (min-aspect-ratio: 1/1) and (max-height: 560px) {
+  .fs-nav {
+    min-height: 39px;
+  }
+  .fs-nav button {
+    min-height: 28px;
+    font-size: 12px;
+  }
+  .fs-hangar {
+    grid-template-columns: 1fr minmax(310px, 1.1fr);
+    min-height: 0;
+  }
+  .fs-poster {
+    min-height: 0;
+  }
+  .fs-brief {
+    padding: 9px 15px;
+    gap: 5px;
+  }
+  .fs-briefing {
+    margin: 0;
+  }
+  .fs-brief h2,
+  .fs-air-label {
+    font-size: 12px;
+  }
+  .fs-brief select,
+  .fs-crafts button,
+  .fs-which button {
+    min-height: 32px;
+    padding-block: 4px;
+    font-size: 12px;
+  }
+  .fs-brief-note,
+  .fs-briefing p {
+    font-size: 11px;
+  }
+  .fs-which {
+    grid-template-columns: 1fr 1fr;
+  }
+  .fs-briefing b {
+    font-size: 12px;
+  }
+  .fs-brief h2 {
+    margin: 0;
+  }
+  .fs-result .fs-award {
+    padding: 8px 0;
+  }
+}
+@media (pointer: coarse) {
+  .fs-ctl {
+    --ctl: 46px;
+  }
+  .fs-actions small {
+    display: none;
+  }
+  .fs-dpad {
+    --ctl: 46px;
+  }
+  .fs-actions button {
+    min-height: 54px;
+    min-width: 59px;
+  }
+}
+@media (max-width: 390px) {
+  .fs-shell {
+    padding-inline: 6px;
+  }
+  .fs-flight-id span {
+    font-size: 11px;
+  }
+  .fs-telemetry > div {
+    padding: 4px;
+  }
+  .fs-telemetry b {
+    font-size: 15px;
+  }
+  .fs-book {
+    padding: 9px;
+  }
+  .fs-book th span {
+    font-size: 9px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fs-cue {
+    animation: none;
+  }
+}
+
+.fs-waypoint progress {
+  display: block;
+  width: 100%;
+  height: 5px;
+  accent-color: #ffc45e;
+}

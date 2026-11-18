@@ -31,6 +31,7 @@ type MiniGameSpriteDefinition = {
 
 const MINI_GAME_SPRITE_ICONS: Record<string, MiniGameSpriteDefinition> = {
   LANTERN_WAR: { src:'sprites/lantern-war/menu-icon.webp',columns:1,rows:1,index:0 },
+  FLIGHT_SCHOOL: { src: 'sprites/flight-school/menu-icon.webp', columns: 1, rows: 1, index: 0, photographic: true },
   KOTOBA_LIFE: { src: 'sprites/kotoba-life/menu-icon.webp', columns: 1, rows: 1, index: 0, photographic: true },
   AFTER_SCHOOL_RUSH: { src: 'sprites/after-school-rush/menu-icon-v1.webp', columns: 1, rows: 1, index: 0 },
   STAR_TIDE: { src: 'sprites/star-tide/menu-icon.webp', columns: 1, rows: 1, index: 0 },

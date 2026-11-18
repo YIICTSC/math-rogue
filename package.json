@@ -10,6 +10,7 @@
   "scripts": {
     "test:lantern-war:enemies": "node scripts/test-lantern-enemies.mjs",
     "test:lantern-war:vacation": "node scripts/test-lantern-vacation.mjs",
+    "test:flight-school": "node scripts/test-flight-school.mjs",
     "test:after-school-rush": "node scripts/test-after-school-rush.mjs",
     "test:after-school-rush:browser": "node scripts/test-after-school-rush-browser.mjs",
     "test:after-school-rush:audio": "node scripts/test-after-school-rush-audio.mjs",

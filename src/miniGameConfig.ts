@@ -1,7 +1,8 @@
 
 import { GameScreen } from './types';
 import { storageService } from './services/storageService';
-import { Club, Skull, Compass, Mountain, Crown, Send, LucideIcon, Rocket, Gem, Dice5, Sparkles, CircleDot, Grid3X3, Layers3, Heart } from 'lucide-react';
+import { Plane, Club, Skull, Compass, Mountain, Crown, Send, LucideIcon, Rocket, Gem, Dice5, Sparkles, CircleDot, Grid3X3, Layers3, Heart } from 'lucide-react';
+import { FLIGHT_LOG_KEY } from './mini-games/flight-school/logbook';
 import { clearSchoolTrpgCampaign } from './mini-games/school-trpg/schoolTrpgSave';
 import { RUSH_BEST_KEY, STORY_KEY } from './mini-games/after-school-rush/rules';
 
@@ -54,6 +55,19 @@ export const MINI_GAMES: MiniGameConfig[] = [
     glowColor: 'rgba(168,200,160,0.5)',
     icon: Heart,
     clearAction: () => localStorage.removeItem('learning-rogue:kotoba-life:v1'),
+  },
+  {
+    id: 'FLIGHT_SCHOOL',
+    name: 'にっぽんフライトスクール',
+    titleLines: ['にっぽんフライトスクール'],
+    description: '日本の空港で、パラシュートから軽飛行機まで4種の飛行に挑戦。',
+    screen: GameScreen.MINI_GAME_FLIGHT_SCHOOL,
+    threshold: 0,
+    typeLabel: 'FLIGHT',
+    typeColor: 'bg-cyan-800',
+    glowColor: 'rgba(85,187,204,0.55)',
+    icon: Plane,
+    clearAction: () => localStorage.removeItem(FLIGHT_LOG_KEY),
   },
   {
     id: 'GAKURO',

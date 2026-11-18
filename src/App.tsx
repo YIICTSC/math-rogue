@@ -959,6 +959,7 @@ const LAUNCH_LOCK_DEFERRED_SCREEN_SET = new Set<GameScreen>([
     GameScreen.BASKETBALL_LAYUP,
     GameScreen.MINI_GAME_POKER,
     GameScreen.MINI_GAME_AFTER_SCHOOL_RUSH,
+    GameScreen.MINI_GAME_FLIGHT_SCHOOL,
     GameScreen.MINI_GAME_CARD_CLUB,
     GameScreen.MINI_GAME_SURVIVOR,
     GameScreen.MINI_GAME_STAR_TIDE,
@@ -19241,6 +19242,7 @@ const App: React.FC = () => {
         GameScreen.MINI_GAME_STAR_TIDE,
         GameScreen.MINI_GAME_LANTERN_WAR,
         GameScreen.MINI_GAME_KOTOBA_LIFE,
+        GameScreen.MINI_GAME_FLIGHT_SCHOOL,
     ].includes(gameState.screen);
 
     return (
@@ -21343,7 +21345,7 @@ const App: React.FC = () => {
                         <MiniGameRouter
                             key={`${gameState.screen}:${uiPreviewMiniGameOutcome ?? 'DEFAULT'}`}
                             screen={gameState.screen}
-                            onBack={gameState.screen === GameScreen.MINI_GAME_AFTER_SCHOOL_RUSH
+                            onBack={gameState.screen === GameScreen.MINI_GAME_AFTER_SCHOOL_RUSH || gameState.screen === GameScreen.MINI_GAME_FLIGHT_SCHOOL
                                 ? () => setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_SELECT }))
                                 : gameState.screen === GameScreen.MINI_GAME_CRANE ? handleCraneGameBack : ()=>{if(gameState.screen===GameScreen.MINI_GAME_CARD_CLUB){setCardClubInviteOpen(false);const url=new URL(window.location.href);url.searchParams.delete('cardClubRoom');window.history.replaceState(null,'',url.toString());}if(gameState.screen===GameScreen.MINI_GAME_GAKUROGEAR){setVrInviteOpen(false);const url=new URL(window.location.href);url.searchParams.delete(VR_ROOM_PARAM);window.history.replaceState(null,'',url.toString());}returnToTitle();}}
                             inviteCode={vrInviteOpen?vrCode:''}
