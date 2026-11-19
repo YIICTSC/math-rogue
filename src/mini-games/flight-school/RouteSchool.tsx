@@ -1,3 +1,4 @@
+import MiniGameProblemChallenge from '../../components/MiniGameProblemChallenge';
 import { PilotPicker, RadioCaption, type FlightCrew } from './FlightRadio';
 import { loadRouteImages } from './routeImages';
 import React, { useEffect, useRef, useState } from 'react';
@@ -32,11 +33,16 @@ function saveScore(key: string, score: number) {
   }
 }
 export default function RouteSchool({
+  study,
   language,
   home,
   crew,
   exit,
 }: {
+  study: Pick<
+    React.ComponentProps<typeof MiniGameProblemChallenge>,
+    'mode' | 'modePool' | 'assignment' | 'answerMode' | 'onAnswerResult'
+  >;
   language: LanguageMode;
   home: string;
   crew: FlightCrew;
@@ -47,8 +53,8 @@ export default function RouteSchool({
     () => ROUTES.find((r) => r.ports.some((p) => p.code === home)) ?? ROUTES[0],
   );
   const [reverse, swap] = useState(region.ports[1].code === home),
-    [assist, setAssist] = useState(true);
-  const [stage, show] = useState<'planning' | 'loading' | 'flight' | 'result' | 'error'>(
+    [assist, setAssist] = useState(false);
+  const [stage, show] = useState<'quiz' | 'planning' | 'loading' | 'flight' | 'result' | 'error'>(
     'planning',
   );
   const [loaded, setLoaded] = useState<{ lesson: Lesson; images: RouteImages } | null>(null);
@@ -68,7 +74,13 @@ export default function RouteSchool({
   );
   const name = (code: string) => localize(PORT_NAMES[code], language);
   useFlightMusic(
-    stage === 'flight' ? 'map' : stage === 'result' && report?.medal ? 'victory' : 'rest',
+    stage === 'quiz'
+      ? 'math'
+      : stage === 'flight'
+        ? 'map'
+        : stage === 'result' && report?.medal
+          ? 'victory'
+          : 'rest',
     stage === 'result' ? 'elementary' : 'high-school',
     30,
   );
@@ -101,6 +113,16 @@ export default function RouteSchool({
     setReport(result);
     show('result');
   }
+  function beginStudy() {
+    crew.stop();
+    show('quiz');
+  }
+  if (stage === 'quiz')
+    return (
+      <div className="fs-quiz">
+        <MiniGameProblemChallenge {...study} languageMode={language} onComplete={launch} />
+      </div>
+    );
   if (stage === 'flight' && loaded)
     return (
       <>
@@ -110,7 +132,7 @@ export default function RouteSchool({
           lesson={loaded.lesson}
           routeImages={loaded.images}
           language={language}
-          onRetry={launch}
+          onRetry={beginStudy}
           onExit={() => {
             crew.stop();
             show('planning');
@@ -186,7 +208,9 @@ export default function RouteSchool({
                   ? t('折り返し便へ', 'Plan return flight', 'おりかえしびんへ')
                   : t('航路選択へ', 'Route selection', 'こうろせんたくへ')}
               </button>
-              <button onClick={launch}>{t('もう一度飛ぶ', 'Fly again', 'もういちど とぶ')}</button>
+              <button onClick={beginStudy}>
+                {t('もう一度飛ぶ', 'Fly again', 'もういちど とぶ')}
+              </button>
             </div>
           </>
         ) : stage === 'loading' ? (
@@ -265,9 +289,11 @@ export default function RouteSchool({
               </p>
             )}
             <div className="fs-which">
-              <button className="fs-main" onClick={launch}>
+              <button className="fs-main" onClick={stage === 'error' ? launch : beginStudy}>
                 <Plane size={18} />
-                {t('滑走路から出発', 'Depart from runway', 'かっそうろから しゅっぱつ')}
+                {stage === 'error'
+                  ? t('再試行', 'Retry', 'さいしこう')
+                  : t('座学と技能検定', 'Ground school & flight test', 'ざがくと ぎのうけんてい')}
               </button>
             </div>
           </>

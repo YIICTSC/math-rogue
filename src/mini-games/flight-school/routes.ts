@@ -153,7 +153,7 @@ export function makeRouteLesson(region: Region, reverse: boolean, assist: boolea
   return {
     aircraft: 'plane',
     airport: AIRPORTS.find((p) => p.code === region.ports[0].code)!,
-    mode: 'practice',
+    mode: 'exam',
     start,
     target,
     gates,

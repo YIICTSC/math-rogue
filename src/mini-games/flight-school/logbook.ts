@@ -1,12 +1,12 @@
 import { AIRPORTS, DISCIPLINES, type Lesson } from './courses';
 import type { Medal, Report } from './simulation';
 
-export const FLIGHT_ROUTE_LOG_KEY='learning-rogue:flight-school:routes:v1';
+export const FLIGHT_ROUTE_LOG_KEY = 'learning-rogue:flight-school:routes:v1';
 export const FLIGHT_COMBAT_LOG_KEY = 'learning-rogue:flight-school:sorties:v1';
 export const FLIGHT_LOG_KEY = 'learning-rogue:flight-school:v1';
 export type RecordBook = Record<string, { score: number; medal: Medal }>;
 export const flightKey = (lesson: Lesson) =>
-  [lesson.airport.code, lesson.aircraft, lesson.mode].join('/');
+  [lesson.airport.code, lesson.aircraft, lesson.expert ? 'master' : lesson.mode].join('/');
 
 export function readLog(): RecordBook {
   const book: RecordBook = {};
@@ -14,7 +14,7 @@ export function readLog(): RecordBook {
     const saved = JSON.parse(localStorage.getItem(FLIGHT_LOG_KEY) ?? '{}');
     for (const airport of AIRPORTS)
       for (const discipline of DISCIPLINES)
-        for (const mode of ['practice', 'exam']) {
+        for (const mode of ['practice', 'exam', 'master']) {
           const key = [airport.code, discipline.id, mode].join('/'),
             entry = saved?.[key];
           if (
@@ -45,4 +45,13 @@ export function recordFlight(lesson: Lesson, report: Report): RecordBook {
     }
   }
   return book;
+}
+
+export const journalTotal = AIRPORTS.length * DISCIPLINES.length;
+export function journalCount(book: RecordBook, tier: 'exam' | 'master') {
+  return AIRPORTS.reduce(
+    (n, airport) =>
+      n + DISCIPLINES.filter((d) => book[[airport.code, d.id, tier].join('/')]).length,
+    0,
+  );
 }

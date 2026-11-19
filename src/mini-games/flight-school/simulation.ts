@@ -1,3 +1,4 @@
+import { newInstruments, type Instruments } from './instruments';
 import { cruiseRate, onStrip, runwayOffset, surfaceHeight, type Route } from './routes';
 import { RUNWAY, type Lesson, type Point, type Position } from './courses';
 import { clamp, groundHeight, hitsBuilding, SEA_LEVEL } from './terrain';
@@ -15,7 +16,15 @@ export const neutralInput = (): FlightInput => ({
   brake: false,
 });
 export type FinishReason =
-  'landed' | 'water' | 'impact' | 'boundary' | 'timeout' | 'runway' | 'target' | 'route';
+  | 'systems'
+  | 'landed'
+  | 'water'
+  | 'impact'
+  | 'boundary'
+  | 'timeout'
+  | 'runway'
+  | 'target'
+  | 'route';
 export type Medal = 'gold' | 'silver' | 'bronze';
 export interface Report {
   reason: FinishReason;
@@ -29,6 +38,7 @@ export interface Report {
   time: number;
 }
 export interface Flight extends Position {
+  instruments?: Instruments;
   lesson: Lesson;
   heading: number;
   bank: number;
@@ -62,6 +72,7 @@ export function beginFlight(lesson: Lesson): Flight {
   const airborne = lesson.aircraft === 'glider' || lesson.aircraft === 'parachute';
   return {
     lesson,
+    instruments: lesson.expert ? newInstruments() : undefined,
     ...lesson.start,
     heading: lesson.route ? Math.atan2(lesson.route.from.ux, -lesson.route.from.uz) : 0,
     bank: 0,
@@ -153,6 +164,14 @@ function grade(s: Flight, reason: FinishReason) {
       25,
     ),
   );
+  if (
+    reason === 'landed' &&
+    s.instruments &&
+    (!s.instruments.cruiseChecked ||
+      !s.instruments.fixLogged ||
+      s.instruments.configuration !== 'landing')
+  )
+    reason = 'systems';
   const passed = reason === 'landed';
   const score = passed ? rings + precision + handling : rings;
   const medal = passed ? (score >= 85 ? 'gold' : score >= 65 ? 'silver' : 'bronze') : null;
@@ -175,7 +194,9 @@ function parachute(s: Flight, i: FlightInput, dt: number) {
     cue(s, s.reserve ? 'reserve' : 'canopy');
   }
   if (s.canopy) {
-    const braking = i.brake ? 1 : Math.max(0, -i.pitch);
+    const braking =
+      (i.brake ? 1 : Math.max(0, -i.pitch)) *
+      (s.instruments?.configuration === 'cruise' ? 0.78 : 1);
     s.speed = approach(s.speed, 11 + 4 * Math.max(0, i.pitch) - 9 * braking, 2, dt);
     s.vertical = approach(s.vertical, -3.8 + 0.9 * braking - 0.45 * Math.max(0, i.pitch), 2.5, dt);
     s.heading += i.turn * 1.02 * dt;
@@ -197,7 +218,13 @@ function glider(s: Flight, i: FlightInput, dt: number) {
   s.bank = approach(s.bank, -i.turn * 0.85, 2.4, dt);
   s.heading -= s.bank * 0.95 * dt;
   s.pitch = approach(s.pitch, i.pitch * 0.33, 2.7, dt);
-  const speedGoal = (i.brake ? 10 : i.primary && i.pitch <= 0 ? 32 : 21) - i.pitch * 6;
+  const trimSpeed =
+    s.instruments?.configuration === 'cruise'
+      ? 1.2
+      : s.instruments?.configuration === 'landing'
+        ? -1
+        : 0;
+  const speedGoal = (i.brake ? 10 : i.primary && i.pitch <= 0 ? 32 : 21) - i.pitch * 6 + trimSpeed;
   s.speed = approach(s.speed, speedGoal, 1.1, dt);
   // Pulling up exchanges airspeed for a brief climb; sustained lift comes from thermals.
   const energyLift = i.pitch > 0 ? i.pitch * Math.max(0, s.speed - 17) * 0.45 : i.pitch * 5.6;
@@ -219,7 +246,15 @@ function jetpack(s: Flight, i: FlightInput, dt: number) {
   s.pitch = approach(s.pitch, -i.pitch * 0.25, 3, dt);
   s.vertical = approach(
     s.vertical,
-    thrust ? 8.8 : hover ? 0 : powered ? -3.1 : -7,
+    thrust
+      ? s.instruments?.configuration === 'landing'
+        ? 6.7
+        : 8.8
+      : hover
+        ? 0
+        : powered
+          ? -3.1
+          : -7,
     hover ? 6 : 2,
     dt,
   );
@@ -227,7 +262,12 @@ function jetpack(s: Flight, i: FlightInput, dt: number) {
 }
 function plane(s: Flight, i: FlightInput, dt: number) {
   if (!s.airborne) {
-    s.speed = approach(s.speed, i.primary && !i.brake ? 43 : 0, i.brake ? 1.8 : 0.26, dt);
+    s.speed = approach(
+      s.speed,
+      s.instruments ? 43 * s.instruments.throttle : i.primary && !i.brake ? 43 : 0,
+      i.brake ? 1.8 : 0.26,
+      dt,
+    );
     s.heading += i.turn * 0.45 * dt * clamp(s.speed / 12, 0, 1);
     if (s.speed >= 20.5 && i.pitch > 0.2) {
       s.airborne = true;
@@ -237,7 +277,10 @@ function plane(s: Flight, i: FlightInput, dt: number) {
     }
     return;
   }
-  const speedGoal = i.brake ? 21 : i.primary ? 45 : 31;
+  const panel = s.instruments;
+  const drag =
+    panel?.configuration === 'landing' ? 3 : panel?.configuration === 'departure' ? 1 : 0;
+  const speedGoal = panel ? 17 + 29 * panel.throttle - drag : i.brake ? 21 : i.primary ? 45 : 31;
   s.speed = approach(s.speed, speedGoal - i.pitch * 3.6, 0.9, dt);
   s.pitch = approach(s.pitch, i.pitch * 0.32, 2.5, dt);
   s.bank = approach(s.bank, -i.turn * 0.93, 2.65, dt);
@@ -263,13 +306,23 @@ function collectGate(s: Flight, dt: number) {
   cue(s, 'gate');
 }
 
-function stepRoute(s: Flight, i: FlightInput, dt: number, r: Route, paceLimit: number) {
+function stepRoute(
+  s: Flight,
+  i: FlightInput,
+  dt: number,
+  r: Route,
+  paceLimit: number,
+  formationHold: boolean,
+) {
   const { from, to, region } = r,
     target = aimPoint(s),
     gate = s.lesson.gates[s.nextGate];
   const rate = Math.min(paceLimit, cruiseRate(s, r));
-  if (r.assist && s.airborne) {
-    const bearing = bearingTo(s, target);
+  if ((r.assist || formationHold) && s.airborne) {
+    // Correct the desired ground track for crosswind, including the final runway approach.
+    const wind = windAt(s);
+    const lead = Math.min(12, Math.hypot(target.x - s.x, target.z - s.z) / Math.max(1, s.speed));
+    const bearing = bearingTo(s, { x: target.x - wind.x * lead, z: target.z - wind.z * lead });
     const landing = !gate;
     const remain = runwayOffset(to, s.lesson.target).along - runwayOffset(to, s).along;
     const desired = landing ? to.elevation + Math.max(0, remain - 40) * 0.056 : target.y;
@@ -345,14 +398,30 @@ export function stepFlight(
   s: Flight,
   control: FlightInput,
   dt = STEP,
-  paceLimit = Infinity,
-  extraTime = 0,
+  {
+    paceLimit = Infinity,
+    extraTime = 0,
+    formationHold = false,
+  }: { paceLimit?: number; extraTime?: number; formationHold?: boolean } = {},
 ) {
   if (s.result || !Number.isFinite(dt) || dt <= 0 || dt > 0.05) return;
+  const cockpit = s.instruments;
+  if (cockpit && !cockpit.started) return;
+  if (cockpit && s.lesson.aircraft === 'plane') {
+    cockpit.throttle = clamp(
+      cockpit.throttle + (Number(control.primary) - Number(control.brake)) * 0.45 * dt,
+      0,
+      1,
+    );
+  }
   s.elapsed += dt;
-  const i = { ...control, turn: clamp(control.turn, -1, 1), pitch: clamp(control.pitch, -1, 1) };
+  const i = {
+    ...control,
+    turn: clamp(control.turn, -1, 1),
+    pitch: clamp(control.pitch + (cockpit?.trim ?? 0) * 0.055, -1, 1),
+  };
   if (s.lesson.route) {
-    stepRoute(s, i, dt, s.lesson.route, paceLimit);
+    stepRoute(s, i, dt, s.lesson.route, paceLimit, formationHold);
     return;
   }
   const aircraft = s.lesson.aircraft;

@@ -78,6 +78,7 @@ const shouldVersionAsset = (path: string): boolean =>
   path.startsWith('models/storybook/') ||
   // Venue dimensions must update together with the players' world coordinates.
   path.startsWith('models/academy-sports/') ||
+  path.startsWith('sprites/mini-game-titles/flight-school-') ||
   path.startsWith('sprites/dungeons1/actions/') ||
   path.startsWith('sprites/dungeons1/martial/') ||
   path.startsWith('sprites/magic/') ||

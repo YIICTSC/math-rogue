@@ -233,6 +233,7 @@ export interface Gate extends Position {
   radius: number;
 }
 export interface Lesson {
+  expert?: boolean;
   route?: import('./routes').Route;
   airport: Airport;
   aircraft: Aircraft;
@@ -243,7 +244,12 @@ export interface Lesson {
   thermal: Point;
 }
 export const RUNWAY = { halfWidth: 32, halfLength: 310 };
-export function makeLesson(airport: Airport, aircraft: Aircraft, mode: Training): Lesson {
+export function makeLesson(
+  airport: Airport,
+  aircraft: Aircraft,
+  mode: Training,
+  expert = false,
+): Lesson {
   const turn = airport.bend < 0 ? -1 : 1;
   const offset = airport.bend * 32;
   const target = aircraft === 'plane' ? { x: 0, z: 100 } : { x: -91, z: -32 + offset };
@@ -290,5 +296,5 @@ export function makeLesson(airport: Airport, aircraft: Aircraft, mode: Training)
       ];
       break;
   }
-  return { airport, aircraft, mode, start, target, gates, thermal };
+  return { airport, aircraft, mode, expert, start, target, gates, thermal };
 }

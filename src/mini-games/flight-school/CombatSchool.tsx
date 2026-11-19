@@ -3,14 +3,7 @@ import { ArrowLeft, Flag } from 'lucide-react';
 import MiniGameProblemChallenge from '../../components/MiniGameProblemChallenge';
 import type { LanguageMode } from '../../types';
 import { audioService } from '../../services/audioService';
-import {
-  localize,
-  makeLesson,
-  type Airport,
-  type Phrase,
-  type Training,
-  type Lesson,
-} from './courses';
+import { localize, makeLesson, type Airport, type Phrase, type Lesson } from './courses';
 import { MISSIONS, scoreSortie } from './combat';
 import { newPatrol } from './patrol';
 import { PilotPicker, RadioCaption, type FlightCrew } from './FlightRadio';
@@ -53,10 +46,11 @@ export default function CombatSchool({
 }) {
   const t = (...p: Phrase) => localize(p, language);
   const [mission, select] = useState(MISSIONS[0]),
-    [mode, setMode] = useState<Training>('practice'),
+    [assist, setAssist] = useState(false),
     [stage, setStage] = useState<'brief' | 'quiz' | 'loading' | 'error' | 'play' | 'result'>(
       'brief',
     );
+  const mode = 'exam';
   const { pilot, select: setPilot } = radio;
   const [routeKey, setRouteKey] = useState('local');
   const [reverse, setReverse] = useState(false);
@@ -102,16 +96,20 @@ export default function CombatSchool({
       if (id !== request.current) return;
       setFlight({
         lesson: region
-          ? makeRouteLesson(region, reverse, true)
+          ? makeRouteLesson(region, reverse, assist)
           : makeLesson(airport, 'plane', mode),
         images,
-        patrol: newPatrol(mission, mode),
+        patrol: newPatrol(mission, mode, assist),
       });
       setLanding(null);
       setStage('play');
     } catch {
       if (id === request.current) setStage('error');
     }
+  }
+  function beginStudy() {
+    radio.stop();
+    setStage('quiz');
   }
   function brief() {
     request.current++;
@@ -154,7 +152,7 @@ export default function CombatSchool({
           onPatrolLost={() => finish()}
           onDone={finish}
           onExit={brief}
-          onRetry={fly}
+          onRetry={beginStudy}
         />
         <RadioCaption line={radio.line} language={language} />
       </>
@@ -220,24 +218,20 @@ export default function CombatSchool({
             )}
             <PilotPicker pilot={pilot} select={setPilot} language={language} />
             <label>
-              {t('訓練区分', 'Training level', 'くんれんくぶん')}{' '}
-              <select value={mode} onChange={(e) => setMode(e.target.value as Training)}>
-                <option value="practice">{t('練習', 'Practice', 'れんしゅう')}</option>
-                <option value="exam">{t('技能検定', 'Flight test', 'ぎのうけんてい')}</option>
-              </select>
+              <input
+                type="checkbox"
+                checked={assist}
+                onChange={(e) => setAssist(e.target.checked)}
+              />{' '}
+              {t('航路アシスト', 'Route assist', 'こうろアシスト')}
             </label>
             <p>
               {t('最高得点', 'Best score', 'さいこうとくてん')}　
               {book[[chartKey, mission.id, mode].join('/')] ?? '—'}
             </p>
             <div className="fs-which">
-              <button
-                className="fs-main"
-                onClick={() => (mode === 'exam' ? setStage('quiz') : fly())}
-              >
-                {mode === 'exam'
-                  ? t('座学から開始', 'Start ground school', 'ざがくから かいし')
-                  : t('出撃', 'Launch', 'しゅつげき')}
+              <button className="fs-main" onClick={beginStudy}>
+                {t('座学と技能検定', 'Ground school & flight test', 'ざがくと ぎのうけんてい')}
               </button>
             </div>
           </>
@@ -294,7 +288,7 @@ export default function CombatSchool({
                 {sortie.shots}
               </p>
               <div className="fs-which">
-                <button className="fs-main" onClick={fly}>
+                <button className="fs-main" onClick={beginStudy}>
                   {t('再挑戦', 'Retry', 'さいちょうせん')}
                 </button>
                 <button onClick={brief}>

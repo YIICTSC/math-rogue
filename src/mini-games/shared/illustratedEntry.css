@@ -10,3 +10,7 @@
 .illustrated-mini-entry button span{margin-left:20px}.illustrated-mini-entry button:focus-visible{outline:3px solid #67e8f9;outline-offset:3px}
 @media(orientation:portrait){.illustrated-mini-entry-copy{text-align:center;left:18px;right:18px}.illustrated-mini-entry nav{flex-direction:column;align-items:center}.illustrated-mini-entry button{width:min(320px,100%)}}
 @media(max-height:400px){.illustrated-mini-entry-copy{top:12px}.illustrated-mini-entry h1{font-size:30px}.illustrated-mini-entry nav{bottom:12px}}
+.flight-title-name{white-space:nowrap}
+@media(orientation:landscape){
+ .illustrated-mini-entry:has([data-title-art="flight-school"]) .illustrated-mini-entry-copy{text-align:right}
+}

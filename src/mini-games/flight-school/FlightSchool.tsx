@@ -1,3 +1,4 @@
+import { titleArtPath } from '../shared/ResponsiveTitleArt';
 import { PilotPicker, RadioCaption, useFlightCrew } from './FlightRadio';
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -28,9 +29,8 @@ import {
   type Aircraft,
   type Lesson,
   type Phrase,
-  type Training,
 } from './courses';
-import { readLog, recordFlight } from './logbook';
+import { journalCount, journalTotal, readLog, recordFlight } from './logbook';
 import type { FinishReason, Report } from './simulation';
 import RouteSchool from './RouteSchool';
 import CombatSchool from './CombatSchool';
@@ -45,6 +45,11 @@ const MEDALS = {
   bronze: ['銅メダル', 'Bronze medal', 'どうメダル'],
 } satisfies Record<string, Phrase>;
 const DEBRIEF: Record<FinishReason, Phrase> = {
+  systems: [
+    '計器手順を確認。離陸後に機器を巡航へ、リング通過後に航法で航点を記録し、着地前に着陸設定へ切り替えよう。',
+    'Check the instruments: select cruise in the air, log a fix after a ring, then select landing before touchdown.',
+    'りりくごに ききを じゅんこうへ。リングの あとで こうてんを きろくし、ちゃくちまえに ちゃくりくせっていへ。',
+  ],
   landed: [
     '着陸成功。次はリング、着地点、接地速度の3項目で自己ベストを狙おう。',
     'Touchdown! Improve your route, accuracy and landing softness to beat your best.',
@@ -107,19 +112,35 @@ export default function FlightSchool({
   };
   const [port, setPort] = useState(AIRPORTS[0]);
   const [craft, setCraft] = useState<Aircraft>('parachute');
-  const [lesson, setLesson] = useState<Lesson>(() =>
-    makeLesson(AIRPORTS[0], 'parachute', 'practice'),
-  );
+  const [lesson, setLesson] = useState<Lesson>(() => makeLesson(AIRPORTS[0], 'parachute', 'exam'));
   const [turn, setTurn] = useState(0);
   const [report, setReport] = useState<Report | null>(null);
+  const [justUnlocked, setJustUnlocked] = useState(false);
   const [book, setBook] = useState(readLog);
-  const [logMode, setLogMode] = useState<Training>('exam');
+  const completed = journalCount(book, 'exam'),
+    unlocked = completed === journalTotal;
+  const [tier, setTier] = useState<'exam' | 'master'>(() =>
+    journalCount(book, 'exam') === journalTotal ? 'master' : 'exam',
+  );
+  const master = unlocked && tier === 'master';
+  const ordinaryName = t('飛行日誌', 'Flight logbook', 'ひこうにっし');
+  const masterName = t('真・飛行日誌', 'Master logbook', 'しん・ひこうにっし');
+  const tierSwitch = unlocked && (
+    <div
+      className="fs-tier"
+      role="group"
+      aria-label={t('日誌の選択', 'Select logbook', 'にっしの せんたく')}
+    >
+      <button aria-pressed={!master} onClick={() => setTier('exam')}>
+        {ordinaryName}
+      </button>
+      <button aria-pressed={master} onClick={() => setTier('master')}>
+        {masterName}
+      </button>
+    </div>
+  );
   const offset = useRef(0);
   const chosen = DISCIPLINES.find((d) => d.id === craft)!;
-  const trainingName = (mode: Training) =>
-    mode === 'practice'
-      ? t('練習飛行', 'Practice flight', 'れんしゅうひこう')
-      : t('技能検定', 'Flight test', 'ぎのうけんてい');
   const flightTracks = {
     parachute: 'paper_plane_vacation',
     glider: 'star_tide_sky',
@@ -143,26 +164,30 @@ export default function FlightSchool({
   useEffect(() => {
     void audioService.preloadFlightSounds();
   }, []);
-  function start(mode: Training) {
+  function start() {
     crew.stop();
     audioService.init();
     audioService.resumeBGM();
     audioService.playFlightSound('start');
-    setLesson(makeLesson(port, craft, mode));
+    setLesson(makeLesson(port, craft, 'exam', master));
     setReport(null);
     setTurn((n) => n + 1);
-    setStage(mode === 'exam' ? 'quiz' : 'flight');
+    setStage('quiz');
   }
   function retry() {
     crew.stop();
     audioService.init();
     setReport(null);
     setTurn((n) => n + 1);
-    setStage('flight');
+    setStage('quiz');
   }
   function finished(result: Report) {
     if (result.reason !== 'landed') crew.stop();
-    setBook(recordFlight(lesson, result));
+    const updated = recordFlight(lesson, result);
+    setBook(updated);
+    const opened = !unlocked && journalCount(updated, 'exam') === journalTotal;
+    setJustUnlocked(opened);
+    if (opened) setTier('master');
     setReport(result);
     audioService.playFlightSound(
       result.reason === 'water'
@@ -178,7 +203,19 @@ export default function FlightSchool({
   return (
     <main className="flight-school" data-flight-screen={stage}>
       {stage === 'routes' ? (
-        <RouteSchool home={port.code} language={languageMode} crew={crew} exit={hangar} />
+        <RouteSchool
+          study={{
+            mode: problemMode,
+            modePool: problemModePool,
+            assignment,
+            answerMode,
+            onAnswerResult,
+          }}
+          home={port.code}
+          language={languageMode}
+          crew={crew}
+          exit={hangar}
+        />
       ) : stage === 'combat' ? (
         <CombatSchool
           crew={crew}
@@ -250,7 +287,7 @@ export default function FlightSchool({
                 }}
               >
                 <BookOpen size={16} />
-                {t('飛行日誌', 'Logbook', 'ひこうにっし')}
+                {master ? masterName : ordinaryName}
               </button>
             ) : (
               <span />
@@ -261,7 +298,7 @@ export default function FlightSchool({
               <section
                 className="fs-poster"
                 style={{
-                  backgroundImage: `url("${assetUrl('sprites/flight-school/title.webp')}")`,
+                  backgroundImage: `url("${assetUrl(titleArtPath('flight-school', 'landscape'))}")`,
                 }}
               >
                 <div>
@@ -335,6 +372,7 @@ export default function FlightSchool({
                   select={crew.select}
                   language={languageMode}
                 />
+                {tierSwitch}
                 <div className="fs-briefing">
                   <b>
                     <Flag size={16} />
@@ -343,22 +381,23 @@ export default function FlightSchool({
                   <p>{localize(chosen.controls, languageMode)}</p>
                 </div>
                 <div className="fs-which">
-                  <button className="fs-main" onClick={() => start('practice')}>
-                    <Plane size={17} />
-                    {trainingName('practice')}
-                    <ChevronRight size={17} />
-                  </button>
-                  <button onClick={() => start('exam')}>
+                  <button className="fs-main" onClick={start}>
                     <MedalIcon size={17} />
                     {t('座学と技能検定', 'Ground school & flight test', 'ざがくと ぎのうけんてい')}
                   </button>
                 </div>
                 <small className="fs-brief-note">
-                  {t(
-                    '練習は弱風・大きなリング。検定は全リングと着陸で合格。',
-                    'Practice has light winds and larger rings. Clear every ring and land to pass the test.',
-                    'れんしゅうは よわいかぜと おおきなリング。けんていは ぜんリングと ちゃくりくで ごうかく。',
-                  )}
+                  {master
+                    ? t(
+                        '機器の電源を入れて姿勢計へ切替。飛行中は巡航設定、航法で航点記録、着地前に着陸設定。',
+                        'Power the instruments and select Attitude. In flight, select cruise, log a navigation fix, then set landing configuration.',
+                        'ききの でんげんを いれて しせいけいへ。じゅんこう・こうてんの きろく・ちゃくりくせっていを おこなおう。',
+                      )
+                    : t(
+                        '全リングの通過と着陸で検定合格。32課目を達成すると真・飛行日誌が開きます。',
+                        'Clear the rings and land to pass. Complete all 32 ratings to open the Master logbook.',
+                        'すべての リングと ちゃくりくで ごうかく。32かもくで しん・ひこうにっしが ひらきます。',
+                      )}
                 </small>
               </section>
             </div>
@@ -367,16 +406,12 @@ export default function FlightSchool({
               <div className="fs-bookhead">
                 <div>
                   <BookOpen size={24} />
-                  <h1>{t('飛行日誌', 'Logbook', 'ひこうにっし')}</h1>
+                  <h1>{master ? masterName : ordinaryName}</h1>
                 </div>
-                <select
-                  aria-label={t('記録の種類', 'Record type', 'きろくの しゅるい')}
-                  value={logMode}
-                  onChange={(e) => setLogMode(e.target.value as Training)}
-                >
-                  <option value="exam">{trainingName('exam')}</option>
-                  <option value="practice">{trainingName('practice')}</option>
-                </select>
+                {tierSwitch}
+                <strong>
+                  {journalCount(book, master ? 'master' : 'exam')} / {journalTotal}
+                </strong>
               </div>
               <table>
                 <thead>
@@ -400,7 +435,7 @@ export default function FlightSchool({
                         <em>{p.code}</em> {localize(p.name, languageMode)}
                       </th>
                       {DISCIPLINES.map((d) => {
-                        const entry = book[[p.code, d.id, logMode].join('/')];
+                        const entry = book[[p.code, d.id, master ? 'master' : 'exam'].join('/')];
                         return (
                           <td key={d.id}>
                             <button
@@ -440,8 +475,13 @@ export default function FlightSchool({
               <section className="fs-panel fs-result">
                 <div className="fs-result-port">
                   {lesson.airport.code} · {localize(lesson.airport.name, languageMode)} /{' '}
-                  {trainingName(lesson.mode)}
+                  {lesson.expert ? masterName : t('技能検定', 'Flight test', 'ぎのうけんてい')}
                 </div>
+                {justUnlocked && (
+                  <strong>
+                    {masterName} · {t('解禁', 'Unlocked', 'かいきん')}
+                  </strong>
+                )}
                 <div className="fs-award">
                   {report.medal ? (
                     <MedalIcon size={50} className={'fs-medal-' + report.medal} />

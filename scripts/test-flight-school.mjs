@@ -4,7 +4,7 @@ import { readFile, stat } from 'node:fs/promises';
 const base = './src/mini-games/flight-school/';
 const { outputFiles } = await build({
   stdin: {
-    contents: ['courses', 'simulation', 'logbook', 'combat', 'routes', 'patrol']
+    contents: ['courses', 'simulation', 'logbook', 'combat', 'routes', 'patrol', 'instruments']
       .map((n) => 'export * from ' + JSON.stringify(base + n))
       .join('\n'),
     resolveDir: process.cwd(),
@@ -31,7 +31,26 @@ const {
 const clamp = (v, low = -1, high = 1) => Math.min(high, Math.max(low, v));
 function fly(lesson) {
   const s = beginFlight(lesson);
+  if (s.instruments) {
+    s.instruments.armed = true;
+    sim.selectPanel(s, 'attitude');
+  }
   while (!s.result) {
+    if (s.instruments && s.airborne) {
+      if (!s.instruments.cruiseChecked) {
+        sim.selectPanel(s, 'systems');
+        sim.configure(s, 'cruise');
+      }
+      if (s.nextGate > 0 && !s.instruments.fixLogged) {
+        sim.selectPanel(s, 'navigation');
+        sim.logFix(s);
+      }
+      if (s.nextGate === lesson.gates.length) {
+        sim.selectPanel(s, 'systems');
+        sim.configure(s, 'landing');
+      }
+      sim.selectPanel(s, 'attitude');
+    }
     const target = aimPoint(s),
       gate = lesson.gates[s.nextGate],
       dx = target.x - s.x,
@@ -79,6 +98,11 @@ function fly(lesson) {
           input.turn = clamp(bearingTo(s, { x: -wind.x * 3, z: s.z - 65 }) * 2.6);
       }
     }
+    if (s.instruments && lesson.aircraft === 'plane' && s.airborne && input.brake) {
+      const targetThrottle = s.instruments.configuration === 'landing' ? 0.24 : 0.15;
+      input.brake = s.instruments.throttle > targetThrottle + 0.01;
+      input.primary = s.instruments.throttle < targetThrottle - 0.01;
+    }
     stepFlight(s, input);
   }
   return s;
@@ -101,6 +125,68 @@ for (const airport of AIRPORTS)
       if (discipline.id === 'glider') assert(s.thermalTime >= 1);
     }
 
+for (const airport of AIRPORTS)
+  for (const d of DISCIPLINES) {
+    const flight = fly(makeLesson(airport, d.id, 'exam', true));
+    assert.equal(
+      flight.result.reason,
+      'landed',
+      [airport.code, d.id, flight.result.reason, flight.nextGate].join('/'),
+    );
+    assert(flight.result.medal);
+  }
+const checkride = beginFlight(makeLesson(AIRPORTS[0], 'plane', 'exam', true));
+const powerUp = { ...sim.neutralInput(), primary: true };
+sim.selectPanel(checkride, 'attitude');
+stepFlight(checkride, powerUp);
+assert.equal(checkride.elapsed, 0, 'The simulation waits for an instrument power check.');
+sim.selectPanel(checkride, 'systems');
+checkride.instruments.armed = true;
+stepFlight(checkride, powerUp);
+assert.equal(checkride.elapsed, 0);
+sim.selectPanel(checkride, 'attitude');
+stepFlight(checkride, powerUp);
+assert(checkride.elapsed > 0 && checkride.instruments.throttle > 0);
+const throttle = checkride.instruments.throttle;
+stepFlight(checkride, sim.neutralInput());
+assert.equal(
+  checkride.instruments.throttle,
+  throttle,
+  'Releasing power holds the throttle setting',
+);
+sim.selectPanel(checkride, 'systems');
+sim.configure(checkride, 'cruise');
+assert.equal(checkride.instruments.cruiseChecked, false);
+sim.selectPanel(checkride, 'navigation');
+sim.logFix(checkride);
+assert.equal(checkride.instruments.fixLogged, false);
+Object.assign(checkride, {
+  airborne: true,
+  y: 0.001,
+  x: 0,
+  z: 0,
+  vertical: -2,
+  speed: 22,
+  nextGate: checkride.lesson.gates.length,
+});
+stepFlight(checkride, sim.neutralInput());
+assert.equal(checkride.result?.reason, 'systems');
+assert.equal(checkride.result.medal, null);
+const masterEntries = Object.fromEntries(
+  AIRPORTS.flatMap((a) =>
+    DISCIPLINES.map((d) => [[a.code, d.id, 'exam'].join('/'), { score: 62, medal: 'bronze' }]),
+  ),
+);
+const lastKey = Object.keys(masterEntries).pop();
+const before = { ...masterEntries };
+delete before[lastKey];
+before[lastKey.replace('/exam', '/practice')] = masterEntries[lastKey];
+assert.equal(sim.journalCount(before, 'exam'), sim.journalTotal - 1);
+assert.equal(sim.journalCount(masterEntries, 'exam'), sim.journalTotal);
+assert.equal(sim.journalCount(masterEntries, 'master'), 0);
+assert.equal(sim.flightKey(checkride.lesson), AIRPORTS[0].code + '/plane/master');
+assert.equal(sim.newPatrol(sim.MISSIONS[0], 'exam').assist, false);
+console.log('PASS 32 master checkrides with in-flight configuration, navigation and landing.');
 const belt = beginFlight(makeLesson(AIRPORTS[0], 'jetpack', 'practice'));
 for (let i = 0; i < 180; i++) stepFlight(belt, { turn: 0, pitch: 1, primary: false, brake: false });
 assert.equal(belt.z, belt.lesson.start.z);
@@ -286,7 +372,7 @@ for (const mission of sim.MISSIONS) {
     ];
     for (const lesson of lessons) {
       const flight = beginFlight(lesson),
-        p = sim.newPatrol(mission, mode),
+        p = sim.newPatrol(mission, mode, true),
         events = [];
       while (!flight.result && !p.failed && flight.elapsed < 640) {
         const i = sim.neutralInput(),
@@ -325,7 +411,7 @@ console.log(
 );
 
 const parked = sim.beginFlight(makeLesson(AIRPORTS[0], 'plane', 'practice'));
-const unattended = sim.newPatrol(sim.MISSIONS[0], 'practice');
+const unattended = sim.newPatrol(sim.MISSIONS[0], 'practice', true);
 const calls = [];
 for (let i = 0; i < 1800; i++)
   sim.stepPatrol(parked, unattended, sim.neutralInput(), (e) => calls.push(e));

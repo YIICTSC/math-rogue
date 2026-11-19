@@ -13,8 +13,9 @@ import {
 import type script from './radio-script.json';
 
 export type RadioEvent = Exclude<keyof typeof script.WARRIOR, 'wing'>;
-export function newPatrol(mission: Sortie['mission'], mode: Training) {
+export function newPatrol(mission: Sortie['mission'], mode: Training, assist = false) {
   return {
+    assist,
     sortie: newSortie(mission, mode),
     phase: 'launch' as 'launch' | 'climb' | 'vista' | 'search' | 'fight' | 'home',
     liftedAt: 0,
@@ -63,7 +64,7 @@ export function stepPatrol(s: Flight, p: Patrol, i: FlightInput, cue: (event: Ra
       );
       controls.pitch = steer(((p.orbit.y - s.y) * 0.25 + 0.65) / (s.speed * 0.31));
     }
-    stepFlight(s, controls, STEP, 1, b.time);
+    stepFlight(s, controls, STEP, { paceLimit: 1, extraTime: b.time, formationHold: true });
     if (s.result) return;
     const kills = b.kills,
       wave = b.wave;
@@ -76,8 +77,8 @@ export function stepPatrol(s: Flight, p: Patrol, i: FlightInput, cue: (event: Ra
     if (!b.finished && wave === 0 && b.wave > wave) cue('wave');
     return;
   }
-  const controls = s.airborne && !s.lesson.route ? circuitControls(s, i) : i;
-  stepFlight(s, controls, STEP, Infinity, b.time);
+  const controls = p.assist && s.airborne && !s.lesson.route ? circuitControls(s, i) : i;
+  stepFlight(s, controls, STEP, { extraTime: b.time });
   if (s.result) {
     if (p.phase === 'home' && s.result.reason === 'landed') cue('land');
     return;

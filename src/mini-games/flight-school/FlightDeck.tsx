@@ -1,20 +1,10 @@
+import { Cockpit, panels } from './Cockpit';
+import { adjustTrim, configure, logFix, selectPanel } from './instruments';
+import { VirtualStick } from '../gakuro-craft/TouchControls';
 import { stepPatrol, type Patrol, type RadioEvent } from './patrol';
 import { PatrolSight } from './PatrolSight';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
-  ArrowUp,
-  Camera,
-  Compass,
-  Crosshair,
-  Gauge,
-  Pause,
-  Play,
-  RotateCcw,
-  Wind,
-} from 'lucide-react';
+import { Camera, Compass, Crosshair, Gauge, Pause, Play, RotateCcw, Wind } from 'lucide-react';
 import GameplayGamepadHint from '../../components/GameplayGamepadHint';
 import { audioService } from '../../services/audioService';
 import { PAD, useGameplayGamepad } from '../../hooks/useGameplayGamepad';
@@ -193,6 +183,7 @@ export default function FlightDeck({
   const canvas = useRef<HTMLCanvasElement>(null),
     keys = useRef(new Set<string>()),
     touches = useRef(new Map<number, string>());
+  const stick = useRef({ turn: 0, pitch: 0 });
   const pad = useRef(neutralInput()),
     halted = useRef(false),
     survey = useRef(false),
@@ -218,6 +209,7 @@ export default function FlightDeck({
     primaryTap.current = false;
     brakeTap.current = false;
     pad.current = neutralInput();
+    stick.current = { turn: 0, pitch: 0 };
   }, []);
   const pause = useCallback(
     (value: boolean) => {
@@ -238,6 +230,27 @@ export default function FlightDeck({
     if (p.pressed[PAD.B]) brakeTap.current = true;
     if (p.pressed[PAD.A]) primaryTap.current = true;
     if (p.pressed[PAD.X]) changeView();
+    if (s.instruments && !halted.current) {
+      const c = s.instruments;
+      if (p.pressed[PAD.Y]) selectPanel(s, panels[(panels.indexOf(c.panel) + 1) % 3]);
+      if (p.pressed[PAD.RB] && c.panel === 'systems') {
+        if (!c.armed) c.armed = true;
+        else if (c.started)
+          configure(
+            s,
+            c.configuration === 'departure'
+              ? 'cruise'
+              : c.configuration === 'cruise'
+                ? 'landing'
+                : 'departure',
+          );
+      }
+      if (p.pressed[PAD.RB] && c.panel === 'navigation') logFix(s);
+      if (c.panel === 'systems' && c.started) {
+        if (p.pressed[PAD.LT]) adjustTrim(c, -1);
+        if (p.pressed[PAD.RT]) adjustTrim(c, 1);
+      }
+    }
     if (p.pressed[PAD.MENU]) pause(true);
   });
   useEffect(() => {
@@ -275,6 +288,19 @@ export default function FlightDeck({
         return;
       }
       if (halted.current) return;
+      if (s.instruments && /^Digit[123]$/.test(e.code)) {
+        e.preventDefault();
+        selectPanel(s, panels[Number(e.code.at(-1)) - 1]);
+        refresh((n) => n + 1);
+        return;
+      }
+      if (
+        s.instruments &&
+        !s.instruments.started &&
+        e.code === 'Space' &&
+        e.target instanceof HTMLButtonElement
+      )
+        return;
       if (e.code === 'Escape' || e.code === 'KeyP' || e.code === 'KeyC') {
         e.preventDefault();
         if (!e.repeat) {
@@ -301,8 +327,16 @@ export default function FlightDeck({
       const active = new Set(touches.current.values());
       for (const code of keys.current) active.add(controls[code]);
       const input = {
-        turn: pad.current.turn + Number(active.has('right')) - Number(active.has('left')),
-        pitch: pad.current.pitch + Number(active.has('up')) - Number(active.has('down')),
+        turn:
+          stick.current.turn +
+          pad.current.turn +
+          Number(active.has('right')) -
+          Number(active.has('left')),
+        pitch:
+          stick.current.pitch +
+          pad.current.pitch +
+          Number(active.has('up')) -
+          Number(active.has('down')),
         primary: primaryTap.current || pad.current.primary || active.has('primary'),
         brake: brakeTap.current || pad.current.brake || active.has('brake'),
       };
@@ -444,6 +478,7 @@ export default function FlightDeck({
       data-patrol-phase={patrol?.phase}
       data-gamepad-live={paused ? undefined : 'flight-school'}
       data-flight-stage="flight"
+      data-expert={!!s.instruments}
       data-airborne={s.airborne}
       data-canopy={s.canopy}
     >
@@ -482,37 +517,43 @@ export default function FlightDeck({
           </button>
         </div>
       </header>
-      <div className="fs-telemetry">
-        <div>
-          <span>{t('高度', 'Altitude', 'こうど')}</span>
-          <b data-flight-altitude>{Math.round(altitude(s))}</b>
-          <small>m</small>
-        </div>
-        <div>
-          <span>{t('速度', 'Speed', 'そくど')}</span>
-          <b data-flight-speed>{Math.round(Math.abs(s.speed) * 3.6)}</b>
-          <small>km/h</small>
-        </div>
-        <div>
-          <Wind size={13} />
-          <i
-            style={{
-              transform: `rotate(${(Math.atan2(wind.x, -wind.z) * 180) / Math.PI - heading}deg)`,
-            }}
-          >
-            ↑
-          </i>
-          <small>{Math.hypot(wind.x, wind.z).toFixed(1)} m/s</small>
-        </div>
-        {lesson.aircraft === 'jetpack' && (
+      {s.instruments ? (
+        <Cockpit flight={s} language={language} refresh={() => refresh((n) => n + 1)} />
+      ) : (
+        <div className="fs-telemetry">
           <div>
-            <span>{t('燃料', 'Fuel', 'ねんりょう')}</span>
-            <b>{Math.ceil(s.fuel)}</b>
-            <small>%</small>
+            <span>{t('高度', 'Altitude', 'こうど')}</span>
+            <b data-flight-altitude>{Math.round(altitude(s))}</b>
+            <small>m</small>
           </div>
-        )}
-      </div>
-      <CourseMap flight={s} label={t('航路図', 'Course map', 'こうろず')} />
+          <div>
+            <span>{t('速度', 'Speed', 'そくど')}</span>
+            <b data-flight-speed>{Math.round(Math.abs(s.speed) * 3.6)}</b>
+            <small>km/h</small>
+          </div>
+          <div>
+            <Wind size={13} />
+            <i
+              style={{
+                transform: `rotate(${(Math.atan2(wind.x, -wind.z) * 180) / Math.PI - heading}deg)`,
+              }}
+            >
+              ↑
+            </i>
+            <small>{Math.hypot(wind.x, wind.z).toFixed(1)} m/s</small>
+          </div>
+          {lesson.aircraft === 'jetpack' && (
+            <div>
+              <span>{t('燃料', 'Fuel', 'ねんりょう')}</span>
+              <b>{Math.ceil(s.fuel)}</b>
+              <small>%</small>
+            </div>
+          )}
+        </div>
+      )}
+      {(!s.instruments || s.instruments.panel === 'navigation') && (
+        <CourseMap flight={s} label={t('航路図', 'Course map', 'こうろず')} />
+      )}
       {fighting && (
         <>
           <PatrolSight s={patrol.sortie} />
@@ -531,7 +572,7 @@ export default function FlightDeck({
           </div>
         </>
       )}
-      {!fighting && (
+      {!fighting && (!s.instruments || s.instruments.panel === 'navigation') && (
         <div className="fs-waypoint">
           <span
             className="fs-way-arrow"
@@ -587,11 +628,15 @@ export default function FlightDeck({
         </small>
       )}
       <div className="fs-touch">
-        <div className="fs-dpad">
-          {press('up', <ArrowUp />, t('上', 'Up', 'うえ'))}
-          {press('left', <ArrowLeft />, t('左旋回', 'Turn left', 'ひだりせんかい'))}
-          {press('down', <ArrowDown />, t('下', 'Down', 'した'))}
-          {press('right', <ArrowRight />, t('右旋回', 'Turn right', 'みぎせんかい'))}
+        <div className="fs-stick-zone">
+          <VirtualStick
+            axes="direct"
+            disabled={paused || lost}
+            t={() => t('操縦スティック', 'Flight stick', 'そうじゅうスティック')}
+            onMove={(v) => {
+              stick.current = { turn: v?.dx ?? 0, pitch: -(v?.dz ?? 0) };
+            }}
+          />
         </div>
         <div className="fs-actions">
           {press(
@@ -636,6 +681,15 @@ export default function FlightDeck({
                   )
                 : localize(discipline.controls, language)}
             </p>
+            {s.instruments && (
+              <p>
+                {t(
+                  '計器切替は1〜3キー、パッドはY。RBで電源・機器設定・航点記録、機器画面でLT／RTはトリム調整。',
+                  'Use keys 1–3 or gamepad Y to switch panels. RB operates the selected panel. LT/RT adjust trim on Systems.',
+                  '1〜3キー または Yで けいきを きりかえ。RBで でんげん・せってい・こうてんきろく。ききがめんの LT／RTで トリムを ちょうせい。',
+                )}
+              </p>
+            )}
             <GameplayGamepadHint mode="flight-school" />
             {!lost && (
               <button autoFocus className="fs-main" onClick={() => pause(false)}>
