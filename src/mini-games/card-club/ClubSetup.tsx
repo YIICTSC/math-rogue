@@ -76,8 +76,8 @@ export function ClubLobbyPanel({packet,host,english,l,title,onConfigure,onStart}
 }){
   const [showCatalog,setShowCatalog]=useState(false);
   const people=packet.members.length,cpu=packet.count-people,online=!!packet.code;
-  const choose=(id:GameId)=>{
-    const seats=clubSeatsFor(id,people);
+  const choose=(id:GameId,preferredSeats?:number)=>{
+    const seats=preferredSeats??clubSeatsFor(id,people);
     if(seats===undefined)return;
     onConfigure(id,seats);
     setShowCatalog(false);

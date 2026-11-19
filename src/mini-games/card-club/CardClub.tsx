@@ -98,7 +98,7 @@ export default function CardClub({onBack,languageMode='JAPANESE'}:MiniGameCompon
     setPage(page==='connect'?'games':page==='games'?'hero':'title');
   };
   const send=(a:Action)=>{capturePresentation();setSelected([]);room.current?.command(a);};
-  const choose=(id:GameId)=>{const d=definition(id);setGame(id);setCount(d.defaultPlayers);setPage('connect');};
+  const choose=(id:GameId,seats?:number)=>{setGame(id);setCount(seats??definition(id).defaultPlayers);setPage('connect');};
   const selectCard=(input:number|number[])=>setSelected(old=>{
     const cards=Array.isArray(input)?input:[input];
     if(cards.every(c=>old.includes(c)))return old.filter(c=>!cards.includes(c));
@@ -208,7 +208,7 @@ export default function CardClub({onBack,languageMode='JAPANESE'}:MiniGameCompon
   const rulesGame=current?.game??(packet?.phase==='lobby'?packet.game:game);
   return <main ref={tableRoot} className={`card-club cc-page-${current?'table':packet?'lobby':page}`} style={{'--cc-title':`url("${assetUrl('sprites/card-club/title.webp')}")`,'--cc-table':`url("${assetUrl('sprites/card-club/table.webp')}")`} as React.CSSProperties} data-gamepad-navigation-root data-mini-game-scope="card-club" data-club-game={current?.game}>
     <ScoreFeedback view={current} l={l}/>
-    {!packet&&page==='title'&&<ResponsiveTitleArt game="card-club" className="cc-title-art"/>}
+    {!packet&&page==='title'&&<ResponsiveTitleArt game="card-club" className="cc-title-art" style={{objectPosition:'var(--cc-title-focus, center)'}}/>}
     <header className="cc-header">
       <button onClick={back}>{packet?.code?l('部屋を出る','Leave room'):l('戻る','Back')}</button>
       <span className="cc-brand">{l('放課後トランプゲーム集','After-school Card Club')}</span>
@@ -217,7 +217,7 @@ export default function CardClub({onBack,languageMode='JAPANESE'}:MiniGameCompon
     </header>
     {error&&<div className="cc-notice" role="alert">{error}<button aria-label={l('閉じる','Close')} onClick={()=>setError('')}>×</button></div>}
     {!packet&&page==='title'&&<section className="cc-title-copy">
-      <h1>{l('放課後','After-school')}<br/><em>{l('トランプゲーム集','Card Club')}</em></h1>
+      <h1><span>{l('放課後','After-school')}</span><em>{l('トランプゲーム集','Card Club')}</em></h1>
       <nav className="cc-title-modes" aria-label={l('遊び方を選ぶ','Choose how to play')}>
         <button className="cc-primary" onClick={()=>setPage('hero')}>{l('CPUと遊ぶ','Play with CPU')}</button>
         {!OFFLINE_DISTRIBUTABLE&&<>

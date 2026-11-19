@@ -102,10 +102,14 @@ try{
   assert.equal(await host.getByLabel('Match seats').inputValue(),'3');
   assert(await host.locator('.cc-recommendations button').count()>=3);
   await host.getByRole('button',{name:'Browse games'}).click();
+  const playerCount=host.getByLabel('Player count');
+  assert.equal(await playerCount.locator('option[value="2"]').count(),0);
   await host.getByRole('searchbox').fill('gin rummy');
   await host.locator('.cc-empty-search').waitFor();
+  await playerCount.selectOption('4');
   await host.getByRole('searchbox').fill('old maid');
   await host.locator('.cc-games>button').first().click();
+  assert.equal(await host.getByLabel('Match seats').inputValue(),'4');
   await host.getByRole('button',{name:'Start this table',exact:true}).click();
   await Promise.all([host,guest,third].map(tab=>tab.locator('.cc-match').waitFor()));
   const first=await host.evaluate(()=>window.__club.room().last.view.turn);
@@ -138,6 +142,10 @@ try{
   const art=await page.locator('.cc-title-art').boundingBox();
   assert(art && art.width>=width && art.height>=height,'Dedicated title image fills the viewport');
   await page.screenshot({path:`${dir}/title-${width}x${height}.png`});
+  if(process.argv.includes('--titles')){
+   const menu=await page.locator('.cc-title-modes').boundingBox();
+   assert(menu&&menu.y>height*.65&&menu.y+menu.height<=height,`Title actions stay in view near the bottom at ${width}×${height}: ${JSON.stringify(menu)}`);
+  }
  }
  await page.setViewportSize({width:1280,height:900});await page.getByRole('button',{name:'CPUと遊ぶ'}).click();await page.getByRole('button',{name:'このキャラクターでゲーム選択'}).click();const implemented=await page.evaluate(()=>window.implemented);assert.match(await page.locator('.cc-search-count').innerText(),new RegExp(String(implemented)));assert.equal(await page.locator('.cc-games>button').count(),implemented);
  assert.equal(await page.locator('.cc-reference').count(),0);assert(!/467|未対応|Reference entries/.test(await page.locator('.cc-search-count').innerText()));await page.locator('input[type=search]').fill('faro');await page.locator('.cc-empty-search').waitFor();assert.equal(await page.locator('.cc-games>button').count(),0);assert.equal(await page.locator('a[href*=faro]').count(),0);await page.locator('input[type=search]').fill('');
@@ -152,9 +160,48 @@ try{
   await page.setViewportSize({width:844,height:390});await page.waitForTimeout(150);await page.screenshot({path:dir+'/polish-mitch-landscape.png'});
   await load('daihinmin',4);await page.evaluate(()=>window.__club.room().rematch());await page.locator('.cc-local-rules').waitFor();await page.locator('.cc-local-rules select').selectOption('3');await page.locator('.cc-local-rules input').first().check();await page.getByRole('button',{name:'このメンバーで開始',exact:true}).click();await page.waitForFunction(()=>window.__club.room().session.state?.ladderOptions.rounds===3);assert(await page.evaluate(()=>window.__club.room().session.state.ladderOptions.eightCut));assert.deepEqual(errors,[]);console.log('PASS casino place/capture labels and score FX, Mitch ace counter, long-hand stacking, local-rule lobby and round settings.');
  }else if(process.argv.includes('--titles')){
+  await page.setViewportSize({width:390,height:844});
+  const playerCount=page.getByLabel('対応人数');
+  const sort=page.getByLabel('並べ替え');
+  const gameCards=page.locator('.cc-games > button');
+  const gameSeats=()=>gameCards.evaluateAll(cards=>cards.map(card=>window.definition(card.dataset.gameId).players));
+  await sort.selectOption('fewest');
+  const fewest=(await gameSeats()).map(seats=>Math.min(...seats));
+  assert.deepEqual(fewest,[...fewest].sort((a,b)=>a-b));
+  await sort.selectOption('most');
+  const most=(await gameSeats()).map(seats=>Math.max(...seats));
+  assert.deepEqual(most,[...most].sort((a,b)=>b-a));
+  await playerCount.selectOption('4');
+  const matching=await gameSeats();
+  assert(matching.length>0&&matching.length<implemented&&matching.every(seats=>seats.includes(4)));
+  await page.screenshot({path:`${dir}/catalog-390x844.png`});
+  await page.getByRole('searchbox').fill('gin rummy');
+  assert.equal(await gameCards.count(),0);
+  await page.getByRole('button',{name:'絞り込みを解除'}).click();
+  assert.equal(await gameCards.count(),implemented);
+  await playerCount.selectOption('4');
+  await gameCards.first().click();
+  assert.equal(await page.getByLabel('プレイ人数（空席はCPU）').inputValue(),'4');
+  await page.locator('.cc-header button').first().click();await gameCards.first().waitFor();
   await page.locator('.cc-header button').first().click();await page.locator('.cc-heroes').waitFor();
   await page.locator('.cc-header button').first().click();await page.locator('.cc-title-copy').waitFor();
-  assert.deepEqual(errors,[]);console.log('PASS: title artwork at 3 viewport sizes, hero/game selection and back navigation');
+  for(const [width,height] of [[390,844],[844,390],[667,320]]){
+   await page.setViewportSize({width,height});
+   for(const [mode,entry] of [['host','部屋を作る'],['join','招待に参加する']]){
+    await page.getByRole('button',{name:entry,exact:true}).click();
+    const form=page.locator('.cc-online-entry');
+    const header=await page.locator('.cc-header').boundingBox();
+    const panel=await form.boundingBox();
+    const submit=await form.locator('button[type=submit]').boundingBox();
+    const spaceAbove=panel.y-header.y-header.height;
+    const spaceBelow=height-panel.y-panel.height;
+    await page.screenshot({path:`${dir}/${mode}-${width}x${height}.png`});
+    assert(spaceAbove>=0&&Math.abs(spaceAbove-spaceBelow)<=28,`${mode} form is centered at ${width}×${height} (${spaceAbove}px above, ${spaceBelow}px below)`);
+    assert(submit.y+submit.height<=height,'Submit is in view at '+width+'×'+height);
+    await page.locator('.cc-header button').first().click();
+   }
+  }
+  assert.deepEqual(errors,[]);console.log('PASS: title art, centered online entry, player-count filtering and sorting, and back navigation');
  }else if(process.argv.includes('--rummy-groups')){
   for(const game of ['ginrummy','rummy']){
    await load(game,2);await mutate(s=>{s.turn=0;s.extra.step=s.game==='ginrummy'?'ginDraw':'draw';s.players[0].hand=[0,1,2,13,14,15,26,27,28,35];});
