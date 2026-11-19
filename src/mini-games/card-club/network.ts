@@ -1,10 +1,12 @@
 import type {LadderOptions} from './ladderOptions';
 import Peer, { type DataConnection, type PeerOptions } from 'peerjs';
-import { createHostRoomCode, normalizeRoomInput } from '../../services/onlineTransport';
+import { createHostRoomCode } from '../../services/onlineTransport';
 import { ClubSession, validProfile, type ClubPacket } from './session';
 import type { Action, PlayerInput } from './model';
 import type { GameId } from './catalog';
 import { shouldReportPeerError } from './networkPolicy';
+import { CARD_CLUB_ROOM_CAPACITY } from './lobbyGames';
+import { normalizeCardClubCode } from './invite';
 
 const PROTOCOL=6;
 type Profile=Pick<PlayerInput,'name'|'hero'>;
@@ -38,7 +40,7 @@ export class CardClubRoom {
       for(let attempt=0;attempt<3;attempt++){this.code=createHostRoomCode();try{peer=await this.open(`learning-card-club-v${PROTOCOL}-${this.code}`);break;}catch(e){this.peer?.destroy();if(String(e).includes('unavailable-id')&&attempt<2)continue;throw e;}}
       if(!peer)throw Error('NETWORK_ERROR');this.beginSession(profile);
       peer.on('connection',c=>{
-        if(this.closed||this.channels.size>=7){c.close();return;}this.channels.set(c.peer,c);
+        if(this.closed||this.channels.size>=CARD_CLUB_ROOM_CAPACITY-1){c.close();return;}this.channels.set(c.peer,c);
         const timer=setTimeout(()=>{if(!this.session?.members.some(p=>p.id===c.peer))c.close();this.timers.delete(timer);},12000);this.timers.add(timer);
         let windowAt=0,count=0;
         c.on('data',raw=>{
@@ -59,17 +61,24 @@ export class CardClubRoom {
   async join(profile:Profile,code:string){
     if(this.connecting||this.closed)return;this.connecting=true;
     try{
-      this.code=normalizeRoomInput(code);if(!/^\d{6}$/.test(this.code))throw Error('INVALID_CODE');
+      this.code=normalizeCardClubCode(code);if(!this.code)throw Error('INVALID_CODE');
       const peer=await this.open(),c=peer.connect(`learning-card-club-v${PROTOCOL}-${this.code}`,{reliable:true});this.channels.set('host',c);
       await new Promise<void>((resolve,reject)=>{
-        let admitted=false;const timer=setTimeout(()=>{reject(Error('TIMEOUT'));c.close();this.timers.delete(timer);},20000);this.timers.add(timer);
+        let admitted=false;
+        const settle=(error?:Error)=>{
+          clearTimeout(timer);this.timers.delete(timer);this.controller.signal.removeEventListener('abort',abort);
+          if(error)reject(error);else resolve();
+        };
+        const abort=()=>settle(Error('CLOSED'));
+        const timer=setTimeout(()=>{settle(Error('TIMEOUT'));c.close();},20000);
+        this.timers.add(timer);this.controller.signal.addEventListener('abort',abort,{once:true});
         c.on('open',()=>this.send(c,{type:'hello',protocol:PROTOCOL,...profile}));
         c.on('data',raw=>{if(this.closed||typeof raw!=='string'||raw.length>500000)return;let d:any;try{d=JSON.parse(raw);}catch{return;}
-          if(d?.type==='state'&&d.packet?.selfId===this.selfId){admitted=true;clearTimeout(timer);this.timers.delete(timer);this.notify(d.packet);resolve();}
-          else if(d?.type==='error'){clearTimeout(timer);this.timers.delete(timer);reject(Error(d.message));}
+          if(d?.type==='state'&&d.packet?.selfId===this.selfId){if(!admitted){admitted=true;settle();}this.notify(d.packet);}
+          else if(d?.type==='error'&&!admitted)settle(Error(d.message));
         });
-        c.on('close',()=>{clearTimeout(timer);this.timers.delete(timer);if(!this.closed){if(this.last?.phase!=='game'||this.last.view.phase!=='result')this.status('HOST_DISCONNECTED');if(!admitted)reject(Error('HOST_DISCONNECTED'));}});
-        c.on('error',()=>{clearTimeout(timer);this.timers.delete(timer);reject(Error('NETWORK_ERROR'));});
+        c.on('close',()=>{if(!this.closed){if(admitted)this.status('HOST_DISCONNECTED');else settle(Error('HOST_DISCONNECTED'));}});
+        c.on('error',()=>{if(admitted)this.status('NETWORK_ERROR');else settle(Error('NETWORK_ERROR'));});
       });
     }finally{this.connecting=false;}
   }

@@ -1,3 +1,4 @@
+import {cardClubInviteCode,CARD_CLUB_ROOM_PARAM} from './mini-games/card-club/invite';
 import {academyInvitation} from './mini-games/academy-sports/onlineInvite';
 import { MINI_GAME_UNIT_CORRECT_EVENT, type MiniGameUnitCorrectDetail } from './services/miniGameUnitProgress';
 import {enableDebugRewards} from './point-exchange/debug';
@@ -1681,7 +1682,7 @@ const App: React.FC = () => {
     ), []);
     const vrCode=useMemo(()=>typeof window==='undefined'?'':vrInviteCode(window.location.href),[]);
     const [vrInviteOpen,setVrInviteOpen]=useState(Boolean(vrCode));
-    const cardClubCode=useMemo(()=>{if(typeof window==='undefined')return '';const code=(new URLSearchParams(window.location.search).get('cardClubRoom')||'').normalize('NFKC').trim();return /^\d{6}$/.test(code)?code:'';},[]);
+    const cardClubCode=useMemo(()=>typeof window==='undefined'?'':cardClubInviteCode(window.location.href),[]);
     const [cardClubInviteOpen,setCardClubInviteOpen]=useState(Boolean(cardClubCode));
     const kartCode = useMemo(() => typeof window === 'undefined' ? '' : kartInviteCode(window.location.href), []);
     const [kartInviteOpen, setKartInviteOpen] = useState(Boolean(kartCode));
@@ -21347,7 +21348,7 @@ const App: React.FC = () => {
                             screen={gameState.screen}
                             onBack={gameState.screen === GameScreen.MINI_GAME_AFTER_SCHOOL_RUSH || gameState.screen === GameScreen.MINI_GAME_FLIGHT_SCHOOL
                                 ? () => setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_SELECT }))
-                                : gameState.screen === GameScreen.MINI_GAME_CRANE ? handleCraneGameBack : ()=>{if(gameState.screen===GameScreen.MINI_GAME_CARD_CLUB){setCardClubInviteOpen(false);const url=new URL(window.location.href);url.searchParams.delete('cardClubRoom');window.history.replaceState(null,'',url.toString());}if(gameState.screen===GameScreen.MINI_GAME_GAKUROGEAR){setVrInviteOpen(false);const url=new URL(window.location.href);url.searchParams.delete(VR_ROOM_PARAM);window.history.replaceState(null,'',url.toString());}returnToTitle();}}
+                                : gameState.screen === GameScreen.MINI_GAME_CRANE ? handleCraneGameBack : ()=>{if(gameState.screen===GameScreen.MINI_GAME_CARD_CLUB){setCardClubInviteOpen(false);const url=new URL(window.location.href);url.searchParams.delete(CARD_CLUB_ROOM_PARAM);window.history.replaceState(null,'',url.toString());}if(gameState.screen===GameScreen.MINI_GAME_GAKUROGEAR){setVrInviteOpen(false);const url=new URL(window.location.href);url.searchParams.delete(VR_ROOM_PARAM);window.history.replaceState(null,'',url.toString());}returnToTitle();}}
                             inviteCode={vrInviteOpen?vrCode:''}
                             problemMode={miniGameProblemMode}
                             problemModePool={miniGameProblemModePool}

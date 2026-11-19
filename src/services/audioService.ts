@@ -9,7 +9,7 @@ import {sportsVoicePath,sportsVoiceDuration,sportsVoiceAvailable} from '../mini-
 import {STAR_VOICE_IDS} from '../mini-games/star-tide/voiceIds';
 import {chronicleVoicePath} from '../components/school-dungeon/chronicles/voices';
 import {paperBridgeVoice} from '../data/paperPlaneBridge';
-import { cardClubVoice,type CardClubVoiceEvent } from '../data/cardClubVoices';
+import { cardClubScoreVoice,cardClubVoice,type CardClubVoiceEvent } from '../data/cardClubVoices';
 import { summerEndingVoiceLimitMs } from '../data/summerEndingVoices';
 import { kochoSuperVoice } from '../mini-games/kocho/superMoves';
 import { kochoEnemyVoice, type KochoEnemyVoiceAction } from '../mini-games/kocho/enemyVoices';
@@ -2655,10 +2655,27 @@ class AudioService {
       return this.playVoiceFile(name,[versionBgmPath(assetUrl(clip.path))],clip.maxDurationMs,false,generation);
   }
 
+  public playCardClubScoreVoice(heroId:string) {
+      const clip=cardClubScoreVoice(heroId);
+      if(!clip||!this.canPlayConversationVoice())return Promise.resolve(false);
+      this.stopCardClubVoices();
+      const name=`card-club-voice-${heroId}-score-${clip.voice}`;
+      const generation=(this.sfxPlaybackGenerations.get(name)??0)+1;
+      this.sfxPlaybackGenerations.set(name,generation);
+      return this.playVoiceFile(name,[versionBgmPath(assetUrl(clip.path))],clip.maxDurationMs,false,generation,true);
+  }
+
   public stopCardClubVoices() {
       const names=new Set([...this.sfxPlaybackGenerations.keys(),...this.activeHtmlSfx.keys(),...this.activeSfxSources.keys()]);
       for(const name of names)if(name.startsWith('card-club-voice-')) {
           this.sfxPlaybackGenerations.set(name,(this.sfxPlaybackGenerations.get(name)??0)+1);
+          for(const audio of [...(this.activeHtmlSfx.get(name)||[])]){
+              const ended=audio.onended;
+              audio.onended=null;
+              audio.pause();
+              audio.currentTime=0;
+              ended?.call(audio,new Event('ended'));
+          }
           this.stopActiveSfx(name);
       }
   }

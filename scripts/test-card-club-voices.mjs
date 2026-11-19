@@ -5,7 +5,7 @@ import {createServer} from 'vite';
 const server=await createServer({optimizeDeps:{noDiscovery:true},server:{middlewareMode:true,hmr:false},appType:'custom'});
 try{
  const {CARD_CLUB_HEROES}=await server.ssrLoadModule('/src/mini-games/card-club/session.ts');
- const {CARD_CLUB_VOICE_HEROES,CARD_CLUB_VOICE_MS,cardClubVoice}=await server.ssrLoadModule('/src/data/cardClubVoices.ts');
+ const {CARD_CLUB_VOICE_HEROES,CARD_CLUB_VOICE_MS,cardClubVoice,cardClubScoreVoice}=await server.ssrLoadModule('/src/data/cardClubVoices.ts');
  const plan=JSON.parse(await readFile('assets/card-club/hero-voice-plan.json','utf8')),build=JSON.parse(await readFile('assets/card-club/hero-voice-build.json','utf8')),qa=JSON.parse(await readFile('assets/card-club/voice-speech-qa.json','utf8'));
  assert.deepEqual([...CARD_CLUB_VOICE_HEROES].sort(),CARD_CLUB_HEROES.map(h=>h.id).sort());assert.equal(plan.heroes.length,26);assert.equal(Object.keys(CARD_CLUB_VOICE_MS).length,104);
  let clips=0;const hashes=new Set();
@@ -15,5 +15,14 @@ try{
   assert.equal(meta.model_device,'cpu');assert.equal(meta.codec_device,'cpu');assert(build.models[meta.model]);assert.equal(meta.checkpoint_sha256,build.models[meta.model].checkpoint_sha256);assert(meta.silentcipher_watermark);assert.equal(meta.text,hero.lines[event]);assert(qa.clips[key].similarity>=.85);assert(Math.abs(meta.seconds*1000-CARD_CLUB_VOICE_MS[key])<90);clips++;
  }
  assert.equal(cardClubVoice('../unsafe','start'),null);assert.equal(cardClubVoice('high-school-warrior','unknown'),null);
+ for(const hero of CARD_CLUB_VOICE_HEROES){
+  const samples=new Set(Array.from({length:50},(_,i)=>cardClubScoreVoice(hero,()=>i/50)?.path));
+  assert(samples.size>=2,hero+' has randomized score voices');
+  for(const path of samples){
+   assert.match(path,/^sfx\/(high-school-voices\/[A-Z]+\/finish|magic-voices\/[A-Z]+\/attack)-\d\.ogg$/);
+   assert.equal((await readFile('public/'+path)).subarray(0,4).toString(),'OggS');
+  }
+ }
+ assert.equal(cardClubScoreVoice('../unsafe'),null);
  console.log(JSON.stringify({heroVoices:26,voiceClips:clips,cpuOnly:true,measuredDurations:true,speechQA:true}));
 }finally{await server.close();}

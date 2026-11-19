@@ -5,6 +5,8 @@ try{
  const {CLUB_GAMES,REFERENCE_GAMES}=await server.ssrLoadModule('/src/mini-games/card-club/catalog.ts');
  const {createClubGame,legalActions,applyAction,viewFor,cpuAction}=await server.ssrLoadModule('/src/mini-games/card-club/engine.ts');
  const {ClubSession,CARD_CLUB_HEROES}=await server.ssrLoadModule('/src/mini-games/card-club/session.ts');
+ const {clubSeatsFor,recommendedClubGames,CARD_CLUB_ROOM_CAPACITY}=await server.ssrLoadModule('/src/mini-games/card-club/lobbyGames.ts');
+ const {cardClubInviteCode,cardClubInviteUrl,normalizeCardClubCode}=await server.ssrLoadModule('/src/mini-games/card-club/invite.ts');
  const {EXTENDED_TRICKS,extendedDeck}=await server.ssrLoadModule('/src/mini-games/card-club/extendedTricks.ts');
  const {classicDeck}=await server.ssrLoadModule('/src/mini-games/card-club/classicCommon.ts');
  const {POPULAR_IDS}=await server.ssrLoadModule('/src/mini-games/card-club/popularCatalog.ts');
@@ -39,5 +41,27 @@ try{
  const packets=[];const room=new ClubSession('p0','012345',(id,p)=>packets.push({id,p}));assert(room.join(inputs(2)[0]));assert(room.join(inputs(2)[1]));assert(room.configure('gofish',3));assert(room.start(123));const t=room.state.turn,a=legalActions(room.state)[0];assert.equal(room.command('p0',a,room.state.revision),false,'Identity selects player, not claimed seat');assert.equal(room.command('p1',a,-1),false,'Stale revision rejected');room.leave('p1');assert.equal(room.state.players[1].cpu,true,'Disconnected guest is replaced by CPU');
  room.finish();assert.equal(packets.at(-1).p.view.phase,'result','Host ending sends result to connected players');room.rematch();assert.equal(room.members.length,1,'Disconnected seats do not remain as ghost humans in the next lobby');
  const endPackets=[];const endRoom=new ClubSession('p0','123456',(id,p)=>endPackets.push({id,p}));endRoom.join(inputs(2)[0]);endRoom.join(inputs(2)[1]);endRoom.configure('memory',2);endRoom.start(9);endRoom.finish();assert(endPackets.slice(-2).every(x=>x.p.phase==='game'&&x.p.view.phase==='result'),'End snapshot reaches both connected humans');
+ const shared=new ClubSession('p0','012345',()=>{});
+ const group=inputs(CARD_CLUB_ROOM_CAPACITY+1);
+ assert(shared.join(group[0]));assert(shared.configure('ginrummy',2));
+ for(let seat=1;seat<CARD_CLUB_ROOM_CAPACITY;seat++){
+  assert(shared.join(group[seat]),'An open room accepts players beyond the current game seat count');
+  assert(shared.count>=shared.members.length);
+ }
+ assert(!shared.join(group.at(-1)));
+ assert.notEqual(shared.game,'ginrummy');
+ for(let count=2;count<=CARD_CLUB_ROOM_CAPACITY;count++){
+  assert(recommendedClubGames(count).length>=3);
+  assert(recommendedClubGames(count).every(game=>clubSeatsFor(game,count)===count));
+ }
+ assert(shared.start(33));shared.finish();shared.rematch();
+ assert.deepEqual(shared.members.map(p=>p.id),group.slice(0,-1).map(p=>p.id));
+ assert(shared.configure('trumpcrew',8));assert(shared.start(34));assert.equal(shared.state.game,'trumpcrew');
+ assert.equal(normalizeCardClubCode('０12３4５'),'012345');
+ assert.equal(normalizeCardClubCode('01234x'),'');
+ const invite=cardClubInviteUrl('https://local.example/math-rogue/?other=1#room','012345');
+ assert.equal(invite,'https://local.example/math-rogue/?cardClubRoom=012345');
+ assert.equal(cardClubInviteCode(invite),'012345');
+ assert.equal(cardClubInviteUrl('https://localhost/','012345',true),'https://yiictsc.github.io/math-rogue/?cardClubRoom=012345');
  console.log(JSON.stringify({matches,moves,catalog:REFERENCE_GAMES.length,implemented:CLUB_GAMES.length,hiddenHands:true,invalidInputs:true,disconnectCPU:true}));
 }finally{await server.close();}
