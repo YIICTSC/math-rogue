@@ -32,9 +32,7 @@ export default function IllustratedMiniGameEntry({ screen, languageMode = 'JAPAN
   return <section className="illustrated-mini-entry" data-gamepad-navigation-root
     data-gamepad-initial-scope={`illustrated-${entry.art}`} aria-label={entry.title[index]}>
     <ResponsiveTitleArt game={entry.art} className="illustrated-mini-entry-art"/>
-    <div className="illustrated-mini-entry-copy"><small>LEARNING ROGUE · GAME COLLECTION</small><h1>{flightTitle && index !== 1
-      ? <>にっぽん<wbr/><span className="flight-title-name">フライトスクール</span></>
-      : entry.title[index]}</h1></div>
+    <div className="illustrated-mini-entry-copy"><small>LEARNING ROGUE · GAME COLLECTION</small><h1>{entry.title[index]}</h1></div>
     <nav>
       <button autoFocus data-gamepad-initial-choice onClick={() => setEntered(true)}>{['はじめる', 'Start', 'はじめる'][index]} <span aria-hidden="true">→</span></button>
       <button data-gamepad-back onClick={onBack}>{['ゲーム一覧へ', 'Back to games', 'ゲームいちらんへ'][index]}</button>
