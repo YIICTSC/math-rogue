@@ -2861,12 +2861,12 @@ class AudioService {
       }
   }
 
-  private playSynthSound(effect: CommonSoundEffect) {
+  private playSynthSound(effect: CommonSoundEffect, volume = 1) {
       if (!this.ctx || !this.sfxGain || this.isMuted) return;
       const t = this.ctx.currentTime;
       switch(effect) {
           case 'select':
-              this.playOsc(1100, t, 0.05, 'triangle', 0.2, this.sfxGain);
+              this.playOsc(1100, t, 0.05, 'triangle', 0.2 * volume, this.sfxGain);
               break;
           case 'attack':
           case 'finisher_slash':
@@ -2917,9 +2917,9 @@ class AudioService {
               break;
           }
           case 'buff':
-              this.playOsc(400, t, 0.1, 'sine', 0.3, this.sfxGain);
-              this.playOsc(600, t + 0.1, 0.1, 'sine', 0.3, this.sfxGain);
-              this.playOsc(1000, t + 0.2, 0.3, 'sine', 0.2, this.sfxGain);
+              this.playOsc(400, t, 0.1, 'sine', 0.3 * volume, this.sfxGain);
+              this.playOsc(600, t + 0.1, 0.1, 'sine', 0.3 * volume, this.sfxGain);
+              this.playOsc(1000, t + 0.2, 0.3, 'sine', 0.2 * volume, this.sfxGain);
               break;
           case 'debuff':
               this.playOsc(500, t, 0.1, 'sawtooth', 0.3, this.sfxGain);
@@ -3001,6 +3001,12 @@ class AudioService {
           return;
       }
       this.runSfxWhenReady(() => this.playSynthSound(effect));
+  }
+
+  public playDungeonFullnessRecovery(cue: 'buff' | 'select' = 'buff') {
+      this.init();
+      if (!this.canPlaySfx()) return;
+      this.runSfxWhenReady(() => this.playSynthSound(cue, 0.65));
   }
 
   public playShogiGimmickSound(family: string, tier: number = 1) {

@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import sharp from 'sharp';
 import crypto from 'node:crypto';
 const routes=JSON.parse(await fs.readFile('src/components/school-dungeon/chronicles/routes.json','utf8')),records=[];
-for(const route of routes){const id=route.id.toLowerCase(),source=`public/sprites/dungeons-chronicles/npc/${id}.webp`,output=`public/sprites/dungeons-chronicles/map-npc/${id}.webp`;
+for(const route of routes.filter(route=>!route.art)){const id=route.id.toLowerCase(),source=`public/sprites/dungeons-chronicles/npc/${id}.webp`,output=`public/sprites/dungeons-chronicles/map-npc/${id}.webp`;
  const buffer=await fs.readFile(source),trimmed=await sharp(buffer).trim({background:'#00000000',threshold:5}).toBuffer();
  // Keep every costume/proportion; a single uniform scale, shared foot anchor (64,124).
  const resized=await sharp(trimmed).resize(112,120,{fit:'inside',kernel:'nearest'}).png().toBuffer({resolveWithObject:true});

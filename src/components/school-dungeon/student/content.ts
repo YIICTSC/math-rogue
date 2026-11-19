@@ -21,29 +21,120 @@ export const STUDENT_GEAR:StudentGear[]=[
 ];
 export const STUDENT_ITEM_DB=Object.fromEntries(STUDENT_GEAR.map(g=>[g.type,g]));
 export function studentGear(id:string,floor=20){const chapter=studentChapter(id);return STUDENT_GEAR.filter(g=>g.chapter===chapter&&g.floor<=floor);}
-export interface StoryAct {floor:number;title:string;englishTitle:string;speaker:string;englishSpeaker:string;lines:readonly (readonly [string,string])[];}
+export type StoryAct = {floor:number;title:string;englishTitle:string;lines:readonly (readonly [string,string])[];};
 export const STUDENT_STORIES:Record<StudentChapter,readonly StoryAct[]>={
- elementary:[
- {floor:1,title:'消えた帰り道',englishTitle:'The missing way home',speaker:'旅の先生',englishSpeaker:'Traveling teacher',lines:[['下校のベルが鳴ったのに、校門の先の道が白く消えてしまった。','The school bell rang, but the road beyond the gate vanished.'],['図書室の地図帳が破れて、道の記憶が迷宮に散らばったんだ。','The library atlas was torn; memories of the roads are scattered through the labyrinth.'],['20階の校長先生をたずねよう。拾った道具と、友だちを思う知恵が道しるべになる。','Find the principal on floor 20. Your supplies and care for friends will guide you.']]},
- {floor:5,title:'小さな約束',englishTitle:'A small promise',speaker:'地図を守る同級生',englishSpeaker:'Atlas keeper',lines:[['この町の子も帰り道を探している。一人で急ぐより、助け合って進もう。','The children here are looking for home too. Help each other instead of rushing alone.'],['紙飛行機に書いた約束は「だれも置いていかない」。','Our paper-plane promise is: leave no one behind.'],['倉庫と宿を使えば、失敗してもまた出発できるよ。','The warehouse and inn will help us set out again, even after a setback.']]},
- {floor:10,title:'川の向こうの一頁',englishTitle:'A page across the river',speaker:'地図を守る同級生',englishSpeaker:'Atlas keeper',lines:[['川辺で地図の一頁を見つけた。でも、帰るための矢印がまだない。','We found an atlas page by the river, but its homeward arrow is missing.'],['道具を組み合わせて、知らなかった道を見つけてみよう。','Combine your equipment and look for a route you did not know.'],['冒険手帳に残した発見が、帰り道の矢印になるんだ。','The discoveries in your notebook will become that arrow.']]},
- {floor:15,title:'みんなの道しるべ',englishTitle:'A signpost for everyone',speaker:'旅の先生',englishSpeaker:'Traveling teacher',lines:[['集めた地図が、友だちの足跡を映し始めた。','The gathered maps are beginning to reveal our friends’ footsteps.'],['最後の扉は、いちばん強い人だけでは開けない。','The final door cannot be opened by strength alone.'],['拾う、守る、引き返す。ここまで選んだ行動が、君の答えだよ。','Gathering, protecting, and knowing when to turn back: your choices are your answer.']]},
- {floor:20,title:'校長先生の問い',englishTitle:'The principal’s question',speaker:'校長先生',englishSpeaker:'The principal',lines:[['よくここまで来たね。私は帰り道を奪ったのではなく、迷った道を守っていた。','You have come far. I did not steal the roads; I have been protecting the lost ones.'],['最後の試練を越えて、だれのために道をつなぐのか見せてほしい。','Pass this final trial and show me whom you wish to connect these roads for.'],['一人で進んだ君にも、仲間と来た君にも、ここまでの工夫が力になっている。','Whether you traveled alone or with friends, your ingenuity has brought you here.']]},
- {floor:21,title:'おかえりの地図',englishTitle:'The welcome-home atlas',speaker:'帰り道の仲間たち',englishSpeaker:'Your homeward companions',lines:[['白かった道に、みんなの家までの線が戻った。','Lines leading to everyone’s homes returned to the blank roads.'],['君の名前は地図のすみに、小さな案内人として刻まれた。','Your name was written in the atlas as a young guide.'],['明日の放課後にも、まだ知らない道が待っている。','After school tomorrow, new roads will be waiting.']]},
+ "elementary":[
+  {floor:1,title:"消えた帰り道",englishTitle:"The missing way home",lines:[
+   ["下校のベルが鳴った。ところが、{hero}が校門を出ると、いつもの帰り道が白い行き止まりになっていた。","The dismissal bell rang. Beyond the gate, {hero} found a blank wall of white where the road home should have been."],
+   ["図書室の地図帳を開くと、町を描いた紙が破れている。風に飛ばされたページは、校門の下に現れた階段へ落ちていった。","The atlas in the library had lost its map of town. The loose pages had blown down a new staircase beneath the gate."],
+   ["校長先生は、先に階段を下りていった。入口には「20階で待つ。拾った紙は捨てるな」と、急いで書いたメモが残っていた。","The principal had gone down first. A hurried note at the entrance read, “Meet me on floor 20. Keep any paper you find.”"],
+   ["{hero}は破れた地図帳を抱え直し、一段目を下りた。","{hero} tucked the torn atlas under an arm and stepped down."],
+  ]},
+  {floor:5,title:"小さな約束",englishTitle:"A small promise",lines:[
+   ["中継町に着いた{hero}の靴先へ、紙飛行機がすべり込んできた。折り目を開くと、同じ学校の子の字だった。","A paper plane slid up to {hero}'s shoe in the relay town. The handwriting inside belonged to a pupil from the same school."],
+   ["「一人で近道を探すより、ここを通った人が知らせを残そう」。裏には、小さな矢印と、おにぎりの絵が描いてあった。","“Instead of searching for shortcuts alone, let's leave messages for the next person.” A little arrow and a rice ball were drawn on the back."],
+   ["宿の人が、おにぎりの絵を見て笑った。あたたかいのがまだ一つあるよ、と教えてくれた。","The innkeeper smiled at the picture. There was one warm rice ball left, they said."],
+   ["{hero}も次の人に伝言を残した。道を探す前に、ここで少し休めると書いた。","{hero} left a message too, passing on that this was a good place to rest before looking for the road."],
+  ]},
+  {floor:10,title:"川の向こうの一頁",englishTitle:"A page across the river",lines:[
+   ["川に着いた{hero}は、渡し場の柱にふやけた地図のページが引っかかっているのを見つけた。","At the ferry landing, {hero} spotted a soggy map page caught on a post."],
+   ["紙には川しか残っていない。近くにいた子が「橋なら、向こうの柳の下だよ」と、かじりかけのおにぎりで指した。","Only the river was left on the paper. A child pointed with a half-eaten rice ball. “The bridge is by that willow.”"],
+   ["言われた通りに歩くと、木の下に古い板橋があった。地図の線がなくても、覚えている人がいれば描き直せる。","Just as the child said, there was an old plank bridge under the tree. If someone remembered a road, the line could be drawn again."],
+   ["{hero}はページを乾かし、橋の位置と柳の絵を描いておいた。","{hero} dried the page and marked where the bridge and the willow stood."],
+  ]},
+  {floor:15,title:"みんなの道しるべ",englishTitle:"A signpost for everyone",lines:[
+   ["{hero}が集めた紙を並べると、よく知っている町の形になった。校門から先だけ、まだ線が切れている。","When {hero} laid out the pages, they made the shape of the familiar town. Only the line beyond the gate still broke off."],
+   ["見つけた橋の印や、町の人から聞いた近道を書き足した。余白には、休める場所も小さく描いた。","The new map gained the bridge, the shortcuts people had mentioned, and little marks in the margins for places to rest."],
+   ["校長先生のメモには、端にもう一行あった。「誰かに渡せる地図を持っておいで」。","There was one more line along the edge of the principal's note: “Bring a map you could hand to someone else.”"],
+   ["{hero}は地図を折った。初めて通る子にも分かるよう、表の角に大きく「学校」と書いた。","{hero} folded the map and wrote “SCHOOL” in one corner so even a first-time traveler could find it."],
+  ]},
+  {floor:20,title:"校長先生の問い",englishTitle:"The principal’s question",lines:[
+   ["いちばん下の階で、{hero}は出口の前に立つ校長先生に追いついた。先生の靴にも、同じ泥がついていた。","On the bottom floor, {hero} caught up with the principal by the exit. The principal had the same mud on their shoes."],
+   ["校長先生は地図を受け取り、柳の絵を見つけた。「そこは私も迷ったよ。これなら次の子は渡れるね」。","The principal took the map and found the willow. “I got lost there too. The next child will find the crossing with this.”"],
+   ["出口を開くには、ここまで来た旅人が最後の実技を通らなければならない。「相手は私だ。迷宮で覚えたことを見せてごらん」と、先生は地図を預かった。","The exit would open when the traveler passed a final practical test. The principal took the map. “I will be your opponent. Show me what you learned along the way.”"],
+   ["{hero}は道具を取り出した。これで帰り道を描くだけでなく、みんなが通れるようにする。","{hero} reached for the supplies. The road was drawn. Now people needed to be able to use it."],
+  ]},
+  {floor:21,title:"おかえりの地図",englishTitle:"The welcome-home atlas",lines:[
+   ["校門をくぐった{hero}の前に、見慣れた道が続いていた。川までは、あの柳が目印だ。","Beyond the gate, {hero} found the familiar road again. The willow still marked the way down to the river."],
+   ["地図は図書室の壁に貼られた。橋の絵を見つけた子が、余白に自分の家を描き足した。","The map went up on the library wall. A child spotted the bridge and drew their house in the margin."],
+   ["校長先生が「おかえり」と言う。夕方に聞くその一言は、朝に聞く「おはよう」と同じくらい、町に似合っていた。","The principal said, “Welcome home.” It belonged in the town at dusk as surely as “Good morning” did at dawn."],
+   ["{hero}は明日のためにえんぴつを削り、今日の帰り道をゆっくり歩いた。","{hero} sharpened a pencil for tomorrow and took the road home slowly today."],
+  ]},
  ],
- 'high-school':[
- {floor:1,title:'終業ベルの向こう',englishTitle:'Beyond the final bell',speaker:'文化祭実行委員',englishSpeaker:'Festival committee',lines:[['文化祭の前夜、校舎の時計が止まり、部室へ続く廊下が迷宮に変わった。','On the eve of the festival, the school clock stopped and the club corridors became a labyrinth.'],['なくなった準備ノートを取り戻さないと、みんなの作品が完成しない。','We must recover the preparation notebook to finish everyone’s work.'],['20階の時計塔で、校長先生が時を支えている。各部の道具を借りて向かおう。','The principal is holding time together in the clock tower on floor 20. Borrow the clubs’ equipment and go.']]},
- {floor:5,title:'途切れた連絡網',englishTitle:'The broken message chain',speaker:'文化祭実行委員',englishSpeaker:'Festival committee',lines:[['旅の町に、部員たちの伝言が届いていた。','Messages from the club members have reached this town.'],['自分の担当だけ終わっても、文化祭は開けない。','Finishing only our own tasks will not open the festival.'],['道具を整え、足りないものを分け合って、次の連絡先を探そう。','Prepare your equipment, share what is needed, and find the next link.']]},
- {floor:10,title:'失敗の書き直し',englishTitle:'Rewriting a setback',speaker:'夜の図書係',englishSpeaker:'Night librarian',lines:[['ノートには成功より、試して失敗した記録がたくさんあった。','The notebook holds more records of experiments and setbacks than successes.'],['消してしまうより、次の工夫を書き足そう。','Rather than erase them, write down what to try next.'],['拾った装備の長所を合わせれば、予定になかった道も開く。','Combine your equipment’s strengths to open a route you never planned.']]},
- {floor:15,title:'一人分の明かり',englishTitle:'One person’s light',speaker:'文化祭実行委員',englishSpeaker:'Festival committee',lines:[['止まった時計の奥で、一人分ずつ明かりがともっている。','Behind the stopped clock, lights are coming on, one for each person.'],['だれかの得意を、だれかの苦手につなげよう。','Connect someone’s strength to someone else’s difficulty.'],['この先で必要なのは、一位の証明より最後まで届ける勇気だ。','What lies ahead calls for the courage to deliver, not proof of first place.']]},
- {floor:20,title:'時計塔の最終確認',englishTitle:'The clock tower’s final check',speaker:'校長先生',englishSpeaker:'The principal',lines:[['時計は壊れたのではない。置き去りの気持ちが針を止めていた。','The clock is not broken. Feelings left behind have stopped its hands.'],['最後の試練で、積み重ねた準備を見せてほしい。','Show what your preparation has taught you in this final trial.'],['結果を一人で抱えず、帰ったら仲間と分かち合いなさい。','When you return, share the outcome rather than carry it alone.']]},
- {floor:21,title:'開幕のベル',englishTitle:'The opening bell',speaker:'文化祭の仲間たち',englishSpeaker:'Festival friends',lines:[['時計が動き、校庭から開幕のベルが響いた。','The clock began to move, and the opening bell rang across the schoolyard.'],['完成したノートには、全員の名前と、直した跡が残っている。','The completed notebook carries everyone’s name, and the marks of every revision.'],['君たちの文化祭は、ここから始まる。','Your festival begins here.']]},
+ "high-school":[
+  {floor:1,title:"終業ベルの向こう",englishTitle:"Beyond the final bell",lines:[
+   ["文化祭の前日、{hero}が廊下を走ると、どの時計も同じ時刻で止まっていた。その先は見知らぬ階段だ。","The day before the festival, every clock {hero} passed in the hall showed the same stopped time. An unfamiliar stairway waited ahead."],
+   ["準備ノートには、各部が明日までにやることを書いてある。そのノートが風にあおられ、階段の奥へ落ちてしまった。","The festival notebook listed what every club still had to do by tomorrow. A gust carried it down the stairs."],
+   ["先生が階段から顔を出した。「紙を集めて20階に持ってきて。私は時計塔で、針が急に進まないように押さえておく」。","A teacher called from the stairs. “Collect the pages and bring them to floor 20. I'll keep the clock hands from jumping ahead.”"],
+   ["{hero}は明日の掲示板に「準備中」と書き、階段へ向かった。","{hero} wrote “Still preparing” on the noticeboard for tomorrow and headed for the stairs."],
+  ]},
+  {floor:5,title:"途切れた連絡網",englishTitle:"The broken message chain",lines:[
+   ["中継町の掲示板で、{hero}は部員の伝言を見つけた。「美術部より。暗くて看板が描けません」。","On the relay town's noticeboard, {hero} found a message. “From the art club. It's too dark to paint the sign.”"],
+   ["すぐ横に「電灯なら貸せる。電池がない」と、別の筆跡で書いてあった。","Beside it, another hand had written, “We can lend you a lamp. No batteries.”"],
+   ["自分の担当だけ見ていたら、二つの伝言がつながることもなかった。","Nobody would have put the two messages together by looking only at their own assignment."],
+   ["{hero}は電池の預け先を書き足し、手持ちの道具をそろえて次の階へ急いだ。","{hero} wrote where to find spare batteries, checked the gear, and headed down to the next floor."],
+  ]},
+  {floor:10,title:"失敗の書き直し",englishTitle:"Rewriting a setback",lines:[
+   ["川辺で{hero}が拾ったページは、赤字だらけだった。飾りが重くて落ちた日や、予行で音が出なかった日が残っている。","The page {hero} found by the river was covered in red ink. It listed the day the decorations fell and the rehearsal where the sound cut out."],
+   ["よく読むと、そのあと何を直したかも書いてあった。去年の誰かが、同じ係に引き継ぐつもりで残したらしい。","A closer look showed what had been fixed. Someone from last year must have wanted the next crew to know."],
+   ["きれいに書き直したいところをこらえ、{hero}は泥だけそっとふき取った。","{hero} resisted the urge to copy it out neatly and wiped away only the mud."],
+   ["乾いたページを折りたたむ。明日もし失敗しても、これならその先を考えられる。","The dry page folded neatly. Tomorrow, if something went wrong, there would be somewhere to start."],
+  ]},
+  {floor:15,title:"一人分の明かり",englishTitle:"One person’s light",lines:[
+   ["中継町の奥が明るい。{hero}が近づくと、部の違う生徒たちが、ひとつの作業台を囲んでいた。","Light spilled from the end of the relay town. As {hero} came closer, students from several clubs were sharing one workbench."],
+   ["電灯が一つしかないので、手の空いた人が持っている。看板には、やっと最後の一文字が入ろうとしていた。","There was only one lamp, held by whoever had a hand free. The painted sign was nearly down to its final letter."],
+   ["集めたノートの最後に、まだ誰も書いていない欄があった。「困ったら、どこへ行く？」","One space was still blank at the back of the notebook: “Where can you go if you need help?”"],
+   ["{hero}は「明かりのある作業台」と書いて、残りのページを時計塔へ運んだ。","{hero} wrote “To the workbench with the light” and carried the pages to the clock tower."],
+  ]},
+  {floor:20,title:"時計塔の最終確認",englishTitle:"The clock tower’s final check",lines:[
+   ["時計塔で、{hero}は針を支える校長先生を見つけた。歯車の間から、最後のページの角がのぞいている。","In the clock tower, {hero} found the principal holding the hands in place. The corner of the last page stuck out between two gears."],
+   ["準備ノートが歯車を止めていたのだ。ここで急に抜くと、止まった分だけ一気に時が進んでしまう。","The notebook had jammed the gears. Pull it out too fast and time would leap ahead."],
+   ["「ここの歯車は、最後の実技を終えたら外せる。実技の相手は私だ」。校長先生は、試合のあとに動かす歯車をノートの余白に描いた。","“This gear comes free once you pass the last practical test. I will be your opponent.” The principal marked the gear they would move after the match."],
+   ["{hero}は手順をよく見て、実行へ移った。何も書いていない頃より、ずっとやることがはっきりしていた。","{hero} studied the sketch and got to work. It was much clearer than when the page was blank."],
+  ]},
+  {floor:21,title:"開幕のベル",englishTitle:"The opening bell",lines:[
+   ["時計が動く。{hero}が校庭へ戻った時、放送係はまだ開幕の一言を練習していた。","The clock started moving. When {hero} returned to the schoolyard, the announcer was still practicing the opening."],
+   ["いちばん目立つところに、あの看板が掛かった。一文字だけ色が違うのは、夜に描いた証拠だと言って、みんなが笑った。","The sign went up in the most visible spot. Everyone laughed about the one odd-colored letter. It was proof they had painted it at night."],
+   ["準備ノートには、直した跡も、電池の置き場所も残っている。来年の係なら、まずそこから読める。","The notebook kept its corrections and even the note about batteries. Next year's crew would know where to start."],
+   ["開幕のベルが鳴った。{hero}はもう時計を見ないで、できあがった看板の下を歩いた。","The opening bell rang. {hero} walked under the finished sign without looking at the clock."],
+  ]},
  ],
- magic:[
- {floor:1,title:'星図の頁を追って',englishTitle:'Following the star-atlas pages',speaker:'星図の司書',englishSpeaker:'Star-atlas librarian',lines:[['魔法学園の星図がほどけ、教室と星界を結ぶ門が散らばった。','The magic academy’s star atlas unraveled, scattering the gates between classrooms and the astral realm.'],['星図の頁は、迷宮を歩く人の選択に反応する。','Its pages respond to the choices made by those who walk the labyrinth.'],['20階で封印を支える校長先生へ、失われた道の記録を届けよう。','Deliver the lost routes to the principal, who maintains the seal on floor 20.']]},
- {floor:5,title:'月の町の伝言',englishTitle:'A message in the moon town',speaker:'月の町の案内人',englishSpeaker:'Moon-town guide',lines:[['ここは星界と学校の間にある、旅人の町。','This travelers’ town lies between the school and the astral realm.'],['属性が違っても、同じ空を見上げているんだ。','Our elements differ, but we all look up at the same sky.'],['筆杖と守りの装備を整えて、次の頁へ進もう。','Prepare your quill wand and protective gear, then move on to the next page.']]},
- {floor:10,title:'影に残る名前',englishTitle:'Names left in shadow',speaker:'星図の司書',englishSpeaker:'Star-atlas librarian',lines:[['影の中に、星図から消えた生徒の名前が見つかった。','In the shadows, we found the names of students erased from the atlas.'],['強い魔法で消すのではなく、忘れないための印を残そう。','Leave marks so they are remembered, rather than erase the shadows with force.'],['仲間を守った選択が、星の線をつなぎ直している。','Each choice to protect a companion reconnects the star lines.']]},
- {floor:15,title:'ほどけない約束',englishTitle:'A promise that holds',speaker:'月の町の案内人',englishSpeaker:'Moon-town guide',lines:[['集まった頁が、君の歩いた道を星座に変えた。','The gathered pages have turned your route into a constellation.'],['どんな属性にも、照らせる場所と届かない場所がある。','Every element has places it can illuminate, and places it cannot reach.'],['だから違う力の持ち主と、同じ約束を結ぶんだ。','That is why we share one promise with people whose powers differ.']]},
- {floor:20,title:'封印の向こう側',englishTitle:'Beyond the seal',speaker:'校長先生',englishSpeaker:'The principal',lines:[['星図は完成を待っていたのではない。新しい道を描く人を待っていた。','The atlas was not waiting to be finished. It was waiting for someone to draw a new route.'],['最後の試練は、力を誇るためではなく門を安全に開くため。','The final trial is for opening the gate safely, not for boasting of power.'],['集めた知恵と道具で、二つの世界をつないでみなさい。','Use your knowledge and equipment to connect the two worlds.']]},
- {floor:21,title:'明日へ続く星座',englishTitle:'A constellation toward tomorrow',speaker:'星図の司書',englishSpeaker:'Star-atlas librarian',lines:[['学校の窓に、見たことのない星座が映った。','A new constellation appeared in the school windows.'],['星図の新しい頁には、君と旅の仲間の足跡が光っている。','Your footsteps and your companions’ shine on the atlas’s new page.'],['世界をつなぐ冒険は、これからも書き足せる。','The adventure connecting these worlds can always gain another chapter.']]},
- ]};
+ "magic":[
+  {floor:1,title:"星図の頁を追って",englishTitle:"Following the star-atlas pages",lines:[
+   ["{hero}が魔法学園の窓を閉めると、星図から一つずつ星が落ちていった。外にいる生徒が帰る門まで消えてしまう。","As {hero} shut the academy window, stars began falling from the atlas. The gate students used to come home vanished too."],
+   ["司書が頁の切れ端を持って駆けてきた。「星は地面に落ちたんじゃない。星図の下に、階段ができてる」。","The librarian hurried in with a scrap of paper. “The stars didn't fall to the ground. Look. There are stairs under the atlas.”"],
+   ["校長先生は20階の門を開ける準備をしている。そこまでに、散った星の頁を拾い集めよう。","The principal was preparing the gate on floor 20. The fallen pages needed to reach it."],
+   ["{hero}は足元を照らした。最初の頁が階段の隅に光り、進む方角を教えてくれた。","{hero} lit the stairs. The first page gleamed in a corner, showing which way to go."],
+  ]},
+  {floor:5,title:"月の町の伝言",englishTitle:"A message in the moon town",lines:[
+   ["中継町で、{hero}は片方ずつ違う色の灯りを見た。一つは学校側、もう一つは星界から来た旅人のためだ。","In the relay town, {hero} found two lights of different colors. One served travelers from school and the other those from the astral realm."],
+   ["小さな宿で、異なる属性の旅人が同じ地図を囲んでいた。消えた門の場所に、誰かが熱い茶をこぼした跡がある。","Travelers with different kinds of magic bent over one map in the inn. There was a tea stain where the missing gate should be."],
+   ["「茶の輪のところが帰り道だよ」。宿の人がそう言って、星の頁を一枚、乾いた布から出してくれた。","“The road home is by the tea ring,” the innkeeper said, taking one star page from a dry cloth."],
+   ["{hero}は受け取り、次の人が迷わないよう、その頁にも小さな丸を描いた。","{hero} took it and drew a small circle on that page too, so the next traveler could find it."],
+  ]},
+  {floor:10,title:"影に残る名前",englishTitle:"Names left in shadow",lines:[
+   ["{hero}が川の暗がりで拾った頁には、星ではなく、生徒の名前が書かれていた。","The page {hero} found in the shadows by the river held students' names instead of stars."],
+   ["以前に門が閉じたとき、帰れなくなった人が、自分で名前を残したらしい。最後の一人の字だけ、かすれていた。","People who were stranded when the gate closed before seem to have written their names here. The last person's writing had faded."],
+   ["魔法を強くすると紙ごと焼けそうだ。{hero}は灯りを下げ、読めた文字をゆっくり別の頁に写した。","Too much magic might burn the paper. {hero} lowered the light and copied the letters that could still be read."],
+   ["読めなかった場所は空けておいた。町に帰ったら、覚えていそうな人に聞いてみよう。","The unreadable part stayed blank. Someone in town might remember when they got back."],
+  ]},
+  {floor:15,title:"ほどけない約束",englishTitle:"A promise that holds",lines:[
+   ["{hero}は中継町の机に星図を広げた。頁を重ねると、学校へ戻る線が出る。最後の角だけが合わない。","{hero} spread the atlas across a table in the relay town. The pages made a route back to school, all but the last corner."],
+   ["線の先を探すあいだ、風を止める人と、机を照らす人がいた。どちらがいなくても、紙は読めなかった。","While they searched for the end of the line, one traveler held back the wind and another lit the table. Both made it possible to read."],
+   ["最後の角は、ただ裏返しになっていただけだった。誰からともなく笑いがもれた。","The last corner was simply upside down. A laugh went around the table."],
+   ["{hero}は道を描いてくれた人の名も、星の隣に書き足した。帰りの門には、全員の仕事が入っていた。","{hero} wrote the helpers' names beside the stars. Everyone had a part in the road home."],
+  ]},
+  {floor:20,title:"封印の向こう側",englishTitle:"Beyond the seal",lines:[
+   ["いちばん下の階で、{hero}は門を支える校長先生に追いついた。開いたすき間から、学園の廊下の音が聞こえる。","On the lowest floor, {hero} found the principal holding the gate steady. A sound like the academy hallway came through the gap."],
+   ["集めた頁を置くと、門の形がはっきりした。あとは門を開く実技に合格するだけだ。校長先生が向かいの印に立ち、対戦の構えを取った。","The gathered pages brought the gate into focus. Passing the final practical test would open it. The principal took their place on the opposite mark, ready to spar."],
+   ["天井に、新しい印が見えた。町で写した文字と同じ形だ。誰かが前にも、同じ場所まで帰ろうとしたのだ。","A mark on the ceiling matched the letters copied in town. Someone had once tried to get home this far too."],
+   ["{hero}は星図を安全な台へ置き、自分の側の印に立った。","{hero} set the atlas safely on a stand and stepped onto the other mark."],
+  ]},
+  {floor:21,title:"明日へ続く星座",englishTitle:"A constellation toward tomorrow",lines:[
+   ["門をくぐった{hero}は、学園の廊下に戻った。向こうから次々に靴音がして、遅くなった生徒たちも帰ってきた。","{hero} stepped through into the academy hallway. Footsteps followed as the students who'd been away too long came home."],
+   ["司書が星図を壁に戻し、かすれていた名前の空欄を見た。「この人なら知ってるよ。今は別の町で先生をしている」。","The librarian put the atlas back and saw the blank space where the name had faded. “I know who that was. They teach in another town now.”"],
+   ["書き足した名前の上に、小さな星が光った。窓の外にも、同じ場所に新しい光が見えた。","A little star shone over the restored name. Outside the window, a new point of light appeared in the same place."],
+   ["{hero}は星図にまだ空白があるのを確かめた。次に誰かが見つけた道も、そこに描ける。","{hero} checked that there was still blank space on the atlas. The next person to find a road could draw it there too."],
+  ]},
+ ],
+};

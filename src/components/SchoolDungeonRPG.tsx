@@ -1614,7 +1614,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           const recovery = 10; // 10回復
           setBelly(prev => Math.min(maxBelly, prev + recovery));
           addLog(`計算全問正解！満腹度が${recovery}回復した！`, "green");
-          audioService.playSound('buff');
+          audioService.playDungeonFullnessRecovery();
       } else {
            // 何もしない、またはログ出力
            if (correctCount > 0) addLog(`${correctCount}問正解。`);
@@ -2430,7 +2430,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
               setSelectedItemIndex(prev => Math.min(prev, inventory.length - 2));
               setMenuOpen(false);
               cueStudentAction(adventure.hero.id,'use'); processTurn(player.x, player.y, { belly: nextBelly, hp: nextHp });
-              audioService.playSound('select');
+              if (nextBelly > belly) audioService.playDungeonFullnessRecovery('select');
+              else audioService.playSound('select');
               return; 
           }
           else if (item.type.includes('HEAL') || item.type === 'GRASS_LIFE') { 

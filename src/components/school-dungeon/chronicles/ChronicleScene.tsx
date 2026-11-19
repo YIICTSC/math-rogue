@@ -1,7 +1,7 @@
 import {audioService} from '../../../services/audioService';
 import {hasEstablishedDungeonVoice} from '../student/battleVoicePolicy';
 import React from 'react';
-import {CHRONICLE_CHOICES,type ChronicleBranch,type chronicleScene} from './story';
+import {type ChronicleBranch,type chronicleScene} from './story';
 import ConversationStage,{type Reaction} from '../../dialogue/ConversationStage';
 import {chronicleHero} from './story';
 import {studentHero} from '../student/content';
@@ -15,8 +15,8 @@ export function ChronicleScene({scene,line,text,advance,choose,replay=false,onCl
  const reaction=(scene.ending?endingMoods:sequence[Math.min(scene.stage,3)])[Math.min(line,5)],listening=scene.ending?reaction:scene.stage===1?'concern':'neutral';
  return <ConversationStage className="dialogue-chronicle" title={text(...scene.title)} eyebrow={`${scene.ending?text('あなたが選んだ結末','The ending you chose'):text('迷宮の年代記','Dungeon chronicle')} · ${scene.stage+1}/4`} background={scene.background}
  left={{id:scene.heroId,name:text(hero.name,profile.en),reaction:speaker==='left'?reaction:listening}}
- right={{id:'chronicle-'+scene.routeId.toLowerCase(),name:text(...scene.npc),reaction:speaker==='right'?reaction:listening}}
+ right={{id:scene.actorId,name:text(...scene.npc),reaction:speaker==='right'?reaction:listening}}
  active={speaker} speaker={text(...current.speaker)} text={text(...current.text)} lineKey={`${scene.routeId}:${scene.stage}:${line}`} progress={`${Math.min(line+1,scene.lines.length)} / ${scene.lines.length}`} onClose={onClose} closeLabel={closeLabel||text('冒険に戻る','Resume')}>
- {done&&!scene.ending&&!replay?<div className="conversation-choice-group chronicle-choices">{CHRONICLE_CHOICES.map((c,i)=><button autoFocus={i===0} data-gamepad-initial-choice={i===0} key={c.id} onClick={()=>choose(c.id)}><strong>{text(...c.label)}</strong><small>{text(...c.detail)}</small></button>)}</div>:<button autoFocus data-gamepad-initial-choice className="conversation-primary" onClick={advance}>{!done?text('次のことば','Next'):replay?text('記録へ戻る','Back to records'):text('結末を記録して町へ帰る','Record ending and return to town')}</button>}
+ {done&&!scene.ending&&!replay?<div className="conversation-choice-group chronicle-choices">{scene.choices.map((c,i)=><button autoFocus={i===0} data-gamepad-initial-choice={i===0} key={c.id} onClick={()=>choose(c.id)}><strong>{text(...c.label)}</strong><small>{text(...c.detail)}</small></button>)}</div>:<button autoFocus data-gamepad-initial-choice className="conversation-primary" onClick={advance}>{!done?text('次のことば','Next'):replay?text('記録へ戻る','Back to records'):text('結末を記録して町へ帰る','Record ending and return to town')}</button>}
  </ConversationStage>;
 }

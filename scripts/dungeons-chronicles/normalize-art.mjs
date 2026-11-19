@@ -6,7 +6,7 @@ const manifestPath='assets-source/dungeons-chronicles/art-generation.json';
 const previous=JSON.parse(await fs.readFile(manifestPath,'utf8').catch(error=>{if(error.code==='ENOENT')return '{"records":[]}';throw error;}));
 await fs.writeFile('src/components/school-dungeon/chronicles/routes.json',JSON.stringify(routes,null,2)+'\n');
 const records=[];const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
-for(const r of routes)for(const type of ['npc']){
+for(const r of routes.filter(route=>!route.art))for(const type of ['npc']){
  const source=`assets-source/dungeons-chronicles/generated/${r.id.toLowerCase()}-${type}.png`,output=`public/sprites/dungeons-chronicles/${type}/${r.id.toLowerCase()}.webp`;
  let data;try{data=await fs.readFile(source);}catch(error){
   if(error.code!=='ENOENT')throw error;

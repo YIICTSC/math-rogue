@@ -8,7 +8,7 @@ const read=async path=>JSON.parse(await fs.readFile(path,'utf8'));
 const plan=await read('assets/dialogue/cast.json'),generation=await read('assets/dialogue/generation.json'),layout=await read('assets/dialogue/atlas-layouts.json');
 async function moduleOf(path){const r=await build({entryPoints:[path],bundle:true,write:false,format:'esm',platform:'node'});return import('data:text/javascript;base64,'+Buffer.from(r.outputFiles[0].text).toString('base64'));}
 const {DIALOGUE_PORTRAITS:portraits}=await moduleOf('src/data/dialoguePortraits.generated.ts');
-const {CHRONICLE_HEROES:heroes,CHRONICLE_ROUTES:routes}=await moduleOf('src/components/school-dungeon/chronicles/story.ts');
+const {CHRONICLE_HEROES:heroes,CHRONICLE_ROUTES:routes,chronicleNpcArt}=await moduleOf('src/components/school-dungeon/chronicles/story.ts');
 const {starDialogue,conversationWords}=await moduleOf('src/mini-games/star-tide/conversation.ts');
 const {JOURNEY_TALKS,ROOM_TALKS}=await moduleOf('src/mini-games/star-tide/quests.ts');
 assert.deepEqual(plan.expressions,['neutral','joy','concern','resolve']);
@@ -16,7 +16,7 @@ assert.equal(plan.cast.length,78);assert.equal(generation.records.length,39);ass
 assert.equal(new Set(plan.cast.map(a=>a.id)).size,78);
 assert.deepEqual(Object.keys(portraits).sort(),plan.cast.map(a=>a.id).sort());
 for(const hero of heroes)assert(portraits[hero.id],hero.id);
-for(const route of routes)assert(portraits['chronicle-'+route.id.toLowerCase()],route.id);
+for(const route of routes)assert(portraits[chronicleNpcArt(route.id).actorId],route.id);
 let frames=0,bytes=0;
 for(const batch of plan.batches){
  const report=layout.reports.find(r=>r.id===batch.id),source=generation.records.find(r=>r.id===batch.id);

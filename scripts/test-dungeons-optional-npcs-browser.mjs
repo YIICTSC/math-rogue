@@ -2,10 +2,11 @@ import {waitForConversationArt} from './helpers/dialogue.mjs';
 import assert from 'node:assert/strict';import fs from 'node:fs/promises';import {createServer} from 'vite';import {chromium} from 'playwright';
 const entry=`.dungeons-revision-${process.pid}.tsx`,out='tmp/dungeons-optional-npcs';let server,browser;
 try{
- await fs.mkdir(out,{recursive:true});await fs.writeFile(entry,`import React from'react';import{createRoot}from'react-dom/client';import D1 from'./src/components/SchoolDungeonRPG';import D2 from'./src/components/SchoolDungeonRPG2';import'./src/styles.css';import{audioService as audio}from'./src/services/audioService';audio.playBGM=async()=>{};audio.playDungeonChronicleVoiceFile=async()=>false;audio.canPlayConversationVoice=()=>false;for(const m of ['playSound','playBattleSound','playAttackEffectSound','playStatusEffectSound','playDungeonsAbilitySound'])audio[m]=()=>{};createRoot(document.getElementById('root')).render(new URLSearchParams(location.search).get('game')==='2'?<D2 languageMode="ENGLISH" onBack={()=>{}}/>:<D1 languageMode="ENGLISH" onBack={()=>{}}/>);`);
- server=await createServer({logLevel:'error',cacheDir:'node_modules/.vite-dungeons-optional-npcs',optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react-dom','react/jsx-runtime','three']},server:{host:'127.0.0.1',port:0,hmr:false},plugins:[{name:'revision',enforce:'pre',transform(code,id){if(/\/components\/SchoolDungeonRPG2?\.tsx$/.test(id))return code.replace(/^  const \{ C0, C1, C2, C3 \} = currentTheme.colors;$/m,` (window as any).__game={player,enemies,inventory,map,menuOpen,shopState,setShopState,setGameOver,setMenuOpen,setPlayer,setEnemies,setInventory,setFloorItems,setTraps,setMap,setFloor,handleActionBtn,handleMoveInput,handleItemAction,handleShopAction,renderGame,visualEffects};\n  const { C0, C1, C2, C3 } = currentTheme.colors;`);if(id.endsWith('/school-dungeon/useSchoolAdventure.ts'))return code.replace(' return {known:', ' const api={known:').replace('\n };\n}\nexport type','\n };\n(window as any).__adventure=api;(window as any).__bridge=b.current;return api;\n}\nexport type');},configureServer(s){s.middlewares.use('/__revision',async(req,res)=>{res.setHeader('Content-Type','text/html');res.end(await s.transformIndexHtml(req.url,`<meta name="viewport" content="width=device-width,initial-scale=1"><body style="margin:0"><div id="root" style="height:100dvh;width:100vw"></div><script type="module" src="/${entry}"></script>`));});}}]});await server.listen();browser=await chromium.launch({headless:true,args:['--no-sandbox']});const page=await browser.newPage({viewport:{width:390,height:844},hasTouch:true}),errors=[];page.setDefaultTimeout(60000);page.on('pageerror',e=>{errors.push(e.message);console.error(e.message);});page.on('dialog',d=>d.accept());
+ await fs.mkdir(out,{recursive:true});await fs.writeFile(entry,`import React from'react';import{createRoot}from'react-dom/client';import D1 from'./src/components/SchoolDungeonRPG';import D2 from'./src/components/SchoolDungeonRPG2';import'./src/styles.css';import{audioService as audio}from'./src/services/audioService';audio.playBGM=async()=>{};audio.playDungeonChronicleVoiceFile=async()=>false;audio.canPlayConversationVoice=()=>false;(window as any).__fullnessCues=[];audio.playDungeonFullnessRecovery=cue=>(window as any).__fullnessCues.push(cue||'buff');for(const m of ['playSound','playBattleSound','playAttackEffectSound','playStatusEffectSound','playDungeonsAbilitySound'])audio[m]=()=>{};createRoot(document.getElementById('root')).render(new URLSearchParams(location.search).get('game')==='2'?<D2 languageMode="ENGLISH" problemMode={'ADDITION' as any} onBack={()=>{}}/>:<D1 languageMode="ENGLISH" problemMode={'ADDITION' as any} onBack={()=>{}}/>);`);
+ server=await createServer({logLevel:'error',cacheDir:'node_modules/.vite-dungeons-optional-npcs',optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react-dom','react/jsx-runtime','three']},server:{host:'127.0.0.1',port:0,hmr:false},plugins:[{name:'revision',enforce:'pre',transform(code,id){if(/\/components\/SchoolDungeonRPG2?\.tsx$/.test(id))return code.replace(/^  const \{ C0, C1, C2, C3 \} = currentTheme.colors;$/m,` (window as any).__game={player,enemies,inventory,map,menuOpen,shopState,setShopState,setGameOver,setMenuOpen,setPlayer,setEnemies,setInventory,setFloorItems,setTraps,setMap,setFloor,handleActionBtn,handleMoveInput,handleItemAction,handleShopAction,renderGame,visualEffects};\n  const { C0, C1, C2, C3 } = currentTheme.colors;`);if(id.endsWith('/school-dungeon/useSchoolAdventure.ts'))return code.replace(' return {known:', ' const api={known:').replace('\n };\n}\nexport type','\n };\n(window as any).__adventure=api;(window as any).__bridge=b.current;return api;\n}\nexport type');},configureServer(s){s.middlewares.use('/__revision',async(req,res)=>{res.setHeader('Content-Type','text/html');res.end(await s.transformIndexHtml(req.url,`<meta name="viewport" content="width=device-width,initial-scale=1"><body style="margin:0"><div id="root" style="height:100dvh;width:100vw"></div><script type="module" src="/${entry}"></script>`));});}}]});await server.listen();browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH,headless:true,args:['--no-sandbox']});const page=await browser.newPage({viewport:{width:390,height:844},hasTouch:true}),errors=[];page.setDefaultTimeout(60000);page.on('pageerror',e=>{errors.push(e.message);console.error(e.message);});page.on('dialog',d=>d.accept());
  const url=`http://127.0.0.1:${server.httpServer.address().port}/__revision`;
  const routes=JSON.parse(await fs.readFile('src/components/school-dungeon/chronicles/routes.json','utf8'));
+ let firstMathTrial=true;
  async function fixture(game,mode='STORY',floor=1,seen=[],choices={}){
   await page.evaluate(({game,mode,floor,seen,choices})=>{const a=window.__adventure,g=window.__game,hero=game===1?'high-school-warrior':'dungeons2-lyria',size=game===1?26:40;a.base.dungeons2Clears=8;g.setGameOver(false);window.__bridge.setGameClear(false);g.setMenuOpen(false);g.setShopState(s=>({...s,active:false}));a.restore({...a.snapshot(),version:1,mode,floor,heroId:hero,place:'DUNGEON',town:false,returned:false,rescued:false,scene:undefined,pendingStory:undefined,storySeen:[1,5,10,15,20],events:{},terrain:{},companion:null,chronicle:{version:1,mode,heroId:hero,seen,choices}},floor);g.setFloor(floor);g.setMap(Array.from({length:size},(_,y)=>Array.from({length:size},(_,x)=>x>0&&y>0&&x<size-1&&y<size-1?'FLOOR':'WALL')));g.setPlayer(p=>({...p,x:10,y:10,hp:100,maxHp:100,dir:{x:0,y:1},status:{sleep:0,frozen:0,confused:0,poison:0},equipment:{weapon:null,armor:null,ranged:null,accessory:null}}));g.setEnemies([]);g.setFloorItems([]);g.setTraps([]);}, {game,mode,floor,seen,choices});
   await page.waitForFunction(({mode,floor})=>window.__adventure.state.mode===mode&&window.__adventure.state.floor===floor&&Object.values(window.__adventure.state.events).some(e=>e.kind==='CHRONICLE'),{mode,floor});assert.equal(await page.locator('.dialogue-chronicle,.dialogue-student').count(),0);
@@ -17,8 +18,13 @@ try{
   await page.setViewportSize({width:390,height:844});
   await page.goto(url+'?game='+game);await page.getByRole('button',{name:'New game',exact:true}).click();await page.getByRole('button',{name:'Begin this journey',exact:true}).click();await page.locator('.d2-pixel-town').waitFor();
   for(const kind of ['GUIDE','SCOUT','STORY_GUIDE']){
+   const labels={GUIDE:'Travel guide',SCOUT:'Returning student',STORY_GUIDE:'Signpost teacher'};
+   const mapActor=await page.getByRole('button',{name:labels[kind],exact:true}).getAttribute('data-town-actor');
    const expected=await page.evaluate(kind=>{const a=window.__adventure;a.state.townX=a.townBuildings.find(v=>v.kind===kind).x;a.townControl(0,0);return a.townLines(kind).length;},kind);
-   await page.locator('[data-conversation-stage]').waitFor();await waitForConversationArt(page);assert.equal(await page.locator('.conversation-portrait').count(),2);
+   const dialogue=page.locator('[data-conversation-stage]');
+   await dialogue.waitFor();await waitForConversationArt(page);assert.equal(await dialogue.locator('.conversation-portrait').count(),2);
+   assert.ok(mapActor);
+   assert.equal(await dialogue.locator('.conversation-right [data-portrait]').getAttribute('data-portrait'),mapActor);
    for(let line=0;line<expected;line++){assert.equal(await page.locator('.conversation-speaker small').innerText(),`${line+1} / ${expected}`);await page.locator('.conversation-actions .conversation-primary').click();}
    await page.locator('[data-conversation-stage]').waitFor({state:'detached'});assert.equal(await page.evaluate(()=>window.__adventure.state.place),'HOME');
   }
@@ -27,6 +33,42 @@ try{
   await page.evaluate(()=>window.__adventure.departRoute('STORY'));
   await page.locator('.dialogue-student').waitFor();while(await page.locator('.dialogue-student').count())await page.locator('.dialogue-student .conversation-primary').click();
   await page.waitForFunction(()=>window.__adventure.state.place==='DUNGEON'&&Object.values(window.__adventure.state.events).some(e=>e.kind==='CHRONICLE'));assert.equal(await page.locator('.dialogue-chronicle,.dialogue-student').count(),0);
+  for(const relayFloor of [5,10,15,18,25,6]){
+   await page.evaluate(floor=>{
+    const a=window.__adventure,b=window.__bridge;
+    a.state.storySeen=[1,5,10,15,20];
+    if(floor===6){
+     // Restore a run saved during the stair quiz in the older duplicate town.
+     const snapshot={...a.snapshot(),place:'DUNGEON',town:true,leavingRelay:true,townX:76};
+     a.restore(snapshot,floor);
+     window.__game.setFloor(floor);
+    }else b.descend(floor);
+    b.setBelly(70);
+   },relayFloor);
+   await page.locator('.d2-pixel-town').waitFor();
+   await page.waitForFunction(()=>window.__adventure.panel===null&&window.__adventure.state.place==='RELAY');
+   await page.evaluate(()=>{const a=window.__adventure;a.state.townX=a.townBuildings.find(v=>v.kind==='GATE').x;});
+   await page.keyboard.press('ArrowUp');
+   await page.getByRole('button',{name:'Take the math trial and continue',exact:true}).click();
+   const quiz=page.locator('[data-gamepad-question-screen]');
+   if(firstMathTrial){await page.locator('.unit-board-close').click();firstMathTrial=false;}
+   const perfect=relayFloor===5;
+   for(let question=0;question<3;question++){
+    await page.locator(`[data-gamepad-initial-scope="math-challenge-${question}"]`).waitFor();
+    const expression=await quiz.locator('.basic-challenge-question h3').innerText();
+    const terms=expression.match(/(\d+)\s*\+\s*(\d+)/);
+    assert.ok(terms,expression);
+    const answer=Number(terms[1])+Number(terms[2]);
+    const choices=quiz.locator('.basic-challenge-options button');
+    await (perfect?quiz.getByRole('button',{name:String(answer),exact:true})
+      :choices.filter({hasNotText:new RegExp(String.raw`^\s*${answer}\s*$`)}).first()).click();
+   }
+   await quiz.waitFor({state:'detached'});
+   await page.waitForFunction(floor=>window.__adventure.state.place==='DUNGEON'&&window.__bridge.floor===floor,relayFloor+1);
+   const state=await page.evaluate(()=>({town:window.__adventure.state.town,belly:window.__bridge.belly,cues:window.__fullnessCues}));
+   assert.deepEqual(state,{town:false,belly:perfect?80:70,cues:['buff']});
+  }
+  console.log(`PASS Dungeons ${game}: each relay gate leads to the next combat floor; legacy duplicate-town saves and scoped perfect-quiz recovery also pass.`);
   await fixture(game);await face('CHRONICLE');await page.waitForTimeout(400);await page.screenshot({path:`${out}/npc-map-${game}.png`});
   const turns=await page.evaluate(()=>window.__adventure.state.floorTurns);await page.evaluate(()=>window.__game.handleMoveInput(1,0));assert.equal(await page.locator('.dialogue-chronicle').count(),0);assert.equal(await page.evaluate(()=>window.__adventure.state.floorTurns),turns);
   // Even legacy saves that place the player on an NPC must not trigger one via tick.
@@ -39,13 +81,13 @@ try{
   for(const floor of [8,15]){await fixture(game,'STORY',floor);assert.deepEqual(await page.evaluate(()=>window.__adventure.state.chronicle.seen),[]);}
   // Each route resolves its own new scenery and matching NPC, through the real A handler.
   console.log('Dungeons '+game+': save/resume and dialogue pause passed; checking all NPC routes.');
-  for(const route of routes){await fixture(game,route.id);await talk();const src=await page.locator('.conversation-landscape').evaluate(el=>getComputedStyle(el).backgroundImage);assert(src.includes('/background/'+route.id.toLowerCase()+'.webp'));await waitForConversationArt(page);await page.getByRole('button',{name:'Resume',exact:true}).click();}
+  for(const route of routes){await fixture(game,route.id);await talk();const src=await page.locator('.conversation-landscape').evaluate(el=>getComputedStyle(el).backgroundImage);assert(src.includes('/background/'+(route.art||route.id).toLowerCase()+'.webp'));await waitForConversationArt(page);await page.getByRole('button',{name:'Resume',exact:true}).click();}
   await fixture(game,'PUZZLE');await page.evaluate(()=>{const a=window.__adventure,g=window.__game,size=g.map.length,s=a.snapshot();a.restore({...s,events:{},terrain:{}},1);g.setMap(Array.from({length:size},(_,y)=>Array.from({length:size},(_,x)=>y===10&&x>=10&&x<=15?(x===15?'STAIRS':'FLOOR'):'WALL')));g.setPlayer(p=>({...p,x:10,y:10,dir:{x:1,y:0}}));});await page.waitForFunction(()=>Object.values(window.__adventure.state.events).some(e=>e.kind==='CHRONICLE'&&e.passable));await face('CHRONICLE');const next=await page.evaluate(()=>({x:window.__game.player.x+1,y:window.__game.player.y}));await page.evaluate(()=>window.__game.handleMoveInput(1,0));await page.waitForFunction(p=>window.__game.player.x===p.x&&window.__game.player.y===p.y,next);assert.equal(await page.locator('.dialogue-chronicle').count(),0);
   await fixture(game);await page.evaluate(()=>window.__bridge.setGameClear(true));await page.getByRole('button',{name:'Return to Firstlight Town',exact:true}).waitFor();assert.equal(await page.locator('.dialogue-chronicle').count(),0);assert.deepEqual(await page.evaluate(()=>window.__adventure.state.chronicle.seen),[]);await page.getByRole('button',{name:'Return to Firstlight Town',exact:true}).click();await page.locator('.d2-pixel-town').waitFor();
   // Completing choices still offers its ending explicitly; it never forces unseen chapters.
   await fixture(game,'STORY',1);await talk();await choice();await fixture(game,'STORY',8,[0],{0:'accord'});await talk();await choice();await fixture(game,'STORY',15,[0,1],{0:'accord',1:'accord'});await talk();await choice();await page.evaluate(()=>window.__bridge.setGameClear(true));await page.getByRole('button',{name:'Talk with the NPC about the ending',exact:true}).click();await page.waitForFunction(()=>window.__adventure.chronicleScene?.ending);for(let n=0;n<6;n++)await page.locator('.dialogue-chronicle .conversation-actions>button').click();await page.locator('.d2-pixel-town').waitFor();assert.equal(await page.evaluate(()=>window.__adventure.base.chronicleRecords.length),1);
-  await fixture(game,'STORY',5);await page.evaluate(()=>{const a=window.__adventure;const s=a.snapshot();a.restore({...s,place:'RELAY',town:true,townX:8},s.floor);});await page.locator('.town-event-portrait').waitFor();assert.equal(await page.locator('.dialogue-chronicle,.dialogue-student').count(),0);await page.evaluate(()=>window.__adventure.townControl(0,0));await page.locator('.dialogue-chronicle').waitFor();await page.getByRole('button',{name:'Back to town',exact:true}).click();assert.equal(await page.evaluate(()=>window.__adventure.townBuildings.some(e=>e.kind==='PERSONAL_NPC')),false);
-  console.log('PASS actual Dungeons '+game+': optional entry, 22 NPC routes/backgrounds, talk/close/resume, no movement/tick trigger, skipped story clear/return, and optional chosen ending.');
+  await fixture(game,'STORY',5);await page.evaluate(()=>{const a=window.__adventure;const s=a.snapshot();a.restore({...s,place:'RELAY',town:true,townX:8},s.floor);});const shion=page.getByRole('button',{name:'Shion, the Gate Scribe',exact:true});await shion.locator('img.town-event-portrait').waitFor();assert.equal(await page.locator('.dialogue-chronicle,.dialogue-student').count(),0);await page.evaluate(()=>window.__adventure.townControl(0,0));await page.locator('.dialogue-chronicle').waitFor();assert.equal(await page.locator('.dialogue-chronicle .conversation-right [data-portrait]').getAttribute('data-portrait'),await shion.getAttribute('data-town-actor'));await page.getByRole('button',{name:'Back to town',exact:true}).click();assert.equal(await page.evaluate(()=>window.__adventure.townBuildings.some(e=>e.kind==='PERSONAL_NPC')),false);
+  console.log(`PASS actual Dungeons ${game}: optional entry, ${routes.length} NPC routes/backgrounds, talk/close/resume, no movement/tick trigger, and optional chosen ending.`);
  }
  assert.deepEqual(errors,[]);
 }finally{await browser?.close();await server?.close();await fs.rm(entry,{force:true});}

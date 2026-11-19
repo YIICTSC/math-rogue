@@ -1524,7 +1524,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
 
   const handleMathComplete = (correctCount: number) => {
       setShowMathChallenge(false); const nextFloor = floor + 1;
-      if (correctCount >= 3) { const recovery = 10; setBelly(prev => Math.min(maxBelly, prev + recovery)); addLog(`計算全問正解！満腹度が${recovery}回復した！`, "green"); audioService.playSound('buff'); } 
+      if (correctCount >= 3) { const recovery = 10; setBelly(prev => Math.min(maxBelly, prev + recovery)); addLog(`計算全問正解！満腹度が${recovery}回復した！`, "green"); audioService.playDungeonFullnessRecovery(); }
       else if (correctCount > 0) addLog(`${correctCount}問正解。`);
       setFloor(nextFloor); generateFloor(nextFloor);
       const nextTheme = getTheme(nextFloor); audioService.playBGM(nextTheme.bgm);
@@ -1813,7 +1813,10 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           if (item.type.includes('ONIGIRI') || item.type.includes('MEAT')) { 
               const val = item.value || 50; let nextBelly = Math.min(maxBelly, belly + val); let nextHp = player.hp;
               if (item.type.includes('MEAT')) { nextHp = Math.min(player.maxHp, player.hp + 50); addLog(`${item.name}を食べた。元気が出た！`); } else addLog(`${item.name}を食べた。満腹！`); 
-              setInventory(prev => prev.filter((_, i) => i !== index)); setSelectedItemIndex(prev => Math.min(prev, inventory.length - 2)); setMenuOpen(false); cueD2HeroAction(adventure.hero.id,'use'); processTurn(player.x, player.y, { belly: nextBelly, hp: nextHp }); audioService.playSound('select'); return;
+              setInventory(prev => prev.filter((_, i) => i !== index)); setSelectedItemIndex(prev => Math.min(prev, inventory.length - 2)); setMenuOpen(false); cueD2HeroAction(adventure.hero.id,'use'); processTurn(player.x, player.y, { belly: nextBelly, hp: nextHp });
+              if (nextBelly > belly) audioService.playDungeonFullnessRecovery('select');
+              else audioService.playSound('select');
+              return;
           }
           else if (item.type.includes('HEAL') || item.type === 'GRASS_LIFE') { 
               let healVal = item.value || 30; if (item.type === 'GRASS_LIFE') { setPlayer(p => ({ ...p, maxHp: p.maxHp + 5 })); healVal = 5; addLog("最大HPが上がった！", "yellow"); }

@@ -1,12 +1,22 @@
 import {ABYSS_HEROES,abyssHero} from './dungeons2/roster';
 import {expedition,expeditionUnlocked} from './expeditions';
+import {chronicleHero,type Bilingual} from './chronicles/story';
 import {PROTAGONISTS,studentChapter,studentHero,STUDENT_STORIES} from './student/content';
 import type {AdventureMode,SchoolBase} from './adventure';
 export const ROUTE_ORDER:AdventureMode[]=['STORY','PUZZLE','TRAPS','MYSTERY','CARDS','NO_GEAR','BARE'];
 export function routeOpen(base:SchoolBase,mode:AdventureMode){if(expedition(mode))return expeditionUnlocked(base,mode);if(mode==='RESCUE')return Boolean(base.rescue&&base.rescue.attempts<3);const index=ROUTE_ORDER.indexOf(mode);return index===0||Boolean(base.clears[mode])||ROUTE_ORDER.slice(index).some(id=>Boolean(base.clears[id]))||Boolean(base.clears[ROUTE_ORDER[index-1]]);}
 export function classmateFor(id:string){const roster=abyssHero(id)?ABYSS_HEROES:PROTAGONISTS.filter(p=>studentChapter(p.id)===studentChapter(id));return roster[(roster.findIndex(p=>p.id===id)+1)%roster.length];}
-export function personalStories(id:string){const hero=studentHero(id);return STUDENT_STORIES[studentChapter(id)].map((act,index)=>({...act,lines:[[`${hero.name}は${['町の門で、最初の一歩を踏み出した。','仲間と交わした約束を胸に、先へ進む。','自分の得意なことを生かし、失われた記録を探す。','これまで出会った人の声を思い出した。','旅で学んだ工夫を、最後の試練に向ける。','帰る場所と、新しい旅の始まりを見つけた。'][index]}`,`Your traveler ${['takes the first step beyond the town gate.','moves forward with a promise of friendship.','uses a personal talent to seek the lost record.','remembers the voices of everyone met along the road.','brings the journey’s lessons to the final trial.','finds a home to return to, and a new beginning.'][index]}`] as const,...act.lines,...(index===5?[routeEpilogue('STORY')]:[])]}));}
-export const TOWN_BUILDINGS:readonly {kind:string;x:number;name:string;en:string;npc?:boolean}[]=[
+export function personalStories(id:string){
+ const hero=studentHero(id),profile=chronicleHero(hero.id);
+ const englishName=profile.en[0].toUpperCase()+profile.en.slice(1);
+ return STUDENT_STORIES[studentChapter(hero.id)].map(act=>({
+  ...act,
+  lines:[...act.lines.map(([ja,en])=>[ja.replaceAll('{hero}',hero.name),en.replace(/^\{hero\}/,englishName).replaceAll('{hero}',profile.en)] as const),
+   ...(act.floor===21?[routeEpilogue('STORY')]:[])],
+ }));
+}
+export interface TownBuilding {kind:string;x:number;name:string;en:string;npc?:boolean;actorId?:string;portrait?:string;}
+export const TOWN_BUILDINGS:readonly TownBuilding[]=[
  {kind:'GUIDE',x:5,name:'旅の案内人',en:'Travel guide',npc:true},
  {kind:'INN',x:11,name:'ひだまりの宿',en:'Sunbeam inn'},
  {kind:'DOJO',x:19,name:'風来道場',en:'Wanderer dojo'},
@@ -19,6 +29,47 @@ export const TOWN_BUILDINGS:readonly {kind:string;x:number;name:string;en:string
  {kind:'FESTIVAL',x:67,name:'旅人の広場',en:'Travelers’ square'},
  {kind:'GATE',x:77,name:'ダンジョン入口',en:'Dungeon entrance'},
 ] as const;
-export function townBuildings(home:boolean){return home?TOWN_BUILDINGS.filter(v=>v.npc||['DOJO','WAREHOUSE','GATE'].includes(v.kind)).map(v=>({...v,x:({GUIDE:5,WAREHOUSE:13,DOJO:23,SCOUT:31,STORY_GUIDE:39,GATE:49} as Record<string,number>)[v.kind]})):TOWN_BUILDINGS;}
-export function townDialogue(kind:string,heroId:string,clears:number):readonly (readonly [string,string])[]{const friend=classmateFor(heroId);if(kind==='SCOUT')return [[`迷宮の中で${friend.name}を見かけたよ。同じ編の仲間なんだって。`,'A traveler from your own chapter was seen inside the labyrinth.'],['出会ったら、まず話を聞こう。約束を交わしてから仲間になるよ。','Listen first. A classmate joins after you share a promise.']];if(kind==='STORY_GUIDE')return clears?[['迷宮を踏破した君へ、新しい分かれ道の地図が届いた。','A new route map has arrived for the traveler who cleared a dungeon.'],['この街道のいちばん奥、門の道案内を確かめておいで。','Follow this street to the gate to discover your next route.']]:[['まだ地図にない道も、最初の迷宮を踏破すれば開かれる。','Clear the first labyrinth to reveal roads not yet on your map.'],['ひとつずつ旅を終え、町へ帰ろう。道はその先へ続いていく。','Finish each journey and return to town. The road will unfold.']];return [['ようこそ、はじまりの町へ。街道を右へ歩けば迷宮の門に着くよ。','Welcome to Firstlight Town. Follow the street right to the labyrinth gate.'],['建物の扉へ歩いて、上キーか「入る」。道場で移動と道具の使い方を練習できるよ。','Walk to a door and press up or Enter. The dojo teaches movement and supplies.'],['迷宮の階段では算数の試練。町と中継町では空腹も時間も進まないよ。','Stairs bring a math trial. Hunger and time pause in towns.']];}
+export function townBuildings(home:boolean,heroId:string=PROTAGONISTS[0].id):TownBuilding[]{
+ const homePositions:Record<string,number>={GUIDE:5,WAREHOUSE:13,DOJO:23,SCOUT:31,STORY_GUIDE:39,GATE:49};
+ const guide=heroId==='elementary-dodgeball'?'elementary-warrior':'elementary-dodgeball';
+ const unavailable=new Set([heroId,guide,classmateFor(heroId).id]);
+ const scout=PROTAGONISTS.find(hero=>studentChapter(hero.id)===studentChapter(heroId)&&!unavailable.has(hero.id))
+  ?? PROTAGONISTS.find(hero=>!unavailable.has(hero.id))!;
+ const actors:Record<string,string>={GUIDE:guide,SCOUT:scout.id,STORY_GUIDE:'town-teacher'};
+ return TOWN_BUILDINGS.filter(building=>!home||homePositions[building.kind]!==undefined).map(building=>({
+  ...building,x:home?homePositions[building.kind]:building.x,actorId:actors[building.kind],
+ }));
+}
+export function townDialogue(kind:string,heroId:string,clears:number,home:boolean,recruited=false):readonly Bilingual[]{
+ if(kind==='SCOUT'){
+  const friend=classmateFor(heroId),en=chronicleHero(friend.id).en;
+  return recruited?[
+   [`${friend.name}と一緒だったんだね。さっき姿が見えて、ほっとしたよ。`,`I saw you with ${en}. It was a relief to know you made it together.`],
+   ['出発はいつでもいいんだし、宿の前で一息ついていったら？','There is no hurry to leave. Why not take a moment by the inn?'],
+  ]:[
+   [`途中で${friend.name}を見かけたよ。一人で奥へ向かったから、少し気になってる。`,`I saw ${en} heading deeper inside alone. I've been thinking about that ever since.`],
+   ['会ったら声をかけてくれない？　同じ方へ行くなら、一緒に歩くだけで心強いよ。','Would you say hello if you meet? If you are going the same way, it helps to have someone beside you.'],
+  ];
+ }
+ if(kind==='STORY_GUIDE'){
+  if(!home)return [
+   ['入り口まで道を見てきたよ。町を出たら、すぐ次の階だ。','I checked the road to the gate. The next floor starts as soon as you leave town.'],
+   ['道具を買い忘れていないか、今のうちに確かめておいで。門は逃げないよ。','Check now if there is anything you meant to buy. The gate will still be there.'],
+  ];
+  return clears?[
+   ['迷宮から帰ったんだね。今日は、前は白紙だったところに、新しい道を一本描けたよ。','You made it back from the labyrinth. Today I drew a road where the map used to be blank.'],
+   ['次の行き先は町の奥の門で聞ける。どの道を歩くかは、急いで決めなくていい。','Ask at the far gate about the new routes. Take your time choosing where to go.'],
+  ]:[
+   ['町の地図は、帰ってきた旅人の話を聞きながら描いているんだ。まだ白い場所が多いだろう？','I draw the map from stories returning travelers tell me. See how much is still blank?'],
+   ['最初の迷宮から戻ったら、君の見た道も教えてくれ。町の奥の門から行けるよ。','When you return from the first labyrinth, tell me what road you saw. The gate at the end of town will get you there.'],
+  ];
+ }
+ return home?[
+  ['ようこそ。初めてなら、道の右端まで行ってごらん。ダンジョンの門が見えるよ。','Welcome. If this is your first visit, follow the road to the right until you see the dungeon gate.'],
+  ['扉の前でAか上を押せば入れる。心配なら、手前の道場で道具を使ってみるといい。','Press A or Up at a door to enter. If you want to try out your supplies, stop at the dojo first.'],
+ ]:[
+  ['おかえりと言うには早いかな。でも、ここにいる間はお腹もすかないし、時間も進まないよ。','Maybe it is too early to say welcome home, but while you are here, time and hunger stand still.'],
+  ['出発するときは右端の門へ。前の階へ戻る道じゃないから、荷物を整えてから行っておいで。','Head to the far-right gate when ready. It takes you onward, so check your supplies before you go.'],
+ ];
+}
 export function routeEpilogue(mode:AdventureMode):readonly [string,string]{const messages:Partial<Record<AdventureMode,readonly [string,string]>>={STORY:['戻った地図に、新しい分かれ道が浮かんだ。町の門から「放課後の一手」へ。','A new fork appears on the restored atlas. One Clever Move is now open at the town gate.'],PUZZLE:['解いた道順が工作室の鍵になった。町から「いたずら工作室」への街道が開通した。','The solved route becomes a workshop key. The road to Trap Workshop is now open.'],TRAPS:['仕掛けの記録をたどり、霧の校舎への道を見つけた。「なぞなぞ校舎」が開かれた。','The mechanism notes reveal a fogbound school. Mystery School is now open.'],MYSTERY:['道具の正体を書いたノートが新しい扉を開いた。「作戦ノートの30階」へ進める。','Your discoveries open a new door. Strategy Notebook is now accessible.'],CARDS:['作戦を届けた先で、身軽な旅の招待状をもらった。「体操服の挑戦」が開かれた。','Delivering your strategies earns an invitation. Gym-clothes Challenge is now open.'],NO_GEAR:['道具より大切な知恵を認められ、遠い山道が現れた。「手ぶらの99階」へ。','Your ingenuity reveals a distant mountain road. Empty-handed 99 Floors is now open.'],BARE:['遠い街道を歩き切った。町のみんなは、新しい道しるべに君の名前を刻んだ。','You walked the longest road. The townspeople carve your name into a new signpost.']};const bonus=expedition(mode);if(bonus)return [`${bonus.ja}を踏破。はじまりの町に新しい分かれ道が届いた。`,`${bonus.en} cleared. New routes await at Firstlight Town.`];return messages[mode]||['忘れ物を町へ届けた。次の旅へ備えよう。','The lost supplies are home. Prepare for your next journey.'];}
