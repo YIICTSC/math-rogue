@@ -3,6 +3,7 @@ import { applyAction, cpuAction, createClubGame, viewFor } from './engine';
 import { definition, type GameId } from './catalog';
 import type { Action, ClubState, ClubView, PlayerInput } from './model';
 import { PROTAGONISTS } from '../../three/protagonistCatalog';
+import { CARD_CLUB_ROOM_CAPACITY, clubSeatsFor, recommendedClubGames } from './lobbyGames';
 
 export const CARD_CLUB_HEROES=PROTAGONISTS.filter(h=>!h.id.startsWith('elementary-'));
 export const validProfile=(p:unknown):p is PlayerInput=>!!p&&typeof p==='object'&&typeof (p as PlayerInput).id==='string'&&typeof (p as PlayerInput).name==='string'&&(p as PlayerInput).name.trim().length>0&&(p as PlayerInput).name.length<=32&&CARD_CLUB_HEROES.some(h=>h.id===(p as PlayerInput).hero);
@@ -11,9 +12,19 @@ export type ClubPacket=ClubLobby|{phase:'game';view:ClubView;hostId:string;selfI
 
 /** Shared local/host authority. Socket identity, never a supplied player index, selects the actor. */
 export class ClubSession {
-  ladderOptions=ladderOptions({rounds:5});game:GameId='whist';count=4;members:PlayerInput[]=[];state:ClubState|null=null;
+  ladderOptions=ladderOptions({rounds:5});game:GameId='memory';count=2;members:PlayerInput[]=[];state:ClubState|null=null;
   constructor(readonly hostId:string,readonly code:string,private emit:(id:string,packet:ClubPacket)=>void){}
-  join(profile:PlayerInput){if(!validProfile(profile)||this.state||this.members.length>=this.count||this.members.some(m=>m.id===profile.id))return false;this.members.push({...profile,cpu:false});this.publish();return true;}
+  join(profile:PlayerInput){
+    if(!validProfile(profile)||this.state||this.members.length>=CARD_CLUB_ROOM_CAPACITY||this.members.some(m=>m.id===profile.id))return false;
+    this.members.push({...profile,cpu:false});
+    const people=this.members.length;
+    if(people>this.count){
+      const seats=clubSeatsFor(this.game,people);
+      if(seats!==undefined)this.count=seats;
+      else {this.game=recommendedClubGames(people)[0]??'memory';this.count=people;}
+    }
+    this.publish();return true;
+  }
   configure(game:GameId,count:number,options?:Partial<LadderOptions>){if(this.state||!definition(game)?.players.includes(count)||count<this.members.length)return false;this.game=game;this.count=count;if(options)this.ladderOptions=ladderOptions(options);this.publish();return true;}
   start(seed:number){
     if(this.state||!this.members.length||this.members[0].id!==this.hostId)return false;

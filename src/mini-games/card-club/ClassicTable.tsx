@@ -1,4 +1,4 @@
-import {bullLabel,yanivValue} from './newRequestedGames';
+import {bullLabel,strongestBullClaim,yanivValue} from './newRequestedGames';
 import { DiversityTable } from './DiversityTable';
 import { DIVERSITY_IDS } from './diversityCatalog';
 import React from 'react';
@@ -9,6 +9,22 @@ import { TraditionalTable } from './TraditionalTable';
 import { WorldTable } from './WorldTable';
 import { ginHand } from './gin';
 import { golfScore,swimScore } from './classicLayouts';
+
+function PokerBullReveal({view,l}:{view:ClubView;l:(jp:string,en:string)=>string}){
+ const loser=view.extra.classic?.nextDealer ?? -1;
+ if(loser<0||view.claim<0)return null;
+ const strongest=strongestBullClaim(view.players.flatMap(p=>p.hand));
+ const claimHeld=loser!==view.extra.claimant;
+ return <section className="cc-bull-reveal" aria-label={l('公開された手札','Revealed hands')}>
+  <h3>{l('公開された手札','Revealed hands')}</h3>
+  <p>{l('最後の宣言','Last claim')} · {view.players[view.extra.claimant]?.name} · {l(bullLabel(view.claim),bullLabel(view.claim,true))} · <strong>{claimHeld?l('成立','Held'):l('不成立','Failed')}</strong></p>
+  {strongest>=0&&<p className="cc-bull-best">{l('全員の札で作れた最も強い役','Strongest combination across all hands')}<strong>{l(bullLabel(strongest),bullLabel(strongest,true))}</strong></p>}
+  <div className="cc-layouts">{view.players.map((p,seat)=><article key={p.id}>
+   <h4>{p.name}{seat===loser&&<span>{l('ライフ−1','Lost 1 life')}</span>}</h4>
+   {p.hand.length?<div className="cc-public-hand">{p.hand.map(card=><CardFace key={card} card={card}/>)}</div>:<small>{l('この配札には不参加','Sat out this deal')}</small>}
+  </article>)}</div>
+ </section>;
+}
 
 export function ClassicTable({view:v,l,send,selected,select}:{view:ClubView;l:(jp:string,en:string)=>string;send:(a:Action)=>void;selected:number[];select:(card:number|number[])=>void}){
  const c=v.extra.classic;if(!c)return null;
@@ -26,7 +42,7 @@ export function ClassicTable({view:v,l,send,selected,select}:{view:ClubView;l:(j
  const noteLabel=(key:string)=>({high:l('ハイ','High'),low:l('ロー','Low'),jack:l('ジャック','Jack'),game:l('ゲーム','Game'),gift:l('ギフト','Gift'),gamePoints:l('ゲーム点','Game points'),marriage:l('マリッジ','Marriage'),pendingMarriage:l('マリッジ宣言（未加算）','Marriage declared (not credited)'),handValue:l('手札点','Hand value'),fifteens:l('15の組','Fifteens'),pairs:l('ペア','Pairs'),runs:l('ラン','Runs'),flush:l('フラッシュ','Flush'),nobs:l('ノブ','Nobs'),heels:l('スターターJ','Jack starter'),pegging:l('プレイ中の得点','Pegging'),lastCard:l('最後の札','Last card'),swimScore:l('手札点','Hand value'),contract:l('獲得した絵札','Counting cards won'),deadwood:l('未組合せ点','Deadwood'),gin:l('ジン獲得点','Points awarded for gin'),knock:l('ノック獲得点','Points awarded for knock'),undercut:l('アンダーカット獲得点','Points awarded for undercut'),bonus:l('ボーナス','Bonus'),pontoon:l('精算','Settlement')}[key]||key);
  return <section className="cc-classic" aria-label={l('ゲームの盤面','Game board')}>
  {v.game==='yaniv'&&<p className="cc-step">{l('先に捨ててから1枚取ります。合計5以下でヤニブ。','Discard before drawing one card. Call Yaniv at five or less.')} {l('自分の合計','Your total')}: {v.players[v.self]?.hand.reduce((n,c)=>n+yanivValue(c),0)}</p>}
- {v.game==='pokerbull'&&<p className="cc-step">{v.claim<0?l('全員の札を合わせた役を宣言','Claim a combination across all hands'):l(bullLabel(v.claim,false),bullLabel(v.claim,true))} · {l('残りライフ','Lives')}: {v.players.map(p=>p.lives).join(' / ')}</p>}
+ {v.game==='pokerbull'&&(over?<PokerBullReveal view={v} l={l}/>:<p className="cc-step">{v.claim<0?l('全員の札を合わせた役を宣言','Claim a combination across all hands'):l(bullLabel(v.claim,false),bullLabel(v.claim,true))} · {l('残りライフ','Lives')}: {v.players.map(p=>p.lives).join(' / ')}</p>)}
  {v.game==='trumpcrew'&&<p className="cc-step">{l('ステージ','Stage')} {c.handSize}/{Math.floor(52/v.players.length)} · {v.extra.step==='crewStrength'?l('親が手札の強・中・弱を公表','Dealer announces weak, medium or strong'):v.extra.step==='crewBid'?l('残りチップ','Remaining chips')+': '+c.contract:l('全員が宣言どおりに勝とう','Everyone must match their bid')} · {l('親の評価','Dealer strength')}: {v.extra.multiplier}</p>}
  {v.game==='mitch'&&<div className="cc-layouts">{v.players.map((p,i)=><article key={i}><h3>{p.name}</h3>{[0,1,2,3].map(color=><div className="cc-mitch-suit" key={color}><b>{SUITS[color]}</b><div className="cc-mitch-row">{c.rows[i*4+color].map(card=><CardFace key={card} card={card}/>)}</div></div>)}</article>)}</div>}
 

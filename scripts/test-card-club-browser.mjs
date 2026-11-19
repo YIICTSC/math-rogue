@@ -2,14 +2,138 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {createServer} from 'vite';
 import {chromium} from 'playwright';
-const file=`.card-club-qa-${process.pid}.tsx`,dir='build/card-club-qa';let server,browser;
+import {spawn} from 'node:child_process';
+import {createServer as createTcpServer} from 'node:net';
+const file=`.card-club-qa-${process.pid}.tsx`,dir='build/card-club-qa';let server,browser,signaling,turn;
+const lobbyTest=process.argv.includes('--lobby')||process.env.CLUB_NETWORK==='1';
 try{
+ if(lobbyTest){
+  signaling=spawn(process.execPath,['--input-type=module','-e',`import {PeerServer} from 'peer'; PeerServer({host:'127.0.0.1',port:0,path:'/club'}, server=>process.send(server.address().port));`],{stdio:['ignore','ignore','inherit','ipc']});
+  const port=await new Promise((resolve,reject)=>{
+   signaling.once('message',resolve);signaling.once('error',reject);
+   signaling.once('exit',code=>reject(Error('PeerServer exited '+code)));
+  });
+  let ice=[];
+  if(process.env.CARD_CLUB_TEST_TURN_MODULE){
+   const {createServer:makeTurn}=await import(process.env.CARD_CLUB_TEST_TURN_MODULE);
+   const turnPort=await new Promise(resolve=>{
+    const socket=createTcpServer();
+    socket.listen(0,'127.0.0.1',()=>{const address=socket.address();socket.close(()=>resolve(address.port));});
+   });
+   turn=makeTurn({auth:{mechanism:'long-term',realm:'club.local',credentials:{club:'local-test-only'}},
+     allowPrivatePeers:true,allowLoopback:true,relay:{ip:'127.0.0.1',externalIp:'127.0.0.1'}});
+   await new Promise((resolve,reject)=>{
+    turn.on('listening',resolve);turn.on('error',reject);turn.listen({port:turnPort,address:'127.0.0.1',transport:'tcp'});
+   });
+   ice=[{urls:`turn:127.0.0.1:${turnPort}?transport=tcp`,username:'club',credential:'local-test-only'}];
+  }
+  Object.assign(process.env,{VITE_RPG_PEER_HOST:'127.0.0.1',VITE_RPG_PEER_PORT:String(port),VITE_RPG_PEER_PATH:'/club',VITE_RPG_PEER_SECURE:'false',VITE_KART_ICE_SERVERS:JSON.stringify(ice)});
+ }
  await fs.mkdir(dir,{recursive:true});
- await fs.writeFile(file,`import {CARD_CLUB_VOICE_HEROES,CARD_CLUB_VOICE_MS} from './src/data/cardClubVoices';import React from 'react';import {createRoot} from 'react-dom/client';import CardClub from './src/mini-games/card-club/CardClub';import * as engine from './src/mini-games/card-club/engine';import {DIVERSITY_IDS} from './src/mini-games/card-club/diversityCatalog';import {TRADITIONAL_IDS} from './src/mini-games/card-club/traditionalCatalog';import {WORLD_IDS} from './src/mini-games/card-club/worldCatalog';import {POPULAR_IDS} from './src/mini-games/card-club/popularCatalog';import {definition,CLUB_GAMES} from './src/mini-games/card-club/catalog';import {audioService} from './src/services/audioService';audioService.playBGM=async()=>{};if(!location.search.includes('voiceTest'))audioService.playCardClubVoice=async()=>false;Object.assign(window,{CARD_CLUB_VOICE_HEROES,CARD_CLUB_VOICE_MS,audioService,engine,popular:[...POPULAR_IDS,...WORLD_IDS,...TRADITIONAL_IDS,...DIVERSITY_IDS],games:CLUB_GAMES,implemented:CLUB_GAMES.length,world:WORLD_IDS,definition});createRoot(document.getElementById('root')).render(<CardClub languageMode={new URLSearchParams(location.search).get('lang')||'JAPANESE'} onBack={()=>{}}/>);`);
+ await fs.writeFile(file,`import {CARD_CLUB_VOICE_HEROES,CARD_CLUB_VOICE_MS} from './src/data/cardClubVoices';import React from 'react';import {createRoot} from 'react-dom/client';import CardClub from './src/mini-games/card-club/CardClub';import * as engine from './src/mini-games/card-club/engine';import {DIVERSITY_IDS} from './src/mini-games/card-club/diversityCatalog';import {TRADITIONAL_IDS} from './src/mini-games/card-club/traditionalCatalog';import {WORLD_IDS} from './src/mini-games/card-club/worldCatalog';import {POPULAR_IDS} from './src/mini-games/card-club/popularCatalog';import {definition,CLUB_GAMES} from './src/mini-games/card-club/catalog';import {audioService} from './src/services/audioService';audioService.playBGM=async()=>{};if(!location.search.includes('voiceTest')){audioService.playCardClubVoice=async()=>false;audioService.playCardClubScoreVoice=async()=>false;}Object.assign(window,{CARD_CLUB_VOICE_HEROES,CARD_CLUB_VOICE_MS,audioService,engine,popular:[...POPULAR_IDS,...WORLD_IDS,...TRADITIONAL_IDS,...DIVERSITY_IDS],games:CLUB_GAMES,implemented:CLUB_GAMES.length,world:WORLD_IDS,definition});createRoot(document.getElementById('root')).render(<CardClub languageMode={new URLSearchParams(location.search).get('lang')||'JAPANESE'} onBack={()=>{}}/>);`);
  const hook=`(window as any).__club={room:()=>room.current,choose,setHero,load:(id:GameId,n:number)=>{room.current?.close();const client=new CardClubRoom(p=>setPacket(p),m=>setError(m));room.current=client;client.practice(profile());client.configure(id,n);client.start();clearInterval((client as any).cpuTimer);const session=(client as any).session;session.state=(window as any).engine.createClubGame(id,session.state.players,42);session.publish();}};`;
  server=await createServer({cacheDir:'node_modules/.vite-card-club-qa',optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','peerjs']},server:{host:'127.0.0.1',port:5243,hmr:false},plugins:[{name:'card-club-qa',enforce:'pre',transform(code,id){if(id.endsWith('/card-club/CardClub.tsx'))return code.replace('  return <main',hook+'\n  return <main');},configureServer(s){s.middlewares.use('/__club',async(req,res)=>{res.setHeader('Content-Type','text/html');res.end(await s.transformIndexHtml('/__club',`<html><head><link rel="icon" href="data:,"/><meta name="viewport" content="width=device-width, initial-scale=1"/><style>body{margin:0}</style></head><body><div id="root"></div><script type="module" src="/${file}"></script></body></html>`));});}}],logLevel:'error'});
- await server.listen();browser=await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_PATH||await fs.access('/usr/bin/chromium').then(()=>'/usr/bin/chromium',()=>undefined),args:['--no-sandbox']});
+ await server.listen();browser=await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_PATH||await fs.access('/usr/bin/chromium').then(()=>'/usr/bin/chromium',()=>undefined),args:['--no-sandbox','--disable-features=WebRtcHideLocalIpsWithMdns']});
  const page=await browser.newPage({viewport:{width:1280,height:900}}),errors=[];page.on('pageerror',e=>{errors.push(e.message);console.error('PAGEERROR',e.message);});page.on('console',m=>{if(m.type()==='error'){errors.push(m.text());console.error('CONSOLE',m.text());}});
+ if(lobbyTest){
+  const entry='http://127.0.0.1:5243/__club';
+  const host=page,guest=await browser.newPage({viewport:{width:390,height:844}}),third=await browser.newPage();
+  for(const tab of [guest,third])tab.on('pageerror',e=>errors.push(e.message));
+  const recordVoices=async tab=>tab.evaluate(()=>{
+   window.turnVoices=[];
+   window.audioService.playCardClubVoice=async (hero,event)=>{window.turnVoices.push({hero,event});return true;};
+  });
+  await host.setViewportSize({width:390,height:844});
+  await host.goto(entry+'?lang=ENGLISH');await recordVoices(host);
+  await host.getByRole('button',{name:'Create room',exact:true}).click();
+  assert.equal(await host.locator('.cc-games').count(),0,'Host creates a room before selecting a game');
+  await host.getByLabel('Player name').fill('Host A');
+  await host.getByRole('button',{name:'Change character'}).click();
+  await host.locator('.cc-heroes').getByRole('button',{name:'dodgeball',exact:true}).click();
+  await host.getByRole('button',{name:'Create room',exact:true}).click();
+  await host.locator('.cc-code').waitFor();
+  const code=(await host.locator('.cc-code').innerText()).trim();
+  assert.match(code,/^\d{6}$/);
+  const invite=await host.getByLabel('Invitation link').inputValue();
+  assert.equal(invite,`${entry}?cardClubRoom=${code}`);
+  await host.getByRole('button',{name:'Copy invite link'}).click();
+  await host.getByRole('button',{name:'Copied',exact:true}).waitFor();
+  for(const [width,height] of [[390,844],[844,390]]){
+   await host.setViewportSize({width,height});
+   const actions=await host.locator('.cc-start-row button').boundingBox();
+   assert(actions&&actions.y+actions.height<=height,'Start button is visible at '+width+'×'+height);
+   for(const recommendation of await host.locator('.cc-recommendations button').all()){
+    const box=await recommendation.boundingBox();
+    assert(box&&box.y+box.height<=actions.y,'Recommended games and the start button stay separate');
+   }
+   await host.screenshot({path:`${dir}/room-${width}x${height}.png`});
+  }
+  await host.getByRole('button',{name:'Browse games'}).click();
+  await host.getByRole('searchbox').fill('gin rummy');
+  await host.locator('.cc-games>button').first().click();
+  await host.waitForFunction(()=>window.__club.room().last.game==='ginrummy');
+
+  const opened=new URL(invite);opened.searchParams.set('lang','ENGLISH');
+  await guest.goto(opened.href);await recordVoices(guest);
+  await guest.getByRole('heading',{name:'Join invitation'}).waitFor();
+  assert.equal(await guest.getByLabel('Invitation code').inputValue(),code);
+  await guest.getByLabel('Player name').fill('Guest B');
+  await guest.getByRole('button',{name:'Change character'}).click();
+  await guest.locator('.cc-heroes').getByRole('button',{name:'akari',exact:true}).click();
+  await guest.getByRole('button',{name:'Join room',exact:true}).click();
+  try{await host.waitForFunction(()=>window.__club.room().last.members.length===2);}
+  catch(error){
+   for(const [name,tab] of [['host',host],['guest',guest]])console.error(name,await tab.evaluate(()=>{
+    const client=window.__club.room();
+    return {message:document.querySelector('.cc-notice')?.textContent,phase:client?.last?.phase,
+     connected:[...(client?.channels.values()??[])].map(c=>[c.open,c.peerConnection?.connectionState,c.peerConnection?.iceConnectionState])};
+   }));
+   throw error;
+  }
+
+  await third.goto(entry+'?lang=ENGLISH');await recordVoices(third);
+  await third.getByRole('button',{name:'Join invitation',exact:true}).click();
+  await third.getByLabel('Player name').fill('Guest C');
+  await third.getByLabel('Invitation code').fill(code.replace(/[0-9]/g,n=>String.fromCharCode(n.charCodeAt(0)+0xff10-48)));
+  await third.getByRole('button',{name:'Join room',exact:true}).click();
+  await host.waitForFunction(()=>window.__club.room().last.members.length===3);
+  assert.equal(await host.locator('.cc-seat-list li').count(),3);
+  assert.notEqual(await host.evaluate(()=>window.__club.room().last.game),'ginrummy');
+  assert.equal(await host.getByLabel('Match seats').inputValue(),'3');
+  assert(await host.locator('.cc-recommendations button').count()>=3);
+  await host.getByRole('button',{name:'Browse games'}).click();
+  const playerCount=host.getByLabel('Player count');
+  assert.equal(await playerCount.locator('option[value="2"]').count(),0);
+  await host.getByRole('searchbox').fill('gin rummy');
+  await host.locator('.cc-empty-search').waitFor();
+  await playerCount.selectOption('4');
+  await host.getByRole('searchbox').fill('old maid');
+  await host.locator('.cc-games>button').first().click();
+  assert.equal(await host.getByLabel('Match seats').inputValue(),'4');
+  await host.getByRole('button',{name:'Start this table',exact:true}).click();
+  await Promise.all([host,guest,third].map(tab=>tab.locator('.cc-match').waitFor()));
+  const first=await host.evaluate(()=>window.__club.room().last.view.turn);
+  const tabs=[host,guest,third];
+  await tabs[first].evaluate(()=>{const room=window.__club.room();room.command(room.last.view.actions[0]);});
+  await host.waitForFunction(first=>window.__club.room().last.view.turn!==first,first);
+  const next=await host.evaluate(()=>window.__club.room().last.view.players[window.__club.room().last.view.turn].hero);
+  for(const tab of tabs)await tab.waitForFunction(hero=>window.turnVoices.some(call=>call.hero===hero&&call.event==='play'),next);
+  await host.evaluate(()=>window.__club.room().finish());
+  await guest.getByText('When the host chooses another game', {exact:false}).waitFor();
+  await host.getByRole('button',{name:'Choose another game',exact:true}).click();
+  await Promise.all(tabs.map(tab=>tab.locator('.cc-lobby').waitFor()));
+  assert.equal(await guest.locator('.cc-code').innerText(),code);
+  assert.equal(await guest.locator('.cc-seat-list li').count(),3);
+  await host.locator('.cc-recommendations').getByRole('button',{name:/Yaniv/}).click();
+  await host.getByRole('button',{name:'Start this table',exact:true}).click();
+  await guest.locator('[data-club-game=yaniv]').waitFor();
+  assert.equal(await guest.evaluate(()=>window.__club.room().last.view.players.find(p=>p.name==='Guest B').hero),'magic-akari');
+  await third.getByRole('button',{name:'Leave room',exact:true}).click();
+  await host.waitForFunction(()=>window.__club.room().last.view.players.find(p=>p.name.startsWith('Guest C'))?.cpu);
+  assert.deepEqual(errors,[]);
+  console.log('PASS: 3-browser WebRTC, host-first selection, copied URL, direct link entry, full-width code, seats and recommendations, remote turn voices, and switching games in the same room.');
+  process.exitCode=0;
+ }else{
  await page.goto('http://127.0.0.1:5243/__club'+(process.argv.includes('--voices')?'?voiceTest=1':''));await page.locator('.cc-title-copy').waitFor();
  for(const [width,height] of [[1280,900],[390,844],[844,390]]) {
   await page.setViewportSize({width,height});
@@ -18,13 +142,70 @@ try{
   const art=await page.locator('.cc-title-art').boundingBox();
   assert(art && art.width>=width && art.height>=height,'Dedicated title image fills the viewport');
   await page.screenshot({path:`${dir}/title-${width}x${height}.png`});
+  if(process.argv.includes('--titles')){
+   const menu=await page.locator('.cc-title-modes').boundingBox();
+   assert(menu&&menu.y>height*.65&&menu.y+menu.height<=height,`Title actions stay in view near the bottom at ${width}×${height}: ${JSON.stringify(menu)}`);
+  }
  }
- await page.setViewportSize({width:1280,height:900});await page.getByRole('button',{name:'クラブへ入る'}).click();await page.getByRole('button',{name:'このキャラクターでゲーム選択'}).click();const implemented=await page.evaluate(()=>window.implemented);assert.match(await page.locator('.cc-search-count').innerText(),new RegExp(String(implemented)));assert.equal(await page.locator('.cc-games>button').count(),implemented);
+ await page.setViewportSize({width:1280,height:900});await page.getByRole('button',{name:'CPUと遊ぶ'}).click();await page.getByRole('button',{name:'このキャラクターでゲーム選択'}).click();const implemented=await page.evaluate(()=>window.implemented);assert.match(await page.locator('.cc-search-count').innerText(),new RegExp(String(implemented)));assert.equal(await page.locator('.cc-games>button').count(),implemented);
  assert.equal(await page.locator('.cc-reference').count(),0);assert(!/467|未対応|Reference entries/.test(await page.locator('.cc-search-count').innerText()));await page.locator('input[type=search]').fill('faro');await page.locator('.cc-empty-search').waitFor();assert.equal(await page.locator('.cc-games>button').count(),0);assert.equal(await page.locator('a[href*=faro]').count(),0);await page.locator('input[type=search]').fill('');
  const load=async(game,n)=>{await page.evaluate(({game,n})=>window.__club.load(game,n||window.definition(game).defaultPlayers),{game,n});await page.waitForFunction(g=>document.querySelector('[data-club-game]')?.getAttribute('data-club-game')===g,game);};
  const snapshot=async(path)=>{await page.waitForFunction(()=>!document.querySelector('.cc-flight-layer'));await page.screenshot({path});};
  const mutate=async(fn,arg)=>{await page.evaluate(({fn,arg})=>{const session=window.__club.room().session;new Function('s','arg',fn)(session.state,arg);session.publish();},{fn:fn.toString().replace(/^.*?\{([\s\S]*)\}$/,'$1'),arg});await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>resolve())));};
- if(process.argv.includes('--polish')){
+ if(process.argv.includes('--declarations')){
+  await load('pokerbull',3);
+  await mutate(s=>{
+   s.players.forEach((p,i)=>p.hand=[[9,10],[11,12],[0,14]][i]);
+   s.turn=2;
+   window.engine.applyAction(s,2,{type:'bid',value:25}); // Pair of aces
+  });
+  const reveal=page.getByRole('region',{name:'公開された手札'});
+  assert.equal(await reveal.count(),0);
+  assert.deepEqual(await page.evaluate(()=>window.__club.room().last.view.players.slice(1).map(p=>p.hand)),[[],[]]);
+  await page.getByRole('button',{name:'ダウト！',exact:true}).click();
+  await reveal.waitFor();
+  assert.match(await reveal.innerText(),/ワンペア A.*不成立/);
+  assert.match(await reveal.locator('.cc-bull-best').innerText(),/ストレートフラッシュ A♣/);
+  assert.deepEqual(await reveal.locator('article').evaluateAll(rows=>rows.map(row=>[...row.querySelectorAll('[data-card]')].map(c=>Number(c.dataset.card)))),[[9,10],[11,12],[0,14]]);
+  assert.match(await reveal.locator('article').nth(2).innerText(),/CPU.*ライフ−1/);
+  assert(await page.evaluate(()=>{const s=window.__club.room().session.state;return s.players.every((_,i)=>window.engine.viewFor(s,i).players.every((p,j)=>p.hand.join()===s.players[j].hand.join()));}));
+  for(const [width,height] of [[390,844],[844,390]]){
+   await page.setViewportSize({width,height});
+   const next=await page.getByRole('button',{name:'次の配札へ',exact:true}).boundingBox();
+   assert(next&&next.y>=0&&next.y+next.height<=height);
+   await page.screenshot({path:`${dir}/pokerbull-reveal-${width}x${height}.png`});
+  }
+  await page.getByRole('button',{name:'次の配札へ',exact:true}).click();
+  await reveal.waitFor({state:'detached'});
+  await mutate(s=>{
+   s.players[0].hand=[0];s.players[0].lives=1;
+   s.players[1].hand=[13];s.players[2].hand=[];s.players[2].out=true;
+   s.turn=1;window.engine.applyAction(s,1,{type:'bid',value:25});
+  });
+  await page.getByRole('button',{name:'ダウト！',exact:true}).click();
+  await page.getByRole('button',{name:'別のゲームを選ぶ',exact:true}).waitFor();
+  assert.match(await reveal.innerText(),/ワンペア A · 成立/);
+  assert.match(await reveal.locator('article').nth(2).innerText(),/この配札には不参加/);
+
+  await load('trumpcrew',4);
+  const bids=page.locator('.cc-crew-bid');
+  assert.deepEqual(await bids.allTextContents(),Array(4).fill('未宣言 · 獲得 0'));
+  await page.getByRole('button',{name:'中位',exact:true}).click();
+  await mutate(s=>{
+   [0,1,0].forEach(value=>window.engine.applyAction(s,s.turn,{type:'bid',value}));
+  });
+  assert.deepEqual(await bids.allTextContents(),['未宣言 · 獲得 0','宣言 0 · 獲得 0','宣言 1 · 獲得 0','宣言 0 · 獲得 0']);
+  await page.getByRole('button',{name:'宣言 0',exact:true}).click();
+  assert.equal(await bids.first().innerText(),'宣言 0 · 獲得 0');
+  await mutate(s=>{s.players.forEach(()=>window.engine.applyAction(s,s.turn,window.engine.legalActions(s)[0]));});
+  assert.equal(await bids.filter({hasText:'獲得 1'}).count(),1);
+  await page.setViewportSize({width:390,height:844});
+  await snapshot(`${dir}/trumpcrew-bids-390x844.png`);
+  await page.getByRole('button',{name:'次の配札へ',exact:true}).click();
+  assert.deepEqual(await bids.allTextContents(),Array(4).fill('未宣言 · 獲得 0'));
+  assert.deepEqual(errors,[]);
+  console.log('PASS: Poker Bull reveal, exact challenge and strongest combination; Trump Crew human and CPU bids and trick wins');
+ }else if(process.argv.includes('--polish')){
   await page.setViewportSize({width:390,height:844});await load('royalcassino',2);
   await mutate(s=>{s.turn=0;s.players[0].hand=[45];s.table=[47];s.extra.classic.rows=[];s.revision++;});await page.locator('.cc-hand [data-card="45"]').click();assert.equal(await page.getByRole('button',{name:'選んだ場札を獲得',exact:true}).count(),0);assert(await page.getByRole('button',{name:/場に置く/}).count());
   await mutate(s=>{s.turn=0;s.players[0].hand=[6,14];s.table=[19];s.players[0].score=0;s.revision++;});await page.locator('.cc-hand [data-card="6"]').click();await page.locator('.cc-table-cards [data-card="19"]').click();await page.getByRole('button',{name:'選んだ場札を獲得',exact:true}).click();await page.locator('[data-score-reward]').waitFor();assert.match(await page.locator('[data-score-reward]').first().innerText(),/スイープ.*1/);
@@ -32,9 +213,48 @@ try{
   await page.setViewportSize({width:844,height:390});await page.waitForTimeout(150);await page.screenshot({path:dir+'/polish-mitch-landscape.png'});
   await load('daihinmin',4);await page.evaluate(()=>window.__club.room().rematch());await page.locator('.cc-local-rules').waitFor();await page.locator('.cc-local-rules select').selectOption('3');await page.locator('.cc-local-rules input').first().check();await page.getByRole('button',{name:'このメンバーで開始',exact:true}).click();await page.waitForFunction(()=>window.__club.room().session.state?.ladderOptions.rounds===3);assert(await page.evaluate(()=>window.__club.room().session.state.ladderOptions.eightCut));assert.deepEqual(errors,[]);console.log('PASS casino place/capture labels and score FX, Mitch ace counter, long-hand stacking, local-rule lobby and round settings.');
  }else if(process.argv.includes('--titles')){
+  await page.setViewportSize({width:390,height:844});
+  const playerCount=page.getByLabel('対応人数');
+  const sort=page.getByLabel('並べ替え');
+  const gameCards=page.locator('.cc-games > button');
+  const gameSeats=()=>gameCards.evaluateAll(cards=>cards.map(card=>window.definition(card.dataset.gameId).players));
+  await sort.selectOption('fewest');
+  const fewest=(await gameSeats()).map(seats=>Math.min(...seats));
+  assert.deepEqual(fewest,[...fewest].sort((a,b)=>a-b));
+  await sort.selectOption('most');
+  const most=(await gameSeats()).map(seats=>Math.max(...seats));
+  assert.deepEqual(most,[...most].sort((a,b)=>b-a));
+  await playerCount.selectOption('4');
+  const matching=await gameSeats();
+  assert(matching.length>0&&matching.length<implemented&&matching.every(seats=>seats.includes(4)));
+  await page.screenshot({path:`${dir}/catalog-390x844.png`});
+  await page.getByRole('searchbox').fill('gin rummy');
+  assert.equal(await gameCards.count(),0);
+  await page.getByRole('button',{name:'絞り込みを解除'}).click();
+  assert.equal(await gameCards.count(),implemented);
+  await playerCount.selectOption('4');
+  await gameCards.first().click();
+  assert.equal(await page.getByLabel('プレイ人数（空席はCPU）').inputValue(),'4');
+  await page.locator('.cc-header button').first().click();await gameCards.first().waitFor();
   await page.locator('.cc-header button').first().click();await page.locator('.cc-heroes').waitFor();
   await page.locator('.cc-header button').first().click();await page.locator('.cc-title-copy').waitFor();
-  assert.deepEqual(errors,[]);console.log('PASS: title artwork at 3 viewport sizes, hero/game selection and back navigation');
+  for(const [width,height] of [[390,844],[844,390],[667,320]]){
+   await page.setViewportSize({width,height});
+   for(const [mode,entry] of [['host','部屋を作る'],['join','招待に参加する']]){
+    await page.getByRole('button',{name:entry,exact:true}).click();
+    const form=page.locator('.cc-online-entry');
+    const header=await page.locator('.cc-header').boundingBox();
+    const panel=await form.boundingBox();
+    const submit=await form.locator('button[type=submit]').boundingBox();
+    const spaceAbove=panel.y-header.y-header.height;
+    const spaceBelow=height-panel.y-panel.height;
+    await page.screenshot({path:`${dir}/${mode}-${width}x${height}.png`});
+    assert(spaceAbove>=0&&Math.abs(spaceAbove-spaceBelow)<=28,`${mode} form is centered at ${width}×${height} (${spaceAbove}px above, ${spaceBelow}px below)`);
+    assert(submit.y+submit.height<=height,'Submit is in view at '+width+'×'+height);
+    await page.locator('.cc-header button').first().click();
+   }
+  }
+  assert.deepEqual(errors,[]);console.log('PASS: title art, centered online entry, player-count filtering and sorting, and back navigation');
  }else if(process.argv.includes('--rummy-groups')){
   for(const game of ['ginrummy','rummy']){
    await load(game,2);await mutate(s=>{s.turn=0;s.extra.step=s.game==='ginrummy'?'ginDraw':'draw';s.players[0].hand=[0,1,2,13,14,15,26,27,28,35];});
@@ -89,12 +309,22 @@ try{
   await page.waitForFunction(()=>[...window.audioService.activeHtmlSfx.entries()].some(([name,audios])=>name.startsWith('card-club-voice-')&&[...audios].some(a=>!a.paused)));
   assert(await page.evaluate(()=>[...window.audioService.activeHtmlSfx.values()].flatMap(a=>[...a]).every(a=>Math.abs(a.volume-.35)<.01)),'Voices use the independent voice volume even with SE muted');
   const count=await page.evaluate(()=>window.voiceEvents.length);await page.evaluate(()=>window.__club.room().session.publish());await page.evaluate(()=>new Promise(r=>requestAnimationFrame(r)));assert.equal(await page.evaluate(()=>window.voiceEvents.length),count);
-  await page.waitForTimeout(7200);await page.locator('.cc-actions>button').first().click();await page.waitForFunction(()=>window.voiceEvents.some(v=>v.event==='play'));
+  await mutate(s=>{s.turn=1;s.revision++;});await mutate(s=>{s.turn=0;s.revision++;});await page.waitForFunction(()=>window.voiceEvents.some(v=>v.event==='play'));
   await mutate(s=>{s.phase='result';s.resultReason='score';s.winners=[0];s.revision++;});await page.waitForFunction(()=>window.voiceEvents.some(v=>v.event==='win'));
   await mutate(s=>{s.phase='play';s.revision++;});await mutate(s=>{s.phase='result';s.resultReason='score';s.winners=[1];s.revision++;});await page.waitForFunction(()=>window.voiceEvents.some(v=>v.event==='lose'));
   await page.evaluate(()=>window.audioService.setVoiceVolume(0));assert.equal(await page.evaluate(()=>[...window.audioService.activeHtmlSfx.keys()].filter(n=>n.startsWith('card-club-voice-')).length),0);assert.equal(await page.evaluate(()=>window.audioService.playCardClubVoice('magic-akari','start')),false);
   await page.evaluate(()=>window.audioService.setVoiceVolume(.8));await page.evaluate(()=>{void window.audioService.playCardClubVoice('magic-akari','start');});await page.waitForFunction(()=>[...window.audioService.activeHtmlSfx.keys()].some(n=>n.startsWith('card-club-voice-')));await page.evaluate(()=>window.audioService.toggleMute());assert.equal(await page.evaluate(()=>[...window.audioService.activeHtmlSfx.keys()].filter(n=>n.startsWith('card-club-voice-')).length),0);await page.evaluate(()=>window.audioService.toggleMute());
   await page.getByRole('button',{name:'クラブに戻る',exact:true}).click();assert.equal(await page.evaluate(()=>[...window.audioService.activeHtmlSfx.keys()].filter(n=>n.startsWith('card-club-voice-')).length),0);
+  for(const [hero,voicePart] of [['high-school-warrior','/high-school-voices/WARRIOR/finish-'],['magic-akari','/magic-voices/AKARI/attack-']]){
+   await load('royalcassino',2);
+   await mutate((s,arg)=>{s.turn=0;s.players[0].hero=arg;s.players[0].hand=[6,14];s.table=[19];s.players[0].score=0;s.revision++;},hero);
+   await page.locator('.cc-hand [data-card="6"]').click();
+   await page.locator('.cc-table-cards [data-card="19"]').click();
+   await page.getByRole('button',{name:'選んだ場札を獲得',exact:true}).click();
+   await page.waitForFunction(path=>[...window.audioService.activeHtmlSfx.entries()].some(([name,audios])=>name.includes('-score-')&&[...audios].some(audio=>audio.src.includes(path)&&!audio.paused)),voicePart);
+   assert.match(await page.locator('[data-score-reward]').first().innerText(),/スイープ.*1/);
+  }
+
   assert.deepEqual(errors,[]);console.log(JSON.stringify({voices:true,...metadata,start:true,play:true,win:true,lose:true,independentVoiceVolume:true,mute:true,zeroVoiceVolume:true,leaveStops:true,deduplicated:true,browserErrors:errors.length}));
  }else if(process.argv.includes('--effects')){
   await page.evaluate(()=>{
@@ -186,17 +416,7 @@ try{
  }
  await page.evaluate(()=>localStorage.setItem('card-club-name','QA Player'));await page.goto('http://127.0.0.1:5243/__club?lang=ENGLISH');await page.waitForFunction(()=>!!window.__club);await load('66');assert.equal(await page.locator('.cc-classic').evaluate(e=>/[一-龯ぁ-んァ-ヶ]/.test(e.textContent)),false);await page.screenshot({path:`${dir}/cribbage-english.png`});for(const id of ['guessit','speculation','suitmatch','petrangola','reddog']){await load(id);assert.equal(await page.locator('.cc-classic').evaluate(e=>/[一-龯ぁ-んァ-ヶ]/.test(e.textContent)),false,id+' English board');}
  await page.goto('http://127.0.0.1:5243/__club?lang=HIRAGANA');await page.waitForFunction(()=>!!window.__club);await load('shithead2');const hira=await page.locator('.cc-classic').innerText();assert.equal(/[一-龯]/.test(hira),false,'Hiragana board has no kanji');await fs.writeFile(`${dir}/hiragana-visible.txt`,hira);await page.screenshot({path:`${dir}/golf-hiragana.png`});for(const id of ['guessit','speculation','suitmatch','petrangola','reddog']){await load(id);assert.equal(await page.locator('.cc-classic').evaluate(e=>/[一-龯]/.test(e.textContent)),false,id+' hiragana board');}
- let network=false;
- if(process.env.CLUB_NETWORK==='1'){
-  const host=await browser.newPage(),guest=await browser.newPage();
-  for(const tab of [host,guest]){tab.on('pageerror',e=>errors.push(e.message));await tab.goto('http://127.0.0.1:5243/__club?lang=ENGLISH');await tab.waitForFunction(()=>!!window.__club);await tab.evaluate(()=>window.__club.choose('chinesewhist'));await tab.locator('.cc-connection').waitFor();}
-  await host.getByRole('button',{name:'Create online room',exact:true}).click();await host.locator('.cc-code').waitFor({timeout:25000});const code=await host.locator('.cc-code').innerText();
-  await guest.getByLabel('Room code',{exact:true}).fill(code.replace(/[0-9]/g,d=>String.fromCharCode(d.charCodeAt(0)+0xfee0)));await guest.getByRole('button',{name:'Join this room',exact:true}).click();try{await host.waitForFunction(()=>window.__club.room()?.session?.members.length===2,{},{timeout:25000});}catch(error){for(const [label,tab] of [['host',host],['guest',guest]])console.error(label,await tab.evaluate(()=>({notice:document.querySelector('.cc-notice')?.textContent,phase:window.__club.room()?.last?.phase,peer:window.__club.room()?.peer?.disconnected,channels:[...(window.__club.room()?.channels?.values()||[])].map(c=>({open:c.open,connectionState:c.peerConnection?.connectionState,ice:c.peerConnection?.iceConnectionState}))})));throw error;}
-  await host.getByRole('button',{name:'Start this table',exact:true}).click();await guest.locator('.cc-classic').waitFor();await host.getByRole('button',{name:'Trump: ♣',exact:true}).click();await guest.waitForFunction(()=>window.__club.room().last?.view?.turn===1);await guest.locator('.cc-actions>button').first().click();
-  await host.waitForFunction(()=>window.__club.room().session.state.revision>=2);await guest.waitForFunction(()=>window.__club.room().last.view.revision>=2);
-  assert(await guest.evaluate(()=>{const v=window.__club.room().last.view;return v.seed===0&&typeof v.stock==='number'&&v.extra.classic.hidden.flat().every(c=>c<0)&&v.players.every((p,i)=>i===v.self||!p.hand.length);}));
-  await guest.evaluate(()=>window.__club.room().close());await host.waitForFunction(()=>window.__club.room().session.state.players[1].cpu);await host.evaluate(()=>window.__club.room().finish());await host.close();await guest.close();network=true;
+ assert.deepEqual(errors,[]);console.log(JSON.stringify({games:await page.evaluate(()=>window.popular.length),viewports:3,screenshots:56,availableOnly:true,diversityControls:true,raises:true,sevenRetry:true,marriage:true,secretPass:true,kittyExchange:true,palace:true,cribDiscard:true,capture:true,build:true,golfReveal:true,english:true,browserErrors:errors.length,hiraganaRemainingKanji:/[一-龯]/.test(hira)}));
  }
- assert.deepEqual(errors,[]);console.log(JSON.stringify({games:await page.evaluate(()=>window.popular.length),viewports:3,screenshots:56,availableOnly:true,diversityControls:true,raises:true,sevenRetry:true,marriage:true,secretPass:true,kittyExchange:true,palace:true,cribDiscard:true,capture:true,build:true,golfReveal:true,english:true,network,browserErrors:errors.length,hiraganaRemainingKanji:/[一-龯]/.test(hira)}));
  }
-}finally{await browser?.close();await server?.close();await fs.rm(file,{force:true});}
+}finally{await browser?.close();await server?.close();signaling?.kill();turn?.stop();await fs.rm(file,{force:true});}

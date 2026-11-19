@@ -10,14 +10,17 @@ export function presentationSnapshot(v:ClubView):PresentationState{
     log:v.log.map(e=>({...e})),board:[...v.extra.board],publicCards:[...v.table,...v.trick.map(t=>t.card),...v.lastTrick.map(t=>t.card)],rows:v.extra.classic?.rows.map(row=>[...row])??[],
     players:v.players.map(p=>({handCount:p.handCount,takenCount:p.takenCount}))};
 }
+export function newClubEvents(previous:ClubEvent[],current:ClubEvent[]):ClubEvent[]{
+  let overlap=Math.min(previous.length,current.length);
+  while(overlap>0&&JSON.stringify(previous.slice(-overlap))!==JSON.stringify(current.slice(0,overlap)))overlap--;
+  return current.slice(overlap);
+}
 /** Only recipient-visible state is accepted. No hidden hand or stock is consulted. */
 export function presentationDelta(previous:PresentationState|null,current:ClubView){
   const deal=!previous||previous.game!==current.game||previous.round!==current.round||current.revision<previous.revision;
   if(deal)return {deal:true,events:[] as ClubEvent[],cue:'shuffle' as CardClubCue};
   if(previous.revision===current.revision)return {deal:false,events:[] as ClubEvent[],cue:null};
-  let overlap=Math.min(previous.log.length,current.log.length);
-  while(overlap>0&&JSON.stringify(previous.log.slice(-overlap))!==JSON.stringify(current.log.slice(0,overlap)))overlap--;
-  const events=current.log.slice(overlap),keys=events.map(e=>e.key);
+  const events=newClubEvents(previous.log,current.log),keys=events.map(e=>e.key);
   const revealed=current.game==='war'&&[...current.table,...current.trick.map(t=>t.card),...current.lastTrick.map(t=>t.card)].some(card=>card>=0&&!previous.publicCards.includes(card))
     ||current.extra.board.some((card,i)=>card>=0&&(previous.board[i]??-1)<0)
     ||current.extra.classic?.rows.some((row,i)=>row.some((card,j)=>card>=0&&(previous.rows[i]?.[j]??-1)<0));

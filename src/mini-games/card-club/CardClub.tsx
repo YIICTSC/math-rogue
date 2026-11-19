@@ -1,4 +1,3 @@
-import {LADDER_RULES,ladderOptions} from './ladderOptions';
 import {ScoreFeedback} from './ScoreFeedback';
 import {useStackedCards} from './useStackedCards';
 import {bullLabel,BULL_CLAIMS} from './newRequestedGames';
@@ -14,7 +13,10 @@ import { assetUrl } from '../../utils/assetPaths';
 import { CARD_CLUB_HIRAGANA } from './hiragana';
 import { trans } from '../../utils/textUtils';
 import { CARD_CLUB_HEROES, type ClubPacket } from './session';
-import { CLUB_GAMES, definition, referenceGame, type GameId } from './catalog';
+import { definition, referenceGame, type GameId } from './catalog';
+import {ClubHeroes,ClubLobbyPanel,ClubOnlineEntry,Face} from './ClubSetup';
+import {cardClubInviteCode} from './invite';
+import {OFFLINE_DISTRIBUTABLE} from '../../config/runtime';
 import { cardLabel, rank, SUITS } from './cards';
 import { actionKey, type Action, type ClubEvent, type ClubView } from './model';
 import { CardClubRoom } from './network';
@@ -32,17 +34,17 @@ import { HandBacks,TableStock } from './TableStock';
 import { useCardPresentation } from './useCardPresentation';
 
 const DEFAULT_HERO='high-school-warrior';
-function Face({hero}:{hero:string}){return <span className="cc-face" aria-hidden="true" style={{backgroundImage:`url("${assetUrl(`sprites/after-school-poker/portraits/${hero}.webp`)}")`}}/>;}
 
 export default function CardClub({onBack,languageMode='JAPANESE'}:MiniGameComponentProps){
   const [bullType,setBullType]=useState(-1);
   const l=(jp:string,en:string)=>languageMode==='ENGLISH'?en:(languageMode==='HIRAGANA'&&CARD_CLUB_HIRAGANA[jp])||trans(jp,languageMode);
-  const [page,setPage]=useState<'title'|'hero'|'games'|'connect'>(()=>'title');
+  const [inviteCode]=useState(()=>OFFLINE_DISTRIBUTABLE?'':cardClubInviteCode(location.href));
+  const [page,setPage]=useState<'title'|'hero'|'games'|'connect'|'host'|'join'>(()=>inviteCode?'join':'title');
   const [hero,setHero]=useState(()=>{try{const h=localStorage.getItem('card-club-hero');return CARD_CLUB_HEROES.some(x=>x.id===h)?h!:DEFAULT_HERO;}catch{return DEFAULT_HERO;}});
   const [name,setName]=useState(()=>{try{return localStorage.getItem('card-club-name')||'';}catch{return '';}});
-  const [game,setGame]=useState<GameId>('whist'),[count,setCount]=useState(4),[packet,setPacket]=useState<ClubPacket|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false),[rules,setRules]=useState(false),[selected,setSelected]=useState<number[]>([]),[copied,setCopied]=useState(false);
+  const [game,setGame]=useState<GameId>('whist'),[count,setCount]=useState(4),[packet,setPacket]=useState<ClubPacket|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false),[rules,setRules]=useState(false),[selected,setSelected]=useState<number[]>([]);
   const [handOrder,setHandOrder]=useState<HandOrder>('dealt');
-  const [code,setCode]=useState(()=>new URLSearchParams(location.search).get('cardClubRoom')||'');
+  const [code,setCode]=useState(inviteCode);
   const room=useRef<CardClubRoom|null>(null);
   const current=packet?.phase==='game'?packet.view:null;
   const displayedHand=current?orderHand(current,handOrder):[];
@@ -51,25 +53,52 @@ export default function CardClub({onBack,languageMode='JAPANESE'}:MiniGameCompon
   const tableRoot=useRef<HTMLElement|null>(null);
   useStackedCards(tableRoot);
   const capturePresentation=useCardPresentation(tableRoot,current);
-  const announceAction=useCardVoices(current);
+  useCardVoices(current);
   const host=!!packet&&packet.selfId===packet.hostId;
   const title=(id:string)=>{const r=referenceGame(id);return languageMode==='ENGLISH'?r?.english||id:l(r?.name||id,r?.english||id);};
   const msg=(key:string)=>({NETWORK_ERROR:l('通信に失敗しました。接続を確認してもう一度お試しください。','Connection failed. Check your network and try again.'),TIMEOUT:l('接続がタイムアウトしました。ホストの画面とコードを確認してください。','Connection timed out. Check the host screen and room code.'),INVALID_CODE:l('6桁のコードを入力してください。','Enter a six-digit room code.'),ROOM_FULL_OR_STARTED:l('部屋が満員か、すでに対戦が始まっています。','The room is full or the match has already started.'),HOST_DISCONNECTED:l('ホストとの接続が切れました。表示中の対戦は中断されています。','The host connection closed. This match is paused.'),CLOSED:l('接続を終了しました。','Connection closed.')}[key]||l('接続できませんでした。もう一度お試しください。','Could not connect. Please try again.'));
-  useEffect(()=>{void audioService.playBGM('poker_shop');return ()=>{room.current?.finish();room.current?.close();};},[]);
+  useEffect(()=>{void audioService.playBGM('poker_shop');return ()=>{const active=room.current;room.current=null;active?.finish();active?.close();};},[]);
   useEffect(()=>{void audioService.playBGM(current?'poker_play':'poker_shop');},[!!current]);
   useEffect(()=>{setSelected([]);},[current?.revision]);
   const profile=()=>({name:name.trim().slice(0,32)||l('プレイヤー','Player'),hero});
   const remember=()=>{try{localStorage.setItem('card-club-hero',hero);localStorage.setItem('card-club-name',profile().name);}catch{}};
   const open=async(mode:'practice'|'create'|'join')=>{
-    if(busy)return;setBusy(true);setError('');room.current?.close();remember();
-    const client=new CardClubRoom(p=>setPacket(p),m=>setError(msg(m)));room.current=client;
-    try{if(mode==='practice')client.practice(profile());else if(mode==='create')await client.create(profile());else await client.join(profile(),code);
-      if(mode!=='join')client.configure(game,count);
-    }catch(e){client.close();room.current=null;setPacket(null);setError(msg(String(e instanceof Error?e.message:e)));}finally{setBusy(false);}
+    if(busy)return;
+    void audioService.unlockAudio();
+    setBusy(true);setError('');room.current?.close();remember();
+    const client=new CardClubRoom(
+      next=>{if(room.current===client)setPacket(next);},
+      message=>{if(room.current===client)setError(msg(message));},
+    );
+    room.current=client;
+    try{
+      if(mode==='practice'){client.practice(profile());client.configure(game,count);}
+      else if(mode==='create')await client.create(profile());
+      else await client.join(profile(),code);
+    }catch(e){
+      client.close();
+      if(room.current===client){
+        room.current=null;
+        setPacket(null);setBusy(false);
+        setError(msg(String(e instanceof Error?e.message:e)));
+      }
+    }finally{if(room.current===client)setBusy(false);}
   };
-  const leave=()=>{room.current?.finish();room.current?.close();room.current=null;setPacket(null);setError('');setPage('games');};
-  const send=(a:Action)=>{capturePresentation();announceAction(a);setSelected([]);room.current?.command(a);};
-  const choose=(id:GameId)=>{const d=definition(id);setGame(id);setCount(d.defaultPlayers);setPage('connect');};
+  const leave=()=>{
+    const active=room.current;
+    room.current=null;active?.finish();active?.close();
+    setPacket(null);setError('');setBusy(false);setRules(false);
+    setPage(active?.code?'title':'games');
+  };
+  const back=()=>{
+    if(packet){leave();return;}
+    if(page==='title'||(page==='join'&&inviteCode)){onBack();return;}
+    if(busy){const active=room.current;room.current=null;active?.close();setBusy(false);}
+    setError('');
+    setPage(page==='connect'?'games':page==='games'?'hero':'title');
+  };
+  const send=(a:Action)=>{capturePresentation();setSelected([]);room.current?.command(a);};
+  const choose=(id:GameId,seats?:number)=>{setGame(id);setCount(seats??definition(id).defaultPlayers);setPage('connect');};
   const selectCard=(input:number|number[])=>setSelected(old=>{
     const cards=Array.isArray(input)?input:[input];
     if(cards.every(c=>old.includes(c)))return old.filter(c=>!cards.includes(c));
@@ -176,16 +205,51 @@ export default function CardClub({onBack,languageMode='JAPANESE'}:MiniGameCompon
   const captureSelection:Action={type:'play',cards:current?[...selected.filter(c=>current.players[current.self].hand.includes(c)),...selected.filter(c=>!current.players[current.self].hand.includes(c))]:[]};
   const captureValid=!!current&&(['cassino','royalcassino'].includes(current.game))&&current.turn===current.self&&casinoCaptureValid(current,captureSelection);
 
-  return <main ref={tableRoot} className={`card-club cc-page-${current?'table':page}`} style={{'--cc-title':`url("${assetUrl('sprites/card-club/title.webp')}")`,'--cc-table':`url("${assetUrl('sprites/card-club/table.webp')}")`} as React.CSSProperties} data-gamepad-navigation-root data-mini-game-scope="card-club" data-club-game={current?.game}><ScoreFeedback view={current} l={l}/>
-    {!packet&&page==='title'&&<ResponsiveTitleArt game="card-club" className="cc-title-art"/>}
-    <header className="cc-header"><button onClick={()=>packet?leave():page==='title'?onBack():setPage(page==='hero'?'title':page==='games'?'hero':'games')}>{l('戻る','Back')}</button><span className="cc-brand">LEARNING ROGUE · CARD CLUB</span>{current&&<span className="cc-compact-title"><strong>{title(current.game)}</strong><small>{l('配札','Deal')} {current.round+1}{current.trump>=0?` · ${l('切札','Trump')} ${current.trump===4?l('ジャック4枚','Four jacks'):SUITS[current.trump]}`:''}</small></span>}<button onClick={()=>setRules(true)}>{l('遊び方','Rules')}</button></header>
-    {error&&<div className="cc-notice" role="alert">{error}<button onClick={()=>setError('')}>×</button></div>}
-    {!packet&&page==='title'&&<section className="cc-title-copy"><p>AFTER SCHOOL · AROUND THE WORLD</p><h1>{l('放課後','After-school')}<br/><em>{l('トランプゲーム集','Card Club')}</em></h1><p>{l('好きな顔で集まって、世界のトランプを。','Pick your portrait. Gather around. Discover card games.')}</p><button className="cc-primary" onClick={()=>{void audioService.playBGM('poker_shop');setPage('hero');}}>{l('クラブへ入る','Enter the club')} →</button></section>}
-    {!packet&&page==='hero'&&<section className="cc-panel"><h1>{l('キャラクター選択','Choose your character')}</h1><label>{l('参加名','Player name')}<input maxLength={32} value={name} onChange={e=>setName(e.target.value)} placeholder={l('プレイヤー','Player')}/></label><div className="cc-heroes">{CARD_CLUB_HEROES.map(h=><button key={h.id} aria-pressed={hero===h.id} onClick={()=>setHero(h.id)}><Face hero={h.id}/><small>{languageMode==='ENGLISH'?h.id.replace(/^(high-school|magic)-/,'').replaceAll('-',' '):trans(h.name,languageMode)}</small></button>)}</div><button className="cc-primary" onClick={()=>{remember();setPage(code?'connect':'games');}}>{l('このキャラクターでゲーム選択','Choose a game with this character')} →</button></section>}
-    {!packet&&page==='games'&&<section className="cc-panel"><div className="cc-heading"><div><h1>{l('ゲーム選択','Choose a game')}</h1><p>{l('CPUと練習、友達とオンライン。','Practice with CPU players or play online with friends.')}</p></div><Face hero={hero}/></div><GameChooser english={languageMode==='ENGLISH'} l={l} onChoose={choose}/></section>}
-    {!packet&&page==='connect'&&<section className="cc-panel cc-connection"><div className="cc-heading"><div><p>{l('選択中','Selected')}</p><h1>{title(game)}</h1></div><Face hero={hero}/></div><p>{l(definition(game).rule,definition(game).englishRule)}</p><label>{l('プレイ人数（空席はCPU）','Seats (empty seats use CPU)')}<select value={count} onChange={e=>setCount(Number(e.target.value))}>{definition(game).players.map(n=><option key={n}>{n}</option>)}</select></label><button className="cc-primary" disabled={busy} onClick={()=>void open('practice')}>{l('CPUと遊ぶ','Play with CPU')}</button><button disabled={busy} onClick={()=>void open('create')}>{l('オンラインの部屋を作る','Create online room')}</button><hr/><h2>{l('招待に参加','Join an invitation')}</h2><p>{l('参加名と6桁のコードだけで参加できます。','Join with your name and a six-digit code.')}</p><label>{l('参加名','Player name')}<input maxLength={32} value={name} onChange={e=>setName(e.target.value)}/></label><label>{l('部屋コード','Room code')}<input inputMode="numeric" maxLength={12} value={code} onChange={e=>setCode(e.target.value)} placeholder="000000"/></label><button disabled={busy} onClick={()=>void open('join')}>{busy?l('接続中…','Connecting…'):l('このコードで参加','Join this room')}</button></section>}
-    {packet?.phase==='lobby'&&<section className="cc-panel cc-connection"><h1>{l('対戦準備','Table lobby')}</h1>{packet.code&&<><label>{l('部屋コード','Room code')}<output className="cc-code">{packet.code}</output></label><button onClick={async()=>{try{await navigator.clipboard.writeText(packet.code);setCopied(true);}catch{setCopied(false);}}}>{copied?l('コピーしました','Copied'):l('コードをコピー','Copy code')}</button></>}{host?<><label>{l('ゲーム','Game')}<select value={packet.game} onChange={e=>{const id=e.target.value as GameId;room.current?.configure(id,definition(id).players.find(n=>n>=Math.max(packet.members.length,definition(id).defaultPlayers))||definition(id).players.find(n=>n>=packet.members.length)!);}}>{CLUB_GAMES.filter(d=>d.players.some(n=>n>=packet.members.length)).map(d=><option key={d.id} value={d.id}>{title(d.id)}</option>)}</select></label><label>{l('人数','Seats')}<select value={packet.count} onChange={e=>room.current?.configure(packet.game,Number(e.target.value))}>{definition(packet.game).players.filter(n=>n>=packet.members.length).map(n=><option key={n}>{n}</option>)}</select></label></>:<h2>{title(packet.game)}</h2>}{packet.game==='daihinmin'&&<fieldset className="cc-local-rules"><legend>{l('全国のローカルルール','Local rule variants')}</legend><p>{l('地域や仲間によって呼び名・運用が異なります。ここに書かれた効果で遊びます。4枚の革命と階段は基本ルールです。','Names and customs vary by group. These descriptions define this table; four-card revolution and runs remain standard.')}</p><label>{l('ラウンド数','Rounds')}<select disabled={!host} value={packet.ladderOptions?.rounds??5} onChange={e=>room.current?.configure(packet.game,packet.count,{...packet.ladderOptions,rounds:Number(e.target.value)})}>{[1,3,5,10,20].map(n=><option key={n}>{n}</option>)}</select></label>{LADDER_RULES.map(([key,ja,en,desc,english])=><label key={key}><input type="checkbox" disabled={!host} checked={!!packet.ladderOptions?.[key]} onChange={e=>room.current?.configure(packet.game,packet.count,{...ladderOptions(packet.ladderOptions),[key]:e.target.checked})}/><span><b>{l(ja,en)}</b><small>{l(desc,english)}</small></span></label>)}</fieldset>}<div className="cc-seat-list">{packet.members.map(p=><article key={p.id}><Face hero={p.hero}/><strong>{p.name}</strong><small>{p.id===packet.hostId?'HOST':l('参加済み','Joined')}</small></article>)}{Array.from({length:packet.count-packet.members.length},(_,i)=><article key={i}><Face hero={CARD_CLUB_HEROES[((packet.members.length+i)*7)%CARD_CLUB_HEROES.length].id}/><strong>CPU {packet.members.length+i+1}</strong></article>)}</div><p>{l('開始すると参加受付を締め切り、空席をCPUが担当します。','Starting closes admission and fills empty seats with CPU players.')}</p>{host?<button className="cc-primary" onClick={()=>room.current?.start()}>{l('このメンバーで開始','Start this table')}</button>:<p>{l('ホストの開始を待っています。','Waiting for the host to start.')}</p>}</section>}
-    {current&&<section className="cc-match"><div className="cc-match-heading"><h1>{title(current.game)}</h1><span>{l('配札','Deal')} {current.round+1} · {current.trump>=0?`${l('切札','Trump')} ${current.trump===4?l('ジャック4枚','Four jacks'):SUITS[current.trump]}`:''}</span><button onClick={()=>setRules(true)}>{l('ルール','Rules')}</button></div><div className="cc-player-ring">{current.players.map((p,i)=><article key={p.id} data-club-seat={i} className={`${current.turn===i?'cc-turn':''} ${current.winners.includes(i)?'cc-winner':''}`}><Face hero={p.hero}/><div><strong>{p.name}{p.id===packet?.selfId?' ★':''}</strong><small>{p.cpu?'CPU':'PLAYER'} · {l('手札','Cards')} {p.handCount}</small><span>{l('得点','Score')} {current.game==='golf'?-p.score:p.score}{['99add','schwimmen','rantergo','petrangola'].includes(current.game)?` · ♥${p.lives}`:''}{(['whist','spades','ohhell'].includes(current.game)||EXTENDED_TRICKS.has(current.game)||CLASSIC_TRICKS.has(current.game)||WORLD_TRICKS.has(current.game)||TRADITIONAL_TRICKS.has(current.game))?` · ${p.tricks}/${p.bid??'—'}`:''}</span></div><HandBacks count={p.handCount}/></article>)}</div>
+  const rulesGame=current?.game??(packet?.phase==='lobby'?packet.game:game);
+  return <main ref={tableRoot} className={`card-club cc-page-${current?'table':packet?'lobby':page}`} style={{'--cc-title':`url("${assetUrl('sprites/card-club/title.webp')}")`,'--cc-table':`url("${assetUrl('sprites/card-club/table.webp')}")`} as React.CSSProperties} data-gamepad-navigation-root data-mini-game-scope="card-club" data-club-game={current?.game}>
+    <ScoreFeedback view={current} l={l}/>
+    {!packet&&page==='title'&&<ResponsiveTitleArt game="card-club" className="cc-title-art" style={{objectPosition:'var(--cc-title-focus, center)'}}/>}
+    <header className="cc-header">
+      <button onClick={back}>{packet?.code?l('部屋を出る','Leave room'):l('戻る','Back')}</button>
+      <span className="cc-brand">{l('放課後トランプゲーム集','After-school Card Club')}</span>
+      {current&&<span className="cc-compact-title"><strong>{title(current.game)}</strong><small>{l('配札','Deal')} {current.round+1}{current.trump>=0?` · ${l('切札','Trump')} ${current.trump===4?l('ジャック4枚','Four jacks'):SUITS[current.trump]}`:''}</small></span>}
+      {(packet||page==='connect')&&<button onClick={()=>setRules(true)}>{l('遊び方','Rules')}</button>}
+    </header>
+    {error&&<div className="cc-notice" role="alert">{error}<button aria-label={l('閉じる','Close')} onClick={()=>setError('')}>×</button></div>}
+    {!packet&&page==='title'&&<section className="cc-title-copy">
+      <h1><span>{l('放課後','After-school')}</span><em>{l('トランプゲーム集','Card Club')}</em></h1>
+      <nav className="cc-title-modes" aria-label={l('遊び方を選ぶ','Choose how to play')}>
+        <button className="cc-primary" onClick={()=>setPage('hero')}>{l('CPUと遊ぶ','Play with CPU')}</button>
+        {!OFFLINE_DISTRIBUTABLE&&<>
+          <button onClick={()=>setPage('host')}>{l('部屋を作る','Create room')}</button>
+          <button onClick={()=>setPage('join')}>{l('招待に参加する','Join invitation')}</button>
+        </>}
+      </nav>
+    </section>}
+    {!packet&&(page==='host'||page==='join')&&<ClubOnlineEntry key={page} mode={page} name={name} onName={setName} hero={hero} onHero={setHero}
+      code={code} onCode={setCode} busy={busy} l={l} onSubmit={()=>void open(page==='host'?'create':'join')}/>}
+    {!packet&&page==='hero'&&<section className="cc-panel">
+      <h1>{l('キャラクター選択','Choose your character')}</h1>
+      <label>{l('参加名','Player name')}<input maxLength={32} value={name} onChange={e=>setName(e.target.value)} placeholder={l('プレイヤー','Player')}/></label>
+      <ClubHeroes hero={hero} onHero={setHero} l={l}/>
+      <button className="cc-primary" onClick={()=>{remember();setPage('games');}}>{l('このキャラクターでゲーム選択','Choose a game with this character')} →</button>
+    </section>}
+    {!packet&&page==='games'&&<section className="cc-panel">
+      <div className="cc-heading"><h1>{l('ゲーム選択','Choose a game')}</h1><Face hero={hero}/></div>
+      <GameChooser english={languageMode==='ENGLISH'} l={l} onChoose={choose}/>
+    </section>}
+    {!packet&&page==='connect'&&<section className="cc-panel cc-connection">
+      <div className="cc-heading"><h1>{title(game)}</h1><Face hero={hero}/></div>
+      <p>{l(definition(game).rule,definition(game).englishRule)}</p>
+      <label>{l('プレイ人数（空席はCPU）','Seats (empty seats use CPU)')}<select value={count} onChange={e=>setCount(Number(e.target.value))}>{definition(game).players.map(n=><option key={n}>{n}</option>)}</select></label>
+      <button className="cc-primary" disabled={busy} onClick={()=>void open('practice')}>{l('CPUと遊ぶ','Play with CPU')}</button>
+    </section>}
+    {packet?.phase==='lobby'&&<ClubLobbyPanel packet={packet} host={host} english={languageMode==='ENGLISH'} l={l} title={title}
+      onConfigure={(id,seats,options)=>room.current?.configure(id,seats,options)}
+      onStart={()=>{void audioService.unlockAudio();room.current?.start();}}/>}
+    {current&&<section className="cc-match"><div className="cc-match-heading"><h1>{title(current.game)}</h1><span>{l('配札','Deal')} {current.round+1} · {current.trump>=0?`${l('切札','Trump')} ${current.trump===4?l('ジャック4枚','Four jacks'):SUITS[current.trump]}`:''}</span><button onClick={()=>setRules(true)}>{l('ルール','Rules')}</button></div><div className="cc-player-ring">{current.players.map((p,i)=><article key={p.id} data-club-seat={i} className={`${current.turn===i?'cc-turn':''} ${current.winners.includes(i)?'cc-winner':''}`}><Face hero={p.hero}/><div><strong>{p.name}{p.id===packet?.selfId?' ★':''}</strong><small>{p.cpu?'CPU':'PLAYER'} · {l('手札','Cards')} {p.handCount}</small>{current.game==='trumpcrew'?<span className="cc-crew-bid">
+        {p.bid===null?l('未宣言','No bid yet'):`${l('宣言','Bid')} ${p.bid}`} · {l('獲得','Won')} {p.tricks}
+      </span>:<span>{l('得点','Score')} {current.game==='golf'?-p.score:p.score}{['99add','schwimmen','rantergo','petrangola'].includes(current.game)?` · ♥${p.lives}`:''}{(['whist','spades','ohhell'].includes(current.game)||EXTENDED_TRICKS.has(current.game)||CLASSIC_TRICKS.has(current.game)||WORLD_TRICKS.has(current.game)||TRADITIONAL_TRICKS.has(current.game))?` · ${p.tricks}/${p.bid??'—'}`:''}</span>}</div><HandBacks count={p.handCount}/></article>)}</div>
       <div className="cc-playfield">
       <div className="cc-table-area"><p className="cc-turn-label">{current.phase==='result'?l('対戦終了','Match finished'):current.phase==='round'?l('配札の結果','Deal results'):`${current.players[current.turn]?.name} · ${current.turn===current.self?l('あなたの番','Your turn'):l('の番です','to act')}`}</p>{current.game==='99add'&&<strong className="cc-total">{current.total} / 99</strong>}{current.phase==='reaction'&&current.pending&&<div className="cc-claim">{current.players[current.pending.player].name}: {current.pending.rank} × {current.pending.count}<p>{l('ダウトするか、見送るかを選んでください。','Challenge the claim or accept it.')}</p></div>}
       {current.game==='daihinmin'&&<p>{l('ラウンド','Round')} {current.round+1}/{current.ladderOptions?.rounds??1} · {l('累計得点','Total score')}{current.ladder?.reversed?' · '+l('革命','Revolution'):''}{current.ladder?.jackBack?' · '+l('11バック','Jack back'):''}{current.ladder?.lock?' · '+l('しばり','Suit lock'):''}</p>}<div className="cc-table-cards">{current.trick.length?current.trick.map(t=><figure key={t.player}><CardFace card={t.card}/><figcaption>{current.players[t.player].name}</figcaption></figure>):current.game==='fantan'?[0,1,2,3].map(st=><div className="cc-fantan-row" key={st}>{current.table.filter(c=>Math.floor(c/13)===st).sort((a,b)=>rank(a)-rank(b)).map(c=><CardFace key={c} card={c}/>)}</div>):(current.game==='shithead2'?current.table.slice(-4):current.table).map((c,i)=><CardFace key={`${c}:${i}`} card={c} selected={(['cassino','royalcassino'].includes(current.game))&&selected.includes(c)} onClick={(['cassino','royalcassino'].includes(current.game))&&current.turn===current.self&&current.phase==='play'?()=>selectCard(c):undefined}/>)}{!current.table.length&&!current.trick.length&&current.lastTrick.map(t=><figure key={t.player}><CardFace card={t.card}/><figcaption>{current.players[t.player].name}</figcaption></figure>)}</div>{current.game!=='memory'&&<TableStock aces={current.game==='mitch'?current.extra.classic?.passes:undefined} count={current.stock} discard={current.discard} pile={['doubt','shithead2'].includes(current.game)?current.table.length:undefined} l={l}/>}</div>
@@ -194,8 +258,8 @@ export default function CardClub({onBack,languageMode='JAPANESE'}:MiniGameCompon
       <details className="cc-log"><summary>{l('プレイ記録','Play log')}</summary>{current.log.map((e,i)=><p key={i}>{eventLabel(e,current)}</p>)}</details>
       </div>
       {current.game!=='memory'&&current.phase!=='result'&&current.phase!=='round'&&<div className="cc-hand-area">{!isRummy&&handToolbar}{isRummy?<RummyHand key={`${current.game}:${current.round}`} sorting={handToolbar} hand={displayedHand} selected={selected} select={selectCard} clearSelection={()=>setSelected([])} l={l}/>:<div className="cc-hand">{displayedHand.map(c=><CardFace key={c} card={c} selected={selected.includes(c)} onClick={()=>selectCard(c)}/>)}</div>}{current.turn===current.self&&<p className="cc-hand-hint">{l('カードを選ぶと、そのカードでできる操作を表示します。','Select a card to filter the actions you can take with it.')}</p>}{current.game==='pokerbull'&&<label>{l('宣言する役','Claim category')}<select value={bullType} onChange={e=>setBullType(Number(e.target.value))}><option value={-1}>{l('すべて','All')}</option>{[0,1,2,3,4,5,6].map(type=><option key={type} value={type}>{bullLabel(BULL_CLAIMS.findIndex(c=>c.type===type),languageMode==='ENGLISH').split(' ')[0]}</option>)}</select></label>}<div className="cc-actions">{(['cassino','royalcassino'].includes(current.game))&&current.turn===current.self&&captureValid&&(captureSelection.cards?.length??0)>1&&<button className="cc-primary" disabled={!captureValid} onClick={()=>send(captureSelection)}>{l('選んだ場札を獲得','Capture selection')}</button>}{(['cassino','royalcassino'].includes(current.game))&&current.turn===current.self&&[...new Set(current.players[current.self].hand.flatMap(card=>casinoValues(current,card)))].map(value=>({type:'build' as const,cards:captureSelection.cards,value})).filter(a=>casinoBuildValid(current,a)).map(a=><button key={`custom-build-${a.value}`} onClick={()=>send(a)}>{l('選択札でビルド','Build selection')} → {a.value}</button>)}{current.game==='doubt'&&current.phase==='play'&&current.turn===current.self&&selected.length>0?<button className="cc-primary" onClick={()=>send({type:'play',cards:selected})}>{l('このカードで宣言','Play these cards')} {current.claim} × {selected.length}</button>:visibleActions.filter(a=>current.game!=='pokerbull'||a.type!=='bid'||bullType<0||BULL_CLAIMS[a.value!].type===bullType).slice(0,current.game==='pokerbull'?400:180).map(a=><button key={actionKey(a)} onClick={()=>send(a)}>{actionLabel(a,current)}</button>)}</div></div>}
-      {(current.phase==='result'||current.phase==='round')&&<section className="cc-result"><h2>{current.resultReason==='draw'?l('引き分け','Draw'):current.resultReason==='repetition'?l('同じ状態が繰り返されたため引き分け','Repeated position: draw'):current.resultReason==='hostEnded'?l('ホストが対戦を終了しました','The host ended the match'):current.phase==='result'?current.winners.includes(current.self)?l('おめでとう！','Congratulations!'):l('対戦結果','Results'):l('今回の結果','Deal complete')}</h2><div className="cc-result-standings">{[...current.players].sort((a,b)=>b.score-a.score).map(p=><div key={p.id}><Face hero={p.hero}/><span>{p.name}</span><strong>{current.game==='golf'?-p.score:p.score}</strong></div>)}</div><div className="cc-result-actions">{host&&<button className="cc-primary" onClick={()=>current.phase==='round'?send({type:'next'}):room.current?.rematch()}>{current.phase==='round'?l('次の配札へ','Next deal'):l('ゲーム選択へ','Back to table lobby')}</button>}<button onClick={leave}>{l('クラブに戻る','Return to club')}</button></div></section>}
+      {(current.phase==='result'||current.phase==='round')&&<section className="cc-result"><h2>{current.resultReason==='draw'?l('引き分け','Draw'):current.resultReason==='repetition'?l('同じ状態が繰り返されたため引き分け','Repeated position: draw'):current.resultReason==='hostEnded'?l('ホストが対戦を終了しました','The host ended the match'):current.phase==='result'?current.winners.includes(current.self)?l('おめでとう！','Congratulations!'):l('対戦結果','Results'):l('今回の結果','Deal complete')}</h2><div className="cc-result-standings">{[...current.players].sort((a,b)=>b.score-a.score).map(p=><div key={p.id}><Face hero={p.hero}/><span>{p.name}</span><strong>{current.game==='golf'?-p.score:p.score}</strong></div>)}</div><div className="cc-result-actions">{host&&<button className="cc-primary" onClick={()=>current.phase==='round'?send({type:'next'}):room.current?.rematch()}>{current.phase==='round'?l('次の配札へ','Next deal'):l('別のゲームを選ぶ','Choose another game')}</button>}<button onClick={leave}>{packet?.code?l('部屋を出る','Leave room'):l('クラブに戻る','Return to club')}</button></div>{!host&&current.phase==='result'&&<p role="status">{l('ホストが次のゲームを選ぶとルームに戻ります。','When the host chooses another game, you will return to the room.')}</p>}</section>}
     </section>}
-    {rules&&<div className="cc-modal" role="dialog" aria-modal="true" aria-label={l('遊び方','Rules')}><section className="cc-panel"><button onClick={()=>setRules(false)}>{l('閉じる','Close')} ×</button><h1>{title(current?.game||(packet?.phase==='lobby'?packet.game:game))}</h1><p>{l(definition(current?.game||(packet?.phase==='lobby'?packet.game:game)).rule,definition(current?.game||(packet?.phase==='lobby'?packet.game:game)).englishRule)}</p><p>{l('CPUの空席補充と、オンラインでの友達との対戦に対応。接続が切れた参加者の席はCPUが引き継ぎます。','Empty seats use CPU players. Play online with friends; disconnected guests are replaced by CPU players.')}</p><a href={referenceGame(current?.game||game)?.source} target="_blank" rel="noreferrer">{l('参考ルール（ゲームファーム）','Reference rules (Gamefarm)')} ↗</a></section></div>}
+    {rules&&<div className="cc-modal" role="dialog" aria-modal="true" aria-label={l('遊び方','Rules')}><section className="cc-panel"><button onClick={()=>setRules(false)}>{l('閉じる','Close')} ×</button><h1>{title(rulesGame)}</h1><p>{l(definition(rulesGame).rule,definition(rulesGame).englishRule)}</p><p>{l('CPUの空席補充と、オンラインでの友達との対戦に対応。接続が切れた参加者の席はCPUが引き継ぎます。','Empty seats use CPU players. Play online with friends; disconnected guests are replaced by CPU players.')}</p><a href={referenceGame(rulesGame)?.source} target="_blank" rel="noreferrer">{l('参考ルール（ゲームファーム）','Reference rules (Gamefarm)')} ↗</a></section></div>}
   </main>;
 }

@@ -109,3 +109,23 @@ export const CARD_CLUB_VOICE_MS:Record<string,number>={
 export function cardClubVoice(hero:string,event:CardClubVoiceEvent){
  const ms=CARD_CLUB_VOICE_MS[hero+'/'+event];return ms?{path:`sfx/card-club-voices/${hero}/${event}.ogg`,maxDurationMs:ms+500}:null;
 }
+
+// The magic main game uses its attack bank on decisive blows. Prefer lines
+// that also read naturally after a strong play at the card table.
+const MAGIC_SCORE_VARIANTS: Readonly<Record<string, readonly number[]>> = {
+  akari:[1,2,3], shizuku:[1,2], hiyori:[1,3], tsubasa:[1,3], rei:[1,3],
+  madoka:[1,3], koharu:[2,3], mirai:[1,2,3], sera:[2,3], ren:[1,3],
+  soma:[1,3], minato:[1,3], riku:[2,3], yamato:[1,3], leon:[1,3],
+  elliot:[1,3], sakuya:[2,3],
+};
+
+export function cardClubScoreVoice(hero:string, random:()=>number=Math.random){
+  if(!CARD_CLUB_VOICE_HEROES.some(id=>id===hero))return null;
+  const highSchool=hero.startsWith('high-school-');
+  const id=hero.replace(/^(high-school|magic)-/,'');
+  const variants=highSchool?[1,2,3,4,5]:MAGIC_SCORE_VARIANTS[id];
+  if(!variants?.length)return null;
+  const variant=variants[Math.floor(random()*variants.length)];
+  const voice=highSchool?`finish-${variant}`:`attack-${variant}`;
+  return {path:`sfx/${highSchool?'high-school':'magic'}-voices/${id.toUpperCase()}/${voice}.ogg`,voice,maxDurationMs:3600};
+}
