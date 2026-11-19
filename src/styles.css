@@ -19894,3 +19894,15 @@ textarea {
   margin-top: clamp(0.5rem, 2dvh, 2rem);
   max-width: 100%;
 }
+
+.main-mini-game-select-screen .mini-game-select-card-copy .mini-game-title[data-wrap-title] {
+  height: auto;
+  max-height: none;
+  max-width: 100%;
+}
+.main-mini-game-select-screen .mini-game-select-card-copy .mini-game-title[data-wrap-title] .mini-game-title-line {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  overflow: visible;
+  text-overflow: clip;
+}

@@ -1,3 +1,5 @@
+import { stepPatrol, type Patrol, type RadioEvent } from './patrol';
+import { PatrolSight } from './PatrolSight';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowDown,
@@ -62,6 +64,10 @@ type Props = {
   onExit: () => void;
   onRetry: () => void;
   routeImages?: RouteImages;
+  patrol?: Patrol;
+  onRadio?: (event: RadioEvent) => void;
+  onRadioStop?: () => void;
+  onPatrolLost?: () => void;
 };
 
 function CourseMap({ flight: s, label }: { flight: Flight; label: string }) {
@@ -176,6 +182,10 @@ export default function FlightDeck({
   onExit,
   onRetry,
   routeImages,
+  patrol,
+  onRadio,
+  onRadioStop,
+  onPatrolLost,
 }: Props) {
   const t = (...p: Phrase) => localize(p, language);
   const discipline = DISCIPLINES.find((d) => d.id === lesson.aircraft)!;
@@ -186,32 +196,46 @@ export default function FlightDeck({
   const pad = useRef(neutralInput()),
     halted = useRef(false),
     survey = useRef(false),
-    primaryTap = useRef(false);
+    primaryTap = useRef(false),
+    brakeTap = useRef(false);
   const [paused, setPaused] = useState(false),
     [lost, setLost] = useState(false),
     [, refresh] = useState(0);
   const done = useRef(onDone);
   done.current = onDone;
+  const callbacks = useRef({ onRadio, onRadioStop, onPatrolLost });
+  callbacks.current = { onRadio, onRadioStop, onPatrolLost };
+  const fighting = patrol?.phase === 'fight';
+  const primaryLabel = fighting
+    ? t('射撃', 'Fire', 'しゃげき')
+    : localize(discipline.primary, language);
+  const secondaryLabel = fighting
+    ? t('バースト', 'Burst', 'バースト') + ' ' + patrol.sortie.energy + '/5'
+    : localize(discipline.secondary, language);
   const clear = useCallback(() => {
     keys.current.clear();
     touches.current.clear();
     primaryTap.current = false;
+    brakeTap.current = false;
     pad.current = neutralInput();
   }, []);
   const pause = useCallback(
     (value: boolean) => {
       halted.current = value;
+      if (value) callbacks.current.onRadioStop?.();
       clear();
       setPaused(value);
     },
     [clear],
   );
   const changeView = () => {
+    if (patrol?.phase === 'fight') return;
     survey.current = !survey.current;
     refresh((n) => n + 1);
   };
   useGameplayGamepad('flight-school', (p) => {
     pad.current = { turn: p.x, pitch: -p.y, primary: p.buttons[PAD.A], brake: p.buttons[PAD.B] };
+    if (p.pressed[PAD.B]) brakeTap.current = true;
     if (p.pressed[PAD.A]) primaryTap.current = true;
     if (p.pressed[PAD.X]) changeView();
     if (p.pressed[PAD.MENU]) pause(true);
@@ -222,8 +246,8 @@ export default function FlightDeck({
     try {
       scene =
         lesson.route && routeImages
-          ? makeRouteScene(surface, lesson.route, routeImages)
-          : makeFlightScene(surface, lesson);
+          ? makeRouteScene(surface, lesson.route, routeImages, !!patrol)
+          : makeFlightScene(surface, lesson, !!patrol);
     } catch {
       setLost(true);
       pause(true);
@@ -233,7 +257,9 @@ export default function FlightDeck({
       previous = performance.now(),
       accumulator = 0,
       nextHud = 0,
-      cueSerial = 0;
+      cueSerial = 0,
+      sawScenery = false,
+      calledHome = false;
     const blur = () => pause(true),
       hidden = () => {
         if (document.hidden) blur();
@@ -260,7 +286,8 @@ export default function FlightDeck({
       if (controls[e.code]) {
         e.preventDefault();
         keys.current.add(e.code);
-        if (controls[e.code] === 'primary') primaryTap.current = true;
+        if (!e.repeat && controls[e.code] === 'primary') primaryTap.current = true;
+        if (!e.repeat && controls[e.code] === 'brake') brakeTap.current = true;
       }
     };
     const tick = (now: number) => {
@@ -277,18 +304,45 @@ export default function FlightDeck({
         turn: pad.current.turn + Number(active.has('right')) - Number(active.has('left')),
         pitch: pad.current.pitch + Number(active.has('up')) - Number(active.has('down')),
         primary: primaryTap.current || pad.current.primary || active.has('primary'),
-        brake: pad.current.brake || active.has('brake'),
+        brake: brakeTap.current || pad.current.brake || active.has('brake'),
       };
       accumulator += dt;
-      while (accumulator >= STEP && !s.result) {
-        stepFlight(s, input);
+      while (accumulator >= STEP && !s.result && !patrol?.failed) {
+        if (patrol) {
+          const inBattle = patrol.phase === 'fight';
+          stepPatrol(s, patrol, input, (event) => callbacks.current.onRadio?.(event));
+          if (inBattle && patrol.sortie.sound) audioService.playFlightSound(patrol.sortie.sound);
+          if (patrol.phase === 'fight') survey.current = false;
+        } else stepFlight(s, input);
         primaryTap.current = false;
+        brakeTap.current = false;
         accumulator -= STEP;
       }
-      scene.draw(s, input, survey.current, dt);
+      if (patrol?.failed) {
+        callbacks.current.onPatrolLost?.();
+        return;
+      }
+      scene.draw(
+        s,
+        input,
+        survey.current,
+        dt,
+        patrol?.phase === 'fight' ? patrol.sortie : undefined,
+      );
+      if (!patrol && s.airborne && !s.result) {
+        if (!sawScenery && s.elapsed > 4 && altitude(s) > 15) {
+          sawScenery = true;
+          callbacks.current.onRadio?.('vista');
+        }
+        if (!calledHome && lesson.aircraft === 'plane' && s.nextGate === lesson.gates.length) {
+          calledHome = true;
+          callbacks.current.onRadio?.('home');
+        }
+      }
       if (cueSerial !== s.serial) {
         cueSerial = s.serial;
         const action = s.lastAction;
+        if (!patrol && action === 'launch') callbacks.current.onRadio?.('lift');
         if (action)
           audioService.playFlightSound(
             action === 'reserve'
@@ -299,12 +353,13 @@ export default function FlightDeck({
           );
       }
       if (s.result) {
+        if (!patrol && s.result.reason === 'landed') callbacks.current.onRadio?.('land');
         done.current(s.result);
         return;
       }
       if (now >= nextHud) {
         refresh((n) => n + 1);
-        nextHud = now + 95;
+        nextHud = now + (patrol?.phase === 'fight' ? 32 : 95);
       }
       frame = requestAnimationFrame(tick);
     };
@@ -325,7 +380,7 @@ export default function FlightDeck({
       document.removeEventListener('visibilitychange', hidden);
       surface.removeEventListener('webglcontextlost', contextLost);
     };
-  }, [s, lesson, clear, pause, routeImages]);
+  }, [s, lesson, clear, pause, routeImages, patrol]);
   function press(action: string, face: React.ReactNode, label: string, shortcut?: string) {
     const release = (e: React.PointerEvent<HTMLButtonElement>) => {
       touches.current.delete(e.pointerId);
@@ -343,6 +398,7 @@ export default function FlightDeck({
           e.currentTarget.setPointerCapture(e.pointerId);
           touches.current.set(e.pointerId, action);
           if (action === 'primary') primaryTap.current = true;
+          if (action === 'brake') brakeTap.current = true;
           e.currentTarget.dataset.held = 'true';
         }}
         onPointerUp={release}
@@ -379,7 +435,13 @@ export default function FlightDeck({
   }
   return (
     <div
-      className="fs-deck"
+      className={
+        'fs-deck' +
+        (fighting ? ' fs-battle' : '') +
+        (fighting && patrol.sortie.hurt > 0 ? ' fs-hurt' : '') +
+        (fighting && patrol.sortie.burst > 0 ? ' fs-bursting' : '')
+      }
+      data-patrol-phase={patrol?.phase}
       data-gamepad-live={paused ? undefined : 'flight-school'}
       data-flight-stage="flight"
       data-airborne={s.airborne}
@@ -397,15 +459,18 @@ export default function FlightDeck({
               : lesson.airport.code}
           </b>
           <span>
-            {lesson.route
-              ? t('空港間フライト', 'Airport routes', 'くうこうかんフライト')
-              : localize(lesson.airport.name, language) +
-                ' · ' +
-                localize(discipline.name, language)}
+            {patrol
+              ? localize(patrol.sortie.mission.name, language)
+              : lesson.route
+                ? t('空港間フライト', 'Airport routes', 'くうこうかんフライト')
+                : localize(lesson.airport.name, language) +
+                  ' · ' +
+                  localize(discipline.name, language)}
           </span>
         </div>
         <div className="fs-tools">
           <button
+            disabled={fighting}
             onClick={changeView}
             aria-pressed={survey.current}
             aria-label={t('視点切替', 'Change view', 'してんきりかえ')}
@@ -448,38 +513,64 @@ export default function FlightDeck({
         )}
       </div>
       <CourseMap flight={s} label={t('航路図', 'Course map', 'こうろず')} />
-      <div className="fs-waypoint">
-        <span className="fs-way-arrow" style={{ transform: `rotate(${bearingTo(s, target)}rad)` }}>
-          ↑
-        </span>
-        <div>
-          <b>{nextInstruction()}</b>
-          <small>
-            {lesson.route ? (
-              <>
-                {(Math.hypot(s.x - lesson.target.x, s.z - lesson.target.z) / 1000).toFixed(1)} km ·{' '}
-                {t('海抜', 'MSL', 'かいばつ')} {Math.round(s.y)} m{' '}
-                {gate && ' → ' + Math.round(gate.y) + ' m'} · ×
-                {Math.round(cruiseRate(s, lesson.route))}
-              </>
-            ) : (
-              <>
-                {s.nextGate}/{lesson.gates.length} ◇ · {distance} m{gate && ` · ↥ ${gate.y} m`}
-              </>
+      {fighting && (
+        <>
+          <PatrolSight s={patrol.sortie} />
+          <div className="fs-combat-readout">
+            {t('編隊', 'Wave', 'へんたい')} {patrol.sortie.wave + 1}/
+            {patrol.sortie.mission.waves.length} · {t('耐久', 'Hull', 'たいきゅう')}{' '}
+            {patrol.sortie.hull}
+            {' · ' +
+              Math.ceil(
+                patrol.sortie.mission.seconds * (patrol.sortie.mode === 'practice' ? 1.35 : 1) -
+                  patrol.sortie.time,
+              ) +
+              ' s'}
+            {patrol.sortie.mission.escort &&
+              ' · ' + t('輸送艇', 'Convoy', 'ゆそうてい') + ' ' + patrol.sortie.convoy}
+          </div>
+        </>
+      )}
+      {!fighting && (
+        <div className="fs-waypoint">
+          <span
+            className="fs-way-arrow"
+            style={{ transform: `rotate(${bearingTo(s, target)}rad)` }}
+          >
+            ↑
+          </span>
+          <div>
+            <b>{nextInstruction()}</b>
+            <small>
+              {lesson.route ? (
+                <>
+                  {(Math.hypot(s.x - lesson.target.x, s.z - lesson.target.z) / 1000).toFixed(1)} km
+                  · {t('海抜', 'MSL', 'かいばつ')} {Math.round(s.y)} m{' '}
+                  {gate && ' → ' + Math.round(gate.y) + ' m'} · ×
+                  {Math.round(cruiseRate(s, lesson.route))}
+                </>
+              ) : (
+                <>
+                  {s.nextGate}/{lesson.gates.length} ◇ · {distance} m{gate && ` · ↥ ${gate.y} m`}
+                </>
+              )}
+            </small>
+            {lesson.aircraft === 'jetpack' && s.dwell > 0 && (
+              <progress aria-label={t('ホバー', 'Hover', 'ホバー')} value={s.dwell} max={0.65} />
             )}
-          </small>
-          {lesson.aircraft === 'jetpack' && s.dwell > 0 && (
-            <progress aria-label={t('ホバー', 'Hover', 'ホバー')} value={s.dwell} max={0.65} />
-          )}
-        </div>
-      </div>
-      {s.lastAction && s.lastAction !== 'thermal' && s.elapsed - s.lastCueTime < 1.4 && (
-        <div className="fs-cue" key={s.serial}>
-          {lesson.route && s.lastAction === 'gate'
-            ? t('経由地点を通過', 'Waypoint reached', 'けいゆちてんを つうか')
-            : localize(CUES[s.lastAction], language)}
+          </div>
         </div>
       )}
+      {!fighting &&
+        s.lastAction &&
+        s.lastAction !== 'thermal' &&
+        s.elapsed - s.lastCueTime < 1.4 && (
+          <div className="fs-cue" key={s.serial}>
+            {lesson.route && s.lastAction === 'gate'
+              ? t('経由地点を通過', 'Waypoint reached', 'けいゆちてんを つうか')
+              : localize(CUES[s.lastAction], language)}
+          </div>
+        )}
       {s.inThermal && (
         <div className="fs-lift">
           <Wind size={14} />
@@ -507,18 +598,18 @@ export default function FlightDeck({
             'brake',
             <>
               <Crosshair />
-              {localize(discipline.secondary, language)}
+              {secondaryLabel}
             </>,
-            localize(discipline.secondary, language),
+            secondaryLabel,
             'Shift',
           )}
           {press(
             'primary',
             <>
-              <Gauge />
-              {localize(discipline.primary, language)}
+              {fighting ? <Crosshair /> : <Gauge />}
+              {primaryLabel}
             </>,
-            localize(discipline.primary, language),
+            primaryLabel,
             'Space',
           )}
         </div>
@@ -557,9 +648,11 @@ export default function FlightDeck({
               {t('やり直す', 'Retry flight', 'やりなおす')}
             </button>
             <button onClick={onExit}>
-              {lesson.route
-                ? t('航路選択へ', 'Route selection', 'こうろせんたくへ')
-                : t('格納庫へ', 'Back to hangar', 'かくのうこへ')}
+              {patrol
+                ? t('課目選択へ', 'Mission select', 'かもくせんたくへ')
+                : lesson.route
+                  ? t('航路選択へ', 'Route selection', 'こうろせんたくへ')
+                  : t('格納庫へ', 'Back to hangar', 'かくのうこへ')}
             </button>
           </section>
         </div>

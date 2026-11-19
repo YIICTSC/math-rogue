@@ -1,3 +1,4 @@
+import { PilotPicker, RadioCaption, useFlightCrew } from './FlightRadio';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ArrowLeft,
@@ -99,6 +100,11 @@ export default function FlightSchool({
   const [stage, setStage] = useState<
     'hangar' | 'log' | 'quiz' | 'flight' | 'result' | 'combat' | 'routes'
   >('hangar');
+  const crew = useFlightCrew();
+  const hangar = () => {
+    crew.stop();
+    setStage('hangar');
+  };
   const [port, setPort] = useState(AIRPORTS[0]);
   const [craft, setCraft] = useState<Aircraft>('parachute');
   const [lesson, setLesson] = useState<Lesson>(() =>
@@ -138,6 +144,7 @@ export default function FlightSchool({
     void audioService.preloadFlightSounds();
   }, []);
   function start(mode: Training) {
+    crew.stop();
     audioService.init();
     audioService.resumeBGM();
     audioService.playFlightSound('start');
@@ -147,12 +154,14 @@ export default function FlightSchool({
     setStage(mode === 'exam' ? 'quiz' : 'flight');
   }
   function retry() {
+    crew.stop();
     audioService.init();
     setReport(null);
     setTurn((n) => n + 1);
     setStage('flight');
   }
   function finished(result: Report) {
+    if (result.reason !== 'landed') crew.stop();
     setBook(recordFlight(lesson, result));
     setReport(result);
     audioService.playFlightSound(
@@ -169,9 +178,10 @@ export default function FlightSchool({
   return (
     <main className="flight-school" data-flight-screen={stage}>
       {stage === 'routes' ? (
-        <RouteSchool home={port.code} language={languageMode} exit={() => setStage('hangar')} />
+        <RouteSchool home={port.code} language={languageMode} crew={crew} exit={hangar} />
       ) : stage === 'combat' ? (
         <CombatSchool
+          crew={crew}
           airport={port}
           language={languageMode}
           study={{
@@ -181,14 +191,16 @@ export default function FlightSchool({
             answerMode,
             onAnswerResult,
           }}
-          onExit={() => setStage('hangar')}
+          onExit={hangar}
         />
       ) : stage === 'flight' ? (
         <FlightDeck
           key={turn}
+          onRadio={crew.cue}
+          onRadioStop={crew.stop}
           lesson={lesson}
           language={languageMode}
-          onExit={() => setStage('hangar')}
+          onExit={hangar}
           onRetry={retry}
           onDone={finished}
         />
@@ -216,7 +228,7 @@ export default function FlightSchool({
       ) : (
         <div className="fs-shell">
           <nav className="fs-nav">
-            <button onClick={stage === 'hangar' ? onBack : () => setStage('hangar')}>
+            <button onClick={stage === 'hangar' ? onBack : hangar}>
               <ArrowLeft size={16} />
               {stage === 'hangar'
                 ? t('ミニゲーム', 'Mini-games', 'ミニゲーム')
@@ -317,6 +329,12 @@ export default function FlightSchool({
                   {t('戦闘訓練', 'Combat training', 'せんとうくんれん')}
                   <ChevronRight size={17} />
                 </button>
+                <PilotPicker
+                  compact
+                  pilot={crew.pilot}
+                  select={crew.select}
+                  language={languageMode}
+                />
                 <div className="fs-briefing">
                   <b>
                     <Flag size={16} />
@@ -459,6 +477,7 @@ export default function FlightSchool({
                   ))}
                 </div>
                 <p>{localize(DEBRIEF[report.reason], languageMode)}</p>
+                <RadioCaption line={crew.line} language={languageMode} />
                 <div className="fs-flight-time">
                   <CircleDot size={14} />
                   {lesson.aircraft === 'plane'
@@ -471,7 +490,7 @@ export default function FlightSchool({
                     {t('同じ課目でもう一度', 'Fly this lesson again', 'おなじ かもくで もういちど')}
                     <ArrowRight size={17} />
                   </button>
-                  <button onClick={() => setStage('hangar')}>
+                  <button onClick={hangar}>
                     <Mountain size={17} />
                     {t('別の空港・種目へ', 'Choose another course', 'べつの くうこう・しゅもくへ')}
                   </button>
@@ -481,6 +500,7 @@ export default function FlightSchool({
           )}
         </div>
       )}
+      {stage === 'flight' && <RadioCaption line={crew.line} language={languageMode} />}
     </main>
   );
 }

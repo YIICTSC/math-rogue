@@ -1,9 +1,10 @@
 import { build } from 'esbuild';
 import assert from 'node:assert/strict';
+import { readFile, stat } from 'node:fs/promises';
 const base = './src/mini-games/flight-school/';
 const { outputFiles } = await build({
   stdin: {
-    contents: ['courses', 'simulation', 'logbook', 'combat', 'routes']
+    contents: ['courses', 'simulation', 'logbook', 'combat', 'routes', 'patrol']
       .map((n) => 'export * from ' + JSON.stringify(base + n))
       .join('\n'),
     resolveDir: process.cwd(),
@@ -159,26 +160,23 @@ console.log(
 );
 
 const neutral = { x: 0, y: 0, fire: false, burst: false };
+function aimAtTarget(s) {
+  const target = s.targets.find((t) => t.hp > 0 && !sim.shielded(s, t));
+  const warning = s.warnings.find((w) => w.life < 0.55 && Math.hypot(s.x - w.x, s.y - w.y) < 0.25);
+  const x = warning ? (warning.x > 0 ? -0.94 : 0.94) : target.x;
+  const y = warning ? (warning.y > 0 ? -0.82 : 0.86) : target.y;
+  return {
+    x: clamp((x - s.x) * 30),
+    y: clamp((y - s.y) * 30),
+    fire: sim.underSight(s, target),
+    burst: s.energy === 5,
+  };
+}
 for (const mission of sim.MISSIONS) {
   for (const mode of ['practice', 'exam']) {
     const flight = sim.newSortie(mission, mode);
     while (!flight.finished) {
-      const target = flight.targets.find((t) => t.hp > 0 && !sim.shielded(flight, t));
-      const warning = flight.warnings.find(
-        (w) => w.life < 0.55 && Math.hypot(flight.x - w.x, flight.y - w.y) < 0.25,
-      );
-      const x = warning ? (warning.x > 0 ? -0.94 : 0.94) : target.x;
-      const y = warning ? (warning.y > 0 ? -0.82 : 0.86) : target.y;
-      sim.stepSortie(
-        flight,
-        {
-          x: clamp((x - flight.x) * 30),
-          y: clamp((y - flight.y) * 30),
-          fire: sim.underSight(flight, target),
-          burst: flight.energy === 5,
-        },
-        1 / 60,
-      );
+      sim.stepSortie(flight, aimAtTarget(flight), STEP);
     }
     assert.equal(flight.finished, 'clear', mission.id + '/' + mode);
     assert.equal(flight.kills, mission.waves.flat().length);
@@ -276,3 +274,98 @@ assert.equal(routeContact(manual.route.from, 0, 25), 'impact');
 assert.equal(routeContact(manual.route.to, 80, 25), 'runway');
 assert.equal(routeContact(manual.route.to, 0, 60), 'impact');
 console.log('PASS manual controls, destination-only landing, missed runway and unsafe touchdown.');
+
+// Fly a complete patrol with exactly the controls available to keyboard, touch and gamepad.
+for (const mission of sim.MISSIONS) {
+  for (const mode of ['practice', 'exam']) {
+    const lessons = [
+      ...AIRPORTS.map((a) => makeLesson(a, 'plane', mode)),
+      ...sim.ROUTES.flatMap((r) =>
+        [false, true].map((reverse) => sim.makeRouteLesson(r, reverse, true)),
+      ),
+    ];
+    for (const lesson of lessons) {
+      const flight = beginFlight(lesson),
+        p = sim.newPatrol(mission, mode),
+        events = [];
+      while (!flight.result && !p.failed && flight.elapsed < 640) {
+        const i = sim.neutralInput(),
+          b = p.sortie;
+        if (!flight.airborne) {
+          i.pitch = 1;
+          i.primary = true;
+        }
+        if (p.phase === 'fight') {
+          const { x, y, fire, burst } = aimAtTarget(b);
+          Object.assign(i, { turn: x, pitch: y, primary: fire, brake: burst });
+        }
+        sim.stepPatrol(flight, p, i, (e) => events.push(e));
+      }
+      const label = [
+        lesson.route?.from.code ?? lesson.airport.code,
+        mission.id,
+        mode,
+        flight.result?.reason,
+        flight.nextGate,
+        p.phase,
+        Math.round(flight.elapsed),
+      ];
+      assert.equal(flight.result?.reason, 'landed', JSON.stringify(label));
+      assert.equal(p.sortie.finished, 'clear');
+      assert.deepEqual(
+        events.filter((e) => !['wave', 'down'].includes(e)),
+        ['lift', 'vista', 'search', 'engage', 'home', 'land'],
+      );
+      assert(events.includes('down') && events.includes('wave'));
+    }
+  }
+}
+console.log(
+  'PASS 192 complete patrols across eight circuits, eight route directions and six missions.',
+);
+
+const parked = sim.beginFlight(makeLesson(AIRPORTS[0], 'plane', 'practice'));
+const unattended = sim.newPatrol(sim.MISSIONS[0], 'practice');
+const calls = [];
+for (let i = 0; i < 1800; i++)
+  sim.stepPatrol(parked, unattended, sim.neutralInput(), (e) => calls.push(e));
+assert.equal(unattended.phase, 'launch');
+assert.equal(unattended.sortie.time, 0);
+assert.deepEqual(calls, []);
+while (!unattended.failed && !parked.result && parked.elapsed < 250) {
+  const input = sim.neutralInput();
+  if (!parked.airborne) {
+    input.pitch = 1;
+    input.primary = true;
+  }
+  sim.stepPatrol(parked, unattended, input, (e) => calls.push(e));
+}
+assert(unattended.failed);
+assert(!calls.includes('home') && !calls.includes('land'));
+
+const scripts = JSON.parse(await readFile(base + 'radio-script.json', 'utf8'));
+assert.equal(Object.keys(scripts).length, 9);
+let clips = 0;
+for (const [lead, entry] of Object.entries(scripts)) {
+  assert(lead !== entry.wing && Object.hasOwn(scripts, entry.wing));
+  assert(
+    (await stat('public/sprites/flight-school/pilots/' + lead.toLowerCase() + '.webp')).size > 0,
+  );
+  for (const event of ['lift', 'vista', 'search', 'engage', 'wave', 'down', 'home', 'land']) {
+    const lines = entry[event];
+    assert.equal(lines.length, event === 'lift' || event === 'land' ? 1 : 2);
+    for (const [i, line] of lines.entries()) {
+      assert(line.length === 3 && line.every((t) => typeof t === 'string' && t.trim()));
+      assert(
+        (
+          await stat(
+            'public/sfx/flight-radio/' + lead.toLowerCase() + '/' + event + '-' + i + '.mp3',
+          )
+        ).size > 0,
+      );
+      clips++;
+    }
+  }
+}
+assert.equal(clips, 126);
+console.log('PASS grounded and failed patrols, nine pilot portraits and 126 voiced radio lines.');

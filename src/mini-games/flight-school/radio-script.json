@@ -1,0 +1,753 @@
+{
+  "WARRIOR": {
+    "wing": "BARD",
+    "lift": [["管制、俺たちの番だ！", "Tower, it's our turn!", "かんせい、おれたちの ばんだ！"]],
+    "vista": [
+      [
+        "この海、放送で見せたかったな。",
+        "Wish we could show the whole school this sea.",
+        "この うみ、ほうそうで みせたかったな。"
+      ],
+      [
+        "実況なら任せて。青、画面いっぱいです！",
+        "I'll do the commentary. Blue, from edge to edge!",
+        "じっきょうなら まかせて。あお、がめん いっぱいです！"
+      ]
+    ],
+    "search": [
+      [
+        "静かすぎるな。そっち、見えるか？",
+        "Too quiet out here. See anything?",
+        "しずかすぎるな。そっち、みえるか？"
+      ],
+      [
+        "左の雲からお客さん。マイク入ったよ！",
+        "Guests coming out of that cloud on the left. Mic's live!",
+        "ひだりの くもから おきゃくさん。マイク はいったよ！"
+      ]
+    ],
+    "engage": [
+      ["相棒、派手に行こうぜ！", "Let's make an entrance, partner!", "あいぼう、はでに いこうぜ！"],
+      [
+        "了解。主役の出番、三、二、一！",
+        "Copy. You're on in three, two, one!",
+        "りょうかい。しゅやくの でばん、さん、に、いち！"
+      ]
+    ],
+    "wave": [
+      ["まだ幕は下りてねえぞ！", "That curtain isn't down yet!", "まだ まくは おりてねえぞ！"],
+      [
+        "おっと、アンコールの編隊です！",
+        "And here comes the encore formation!",
+        "おっと、アンコールの へんたいです！"
+      ]
+    ],
+    "down": [
+      [
+        "一機クリア！ 今の撮れたか？",
+        "One clear! Did you catch that?",
+        "いっき クリア！ いまの とれたか？"
+      ],
+      [
+        "ばっちり。今度の昼休みに流すね！",
+        "Every second. It's going on the lunchtime show!",
+        "ばっちり。こんどの ひるやすみに ながすね！"
+      ]
+    ],
+    "home": [
+      [
+        "帰るぞ。全員そろって、な。",
+        "Time for home. Everybody together.",
+        "かえるぞ。ぜんいん そろって、な。"
+      ],
+      [
+        "こちら僚機、最後までオンエアです。",
+        "Wingmate here. On the air to the very end.",
+        "こちら りょうき、さいごまで オンエアです。"
+      ]
+    ],
+    "land": [
+      [
+        "着陸よし。いい相棒を持ったぜ。",
+        "Wheels down. Couldn't ask for a better wingmate.",
+        "ちゃくりく よし。いい あいぼうを もったぜ。"
+      ]
+    ]
+  },
+  "CARETAKER": {
+    "wing": "GARDENER",
+    "lift": [
+      [
+        "こちら先発機、元気に離陸します！",
+        "Lead aircraft, ready and raring to fly!",
+        "こちら せんぱつき、げんきに りりくします！"
+      ]
+    ],
+    "vista": [
+      [
+        "上から見ると、森が大きな生き物みたい。",
+        "The forest looks like one big living thing from up here.",
+        "うえから みると、もりが おおきな いきものみたい。"
+      ],
+      [
+        "この緑、毎日水やりした甲斐があるな。",
+        "All that green! Guess my watering paid off.",
+        "この みどり、まいにち みずやりした かいが あるな。"
+      ]
+    ],
+    "search": [
+      [
+        "雲の上に小さな影。鳥かな？",
+        "A little shadow over the clouds. A bird?",
+        "くもの うえに ちいさな かげ。とりかな？"
+      ],
+      [
+        "翼が光った。あれが演習機だよ。",
+        "Its wings just flashed. That's our training drone.",
+        "つばさが ひかった。あれが えんしゅうきだよ。"
+      ]
+    ],
+    "engage": [
+      [
+        "迷子にならないでね、ついてきて！",
+        "Stay close. Can't have you getting lost!",
+        "まいごに ならないでね、ついてきて！"
+      ],
+      [
+        "了解、君の翼が目印だ。",
+        "Copy. I'm following your wings.",
+        "りょうかい、きみの つばさが めじるしだ。"
+      ]
+    ],
+    "wave": [
+      [
+        "次の群れだよ。息を合わせよう。",
+        "Another flock. Nice and steady, together.",
+        "つぎの むれだよ。いきを あわせよう。"
+      ],
+      [
+        "大丈夫、こっちは根気が取り柄さ。",
+        "Steady's my specialty. I'm right here.",
+        "だいじょうぶ、こっちは こんきが とりえさ。"
+      ]
+    ],
+    "down": [
+      [
+        "よし、ひとつ抜けた！ そっちは？",
+        "One down! How are you doing?",
+        "よし、ひとつ ぬけた！ そっちは？"
+      ],
+      [
+        "元気だよ。見事な連係だったね。",
+        "Doing great. Look at us working together!",
+        "げんきだよ。みごとな れんけいだったね。"
+      ]
+    ],
+    "home": [
+      ["みんなで巣に帰ろっか。", "Let's head back to the nest.", "みんなで すに かえろっか。"],
+      [
+        "帰ったら温室の花を見に行こう。",
+        "Let's see what's blooming in the greenhouse when we get back.",
+        "かえったら おんしつの はなを みにいこう。"
+      ]
+    ],
+    "land": [
+      ["無事に着いたよ。お疲れさま！", "Down safe. Nice flying!", "ぶじに ついたよ。おつかれさま！"]
+    ]
+  },
+  "ASSASSIN": {
+    "wing": "LIBRARIAN",
+    "lift": [
+      [
+        "こちら先行機。静かに出る。",
+        "Lead here. Slipping out quietly.",
+        "こちら せんこうき。しずかに でる。"
+      ]
+    ],
+    "vista": [
+      [
+        "こんな青、名前はあるのか？",
+        "Think there's a name for this blue?",
+        "こんな あお、なまえは あるのか？"
+      ],
+      [
+        "帰ったら、一緒に辞書で探しましょう。",
+        "Let's look it up together when we get back.",
+        "かえったら、いっしょに じしょで さがしましょう。"
+      ]
+    ],
+    "search": [
+      [
+        "雲が動いた。見落とすな。",
+        "That cloud moved. Keep watching.",
+        "くもが うごいた。みおとすな。"
+      ],
+      [
+        "了解、余白に影が二つ。",
+        "Copy. Two shadows in the margin.",
+        "りょうかい、よはくに かげが ふたつ。"
+      ]
+    ],
+    "engage": [
+      [
+        "俺が先に行く。続きを頼む。",
+        "I'll go first. You take the next part.",
+        "おれが さきに いく。つづきを たのむ。"
+      ],
+      [
+        "ええ。結末なら、もう決めてあります。",
+        "Of course. I already know the ending.",
+        "ええ。けつまつなら、もう きめてあります。"
+      ]
+    ],
+    "wave": [
+      [
+        "次の影だ。読みは当たったな。",
+        "Next shadow. You read that right.",
+        "つぎの かげだ。よみは あたったな。"
+      ],
+      [
+        "伏線はちゃんと拾いますよ。",
+        "I never miss a bit of foreshadowing.",
+        "ふくせんは ちゃんと ひろいますよ。"
+      ]
+    ],
+    "down": [
+      [
+        "一機消えた。いい間だった。",
+        "One's gone. Perfect timing.",
+        "いっき きえた。いい まだった。"
+      ],
+      [
+        "その一拍、栞を挟みたいくらいです。",
+        "A moment worth bookmarking.",
+        "その いっぱく、しおりを はさみたい くらいです。"
+      ]
+    ],
+    "home": [
+      [
+        "これで幕引きだ。帰ろう。",
+        "That's the end. Let's head home.",
+        "これで まくひきだ。かえろう。"
+      ],
+      [
+        "まだあと一行。二機そろって帰還、です。",
+        "One more line. Both aircraft returned together.",
+        "まだ あと いちぎょう。にき そろって きかん、です。"
+      ]
+    ],
+    "land": [
+      [
+        "着陸した。その一行、書いてくれ。",
+        "Touchdown. Go ahead and write that line.",
+        "ちゃくりくした。その いちぎょう、かいてくれ。"
+      ]
+    ]
+  },
+  "MAGE": {
+    "wing": "CHEF",
+    "lift": [
+      [
+        "実験開始。離陸データ、良好！",
+        "Experiment begins. Takeoff readings look good!",
+        "じっけん かいし。りりく データ、りょうこう！"
+      ]
+    ],
+    "vista": [
+      [
+        "雲の層がきれい。まるで結晶ね。",
+        "Those cloud layers are beautiful. Almost crystalline.",
+        "くもの そうが きれい。まるで けっしょうね。"
+      ],
+      [
+        "俺にはパイ生地に見えるけどな。",
+        "Looks more like flaky pastry to me.",
+        "おれには パイきじに みえるけどな。"
+      ]
+    ],
+    "search": [
+      [
+        "反応あり。目視の確認、頼める？",
+        "I've got a reading. Can you confirm visually?",
+        "はんのう あり。もくしの かくにん、たのめる？"
+      ],
+      [
+        "見えたぜ。雲からひょっこり顔出した。",
+        "Got it. Just popped its head out of a cloud.",
+        "みえたぜ。くもから ひょっこり かお だした。"
+      ]
+    ],
+    "engage": [
+      [
+        "仮説はひとつ。私たちなら勝てる！",
+        "My hypothesis? Together we can win!",
+        "かせつは ひとつ。わたしたちなら かてる！"
+      ],
+      [
+        "そりゃ実証済みだ。仕上げようぜ！",
+        "Already proven. Let's finish this!",
+        "そりゃ じっしょうずみだ。しあげようぜ！"
+      ]
+    ],
+    "wave": [
+      ["追加サンプル、来たわよ！", "More samples, coming up!", "ついか サンプル、きたわよ！"],
+      [
+        "追加注文なら大歓迎だ！",
+        "Seconds? Always happy to serve!",
+        "ついか ちゅうもんなら だいかんげいだ！"
+      ]
+    ],
+    "down": [
+      [
+        "標的消失。結果は大成功！",
+        "Target gone. A successful experiment!",
+        "ひょうてき しょうしつ。けっかは だいせいこう！"
+      ],
+      [
+        "いい音だ。今のは星三つ！",
+        "Listen to that! Three stars!",
+        "いい おとだ。いまのは ほし みっつ！"
+      ]
+    ],
+    "home": [
+      [
+        "記録完了。帰って答え合わせね。",
+        "Data saved. Let's compare notes back at base.",
+        "きろく かんりょう。かえって こたえあわせね。"
+      ],
+      [
+        "報告書の前に、温かいの出すよ。",
+        "I'll serve something hot before you write that report.",
+        "ほうこくしょの まえに、あたたかいの だすよ。"
+      ]
+    ],
+    "land": [
+      [
+        "着陸完了。次の実験もよろしく！",
+        "Touchdown complete. Same team next experiment?",
+        "ちゃくりく かんりょう。つぎの じっけんも よろしく！"
+      ]
+    ]
+  },
+  "DODGEBALL": {
+    "wing": "WARRIOR",
+    "lift": [
+      ["離陸！ さあ、試合開始だ！", "We're airborne! Game on!", "りりく！ さあ、しあい かいしだ！"]
+    ],
+    "vista": [
+      ["空のコートって広いなあ！", "Now that's a big court!", "そらの コートって ひろいなあ！"],
+      [
+        "場外まで追いかけてくなよ、エース。",
+        "Just don't chase the ball out of bounds, ace.",
+        "じょうがいまで おいかけてくなよ、エース。"
+      ]
+    ],
+    "search": [
+      [
+        "相棒、次の選手は見えてるか？",
+        "Can you see our next player, partner?",
+        "あいぼう、つぎの せんしゅは みえてるか？"
+      ],
+      [
+        "見えた。雲のベンチから交代だ。",
+        "Got him. Subbing in off the cloud bench.",
+        "みえた。くもの ベンチから こうたいだ。"
+      ]
+    ],
+    "engage": [
+      [
+        "パス出すぞ！ 合わせてくれ！",
+        "Pass coming! Meet me there!",
+        "パス だすぞ！ あわせてくれ！"
+      ],
+      [
+        "任せろ、その球は落とさねえ！",
+        "On it. I'm not dropping that one!",
+        "まかせろ、その たまは おとさねえ！"
+      ]
+    ],
+    "wave": [
+      [
+        "後半戦だ、まだ走れるか？",
+        "Second half! Still got legs?",
+        "こうはんせんだ、まだ はしれるか？"
+      ],
+      [
+        "お前こそ、延長まで付き合えよ！",
+        "Look who's talking. Stay for overtime!",
+        "おまえこそ、えんちょうまで つきあえよ！"
+      ]
+    ],
+    "down": [
+      [
+        "決まった！ 今のアシスト最高！",
+        "It's in! Beautiful assist!",
+        "きまった！ いまの アシスト さいこう！"
+      ],
+      [
+        "得点はお前、笑顔は山分けだ。",
+        "You get the point. We split the grins.",
+        "とくてんは おまえ、えがおは やまわけだ。"
+      ]
+    ],
+    "home": [
+      [
+        "試合終了！ 並んで戻ろうぜ。",
+        "Final whistle! Side by side all the way back.",
+        "しあい しゅうりょう！ ならんで もどろうぜ。"
+      ],
+      [
+        "帰るまでがチーム戦だ。了解！",
+        "Team game until we're home. Copy!",
+        "かえるまでが チームせんだ。りょうかい！"
+      ]
+    ],
+    "land": [
+      [
+        "着地も決まった。ナイスゲーム！",
+        "Stuck the landing. Great game!",
+        "ちゃくちも きまった。ナイスゲーム！"
+      ]
+    ]
+  },
+  "BARD": {
+    "wing": "ASSASSIN",
+    "lift": [
+      [
+        "生中継、空へ！ 離陸します。",
+        "Going live from the sky! Taking off.",
+        "なまちゅうけい、そらへ！ りりくします。"
+      ]
+    ],
+    "vista": [
+      [
+        "リスナーにこの雲海、届けたいな。",
+        "Wish our listeners could see this sea of clouds.",
+        "リスナーに この うんかい、とどけたいな。"
+      ],
+      [
+        "なら少し黙って。風の音を録ろう。",
+        "Then give it a moment. Let's record the wind.",
+        "なら すこし だまって。かぜの おとを とろう。"
+      ]
+    ],
+    "search": [
+      [
+        "こちら放送席。ゲストは見える？",
+        "Broadcast booth here. Is our guest in sight?",
+        "こちら ほうそうせき。ゲストは みえる？"
+      ],
+      [
+        "招待状のない機影なら、見えてる。",
+        "If you mean the uninvited one, yes.",
+        "しょうたいじょうの ない きえいなら、みえてる。"
+      ]
+    ],
+    "engage": [
+      ["私の合図で。せーの！", "On my count. And... now!", "わたしの あいずで。せーの！"],
+      ["聞こえてる。いいリズムだ。", "I hear you. Good rhythm.", "きこえてる。いい リズムだ。"]
+    ],
+    "wave": [
+      [
+        "次の曲、テンポ上げるよ！",
+        "Next track. Let's pick up the tempo!",
+        "つぎの きょく、テンポ あげるよ！"
+      ],
+      [
+        "了解。裏拍は俺が取る。",
+        "Copy. I'll take the offbeat.",
+        "りょうかい。うらはくは おれが とる。"
+      ]
+    ],
+    "down": [
+      [
+        "一機クリア！ 勝因をひと言！",
+        "One clear! A word on what won it?",
+        "いっき クリア！ しょういんを ひとこと！"
+      ],
+      [
+        "君の声。迷わず飛べた。",
+        "Your voice. It kept me on course.",
+        "きみの こえ。まよわず とべた。"
+      ]
+    ],
+    "home": [
+      [
+        "放送終了まで、あとひとっ飛び！",
+        "One more flight before we go off air!",
+        "ほうそう しゅうりょうまで、あと ひとっとび！"
+      ],
+      [
+        "最後の曲は帰り道に頼む。",
+        "Save the last song for the way home.",
+        "さいごの きょくは かえりみちに たのむ。"
+      ]
+    ],
+    "land": [
+      [
+        "ただいまの着陸音、現場からでした！",
+        "You just heard that landing live from the field!",
+        "ただいまの ちゃくりくおん、げんばから でした！"
+      ]
+    ]
+  },
+  "LIBRARIAN": {
+    "wing": "MAGE",
+    "lift": [
+      [
+        "新しいページを開きます。離陸。",
+        "Opening a fresh page. Taking off.",
+        "あたらしい ページを ひらきます。りりく。"
+      ]
+    ],
+    "vista": [
+      [
+        "窓の向こう、雲に栞を挟めたら。",
+        "If only I could slip a bookmark into those clouds.",
+        "まどの むこう、くもに しおりを はさめたら。"
+      ],
+      [
+        "緯度は記録したわ。またここへ来よう。",
+        "I logged the latitude. We can come back.",
+        "いどは きろくしたわ。また ここへ こよう。"
+      ]
+    ],
+    "search": [
+      [
+        "雲間に句読点のような影が。",
+        "Something like punctuation between the clouds.",
+        "くもまに くとうてんの ような かげが。"
+      ],
+      [
+        "観測一致。動く句読点ね。",
+        "Observation confirmed. Moving punctuation.",
+        "かんそく いっち。うごく くとうてんね。"
+      ]
+    ],
+    "engage": [
+      [
+        "次の一行、私と書いてくれますか？",
+        "Will you write the next line with me?",
+        "つぎの いちぎょう、わたしと かいてくれますか？"
+      ],
+      [
+        "共同研究ね。もちろん！",
+        "A joint research project? Absolutely!",
+        "きょうどうけんきゅうね。もちろん！"
+      ]
+    ],
+    "wave": [
+      [
+        "続編が来ました。少々にぎやかです。",
+        "Here comes the sequel. A rather lively one.",
+        "ぞくへんが きました。しょうしょう にぎやかです。"
+      ],
+      [
+        "退屈な実験よりずっといいわ。",
+        "Beats a boring experiment any day.",
+        "たいくつな じっけんより ずっと いいわ。"
+      ]
+    ],
+    "down": [
+      [
+        "一機通過。息が合いましたね。",
+        "One clear. We were in sync.",
+        "いっき つうか。いきが あいましたね。"
+      ],
+      [
+        "再現性あり。もう一度できるわ。",
+        "Repeatable result. We can do it again.",
+        "さいげんせい あり。もう いちど できるわ。"
+      ]
+    ],
+    "home": [
+      [
+        "帰りの章は、穏やかだといいですね。",
+        "I hope the chapter on our return is a peaceful one.",
+        "かえりの しょうは、おだやかだと いいですね。"
+      ],
+      [
+        "了解。夕焼けも記録に残しましょう。",
+        "Copy. Let's record the sunset too.",
+        "りょうかい。ゆうやけも きろくに のこしましょう。"
+      ]
+    ],
+    "land": [
+      [
+        "二機とも着陸。今日はいい結末です。",
+        "Both down safely. A fine ending for today.",
+        "にきとも ちゃくりく。きょうは いい けつまつです。"
+      ]
+    ]
+  },
+  "CHEF": {
+    "wing": "DODGEBALL",
+    "lift": [
+      [
+        "厨房から大空へ、出発だ！",
+        "From the kitchen to the sky! Let's go!",
+        "ちゅうぼうから おおぞらへ、しゅっぱつだ！"
+      ]
+    ],
+    "vista": [
+      [
+        "あの雲、いい焼き色してるな。",
+        "That cloud's got a lovely golden crust.",
+        "あの くも、いい やきいろ してるな。"
+      ],
+      [
+        "おい、腹が鳴って無線に入ったぞ！",
+        "Hey, my stomach just went out over the radio!",
+        "おい、はらが なって むせんに はいったぞ！"
+      ]
+    ],
+    "search": [
+      [
+        "次の注文、どこからだ？",
+        "Where's the next order coming from?",
+        "つぎの ちゅうもん、どこからだ？"
+      ],
+      [
+        "正面にお客さん！ ずいぶん足が速いぞ。",
+        "Customer up ahead! That one's quick on its feet.",
+        "しょうめんに おきゃくさん！ ずいぶん あしが はやいぞ。"
+      ]
+    ],
+    "engage": [
+      [
+        "こっちは仕込み完了。相棒は？",
+        "Prep's done here. How about you, partner?",
+        "こっちは しこみ かんりょう。あいぼうは？"
+      ],
+      [
+        "アップは十分！ 一丁いこうぜ！",
+        "All warmed up! Let's do this!",
+        "アップは じゅうぶん！ いっちょう いこうぜ！"
+      ]
+    ],
+    "wave": [
+      [
+        "おかわり来たぞ。さばけるか？",
+        "They want seconds. Can you handle it?",
+        "おかわり きたぞ。さばけるか？"
+      ],
+      ["大盛りで頼む！", "Make mine a double!", "おおもりで たのむ！"]
+    ],
+    "down": [
+      ["はい、一丁あがり！", "One order, ready to serve!", "はい、いっちょう あがり！"],
+      [
+        "今の合わせ技、本日のおすすめだな！",
+        "That combo's today's special!",
+        "いまの あわせわざ、ほんじつの おすすめだな！"
+      ]
+    ],
+    "home": [
+      [
+        "帰投するぞ。腹ぺこは何人だ？",
+        "Heading back. How many hungry mouths?",
+        "きとうするぞ。はらぺこは なんにんだ？"
+      ],
+      [
+        "二人！ いや、俺は二人前で！",
+        "Two! Wait, make my portion a double!",
+        "ふたり！ いや、おれは ふたりまえで！"
+      ]
+    ],
+    "land": [
+      [
+        "着陸。さあ、まかないの時間だ。",
+        "Wheels down. Staff meal's up!",
+        "ちゃくりく。さあ、まかないの じかんだ。"
+      ]
+    ]
+  },
+  "GARDENER": {
+    "wing": "CARETAKER",
+    "lift": [
+      [
+        "風よし。今日も空へ出よう。",
+        "Wind looks good. Up we go again.",
+        "かぜ よし。きょうも そらへ でよう。"
+      ]
+    ],
+    "vista": [
+      [
+        "畑が小さな布を縫ったみたいだ。",
+        "The fields look like little squares of cloth sewn together.",
+        "はたけが ちいさな ぬのを ぬったみたいだ。"
+      ],
+      [
+        "そうだね。あの緑、ちゃんと育ってる。",
+        "They do. Look at all that green growing strong.",
+        "そうだね。あの みどり、ちゃんと そだってる。"
+      ]
+    ],
+    "search": [
+      [
+        "風上にひとつ、光が揺れた。",
+        "Something glinted upwind.",
+        "かざかみに ひとつ、ひかりが ゆれた。"
+      ],
+      [
+        "見つけたよ。鳥より速いね。",
+        "Found it. Faster than a bird.",
+        "みつけたよ。とりより はやいね。"
+      ]
+    ],
+    "engage": [
+      [
+        "僕が道を開く。並んで飛ぼう！",
+        "I'll clear the way. Let's fly together!",
+        "ぼくが みちを ひらく。ならんで とぼう！"
+      ],
+      [
+        "了解。ちゃんと隣にいるよ！",
+        "Copy. Right beside you!",
+        "りょうかい。ちゃんと となりに いるよ！"
+      ]
+    ],
+    "wave": [
+      [
+        "もうひと山だ。ついて来られる？",
+        "One more to go. Still with me?",
+        "もう ひとやまだ。ついて こられる？"
+      ],
+      [
+        "もちろん。観察日記はまだ途中！",
+        "Of course! My field notes aren't finished yet.",
+        "もちろん。かんさつにっきは まだ とちゅう！"
+      ]
+    ],
+    "down": [
+      [
+        "一機クリア。いい風だったね。",
+        "One clear. A good wind today.",
+        "いっき クリア。いい かぜだったね。"
+      ],
+      [
+        "風だけじゃないよ。二人でやったんだ。",
+        "It wasn't just the wind. That was us.",
+        "かぜだけじゃ ないよ。ふたりで やったんだ。"
+      ]
+    ],
+    "home": [
+      [
+        "そろそろ庭が恋しいな。帰ろう。",
+        "I'm starting to miss the garden. Let's go home.",
+        "そろそろ にわが こいしいな。かえろう。"
+      ],
+      [
+        "私も。みんな、水を待ってるよ。",
+        "Me too. Everything's waiting to be watered.",
+        "わたしも。みんな、みずを まってるよ。"
+      ]
+    ],
+    "land": [
+      [
+        "ただいま。地面の匂い、落ち着くな。",
+        "We're home. I've missed the smell of the earth.",
+        "ただいま。じめんの におい、おちつくな。"
+      ]
+    ]
+  }
+}

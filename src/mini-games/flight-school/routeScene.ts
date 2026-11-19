@@ -1,3 +1,5 @@
+import { makeFormation } from './combatScene';
+import type { Sortie } from './combat';
 import * as THREE from 'three';
 import { Workshop, makeAircraft } from './aircraftModels';
 import { center, surfaceHeight, type Route } from './routes';
@@ -5,7 +7,12 @@ import { aimPoint, type Flight, type FlightInput } from './simulation';
 
 export type RouteImages = [HTMLImageElement, HTMLImageElement, HTMLImageElement];
 
-export function makeRouteScene(canvas: HTMLCanvasElement, route: Route, images: RouteImages) {
+export function makeRouteScene(
+  canvas: HTMLCanvasElement,
+  route: Route,
+  images: RouteImages,
+  patrol = false,
+) {
   const renderer = new THREE.WebGLRenderer({
     canvas,
     antialias: true,
@@ -75,7 +82,7 @@ export function makeRouteScene(canvas: HTMLCanvasElement, route: Route, images: 
   light.position.set(-3, 6, -2);
   scene.add(light);
   const w = new Workshop(),
-    aircraft = makeAircraft('plane', w);
+    aircraft = makeAircraft('plane', w, patrol);
   scene.add(aircraft.body);
   for (const strip of [from, to]) {
     const stripGroup = new THREE.Group();
@@ -106,8 +113,9 @@ export function makeRouteScene(canvas: HTMLCanvasElement, route: Route, images: 
     look = new THREE.Vector3();
   let lastW = 0,
     lastH = 0;
+  const formation = patrol ? makeFormation(scene, camera, w) : null;
   return {
-    draw(s: Flight, input: FlightInput, survey: boolean, dt: number) {
+    draw(s: Flight, input: FlightInput, survey: boolean, dt: number, battle?: Sortie) {
       const width = canvas.clientWidth,
         height = canvas.clientHeight;
       if (!width || !height) return;
@@ -137,12 +145,14 @@ export function makeRouteScene(canvas: HTMLCanvasElement, route: Route, images: 
       camera.lookAt(look);
       sky.position.copy(camera.position);
       const target = aimPoint(s);
-      beacon.visible = s.airborne && s.nextGate < s.lesson.gates.length;
+      beacon.visible = !battle && s.airborne && s.nextGate < s.lesson.gates.length;
       if (beacon.visible) {
         beacon.position.set(target.x, target.y, target.z);
         beacon.quaternion.copy(camera.quaternion);
         beacon.scale.setScalar(Math.max(1, camera.position.distanceTo(beacon.position) / 2600));
       }
+      aircraft.body.visible = !battle;
+      formation?.(battle);
       renderer.render(scene, camera);
     },
     dispose() {
@@ -150,7 +160,7 @@ export function makeRouteScene(canvas: HTMLCanvasElement, route: Route, images: 
         materialSet = new Set<THREE.Material>();
       scene.traverse((node) => {
         if (node instanceof THREE.InstancedMesh) node.dispose();
-        if (node instanceof THREE.Mesh) {
+        if (node instanceof THREE.Mesh || node instanceof THREE.Line) {
           geometrySet.add(node.geometry);
           for (const m of Array.isArray(node.material) ? node.material : [node.material])
             materialSet.add(m);

@@ -74,12 +74,34 @@ function wingCloth(w: Workshop, group: THREE.Group, points: Triple[], color: num
   group.add(new THREE.Mesh(geom, w.paint(color)));
 }
 
-export function makeAircraft(id: Aircraft, w: Workshop) {
+export function makeTrainingJet(w: Workshop, color: number) {
+  const g = new THREE.Group();
+  w.part(g, w.ball, color, [0, 0, 0], [0.43, 0.36, 2]);
+  w.part(g, w.ball, 0x235b77, [0, 0.3, -0.52], [0.33, 0.28, 0.72]);
+  for (const side of [-1, 1]) {
+    const wing = w.part(g, w.pebble, color, [side * 0.88, 0, 0.15], [1.42, 0.12, 0.74]);
+    wing.rotation.y = side * 0.39;
+    const tail = w.part(g, w.box, color, [side * 0.28, 0.42, 1.35], [0.1, 0.88, 0.65]);
+    tail.rotation.z = -side * 0.28;
+    w.part(g, w.ball, 0x294966, [side * 1.55, 0.035, 0.39], [0.43, 0.085, 0.35]);
+    w.part(g, w.box, 0xf35a35, [side * 0.28, 0.72, 1.36], [0.13, 0.22, 0.66]);
+    w.part(g, w.ball, 0xffbd56, [side * 0.2, -0.03, 1.77], [0.17, 0.18, 0.4]);
+  }
+  return g;
+}
+
+export function makeAircraft(id: Aircraft, w: Workshop, patrol = false) {
   const body = new THREE.Group(),
     pilotBody = new THREE.Group(),
     moving = new THREE.Group();
   let opening = 0;
-  if (id === 'plane') {
+  const wingmate = patrol ? makeTrainingJet(w, 0x479ccc) : null;
+  if (wingmate) {
+    const jet = makeTrainingJet(w, 0xfff1bd);
+    jet.scale.setScalar(2.5);
+    wingmate.scale.setScalar(2.5);
+    body.add(jet, wingmate);
+  } else if (id === 'plane') {
     w.part(body, w.ball, cream, [0, 0.12, 0.5], [1.18, 1.07, 4.2]);
     w.part(body, w.ball, orange, [0, -0.11, -1.1], [1.23, 0.92, 2.63]);
     w.part(body, w.ball, glass, [0, 0.88, -0.67], [0.96, 0.89, 1.56]);
@@ -166,7 +188,10 @@ export function makeAircraft(id: Aircraft, w: Workshop) {
       body.position.set(s.x, s.y + (id === 'plane' ? 1.63 : 0.65), s.z);
       body.rotation.order = 'YXZ';
       body.rotation.set(s.pitch, -s.heading, s.bank);
-      if (id === 'plane') moving.rotation.z += dt * (9 + s.speed * 3);
+      if (wingmate) {
+        wingmate.visible = s.airborne;
+        wingmate.position.set(-12 + Math.sin(s.elapsed * 0.65), 2 + Math.cos(s.elapsed * 0.7), -15);
+      } else if (id === 'plane') moving.rotation.z += dt * (9 + s.speed * 3);
       if (id === 'parachute') {
         opening = THREE.MathUtils.damp(opening, s.canopy ? 1 : 0, 9, dt);
         moving.visible = opening > 0.01;

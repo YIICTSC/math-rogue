@@ -198,7 +198,7 @@ export const MINI_GAMES: MiniGameConfig[] = [
   {
     id: 'FLIGHT_SCHOOL',
     name: 'にっぽんフライトスクール',
-    titleLines: ['にっぽんフライトスクール'],
+    titleLines: ['にっぽん', 'フライトスクール'],
     description: '日本各地で4種の飛行と空中戦闘訓練に挑戦。',
     screen: GameScreen.MINI_GAME_FLIGHT_SCHOOL,
     threshold: 5000,

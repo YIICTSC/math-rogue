@@ -315,6 +315,7 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
 
                 <div className="mini-game-select-card-copy flex flex-col items-center md:items-start w-full">
                   <span
+                    data-wrap-title={game.id === 'FLIGHT_SCHOOL' || undefined}
                     className={`mini-game-title text-sm md:text-lg font-bold mb-1 text-white transition-colors ${languageMode === 'ENGLISH' ? 'mini-game-title-english' : ''}`}
                     aria-label={trans(game.name, languageMode)}
                   >

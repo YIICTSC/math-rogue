@@ -192,7 +192,7 @@ class AudioService {
   constructor() {}
 
   private getEffectiveBgmVolume() {
-      return this.bgmSilencers.size ? 0 : this.bgmVolume * this.bgmDuckMultiplier;
+      return this.bgmSilencers.size ? 0 : this.bgmVolume * this.bgmDuckMultiplier * (this.flightRadioChannel ? 0.55 : 1);
   }
 
   /** Independent scopes keep preview/gameplay silent even if another scene resets ducking. */
@@ -408,7 +408,7 @@ class AudioService {
 
   public handleAppBackground() {
       if(typeof window!=='undefined')window.dispatchEvent(new Event('learning-rogue:sports-voice-muted'));
-      this.stopStarTideVoices(); this.stopLanternWarVoices(); this.stopSportsVoices();
+      this.stopFlightRadio(); this.stopStarTideVoices(); this.stopLanternWarVoices(); this.stopSportsVoices();
       this.stopKochoVoices();
       this.stopCardClubVoices(); this.stopPaperPlaneVoices();
       this.stopMiniRushAudio();
@@ -647,7 +647,7 @@ class AudioService {
 
   public setVoiceVolume(volume: number) {
       this.voiceVolume = Math.max(0, Math.min(1.5, volume));
-      if (this.voiceVolume === 0) { if(typeof window!=='undefined')window.dispatchEvent(new Event('learning-rogue:sports-voice-muted'));this.stopStarTideVoices(); this.stopLanternWarVoices(); this.stopSportsVoices(); this.stopDungeonChronicleVoices(); this.stopKochoVoices(); this.stopCardClubVoices(); this.stopPaperPlaneVoices(); this.stopMiniRushVoice(); }
+      if (this.voiceVolume === 0) { if(typeof window!=='undefined')window.dispatchEvent(new Event('learning-rogue:sports-voice-muted'));this.stopFlightRadio(); this.stopStarTideVoices(); this.stopLanternWarVoices(); this.stopSportsVoices(); this.stopDungeonChronicleVoices(); this.stopKochoVoices(); this.stopCardClubVoices(); this.stopPaperPlaneVoices(); this.stopMiniRushVoice(); }
       const voiceGain = Math.min(1, this.voiceVolume);
       this.activeSfxSourceGains.forEach((gains, name) => {
           if (!this.isVoiceSfxName(name) || !this.ctx) return;
@@ -1677,7 +1677,7 @@ class AudioService {
   public toggleMute() {
       this.isMuted = !this.isMuted;
       this.applyBgmVolume();
-      if (this.isMuted) { if(typeof window!=='undefined')window.dispatchEvent(new Event('learning-rogue:sports-voice-muted'));this.stopStarTideVoices(); this.stopLanternWarVoices(); this.stopSportsVoices(); this.stopRpgFishingSounds(); this.stopHobbySounds(); this.stopKochoVoices(); this.stopCardClubVoices(); this.stopPaperPlaneVoices(); this.stopMiniRushAudio(); }
+      if (this.isMuted) { if(typeof window!=='undefined')window.dispatchEvent(new Event('learning-rogue:sports-voice-muted'));this.stopFlightRadio(); this.stopStarTideVoices(); this.stopLanternWarVoices(); this.stopSportsVoices(); this.stopRpgFishingSounds(); this.stopHobbySounds(); this.stopKochoVoices(); this.stopCardClubVoices(); this.stopPaperPlaneVoices(); this.stopMiniRushAudio(); }
       if (this.masterGain && this.ctx) {
           this.masterGain.gain.setTargetAtTime(this.isMuted ? 0 : 0.4, this.ctx.currentTime, 0.1);
       }
@@ -1928,7 +1928,7 @@ class AudioService {
       void this.resumeAudioContext();
       for (const path of paths) {
           if (!canPlay() || (name === MINI_RUSH_VOICE && this.sfxPlaybackGenerations.get(name) !== generation)) return false;
-          if ((name.startsWith('lantern-war-voice-') || name.startsWith('sports-voice-') || name.startsWith('star-tide-voice-') || name.startsWith('dungeon-chronicle-voice-') || name.startsWith('kocho-voice-') || name.startsWith('card-club-voice-') || name.startsWith('paper-plane-voice-')) && (this.sfxPlaybackGenerations.get(name) !== generation || !this.canPlayConversationVoice())) return false;
+          if ((name.startsWith('flight-radio-voice-') || name.startsWith('lantern-war-voice-') || name.startsWith('sports-voice-') || name.startsWith('star-tide-voice-') || name.startsWith('dungeon-chronicle-voice-') || name.startsWith('kocho-voice-') || name.startsWith('card-club-voice-') || name.startsWith('paper-plane-voice-')) && (this.sfxPlaybackGenerations.get(name) !== generation || !this.canPlayConversationVoice())) return false;
           try {
               const audio = new Audio(path);
               audio.preload = 'auto';
@@ -2051,7 +2051,7 @@ class AudioService {
   }
 
   private isVoiceSfxName(name: string) {
-      return name === MINI_RUSH_VOICE || name.startsWith('lantern-war-voice-') || name.startsWith('sports-voice-') || name.startsWith('star-tide-voice-') || name.startsWith('dungeon-chronicle-voice-') || name.startsWith('paper-plane-voice-') || name.startsWith('card-club-voice-') || name.startsWith('kocho-voice-') || name.startsWith('home-dash-voice-') || name.startsWith('dungeons2-voice-') || name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-') || name.startsWith('enemy-voice-') || name.startsWith('protagonist-audition-');
+      return name === MINI_RUSH_VOICE || name.startsWith('flight-radio-voice-') || name.startsWith('lantern-war-voice-') || name.startsWith('sports-voice-') || name.startsWith('star-tide-voice-') || name.startsWith('dungeon-chronicle-voice-') || name.startsWith('paper-plane-voice-') || name.startsWith('card-club-voice-') || name.startsWith('kocho-voice-') || name.startsWith('home-dash-voice-') || name.startsWith('dungeons2-voice-') || name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-') || name.startsWith('enemy-voice-') || name.startsWith('protagonist-audition-');
   }
 
   private getHtmlSfxVolume(name: string) {
@@ -2250,6 +2250,39 @@ class AudioService {
           ? `spell-${Math.max(1, Math.min(3, spellIndex ?? 1))}`
           : `${safeAction}-${Math.floor(Math.random() * Math.max(1, variantCount)) + 1}`;
       return this.playMagicVoiceFile(heroId, voiceName, 2200, transformed);
+  }
+
+  private flightRadioChannel: string | null = null;
+  public stopFlightRadio() {
+      const name = this.flightRadioChannel;
+      if (!name) return;
+      this.flightRadioChannel = null;
+      this.applyBgmVolume();
+      this.sfxPlaybackGenerations.set(name, (this.sfxPlaybackGenerations.get(name) ?? 0) + 1);
+      for (const audio of [...(this.activeHtmlSfx.get(name) ?? [])]) {
+          audio.pause();
+          audio.onended?.call(audio, new Event('ended'));
+      }
+      this.stopActiveSfx(name);
+  }
+
+  public async playFlightRadio(pilot: string, event: string, index: number) {
+      this.stopFlightRadio();
+      if (!this.canPlayConversationVoice()) return false;
+      const key = pilot.toLowerCase() + '/' + event + '-' + index;
+      const name = 'flight-radio-voice-' + key;
+      this.flightRadioChannel = name;
+      this.applyBgmVolume();
+      const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
+      this.sfxPlaybackGenerations.set(name, generation);
+      try {
+          return await this.playVoiceFile(name, [versionBgmPath(assetUrl('sfx/flight-radio/' + key + '.mp3'))], 14000, false, generation, true);
+      } finally {
+          if (this.flightRadioChannel === name && this.sfxPlaybackGenerations.get(name) === generation) {
+              this.flightRadioChannel = null;
+              this.applyBgmVolume();
+          }
+      }
   }
 
   public async playKochoStoryVoice(path:string){

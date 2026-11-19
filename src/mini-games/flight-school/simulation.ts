@@ -263,11 +263,11 @@ function collectGate(s: Flight, dt: number) {
   cue(s, 'gate');
 }
 
-function stepRoute(s: Flight, i: FlightInput, dt: number, r: Route) {
+function stepRoute(s: Flight, i: FlightInput, dt: number, r: Route, paceLimit: number) {
   const { from, to, region } = r,
     target = aimPoint(s),
     gate = s.lesson.gates[s.nextGate];
-  const rate = cruiseRate(s, r);
+  const rate = Math.min(paceLimit, cruiseRate(s, r));
   if (r.assist && s.airborne) {
     const bearing = bearingTo(s, target);
     const landing = !gate;
@@ -341,12 +341,18 @@ function stepRoute(s: Flight, i: FlightInput, dt: number, r: Route) {
 }
 
 /** All movement runs at a fixed step; the UI, camera and scoring share this state. */
-export function stepFlight(s: Flight, control: FlightInput, dt = STEP) {
+export function stepFlight(
+  s: Flight,
+  control: FlightInput,
+  dt = STEP,
+  paceLimit = Infinity,
+  extraTime = 0,
+) {
   if (s.result || !Number.isFinite(dt) || dt <= 0 || dt > 0.05) return;
   s.elapsed += dt;
   const i = { ...control, turn: clamp(control.turn, -1, 1), pitch: clamp(control.pitch, -1, 1) };
   if (s.lesson.route) {
-    stepRoute(s, i, dt, s.lesson.route);
+    stepRoute(s, i, dt, s.lesson.route, paceLimit);
     return;
   }
   const aircraft = s.lesson.aircraft;
@@ -365,7 +371,7 @@ export function stepFlight(s: Flight, control: FlightInput, dt = STEP) {
     grade(s, 'boundary');
     return;
   }
-  if (s.elapsed > 210) {
+  if (s.elapsed > 210 + extraTime) {
     grade(s, 'timeout');
     return;
   }

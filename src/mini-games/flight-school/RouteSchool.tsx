@@ -1,3 +1,5 @@
+import { PilotPicker, RadioCaption, type FlightCrew } from './FlightRadio';
+import { loadRouteImages } from './routeImages';
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, ArrowLeftRight, Plane } from 'lucide-react';
 import type { LanguageMode } from '../../types';
@@ -29,22 +31,15 @@ function saveScore(key: string, score: number) {
     /* Flying remains available when storage is unavailable. */
   }
 }
-async function loadImage(key: string) {
-  const image = new Image();
-  image.crossOrigin = 'anonymous';
-  return new Promise<HTMLImageElement>((resolve, reject) => {
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error(key));
-    image.src = assetUrl(photo(key));
-  });
-}
 export default function RouteSchool({
   language,
   home,
+  crew,
   exit,
 }: {
   language: LanguageMode;
   home: string;
+  crew: FlightCrew;
   exit: () => void;
 }) {
   const t = (...p: Phrase) => localize(p, language);
@@ -82,17 +77,14 @@ export default function RouteSchool({
     exit();
   }
   async function launch() {
+    crew.stop();
     audioService.init();
     audioService.playFlightSound('start');
     const id = ++request.current;
     show('loading');
     setReport(null);
     try {
-      const images = await Promise.all([
-        loadImage(region.key),
-        loadImage(from.code),
-        loadImage(to.code),
-      ]);
+      const images = await loadRouteImages(region, reverse);
       if (id !== request.current) return;
       setLoaded({ lesson: makeRouteLesson(region, reverse, assist), images });
       show('flight');
@@ -101,6 +93,7 @@ export default function RouteSchool({
     }
   }
   function finish(result: Report) {
+    if (!result.medal) crew.stop();
     if (result.medal) saveScore(key, result.score);
     audioService.playFlightSound(
       result.medal ? 'land' : result.reason === 'water' ? 'water' : 'end',
@@ -110,14 +103,22 @@ export default function RouteSchool({
   }
   if (stage === 'flight' && loaded)
     return (
-      <FlightDeck
-        lesson={loaded.lesson}
-        routeImages={loaded.images}
-        language={language}
-        onRetry={launch}
-        onExit={() => show('planning')}
-        onDone={finish}
-      />
+      <>
+        <FlightDeck
+          onRadio={crew.cue}
+          onRadioStop={crew.stop}
+          lesson={loaded.lesson}
+          routeImages={loaded.images}
+          language={language}
+          onRetry={launch}
+          onExit={() => {
+            crew.stop();
+            show('planning');
+          }}
+          onDone={finish}
+        />
+        <RadioCaption line={crew.line} language={language} />
+      </>
     );
   return (
     <div className="fs-shell">
@@ -171,10 +172,12 @@ export default function RouteSchool({
                       )}
               </p>
             )}
+            <RadioCaption line={crew.line} language={language} />
             <div className="fs-which">
               <button
                 className="fs-main"
                 onClick={() => {
+                  crew.stop();
                   if (report.medal) swap(!reverse);
                   show('planning');
                 }}
@@ -209,6 +212,7 @@ export default function RouteSchool({
                 ))}
               </select>
             </label>
+            <PilotPicker compact pilot={crew.pilot} select={crew.select} language={language} />
             <div className="fs-route-leg">
               <b>
                 {name(from.code)} → {name(to.code)} · {distance} km

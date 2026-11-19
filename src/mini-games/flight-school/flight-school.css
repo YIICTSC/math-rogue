@@ -952,3 +952,143 @@
   font-size: 10px;
   pointer-events: none;
 }
+
+.fs-pilots {
+  margin: 14px 0 6px;
+  padding: 8px;
+  border: 1px solid #abc0b3;
+  border-radius: 7px;
+}
+.fs-pilots legend {
+  font-weight: 700;
+  padding: 0 5px;
+}
+.fs-pilots > div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+.fs-pilots button {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  text-align: left;
+  background: #f5f1e5;
+  border: 1px solid #adc0b7;
+  border-radius: 4px;
+  padding: 3px;
+  font-weight: 650;
+  font-size: clamp(10px, 1.4vw, 14px);
+  line-height: 1.2;
+}
+.fs-pilots button[aria-pressed='true'] {
+  background: #184957;
+  color: #fff4cc;
+  outline: 2px solid #c18b3a;
+  outline-offset: -2px;
+}
+.fs-pilots img {
+  width: clamp(29px, 5vw, 46px);
+  aspect-ratio: 1;
+  border-radius: 3px;
+}
+.fs-radio {
+  position: absolute;
+  z-index: 3;
+  left: max(10px, env(safe-area-inset-left));
+  top: calc(max(8px, env(safe-area-inset-top)) + 114px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(390px, 72vw);
+  padding: 5px 10px 5px 5px;
+  border-left: 3px solid #f0c775;
+  background: #10323fee;
+  color: white;
+  border-radius: 4px;
+  pointer-events: none;
+}
+.fs-radio img {
+  width: clamp(32px, 7vmin, 54px);
+  border-radius: 2px;
+}
+.fs-radio b,
+.fs-radio span {
+  display: block;
+}
+.fs-radio b {
+  color: #ffda87;
+  font-size: 11px;
+}
+.fs-radio b svg {
+  display: inline;
+  vertical-align: middle;
+}
+.fs-radio span {
+  font-size: clamp(12px, 1.8vmin, 15px);
+  line-height: 1.35;
+}
+.fs-result .fs-radio {
+  position: static;
+  margin: auto;
+}
+.fs-combat-readout {
+  position: absolute;
+  top: calc(max(8px, env(safe-area-inset-top)) + 83px);
+  left: max(10px, env(safe-area-inset-left));
+  background: #173d4eee;
+  color: #ffe3a3;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+.fs-deck[data-patrol-phase='fight'] .fs-route-credit {
+  left: auto;
+  right: max(10px, env(safe-area-inset-right));
+  top: calc(26dvh + 55px);
+}
+.fs-crew-preview {
+  display: flex;
+  gap: 2px;
+  background: #1a4450;
+  color: #fff3d2;
+  margin-bottom: 7px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.fs-crew-preview > div {
+  display: flex;
+  align-items: center;
+  flex: 1 1 50%;
+  min-width: 0;
+  gap: 8px;
+  background: linear-gradient(110deg, #0c2e3c, #215768);
+}
+.fs-crew-preview img {
+  width: clamp(48px, 9vw, 90px);
+  height: auto;
+  border-radius: 0;
+}
+.fs-crew-preview small,
+.fs-crew-preview strong {
+  display: block;
+}
+.fs-crew-preview small {
+  color: #f2cc7e;
+  font-size: 11px;
+}
+.fs-crew-preview strong {
+  font-size: clamp(11px, 1.6vw, 16px);
+}
+
+.fs-pilot-fold {
+  margin: 10px 0;
+}
+.fs-pilot-fold summary {
+  cursor: pointer;
+  font-weight: 650;
+  color: var(--teal);
+}

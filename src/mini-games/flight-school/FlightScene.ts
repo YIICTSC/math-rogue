@@ -1,3 +1,5 @@
+import { makeFormation } from './combatScene';
+import type { Sortie } from './combat';
 import * as THREE from 'three';
 import { makeAirfield } from './airfield';
 import { makeAircraft, Workshop } from './aircraftModels';
@@ -5,7 +7,7 @@ import type { Lesson } from './courses';
 import { altitude, windAt, type Flight, type FlightInput } from './simulation';
 import { groundHeight, SEA_LEVEL } from './terrain';
 
-export function makeFlightScene(canvas: HTMLCanvasElement, lesson: Lesson) {
+export function makeFlightScene(canvas: HTMLCanvasElement, lesson: Lesson, patrol = false) {
   const renderer = new THREE.WebGLRenderer({
     canvas,
     antialias: true,
@@ -39,8 +41,10 @@ export function makeFlightScene(canvas: HTMLCanvasElement, lesson: Lesson) {
   scene.add(sunlight);
   const w = new Workshop(),
     { field, sock } = makeAirfield(lesson.airport, w),
-    aircraft = makeAircraft(lesson.aircraft, w);
+    aircraft = makeAircraft(lesson.aircraft, w, patrol);
   scene.add(field, aircraft.body);
+  const routeMarkers = new THREE.Group();
+  scene.add(routeMarkers);
   const rings = lesson.gates.map((gate, index) => {
     const previous = index === 0 ? lesson.start : lesson.gates[index - 1];
     const hoop = new THREE.Mesh(
@@ -63,12 +67,12 @@ export function makeFlightScene(canvas: HTMLCanvasElement, lesson: Lesson) {
       tab.rotation.z = a;
     }
     hoop.add(tabs);
-    scene.add(hoop);
+    routeMarkers.add(hoop);
     return hoop;
   });
   const target = new THREE.Group();
   target.position.set(lesson.target.x, 0.32, lesson.target.z);
-  scene.add(target);
+  routeMarkers.add(target);
   for (const [outer, inner, color] of lesson.aircraft === 'plane'
     ? [
         [9, 7, 0xffb447],
@@ -125,7 +129,8 @@ export function makeFlightScene(canvas: HTMLCanvasElement, lesson: Lesson) {
     lastWidth = 0,
     lastHeight = 0,
     oldGate = -1;
-  function draw(s: Flight, i: FlightInput, survey: boolean, dt: number) {
+  const formation = patrol ? makeFormation(scene, camera, w) : null;
+  function draw(s: Flight, i: FlightInput, survey: boolean, dt: number, battle?: Sortie) {
     const width = canvas.clientWidth,
       height = canvas.clientHeight;
     if (width < 1 || height < 1) return;
@@ -190,6 +195,9 @@ export function makeFlightScene(canvas: HTMLCanvasElement, lesson: Lesson) {
     );
     camera.lookAt(look);
     sky.position.copy(camera.position);
+    routeMarkers.visible = !battle;
+    aircraft.body.visible = !battle;
+    formation?.(battle);
     renderer.render(scene, camera);
   }
   return {
