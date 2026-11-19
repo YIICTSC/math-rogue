@@ -327,6 +327,28 @@
 .cc-start-row {position:sticky; z-index:3; bottom:0; padding-top:6px; background:#081a2b;}
 .cc-start-row button {width:100%;}
 .cc-start-row p, .cc-result > p {font-size: 13px; margin: 6px 0;}
+.cc-playfield:has(.cc-bull-reveal) > .cc-table-area {display: none;}
+.cc-bull-best {
+  display: grid;
+  gap: 2px;
+  padding: 8px 12px;
+  border-left: 3px solid #e5c675;
+  background: #102f38;
+}
+.cc-bull-best strong {font-size: 1.25em; color: #ffe5a5;}
+.cc-bull-reveal h4 {margin: 0 0 6px; font-size: 13px; overflow-wrap: anywhere;}
+.cc-bull-reveal h4 span {display: inline-block; margin-inline-start: 8px; color: #ffb5ab;}
+.cc-bull-reveal .cc-public-hand {min-width: 0;}
+.cc-crew-bid {font-weight: 750; color: #ffe5a5; font-variant-numeric: tabular-nums;}
+@media (orientation: landscape) and (max-height: 600px), (orientation: portrait) and (max-width: 600px) {
+  .cc-page-table[data-club-game=trumpcrew] .cc-player-ring article {flex-basis: 140px; min-width: 140px;}
+}
+@media (orientation: landscape) and (max-height: 600px) {
+  .cc-page-table .cc-match:has(.cc-bull-reveal) {grid-template-columns: minmax(0,1fr) minmax(210px,34%);}
+}
+@media (orientation: portrait) and (max-width: 600px) {
+  .cc-page-table .cc-match:has(.cc-bull-reveal) {grid-template-rows: 48px minmax(0,1fr) clamp(180px,28dvh,236px);}
+}
 @media (max-width: 600px), (orientation: landscape) and (max-height: 520px) {
   .cc-page-host > .cc-header, .cc-page-join > .cc-header, .cc-page-lobby > .cc-header {padding-block:6px;}
   .cc-online-entry, .cc-lobby {padding:12px;}

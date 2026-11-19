@@ -152,7 +152,60 @@ try{
  const load=async(game,n)=>{await page.evaluate(({game,n})=>window.__club.load(game,n||window.definition(game).defaultPlayers),{game,n});await page.waitForFunction(g=>document.querySelector('[data-club-game]')?.getAttribute('data-club-game')===g,game);};
  const snapshot=async(path)=>{await page.waitForFunction(()=>!document.querySelector('.cc-flight-layer'));await page.screenshot({path});};
  const mutate=async(fn,arg)=>{await page.evaluate(({fn,arg})=>{const session=window.__club.room().session;new Function('s','arg',fn)(session.state,arg);session.publish();},{fn:fn.toString().replace(/^.*?\{([\s\S]*)\}$/,'$1'),arg});await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>resolve())));};
- if(process.argv.includes('--polish')){
+ if(process.argv.includes('--declarations')){
+  await load('pokerbull',3);
+  await mutate(s=>{
+   s.players.forEach((p,i)=>p.hand=[[9,10],[11,12],[0,14]][i]);
+   s.turn=2;
+   window.engine.applyAction(s,2,{type:'bid',value:25}); // Pair of aces
+  });
+  const reveal=page.getByRole('region',{name:'公開された手札'});
+  assert.equal(await reveal.count(),0);
+  assert.deepEqual(await page.evaluate(()=>window.__club.room().last.view.players.slice(1).map(p=>p.hand)),[[],[]]);
+  await page.getByRole('button',{name:'ダウト！',exact:true}).click();
+  await reveal.waitFor();
+  assert.match(await reveal.innerText(),/ワンペア A.*不成立/);
+  assert.match(await reveal.locator('.cc-bull-best').innerText(),/ストレートフラッシュ A♣/);
+  assert.deepEqual(await reveal.locator('article').evaluateAll(rows=>rows.map(row=>[...row.querySelectorAll('[data-card]')].map(c=>Number(c.dataset.card)))),[[9,10],[11,12],[0,14]]);
+  assert.match(await reveal.locator('article').nth(2).innerText(),/CPU.*ライフ−1/);
+  assert(await page.evaluate(()=>{const s=window.__club.room().session.state;return s.players.every((_,i)=>window.engine.viewFor(s,i).players.every((p,j)=>p.hand.join()===s.players[j].hand.join()));}));
+  for(const [width,height] of [[390,844],[844,390]]){
+   await page.setViewportSize({width,height});
+   const next=await page.getByRole('button',{name:'次の配札へ',exact:true}).boundingBox();
+   assert(next&&next.y>=0&&next.y+next.height<=height);
+   await page.screenshot({path:`${dir}/pokerbull-reveal-${width}x${height}.png`});
+  }
+  await page.getByRole('button',{name:'次の配札へ',exact:true}).click();
+  await reveal.waitFor({state:'detached'});
+  await mutate(s=>{
+   s.players[0].hand=[0];s.players[0].lives=1;
+   s.players[1].hand=[13];s.players[2].hand=[];s.players[2].out=true;
+   s.turn=1;window.engine.applyAction(s,1,{type:'bid',value:25});
+  });
+  await page.getByRole('button',{name:'ダウト！',exact:true}).click();
+  await page.getByRole('button',{name:'別のゲームを選ぶ',exact:true}).waitFor();
+  assert.match(await reveal.innerText(),/ワンペア A · 成立/);
+  assert.match(await reveal.locator('article').nth(2).innerText(),/この配札には不参加/);
+
+  await load('trumpcrew',4);
+  const bids=page.locator('.cc-crew-bid');
+  assert.deepEqual(await bids.allTextContents(),Array(4).fill('未宣言 · 獲得 0'));
+  await page.getByRole('button',{name:'中位',exact:true}).click();
+  await mutate(s=>{
+   [0,1,0].forEach(value=>window.engine.applyAction(s,s.turn,{type:'bid',value}));
+  });
+  assert.deepEqual(await bids.allTextContents(),['未宣言 · 獲得 0','宣言 0 · 獲得 0','宣言 1 · 獲得 0','宣言 0 · 獲得 0']);
+  await page.getByRole('button',{name:'宣言 0',exact:true}).click();
+  assert.equal(await bids.first().innerText(),'宣言 0 · 獲得 0');
+  await mutate(s=>{s.players.forEach(()=>window.engine.applyAction(s,s.turn,window.engine.legalActions(s)[0]));});
+  assert.equal(await bids.filter({hasText:'獲得 1'}).count(),1);
+  await page.setViewportSize({width:390,height:844});
+  await snapshot(`${dir}/trumpcrew-bids-390x844.png`);
+  await page.getByRole('button',{name:'次の配札へ',exact:true}).click();
+  assert.deepEqual(await bids.allTextContents(),Array(4).fill('未宣言 · 獲得 0'));
+  assert.deepEqual(errors,[]);
+  console.log('PASS: Poker Bull reveal, exact challenge and strongest combination; Trump Crew human and CPU bids and trick wins');
+ }else if(process.argv.includes('--polish')){
   await page.setViewportSize({width:390,height:844});await load('royalcassino',2);
   await mutate(s=>{s.turn=0;s.players[0].hand=[45];s.table=[47];s.extra.classic.rows=[];s.revision++;});await page.locator('.cc-hand [data-card="45"]').click();assert.equal(await page.getByRole('button',{name:'選んだ場札を獲得',exact:true}).count(),0);assert(await page.getByRole('button',{name:/場に置く/}).count());
   await mutate(s=>{s.turn=0;s.players[0].hand=[6,14];s.table=[19];s.players[0].score=0;s.revision++;});await page.locator('.cc-hand [data-card="6"]').click();await page.locator('.cc-table-cards [data-card="19"]').click();await page.getByRole('button',{name:'選んだ場札を獲得',exact:true}).click();await page.locator('[data-score-reward]').waitFor();assert.match(await page.locator('[data-score-reward]').first().innerText(),/スイープ.*1/);

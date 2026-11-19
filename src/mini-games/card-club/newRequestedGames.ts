@@ -52,6 +52,12 @@ export function bullClaimHolds(cards:number[],claim:BullClaim){
  if(claim.type===4)return count(claim.rank)>=3&&count(claim.second!)>=2;
  return count(claim.rank)>=[1,2,0,3,0,4][claim.type];
 }
+export function strongestBullClaim(cards:number[]){
+ for(let i=BULL_CLAIMS.length-1;i>=0;i--){
+  if(bullClaimHolds(cards,BULL_CLAIMS[i]))return i;
+ }
+ return -1;
+}
 export const bullLabel=(index:number,en=false)=>{const c=BULL_CLAIMS[index],r=(n:number)=>n===14?'A':n===13?'K':n===12?'Q':n===11?'J':String(n);return `${(en?['High card','Pair','Two pairs','Three of a kind','Full house','Four of a kind','Straight flush']:['1枚','ワンペア','ツーペア','スリーカード','フルハウス','フォーカード','ストレートフラッシュ'])[c.type]} ${r(c.rank)}${c.second?' + '+r(c.second):''}${c.suit!==undefined?' ♣♦♥♠'[c.suit+1]:''}`;};
 export const pokerBullRules:RuleExtension={start:s=>{initClassic(s);s.claim=-1;s.players.forEach(p=>{if(s.round===0)p.lives=5;if(!p.out)for(let i=0;i<1+5-p.lives;i++)p.hand.push(s.stock.pop()!);});s.turn=nextSeat(s,s.dealer);s.extra.claimant=-1;},actions:s=>{
  const remaining=BULL_CLAIMS.map((c,value)=>({c,value})).filter(({value,c})=>s.claim<0||c.type>BULL_CLAIMS[s.claim].type||c.type===BULL_CLAIMS[s.claim].type&&(c.rank>BULL_CLAIMS[s.claim].rank||c.rank===BULL_CLAIMS[s.claim].rank&&(c.second||0)>(BULL_CLAIMS[s.claim].second||0)));
