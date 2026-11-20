@@ -57,6 +57,22 @@ export function shotVector(seat: number, n: number, shot: Shot) {
   const speed = 0.2 + shot.power * 2.15;
   return { ...start, vx: Math.cos(heading) * speed, vy: Math.sin(heading) * speed };
 }
+
+export function pullShot(
+  seat: number,
+  players: number,
+  angle: number,
+  dx: number,
+  dy: number,
+): Shot {
+  const origin = shotOrigin(seat, players, angle);
+  return {
+    type: 'shot',
+    angle,
+    aim: aimAt(seat, players, angle, origin.x - dx, origin.y - dy),
+    power: Math.min(1, Math.max(0.05, Math.hypot(dx, dy) / 0.55)),
+  };
+}
 export function discPoints(d: Disc) {
   const dist = length(d.x, d.y) + DISC_R;
   return dist < 1 / 3 ? 15 : dist < 2 / 3 ? 10 : dist < 1 ? 5 : 0;

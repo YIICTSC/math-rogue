@@ -29,9 +29,9 @@ export function ClubHeroes({hero,onHero,l,disabled=false}:{
   </div>;
 }
 
-export function ClubOnlineEntry({mode,name,onName,hero,onHero,code,onCode,busy,l,onSubmit}:{
+export function ClubOnlineEntry({mode,name,onName,hero,onHero,code,onCode,busy,l,onSubmit,parseInviteCode=cardClubInviteCode}:{
   mode:'host'|'join';name:string;onName:(value:string)=>void;hero:string;onHero:(id:string)=>void;
-  code:string;onCode:(value:string)=>void;busy:boolean;l:Copy;onSubmit:()=>void;
+  code:string;onCode:(value:string)=>void;busy:boolean;l:Copy;onSubmit:()=>void;parseInviteCode?:(href:string)=>string;
 }){
   const [chooseHero,setChooseHero]=useState(false);
   const host=mode==='host';
@@ -43,7 +43,7 @@ export function ClubOnlineEntry({mode,name,onName,hero,onHero,code,onCode,busy,l
     <label>{l('参加名','Player name')}<input autoComplete="nickname" maxLength={32} value={name} disabled={busy} onChange={e=>onName(e.target.value)} /></label>
     {!host&&<label>{l('招待コード','Invitation code')}<input inputMode="numeric" autoComplete="off" maxLength={6} placeholder="000000" value={code} disabled={busy}
       onChange={e=>onCode(normalizeRoomInput(e.target.value).replace(/[^0-9]/g,'').slice(0,6))}
-      onPaste={e=>{const pastedCode=cardClubInviteCode(e.clipboardData.getData('text'));if(pastedCode){e.preventDefault();onCode(pastedCode);}}}/></label>}
+      onPaste={e=>{const pastedCode=parseInviteCode(e.clipboardData.getData('text'));if(pastedCode){e.preventDefault();onCode(pastedCode);}}}/></label>}
     <div className="cc-profile-preview">
       <Face hero={hero}/><strong>{heroName(selected,l)}</strong>
       <button type="button" disabled={busy} aria-expanded={chooseHero} onClick={()=>setChooseHero(v=>!v)}>{l('キャラクター変更','Change character')}</button>

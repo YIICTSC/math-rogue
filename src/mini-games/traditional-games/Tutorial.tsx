@@ -65,8 +65,8 @@ const practiceCopy: Record<TableGame, Copy> = {
     'ばには7が1まい。4を3まいえらんでだし、ボムでばをとりましょう。',
   ],
   crokinole: [
-    '盤の中央を狙い、強さを調整して弾きましょう。20点の穴に入るまで試せます。',
-    'Aim at the center and adjust your power. Try shots until you sink a twenty.',
+    '自分の円盤を後ろへ引いて指を離しましょう。中央の20点の穴に入るまで、引く向きと強さを変えて試せます。',
+    'Pull your disc back and release toward the center. Adjust the pull direction and distance until you sink a twenty.',
     'ばんのちゅうおうをねらい、つよさをちょうせいしてひきましょう。20てんのあなにいるまでためせます。',
   ],
   goita: [

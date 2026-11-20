@@ -17,10 +17,9 @@ import { CARD_CLUB_VOICE_HEROES } from '../../data/cardClubVoices';
 import { OFFLINE_DISTRIBUTABLE } from '../../config/runtime';
 import { audioService } from '../../services/audioService';
 import { trans } from '../../utils/textUtils';
-import { ClubHeroes, Face } from '../card-club/ClubSetup';
+import { ClubHeroes, ClubOnlineEntry, Face } from '../card-club/ClubSetup';
 import '../card-club/cardClub.css';
 import { copyInviteUrl } from '../shared/copyInviteUrl';
-import { normalizeRoomInput } from '../../services/onlineTransport';
 import { tableRoomCode, tableInviteUrl } from '../shared/tableInvite';
 import { useTableVoice } from '../shared/useTableVoice';
 import { TableBoard } from './Boards';
@@ -142,7 +141,9 @@ function Seats({ view: v, language }: { view: TableView; language: LanguageMode 
           key={p.id}
           className="tt-seat"
           data-turn={v.phase === 'play' && v.turn === seat}
-          data-team={v.teams ? seat % 2 : undefined}
+          data-team={
+            v.game === 'goita' ? Number(seat % 2 !== v.self % 2) : v.teams ? seat % 2 : undefined
+          }
         >
           <Face hero={p.hero} />
           <div>
@@ -150,11 +151,15 @@ function Seats({ view: v, language }: { view: TableView; language: LanguageMode 
             <small>
               {seat === v.self
                 ? l('あなた', 'You', 'あなた')
-                : v.teams
-                  ? l('組', 'Team', 'くみ') + ' ' + ((seat % 2) + 1)
-                  : p.cpu
-                    ? 'CPU'
-                    : ''}
+                : v.game === 'goita'
+                  ? seat % 2 === v.self % 2
+                    ? l('味方', 'Partner', 'みかた')
+                    : l('相手', 'Opponent', 'あいて')
+                  : v.teams
+                    ? l('組', 'Team', 'くみ') + ' ' + ((seat % 2) + 1)
+                    : p.cpu
+                      ? 'CPU'
+                      : ''}
               {v.kind !== 'crokinole' && ` · ${v.counts[seat]} ${l('枚', 'tiles', 'まい')}`}
             </small>
           </div>
@@ -173,8 +178,8 @@ export default function TraditionalGames({
   const [inviteCode] = useState(() =>
     OFFLINE_DISTRIBUTABLE ? '' : traditionalInviteCode(location.href),
   );
-  const [page, setPage] = useState<'select' | 'host' | 'join' | 'tutorial'>(
-    inviteCode ? 'join' : 'select',
+  const [page, setPage] = useState<'title' | 'select' | 'host' | 'join' | 'tutorial'>(
+    inviteCode ? 'join' : 'title',
   );
   const [game, setGame] = useState<TableGame>('competitive');
   const [hero, setHero] = useState(() => {
@@ -298,19 +303,19 @@ export default function TraditionalGames({
     setError('');
     setRules(false);
     if (inviteCode) onBack();
-    else setPage('select');
+    else setPage('title');
   }
   function back() {
     if (packet || busy) {
       leave();
       return;
     }
-    if (page === 'select' || inviteCode) {
+    if (page === 'title' || inviteCode) {
       onBack();
       return;
     }
     setError('');
-    setPage('select');
+    setPage(page === 'tutorial' ? 'select' : 'title');
   }
 
   const selectFamily = (
@@ -399,6 +404,60 @@ export default function TraditionalGames({
       )}
     </div>
   );
+
+  if (page === 'title' && !packet)
+    return (
+      <main className="traditional-tables tt-title">
+        <picture className="tt-title-art">
+          <source media="(orientation: portrait)" srcSet={tableArt('title-portrait')} />
+          <img src={tableArt('title-landscape')} alt="" />
+        </picture>
+        <button className="tt-title-back" onClick={onBack}>
+          <ArrowLeft size={18} />
+          {l('ゲーム一覧へ', 'Back to games', 'ゲームいちらんへ')}
+        </button>
+        <h1>
+          {l(
+            '世界の伝統ゲーム集',
+            'Traditional Games of the World',
+            'せかいの でんとうゲームしゅう',
+          )}
+        </h1>
+        <nav
+          className="tt-title-menu"
+          aria-label={l('遊び方を選ぶ', 'Choose how to play', 'あそびかたを えらぶ')}
+        >
+          <button
+            onClick={() => {
+              audioGesture();
+              setPage('select');
+            }}
+          >
+            {l('ひとりで遊ぶ', 'Play solo', 'ひとりで あそぶ')}
+          </button>
+          {!OFFLINE_DISTRIBUTABLE && (
+            <>
+              <button
+                onClick={() => {
+                  audioGesture();
+                  setPage('host');
+                }}
+              >
+                {l('オンラインの部屋を作る', 'Create online room', 'オンラインの へやを つくる')}
+              </button>
+              <button
+                onClick={() => {
+                  audioGesture();
+                  setPage('join');
+                }}
+              >
+                {l('招待に参加する', 'Join invitation', 'しょうたいに さんかする')}
+              </button>
+            </>
+          )}
+        </nav>
+      </main>
+    );
 
   return (
     <main
@@ -536,21 +595,35 @@ export default function TraditionalGames({
               )}
             </section>
           ) : packet?.phase === 'lobby' ? (
-            <section className="tt-setup">
-              {!!packet.code && <RoomInvite code={packet.code} language={languageMode} />}
-              <div className="tt-members">
-                {Array.from({ length: packet.count }, (_, i) => {
-                  const player = packet.members[i];
-                  return (
-                    <span key={i}>
-                      {player && <Face hero={player.hero} />}
-                      {player
-                        ? player.name + (player.id === packet.hostId ? ' ★' : '')
-                        : 'CPU ' + (i + 1)}
-                    </span>
-                  );
-                })}
+            <section className="tt-setup cc-panel cc-lobby">
+              <div className="cc-lobby-heading">
+                <h1>{l('オンラインルーム', 'Online room', 'オンラインルーム')}</h1>
+                <span>
+                  {packet.members.length} / {packet.count}{' '}
+                  {l('人が参加中', 'joined', 'にんが さんかちゅう')}
+                </span>
               </div>
+              {!!packet.code && <RoomInvite code={packet.code} language={languageMode} />}
+              <ul className="cc-seat-list" aria-label={l('参加者', 'Participants', 'さんかしゃ')}>
+                {packet.members.map((player) => (
+                  <li key={player.id}>
+                    <Face hero={player.hero} />
+                    <div>
+                      <strong>{player.name}</strong>
+                      <small>
+                        {player.id === packet.hostId
+                          ? l('ホスト', 'Host', 'ホスト')
+                          : l('参加済み', 'Joined', 'さんかずみ')}
+                        {player.id === packet.selfId ? ' · ' + l('あなた', 'You', 'あなた') : ''}
+                      </small>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <p className="cc-seat-summary">
+                {packet.members.length} {l('人が参加', 'human players', 'にんが さんか')} ＋ CPU{' '}
+                {packet.count - packet.members.length}
+              </p>
               {host && (
                 <>
                   {selectFamily}
@@ -605,56 +678,19 @@ export default function TraditionalGames({
               )}
             </section>
           ) : page === 'host' || page === 'join' ? (
-            <form
-              className="tt-setup tt-connect"
-              onSubmit={(e) => {
-                e.preventDefault();
-                void connect(page);
-              }}
-            >
-              <h1>
-                {page === 'host'
-                  ? l(
-                      'オンラインの部屋を作る',
-                      'Create an online room',
-                      'オンラインの へやを つくる',
-                    )
-                  : l('招待に参加する', 'Join an invitation', 'しょうたいに さんかする')}
-              </h1>
-              {personPicker}
-              {page === 'join' && (
-                <label>
-                  {l('招待コード', 'Room code', 'しょうたいコード')}
-                  <input
-                    value={code}
-                    disabled={busy}
-                    inputMode="numeric"
-                    maxLength={6}
-                    onChange={(e) =>
-                      setCode(normalizeRoomInput(e.target.value).replace(/[^\d]/g, '').slice(0, 6))
-                    }
-                    onPaste={(e) => {
-                      const pasted = traditionalInviteCode(e.clipboardData.getData('text'));
-                      if (pasted) {
-                        e.preventDefault();
-                        setCode(pasted);
-                      }
-                    }}
-                  />
-                </label>
-              )}
-              <button
-                className="tt-primary"
-                type="submit"
-                disabled={busy || !name.trim() || (page === 'join' && !tableRoomCode(code))}
-              >
-                {busy
-                  ? l('接続中…', 'Connecting…', 'せつぞくちゅう…')
-                  : page === 'host'
-                    ? l('部屋を作る', 'Create room', 'へやを つくる')
-                    : l('参加する', 'Join room', 'さんかする')}
-              </button>
-            </form>
+            <ClubOnlineEntry
+              mode={page}
+              name={name}
+              onName={setName}
+              hero={hero}
+              onHero={chooseHero}
+              code={code}
+              onCode={setCode}
+              busy={busy}
+              l={l}
+              parseInviteCode={traditionalInviteCode}
+              onSubmit={() => void connect(page)}
+            />
           ) : (
             <section className="tt-setup">
               {selectFamily}

@@ -308,9 +308,9 @@ export const TABLE_GAMES: Record<TableGame, Entry> = {
     ],
     instructions: [
       [
-        '手前の区画内で発射位置を決め、盤をタップして狙います。強さを調整して弾きます。',
-        'Set your launch point within your quadrant, tap the board to aim, choose power, and flick.',
-        'てまえのくかくないではっしゃいちをきめ、ばんをタップしてねらいます。つよさをちょうせいしてはじきます。',
+        '手前の区画内で発射位置を決めます。自分の円盤を後ろへ引き、指を離すと反対方向へ発射。大きく引くほど強く弾けます。',
+        'Set your launch point within your quadrant. Pull your disc back and release to shoot in the opposite direction. Pull farther for more power.',
+        'じぶんの えんばんを うしろへ ひき、はなすと はんたいへ はっしゃ。おおきく ひくほど つよく はじけます。',
       ],
       [
         '相手の円盤がある時は接触が必要。相手がいなければ、動かした自分側の円盤を15点線まで届けます。条件を満たさない一手は反則です。',

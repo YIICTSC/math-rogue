@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { LanguageMode } from '../../types';
 import {
   aimAt,
   PEGS,
+  pullShot,
   resolveShot,
   shotOrigin,
   shotVector,
@@ -15,6 +16,7 @@ import type { TableAction } from './model';
 import { peeperSelection } from './peeper';
 import { say } from './catalog';
 import { Piece, pieceLabel } from './Pieces';
+import { Face } from '../card-club/ClubSetup';
 
 type Send = (action: TableAction) => void;
 type Props<T extends TableView['kind']> = {
@@ -389,32 +391,82 @@ export function GoitaBoard({ view: v, language, send, disabled }: Props<'goita'>
             {l('五しです', 'Five pawns', 'ごしです')}
           </div>
         )}
-        <div className="tt-goita-grid">
-          {v.rows.map((row, seat) => (
-            <div className="tt-goita-row" key={seat} data-active={v.turn === seat}>
-              <small>{v.players[seat].name}</small>
-              <div className="tt-goita-columns">
-                {Array.from({ length: 4 }, (_, i) => {
-                  const pair = row[i];
-                  return (
-                    <div className="tt-goita-column" key={i}>
-                      {pair ? (
-                        <>
-                          <Piece family="goita" tile={pair.cover} />
-                          <Piece family="goita" tile={pair.attack} />
-                        </>
-                      ) : (
-                        <>
-                          <i />
-                          <i />
-                        </>
-                      )}
-                    </div>
-                  );
-                })}
+        <div className="tt-goita-team-scores">
+          <div data-team="ally">
+            <span>{l('自分のペア', 'Your pair', 'じぶんの ペア')}</span>
+            <strong>{v.scores[v.self]} / 150</strong>
+          </div>
+          <div data-team="opponent">
+            <span>{l('相手のペア', 'Opposing pair', 'あいての ペア')}</span>
+            <strong>{v.scores[(v.self + 1) % 4]} / 150</strong>
+          </div>
+        </div>
+        <div className="tt-goita-table">
+          <div
+            className="tt-goita-partners"
+            aria-label={l(
+              '向かいの人が味方',
+              'Your partner sits opposite you',
+              'むかいの ひとが みかた',
+            )}
+          >
+            {v.players.map((player, seat) => {
+              const position = ['bottom', 'right', 'top', 'left'][(seat - v.self + 4) % 4];
+              return (
+                <div
+                  key={player.id}
+                  className="tt-goita-player"
+                  data-position={position}
+                  data-team={seat % 2 === v.self % 2 ? 'ally' : 'opponent'}
+                  data-active={v.phase === 'play' && v.turn === seat}
+                >
+                  <Face hero={player.hero} />
+                </div>
+              );
+            })}
+          </div>
+          {v.rows.map((row, seat) => {
+            const relative = (seat - v.self + 4) % 4;
+            const role =
+              relative === 0
+                ? l('あなた', 'You', 'あなた')
+                : relative === 2
+                  ? l('味方', 'Partner', 'みかた')
+                  : l('相手', 'Opponent', 'あいて');
+            return (
+              <div
+                className="tt-goita-row"
+                key={seat}
+                data-position={['bottom', 'right', 'top', 'left'][relative]}
+                data-seat={seat}
+                data-team={seat % 2 === v.self % 2 ? 'ally' : 'opponent'}
+                data-active={v.phase === 'play' && v.turn === seat}
+              >
+                <small title={v.players[seat].name}>{v.players[seat].name}</small>
+                <span className="tt-goita-role">{role}</span>
+                <div className="tt-goita-columns">
+                  {Array.from({ length: 4 }, (_, i) => {
+                    const pair = row[i];
+                    return (
+                      <div className="tt-goita-column" key={i}>
+                        {pair ? (
+                          <>
+                            <Piece family="goita" tile={pair.cover} />
+                            <Piece family="goita" tile={pair.attack} />
+                          </>
+                        ) : (
+                          <>
+                            <i />
+                            <i />
+                          </>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
       <div className="tt-play-actions">
@@ -478,6 +530,15 @@ export function CrokinoleBoard({ view: v, language, send, disabled }: Props<'cro
     [power, setPower] = useState(0.56);
   const [replay, setReplay] = useState<Disc[] | null>(null);
   const [busy, setBusy] = useState(false);
+  const pull = useRef<{
+    id: number;
+    x: number;
+    y: number;
+    scale: number;
+    angle: number;
+    control: HTMLElement;
+  } | null>(null);
+  const [draw, setDraw] = useState<{ x: number; y: number } | null>(null);
   const l = (ja: string, en: string, kana?: string) => say(language, [ja, en, kana]);
   const last = v.lastShot;
   useEffect(() => {
@@ -486,7 +547,6 @@ export function CrokinoleBoard({ view: v, language, send, disabled }: Props<'cro
       setBusy(false);
       return;
     }
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const p = resolveShot(last.before, last.seat, v.players.length, last.shot, last.discId, true);
     let id = 0;
     setReplay(p.frames[0]);
@@ -506,6 +566,21 @@ export function CrokinoleBoard({ view: v, language, send, disabled }: Props<'cro
     return () => cancelAnimationFrame(id);
   }, [last?.discId, v.round, v.players.length]);
   const active = !disabled && !busy && v.phase === 'play' && v.turn === v.self;
+  const cancelPull = () => {
+    const held = pull.current;
+    pull.current = null;
+    setDraw(null);
+    if (held?.control.hasPointerCapture(held.id)) held.control.releasePointerCapture(held.id);
+  };
+  useEffect(() => cancelPull(), [v.revision, disabled]);
+  useEffect(
+    () => () => {
+      const held = pull.current;
+      if (held?.control.hasPointerCapture(held.id)) held.control.releasePointerCapture(held.id);
+      pull.current = null;
+    },
+    [],
+  );
   const shot: Shot = { type: 'shot', angle, aim, power };
   const start = shotOrigin(v.self, v.players.length, angle);
   const velocity = shotVector(v.self, v.players.length, shot);
@@ -517,8 +592,24 @@ export function CrokinoleBoard({ view: v, language, send, disabled }: Props<'cro
           className="tt-croki-board"
           aria-label={l('クロキノール盤', 'Crokinole board', 'クロキノールばん')}
           onPointerDown={(event) => {
-            if (!active) return;
+            if (!active || pull.current || event.button !== 0) return;
             const box = event.currentTarget.getBoundingClientRect();
+            const x = ((event.clientX - box.left) / box.width - 0.5) / 0.42;
+            const y = ((event.clientY - box.top) / box.height - 0.5) / 0.42;
+            if (Math.hypot(x - start.x, y - start.y) * box.width * 0.42 <= 28) {
+              event.preventDefault();
+              event.currentTarget.setPointerCapture(event.pointerId);
+              pull.current = {
+                id: event.pointerId,
+                x: event.clientX,
+                y: event.clientY,
+                scale: box.width * 0.42,
+                angle,
+                control: event.currentTarget,
+              };
+              setDraw({ x: 0, y: 0 });
+              return;
+            }
             setAim(
               aimAt(
                 v.self,
@@ -528,6 +619,33 @@ export function CrokinoleBoard({ view: v, language, send, disabled }: Props<'cro
                 ((event.clientY - box.top) / box.height - 0.5) / 0.42,
               ),
             );
+          }}
+          onPointerMove={(event) => {
+            const held = pull.current;
+            if (!held || held.id !== event.pointerId) return;
+            const dx = (event.clientX - held.x) / held.scale;
+            const dy = (event.clientY - held.y) / held.scale;
+            const next = pullShot(v.self, v.players.length, held.angle, dx, dy);
+            setAim(next.aim);
+            setPower(next.power);
+            const limit = Math.max(1, Math.hypot(dx, dy) / 0.19);
+            setDraw({ x: dx / limit, y: dy / limit });
+          }}
+          onPointerUp={(event) => {
+            const held = pull.current;
+            if (!held || held.id !== event.pointerId) return;
+            const dx = (event.clientX - held.x) / held.scale;
+            const dy = (event.clientY - held.y) / held.scale;
+            const origin = shotOrigin(v.self, v.players.length, held.angle);
+            cancelPull();
+            if (active && Math.hypot(dx, dy) * held.scale >= 9 && dx * origin.x + dy * origin.y > 0)
+              send(pullShot(v.self, v.players.length, held.angle, dx, dy));
+          }}
+          onPointerCancel={(event) => {
+            if (pull.current?.id === event.pointerId) cancelPull();
+          }}
+          onLostPointerCapture={(event) => {
+            if (pull.current?.id === event.pointerId) cancelPull();
           }}
         >
           <div className="tt-outer-ring" />
@@ -557,12 +675,19 @@ export function CrokinoleBoard({ view: v, language, send, disabled }: Props<'cro
               />
               <span
                 className={`tt-disc tt-disc-${v.self % 2} tt-preview-disc`}
-                style={position(start.x, start.y)}
+                style={position(start.x + (draw?.x ?? 0), start.y + (draw?.y ?? 0))}
               />
             </>
           )}
         </section>
         <div className="tt-shot-controls">
+          <p className="tt-pull-help">
+            {l(
+              '自分の円盤を引いて、指を離すと発射。大きく引くほど強く弾けます。',
+              'Pull your disc back and release to shoot. Pull farther for more power.',
+              'じぶんの えんばんを ひいて、はなすと はっしゃ。おおきく ひくほど つよく はじけます。',
+            )}
+          </p>
           <div className="tt-croki-points">
             {v.boardPoints.map((n, i) => (
               <small key={i}>
