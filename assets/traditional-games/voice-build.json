@@ -1,0 +1,2991 @@
+{
+  "runtime": "speech.cpp 0.11.0",
+  "irodori_revision": "f01c08cd40c0afa62a862439a5de12f6dcf62054",
+  "model_device": "cpu",
+  "codec_device": "cpu",
+  "threads": 2,
+  "format": "MP3, 32000 Hz mono, 64 kbit/s",
+  "models": {
+    "Irodori-TTS-v4.1-Small-MF": {
+      "upstream": "Aratako/Irodori-TTS-v4.1-Small-MF",
+      "revision": "ccc78f5d480b6e51b69b2d5042a14c4da04fea6e",
+      "quant_repository": "sakasegawa/Irodori-TTS-v4.1-Small-MF-GGUF",
+      "quant_revision": "9db7da1bec3d1069ef8e29732e0497be60c7b047",
+      "sha256": "2d161b0bbcd74f906f6b07e03d031075f8ae916db1b8bd4daf16cb37b451086a"
+    },
+    "Irodori-TTS-v4.1-Small": {
+      "upstream": "Aratako/Irodori-TTS-v4.1-Small",
+      "revision": "2b28324dc263ed5e6638b3cf3dd94c82ead07b4b",
+      "quant_repository": "sakasegawa/Irodori-TTS-v4.1-Small-GGUF",
+      "quant_revision": "66fe2cde1973fd44e7202fbe36df722103958188",
+      "sha256": "293668c68ed2eec670d69c8c30d570410eedd14678acbdb1a80b3d03117c1600"
+    }
+  },
+  "clips": {
+    "high-school-warrior/turn": {
+      "game_call": "turn",
+      "text": "俺の番だな。",
+      "synthesis_text": "俺の番だな。",
+      "recognized_text": "番だな。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28800,
+      "steps": 4,
+      "requested_seconds": 2.15,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/high-school-voices/WARRIOR/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "dacd463697b622140c4f1c9d6f6a5f07269683517c65b09b080c354ab1d6e7a8",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "9e7788d62cc7664727b59d61330074f88b4de61c0563cef1944a4062fc02298d",
+      "review_pending": false
+    },
+    "high-school-warrior/domino": {
+      "game_call": "domino",
+      "text": "ドミノ！",
+      "synthesis_text": "ドミノ！",
+      "recognized_text": "ドミノ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28801,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/high-school-voices/WARRIOR/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "dacd463697b622140c4f1c9d6f6a5f07269683517c65b09b080c354ab1d6e7a8",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "769ddb3b3fbc34d591b9ae1bca24d59f68e99a5fd64a9c34cdd38f0e6da2d4fd",
+      "review_pending": false
+    },
+    "high-school-warrior/bomb": {
+      "game_call": "bomb",
+      "text": "ボム！",
+      "synthesis_text": "ボム！",
+      "recognized_text": "ボム。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28802,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/high-school-voices/WARRIOR/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "dacd463697b622140c4f1c9d6f6a5f07269683517c65b09b080c354ab1d6e7a8",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "740dd6294fbc6385b1ededbbdd56ee0a684633b4cabeba5e9b85f645b1a443fe",
+      "review_pending": false
+    },
+    "high-school-warrior/five-shi": {
+      "game_call": "five-shi",
+      "text": "ごいたでしが五枚、ゴシです",
+      "synthesis_text": "ごいたでしが五枚、ゴシです",
+      "recognized_text": "弟子が5枚5紙です。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 33803,
+      "steps": 4,
+      "requested_seconds": 2.8,
+      "duration_seconds": 2.844,
+      "reference": [
+        "public/sfx/high-school-voices/WARRIOR/attack-1.ogg",
+        "public/sfx/card-club-voices/high-school-warrior/start.ogg",
+        "public/sfx/card-club-voices/high-school-warrior/win.ogg"
+      ],
+      "reference_pcm_sha256": "d7ff6b7f27f0d1fe98d104bebbdef185438f2f6a6bada6957e0c08ae04fa6736",
+      "instructions": "落ち着いた対局。",
+      "sha256": "17581731cda7ac9519e7002dd7972d82cb07ea191b6b36a495d0ce754c4d83fa",
+      "review_pending": false
+    },
+    "high-school-warrior/twenty": {
+      "game_call": "twenty",
+      "text": "二十点！",
+      "synthesis_text": "にじゅってん！",
+      "recognized_text": "20点。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28804,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/high-school-voices/WARRIOR/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "dacd463697b622140c4f1c9d6f6a5f07269683517c65b09b080c354ab1d6e7a8",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "af2eac1e2ee61ccd5b36c7af88dc9109b983e36da0a1923fc39c73a1734b1d86",
+      "review_pending": false
+    },
+    "high-school-caretaker/turn": {
+      "game_call": "turn",
+      "text": "私の番ね。",
+      "synthesis_text": "私の番ね。",
+      "recognized_text": "私の番ね。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28810,
+      "steps": 4,
+      "requested_seconds": 2.15,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/high-school-voices/CARETAKER/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "97a2ec58e4a5ea0885de039d93fc5ae4610e37d1976ad81db11696b2582a1626",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "8ef9ccf1ddfd58e10c80d385b98f1e09b657f6d501157a5b75276ddaef0d343d",
+      "review_pending": false
+    },
+    "high-school-caretaker/domino": {
+      "game_call": "domino",
+      "text": "ドミノで上がりです",
+      "synthesis_text": "ドミノで上がりです",
+      "recognized_text": "ドミノであがりです。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 48811,
+      "steps": 16,
+      "requested_seconds": 2.6,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/high-school-voices/CARETAKER/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "97a2ec58e4a5ea0885de039d93fc5ae4610e37d1976ad81db11696b2582a1626",
+      "instructions": "高校生の女性アニメ主人公。落ち着いた柔らかい中音。生き物を見守る包容力と、静かな芯の強さを出す。安心させる台詞は穏やかに、決意は明瞭に。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "b776183dad1959139f598bdf16400763c8622a1f7a0a57879045c6fe1b9fa522",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "high-school-caretaker/bomb": {
+      "game_call": "bomb",
+      "text": "ボムで勝負します",
+      "synthesis_text": "ボムで勝負します",
+      "recognized_text": "ボムで勝負します。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 33812,
+      "steps": 4,
+      "requested_seconds": 2.4,
+      "duration_seconds": 2.448,
+      "reference": [
+        "public/sfx/high-school-voices/CARETAKER/attack-1.ogg",
+        "public/sfx/card-club-voices/high-school-caretaker/start.ogg",
+        "public/sfx/card-club-voices/high-school-caretaker/win.ogg"
+      ],
+      "reference_pcm_sha256": "523046670610655ad83bbf42d0082021151e323889f2d9a3e410ab3bd3c4f683",
+      "instructions": "落ち着いた対局。",
+      "sha256": "eba828fab5b578784424da425bc2d90d5ee892c700d3f547e4ca49980158d01d",
+      "review_pending": false
+    },
+    "high-school-caretaker/five-shi": {
+      "game_call": "five-shi",
+      "text": "しが五枚です",
+      "synthesis_text": "しが五枚です",
+      "recognized_text": "しが5まいです。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 49813,
+      "steps": 24,
+      "requested_seconds": 2.8,
+      "duration_seconds": 3.24,
+      "reference": [
+        "public/sfx/high-school-voices/CARETAKER/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "97a2ec58e4a5ea0885de039d93fc5ae4610e37d1976ad81db11696b2582a1626",
+      "instructions": "高校生の女性アニメ主人公。落ち着いた柔らかい中音。生き物を見守る包容力と、静かな芯の強さを出す。安心させる台詞は穏やかに、決意は明瞭に。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "8b99629a47c6afcd8b2fd0ba60247b190890d7f6dbe8336344ffc58d760d567e",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 8,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "high-school-caretaker/twenty": {
+      "game_call": "twenty",
+      "text": "二十点！",
+      "synthesis_text": "にじゅってん！",
+      "recognized_text": "20点!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28814,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/high-school-voices/CARETAKER/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "97a2ec58e4a5ea0885de039d93fc5ae4610e37d1976ad81db11696b2582a1626",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "f6d25d7058f1236612f902ac14df9a0101b8beb0a22a1331a0b9a0612021cc21",
+      "review_pending": false
+    },
+    "high-school-assassin/turn": {
+      "game_call": "turn",
+      "text": "僕の番か",
+      "synthesis_text": "僕の番か",
+      "recognized_text": "僕の番か。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 38820,
+      "steps": 4,
+      "requested_seconds": 2.55,
+      "duration_seconds": 1.872,
+      "reference": [
+        "public/sfx/high-school-voices/ASSASSIN/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "da0e3a607c281ae2145da523b3645cd30bda935a0a277134cb489dc9087aa229",
+      "instructions": "参照と同じ声ではっきり発音。",
+      "sha256": "a7d416a0e2f481ca6fa48b87d4e027a1f743506bd0406b973e2f8a9ac679c03e",
+      "review_pending": false
+    },
+    "high-school-assassin/domino": {
+      "game_call": "domino",
+      "text": "これで上がり、ドミノ",
+      "synthesis_text": "これで上がり、ドミノ",
+      "recognized_text": "あがりドミノ。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 49821,
+      "steps": 24,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/high-school-voices/ASSASSIN/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "da0e3a607c281ae2145da523b3645cd30bda935a0a277134cb489dc9087aa229",
+      "instructions": "高校生の中性的な若いアニメ主人公。低めで静かな声。普段は抑制的で、秘密を抱えた距離感を出し、選択を語る場面だけ芯を強める。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "c87c3540593724a96772b194eab34d74cb32f236b35b01f49ea03311ac97c583",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 8,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "high-school-assassin/bomb": {
+      "game_call": "bomb",
+      "text": "ボムを出すよ",
+      "synthesis_text": "ボムを出すよ",
+      "recognized_text": "ボムをだすよ。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 48822,
+      "steps": 16,
+      "requested_seconds": 2.6,
+      "duration_seconds": 2.664,
+      "reference": [
+        "public/sfx/high-school-voices/ASSASSIN/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "da0e3a607c281ae2145da523b3645cd30bda935a0a277134cb489dc9087aa229",
+      "instructions": "高校生の中性的な若いアニメ主人公。低めで静かな声。普段は抑制的で、秘密を抱えた距離感を出し、選択を語る場面だけ芯を強める。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "ad84c3d566dd1a40074447bffe84990d342168b2e697322b079aa863eca81b03",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "high-school-assassin/five-shi": {
+      "game_call": "five-shi",
+      "text": "ごいたでしが五枚、ゴシです",
+      "synthesis_text": "ごいたでしが五枚、ゴシです",
+      "recognized_text": "豪華ですが5まい5しです。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 33823,
+      "steps": 4,
+      "requested_seconds": 2.8,
+      "duration_seconds": 2.808,
+      "reference": [
+        "public/sfx/high-school-voices/ASSASSIN/attack-1.ogg",
+        "public/sfx/card-club-voices/high-school-assassin/start.ogg",
+        "public/sfx/card-club-voices/high-school-assassin/win.ogg"
+      ],
+      "reference_pcm_sha256": "447b327db302b1a5d4365f90684b75210f0f569c9a1205c4d7e6b6fc0ed0e4a5",
+      "instructions": "落ち着いた対局。",
+      "sha256": "c9d6a51d5b1f70753fa89eed8457ee0e49204eaa609bc2145234288de02295bb",
+      "review_pending": false
+    },
+    "high-school-assassin/twenty": {
+      "game_call": "twenty",
+      "text": "二十点！",
+      "synthesis_text": "にじゅってん！",
+      "recognized_text": "20点。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28824,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/high-school-voices/ASSASSIN/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "da0e3a607c281ae2145da523b3645cd30bda935a0a277134cb489dc9087aa229",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "4332eb8b1d0079e52eeed6a046d5b0aa4bbe1ccda61b57315d919cbfd33a4c1d",
+      "review_pending": false
+    },
+    "high-school-mage/turn": {
+      "game_call": "turn",
+      "text": "では、私の番ね。",
+      "synthesis_text": "では、私の番ね。",
+      "recognized_text": "私の番ね。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28830,
+      "steps": 4,
+      "requested_seconds": 2.15,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/high-school-voices/MAGE/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "d4a1fd6dc8bdda6ebcae5e62c3ccb7fe22b74f11068fc33da7cea73c3f99f9be",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "758a03ff9ce96d918e63cd17fa1100fe26085639f7ef61e2cae773745de9a709",
+      "review_pending": false
+    },
+    "high-school-mage/domino": {
+      "game_call": "domino",
+      "text": "ドミノで上がりです",
+      "synthesis_text": "ドミノで上がりです",
+      "recognized_text": "ドミノであがりです。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 48831,
+      "steps": 16,
+      "requested_seconds": 2.6,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/high-school-voices/MAGE/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "d4a1fd6dc8bdda6ebcae5e62c3ccb7fe22b74f11068fc33da7cea73c3f99f9be",
+      "instructions": "高校生の女性アニメ主人公。研究者らしい明瞭な中音。観察と仮説を語る冷静さ、実験が成功した時の知的な高揚感を自然に出す。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "9df17541a38503b6dc751f9f4eb94c6760b0227e7207d6757dd3f789c2bb50b7",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "high-school-mage/bomb": {
+      "game_call": "bomb",
+      "text": "爆弾です",
+      "synthesis_text": "爆弾です",
+      "recognized_text": "ばくだんです。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 49832,
+      "steps": 24,
+      "requested_seconds": 2.6,
+      "duration_seconds": 2.052,
+      "reference": [
+        "public/sfx/high-school-voices/MAGE/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "d4a1fd6dc8bdda6ebcae5e62c3ccb7fe22b74f11068fc33da7cea73c3f99f9be",
+      "instructions": "高校生の女性アニメ主人公。研究者らしい明瞭な中音。観察と仮説を語る冷静さ、実験が成功した時の知的な高揚感を自然に出す。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "da353c2ada23cb12de3005c0d22d09be997173188404d529819a3c592af9853a",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 8,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "high-school-mage/five-shi": {
+      "game_call": "five-shi",
+      "text": "しが五枚で、五しです",
+      "synthesis_text": "しが五枚で、五しです",
+      "recognized_text": "4が5まいで5しです。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 32833,
+      "steps": 2,
+      "requested_seconds": 2.65,
+      "duration_seconds": 2.664,
+      "reference": [
+        "public/sfx/high-school-voices/MAGE/attack-1.ogg",
+        "public/sfx/card-club-voices/high-school-mage/start.ogg",
+        "public/sfx/card-club-voices/high-school-mage/win.ogg"
+      ],
+      "reference_pcm_sha256": "44e5495dd3ea19fc4b4f5e6bef80e34ede697971e087cad31dae15490036fc81",
+      "instructions": "落ち着いた対局。",
+      "sha256": "1301a2162eff2e2e37f191e8d6c2f096dab3a06177f7ea39aa356fb667e38b1a",
+      "review_pending": false
+    },
+    "high-school-mage/twenty": {
+      "game_call": "twenty",
+      "text": "二十点です",
+      "synthesis_text": "二十点です",
+      "recognized_text": "20点です。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 48834,
+      "steps": 16,
+      "requested_seconds": 2.6,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/high-school-voices/MAGE/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "d4a1fd6dc8bdda6ebcae5e62c3ccb7fe22b74f11068fc33da7cea73c3f99f9be",
+      "instructions": "高校生の女性アニメ主人公。研究者らしい明瞭な中音。観察と仮説を語る冷静さ、実験が成功した時の知的な高揚感を自然に出す。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "283a3b03711fee2f79310bed45bb42058a4065ca3eb02cb691cbd06540e597fe",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "high-school-dodgeball/turn": {
+      "game_call": "turn",
+      "text": "よし、俺の番だ！",
+      "synthesis_text": "よし、俺の番だ！",
+      "recognized_text": "俺の番だ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28840,
+      "steps": 4,
+      "requested_seconds": 2.15,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/high-school-voices/DODGEBALL/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "e617d125da934d666c1a906c8631f7e26e480fe0917379c11a2835f1e36934fd",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "9ca4a43453990a152e8d2c7d05e429d555063139c78d4d64c71db56512ea9e95",
+      "review_pending": false
+    },
+    "high-school-dodgeball/domino": {
+      "game_call": "domino",
+      "text": "ドミノ！",
+      "synthesis_text": "ドミノ！",
+      "recognized_text": "ドミノ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28841,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/high-school-voices/DODGEBALL/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "e617d125da934d666c1a906c8631f7e26e480fe0917379c11a2835f1e36934fd",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "0704fab6acca5125fe7085da7e5d005d5110bd2fe583a5094660e3b22ef48121",
+      "review_pending": false
+    },
+    "high-school-dodgeball/bomb": {
+      "game_call": "bomb",
+      "text": "ボム！",
+      "synthesis_text": "ボム！",
+      "recognized_text": "ボム。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28842,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/high-school-voices/DODGEBALL/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "e617d125da934d666c1a906c8631f7e26e480fe0917379c11a2835f1e36934fd",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "ea22361654182ecdd5f30f62c5ff5148b2ab9f47133fc99c01032533a2d101c2",
+      "review_pending": false
+    },
+    "high-school-dodgeball/five-shi": {
+      "game_call": "five-shi",
+      "text": "五指です",
+      "synthesis_text": "五指です",
+      "recognized_text": "ゴシです。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 38843,
+      "steps": 4,
+      "requested_seconds": 2.35,
+      "duration_seconds": 0.9,
+      "reference": [
+        "public/sfx/high-school-voices/DODGEBALL/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "e617d125da934d666c1a906c8631f7e26e480fe0917379c11a2835f1e36934fd",
+      "instructions": "参照と同じ声ではっきり発音。",
+      "sha256": "c4521e92a28f7ff0d72339d77cc87828a6f8f86e833150e73bf9e4ea8c1f4c0c",
+      "review_pending": false
+    },
+    "high-school-dodgeball/twenty": {
+      "game_call": "twenty",
+      "text": "二十点！",
+      "synthesis_text": "にじゅってん！",
+      "recognized_text": "20点。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28844,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/high-school-voices/DODGEBALL/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "e617d125da934d666c1a906c8631f7e26e480fe0917379c11a2835f1e36934fd",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "b28657cee2fff1914ff2b61af32989d5f73e806d24ce64fdec1c018e10df3165",
+      "review_pending": false
+    },
+    "high-school-bard/turn": {
+      "game_call": "turn",
+      "text": "はい、私の番！",
+      "synthesis_text": "はい、私の番！",
+      "recognized_text": "わたしのばん!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28850,
+      "steps": 4,
+      "requested_seconds": 2.15,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/high-school-voices/BARD/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "d102b92db9041b649463b315e5350bcf96fceba22fb3d594755e33002fec0a34",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "d19f3da0c206d1993c597364368ac6a0ce9edcaea83d729b4df280017e94bfbf",
+      "review_pending": false
+    },
+    "high-school-bard/domino": {
+      "game_call": "domino",
+      "text": "ドミノ！",
+      "synthesis_text": "ドミノ！",
+      "recognized_text": "ドミノ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28851,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/high-school-voices/BARD/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "d102b92db9041b649463b315e5350bcf96fceba22fb3d594755e33002fec0a34",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "27d97e9290292a62bf81c7ca12e71eb30673b8c6426cdbf523995e5cc960c672",
+      "review_pending": false
+    },
+    "high-school-bard/bomb": {
+      "game_call": "bomb",
+      "text": "ボムを出すよ",
+      "synthesis_text": "ボムを出すよ",
+      "recognized_text": "ボムを出すよ。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 48852,
+      "steps": 16,
+      "requested_seconds": 2.6,
+      "duration_seconds": 2.124,
+      "reference": [
+        "public/sfx/high-school-voices/BARD/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "d102b92db9041b649463b315e5350bcf96fceba22fb3d594755e33002fec0a34",
+      "instructions": "高校生の女性アニメ主人公。明るく通る放送部の声。言葉を届ける表現力と軽快なリズムを持ち、感動場面では温かな余韻を残す。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "3e6de146f378f1db5a3edb3893e864ee0e1627ab9c9cbf37d2b3789769dfd604",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "high-school-bard/five-shi": {
+      "game_call": "five-shi",
+      "text": "五指です",
+      "synthesis_text": "五指です",
+      "recognized_text": "5紙です。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 38853,
+      "steps": 4,
+      "requested_seconds": 2.35,
+      "duration_seconds": 1.728,
+      "reference": [
+        "public/sfx/high-school-voices/BARD/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "d102b92db9041b649463b315e5350bcf96fceba22fb3d594755e33002fec0a34",
+      "instructions": "参照と同じ声ではっきり発音。",
+      "sha256": "e5ebc6782b63723a4959e22cdedf6c9683449bcff85333e8012f1f0064d401a8",
+      "review_pending": false
+    },
+    "high-school-bard/twenty": {
+      "game_call": "twenty",
+      "text": "二十点！",
+      "synthesis_text": "にじゅってん！",
+      "recognized_text": "20点!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28854,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/high-school-voices/BARD/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "d102b92db9041b649463b315e5350bcf96fceba22fb3d594755e33002fec0a34",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "3c0e33f5b8f099da0f5c906190cb217ba8a2b0a9181d6960b66d3377b3d08cde",
+      "review_pending": false
+    },
+    "high-school-librarian/turn": {
+      "game_call": "turn",
+      "text": "私の手番ですね。",
+      "synthesis_text": "私の手番ですね。",
+      "recognized_text": "私の手番ですね。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28860,
+      "steps": 4,
+      "requested_seconds": 2.15,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/high-school-voices/LIBRARIAN/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "3ff20a8061c22151638739c68a8292d687e8d8dbd7cbe197d019d7bb252c3135",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "8163f178846f61f2d11ade0329b84e79e13392f676d523bb1eaabe0c787ce345",
+      "review_pending": false
+    },
+    "high-school-librarian/domino": {
+      "game_call": "domino",
+      "text": "ドミノで上がりです",
+      "synthesis_text": "ドミノで上がりです",
+      "recognized_text": "ドミノであがりです。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 48861,
+      "steps": 16,
+      "requested_seconds": 2.6,
+      "duration_seconds": 2.304,
+      "reference": [
+        "public/sfx/high-school-voices/LIBRARIAN/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "3ff20a8061c22151638739c68a8292d687e8d8dbd7cbe197d019d7bb252c3135",
+      "instructions": "高校生の女性アニメ主人公。知的で静かな中音。文芸部らしく言葉を丁寧に区切り、冷静さの中に好奇心と仲間への優しさを込める。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "c8f778d89a70b525e308494e95c18adaa222d4e8aaae58b9eb1d6dc30b271aac",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "high-school-librarian/bomb": {
+      "game_call": "bomb",
+      "text": "ボムを出すよ",
+      "synthesis_text": "ボムを出すよ",
+      "recognized_text": "ボムを出すよ。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 638266,
+      "steps": 16,
+      "requested_seconds": 2.6,
+      "duration_seconds": 1.98,
+      "reference": [
+        "public/sfx/high-school-voices/LIBRARIAN/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "3ff20a8061c22151638739c68a8292d687e8d8dbd7cbe197d019d7bb252c3135",
+      "instructions": "高校生の女性アニメ主人公。知的で静かな中音。文芸部らしく言葉を丁寧に区切り、冷静さの中に好奇心と仲間への優しさを込める。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "0ea32b0a59b9071f972631e9a7edd458c36136ce41c570d46d841300b3681933",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "high-school-librarian/five-shi": {
+      "game_call": "five-shi",
+      "text": "ごしです",
+      "synthesis_text": "ごしです",
+      "recognized_text": "5氏です。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 638266,
+      "steps": 16,
+      "requested_seconds": 2.6,
+      "duration_seconds": 1.728,
+      "reference": [
+        "public/sfx/high-school-voices/LIBRARIAN/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "3ff20a8061c22151638739c68a8292d687e8d8dbd7cbe197d019d7bb252c3135",
+      "instructions": "高校生の女性アニメ主人公。知的で静かな中音。文芸部らしく言葉を丁寧に区切り、冷静さの中に好奇心と仲間への優しさを込める。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "62e45a97784e153adcbc4e53f97b7b4883884cbdd55340d3a66faef8ba54e2de",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "high-school-librarian/twenty": {
+      "game_call": "twenty",
+      "text": "二十点です",
+      "synthesis_text": "二十点です",
+      "recognized_text": "20点です。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 48864,
+      "steps": 16,
+      "requested_seconds": 2.6,
+      "duration_seconds": 1.908,
+      "reference": [
+        "public/sfx/high-school-voices/LIBRARIAN/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "3ff20a8061c22151638739c68a8292d687e8d8dbd7cbe197d019d7bb252c3135",
+      "instructions": "高校生の女性アニメ主人公。知的で静かな中音。文芸部らしく言葉を丁寧に区切り、冷静さの中に好奇心と仲間への優しさを込める。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "37c0d25e02a3966fab48c0589e4ab701298878e900345520c75409ccf10d75a2",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "high-school-chef/turn": {
+      "game_call": "turn",
+      "text": "さあ、俺の番だ。",
+      "synthesis_text": "さあ、俺の番だ。",
+      "recognized_text": "おれの番だ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28870,
+      "steps": 4,
+      "requested_seconds": 2.15,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/high-school-voices/CHEF/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "14caa82e9c3b8318da0ca96986c29edc26c36e0bd7e2cee5eb905e850d3577c3",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "7b6cfad56efef36e7d8f432a91bac80e61be6f12a30e7201dc6833f2e4efdc55",
+      "review_pending": false
+    },
+    "high-school-chef/domino": {
+      "game_call": "domino",
+      "text": "ドミノ！",
+      "synthesis_text": "ドミノ！",
+      "recognized_text": "なお。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28871,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/high-school-voices/CHEF/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "14caa82e9c3b8318da0ca96986c29edc26c36e0bd7e2cee5eb905e850d3577c3",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "ed295d35b8f7f61ea3595aa806a83bbc511e00b087ebaf1dc9a4d2da4c39a01f",
+      "review_pending": true
+    },
+    "high-school-chef/bomb": {
+      "game_call": "bomb",
+      "text": "ここでボムを出します",
+      "synthesis_text": "ここでボムを出します",
+      "recognized_text": "ここでボムをだします。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 32872,
+      "steps": 2,
+      "requested_seconds": 2.5,
+      "duration_seconds": 2.556,
+      "reference": [
+        "public/sfx/high-school-voices/CHEF/attack-1.ogg",
+        "public/sfx/card-club-voices/high-school-chef/start.ogg",
+        "public/sfx/card-club-voices/high-school-chef/win.ogg"
+      ],
+      "reference_pcm_sha256": "6bd8087aed42a149ab5b27276237aa135ad028ea2fed1993ed3a7690e98b4fad",
+      "instructions": "落ち着いた対局。",
+      "sha256": "89068f48bd5cbda07024228da57f5380d01a74d34418e178a20012de07fc1a98",
+      "review_pending": false
+    },
+    "high-school-chef/five-shi": {
+      "game_call": "five-shi",
+      "text": "ごしです",
+      "synthesis_text": "ごしです",
+      "recognized_text": "ごしです。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 48873,
+      "steps": 16,
+      "requested_seconds": 2.6,
+      "duration_seconds": 1.98,
+      "reference": [
+        "public/sfx/high-school-voices/CHEF/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "14caa82e9c3b8318da0ca96986c29edc26c36e0bd7e2cee5eb905e850d3577c3",
+      "instructions": "高校生の男子アニメ主人公。気さくで頼れる明るい中低音。料理長らしい面倒見のよさと勢いを持ち、冗談は親しみやすく、決意は力強く。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "caccfbc64f9485d4a6ed3a1f2964ede9e4e33b67855dad8e43e3446e3ab07ac3",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "high-school-chef/twenty": {
+      "game_call": "twenty",
+      "text": "二十点！",
+      "synthesis_text": "にじゅってん！",
+      "recognized_text": "20点!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28874,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/high-school-voices/CHEF/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "14caa82e9c3b8318da0ca96986c29edc26c36e0bd7e2cee5eb905e850d3577c3",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "6132821a22e31e826a15fb98aaf2dfda0e4eaa55fca75401d8cdd27d8444e50b",
+      "review_pending": false
+    },
+    "high-school-gardener/turn": {
+      "game_call": "turn",
+      "text": "私の番ですね。",
+      "synthesis_text": "私の番ですね。",
+      "recognized_text": "ばんですね。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28880,
+      "steps": 4,
+      "requested_seconds": 2.15,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/high-school-voices/GARDENER/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "1bcda516217aa45c9deaf8c444a4e669939f344f949ac158326b041f827524eb",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "0f31feb5f0ffed904c55712b3519f17c592eecbfb893545f7d9adb838a1a8077",
+      "review_pending": false
+    },
+    "high-school-gardener/domino": {
+      "game_call": "domino",
+      "text": "ドミノ！",
+      "synthesis_text": "ドミノ！",
+      "recognized_text": "ドミノ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28881,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/high-school-voices/GARDENER/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "1bcda516217aa45c9deaf8c444a4e669939f344f949ac158326b041f827524eb",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "f83315e0dc9c861f1b7679a61dcb79514196b4b82d4849c14dc4e08e1f284809",
+      "review_pending": false
+    },
+    "high-school-gardener/bomb": {
+      "game_call": "bomb",
+      "text": "ボムを出します",
+      "synthesis_text": "ボムを出します",
+      "recognized_text": "ボムを出します。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 38882,
+      "steps": 4,
+      "requested_seconds": 2.4,
+      "duration_seconds": 1.98,
+      "reference": [
+        "public/sfx/high-school-voices/GARDENER/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "1bcda516217aa45c9deaf8c444a4e669939f344f949ac158326b041f827524eb",
+      "instructions": "参照と同じ声ではっきり発音。",
+      "sha256": "ad48842a04e79f20a11b5b3503a2f75d8ea26a7c32142415a5da491a14fa2377",
+      "review_pending": false
+    },
+    "high-school-gardener/five-shi": {
+      "game_call": "five-shi",
+      "text": "五指です",
+      "synthesis_text": "五指です",
+      "recognized_text": "ゴシ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 38883,
+      "steps": 4,
+      "requested_seconds": 2.35,
+      "duration_seconds": 1.548,
+      "reference": [
+        "public/sfx/high-school-voices/GARDENER/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "1bcda516217aa45c9deaf8c444a4e669939f344f949ac158326b041f827524eb",
+      "instructions": "参照と同じ声ではっきり発音。",
+      "sha256": "25d55009b30a1ac01fb7f09be258bfc256c61083e8c6fc88abfe4276a973c6a1",
+      "review_pending": false
+    },
+    "high-school-gardener/twenty": {
+      "game_call": "twenty",
+      "text": "二十点です",
+      "synthesis_text": "二十点です",
+      "recognized_text": "20点です。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 48884,
+      "steps": 16,
+      "requested_seconds": 2.6,
+      "duration_seconds": 1.836,
+      "reference": [
+        "public/sfx/high-school-voices/GARDENER/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "1bcda516217aa45c9deaf8c444a4e669939f344f949ac158326b041f827524eb",
+      "instructions": "高校生の女性アニメ主人公。穏やかで透明感のある中音。植物を育てるような優しさを保ち、未来を語る時は静かに力強く伸びる声。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "657cf48d2d457b90937b3d639fd792d8bef2d4f71d0030e822c6e5c564d42bc4",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "magic-akari/turn": {
+      "game_call": "turn",
+      "text": "よーし、私の番！",
+      "synthesis_text": "よーし、私の番！",
+      "recognized_text": "わたしの番!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28890,
+      "steps": 4,
+      "requested_seconds": 2.15,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/magic-voices/AKARI/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "cc8f95da12944cb96bc3da41e0e1a75383a4e47bec33b23f11d6756d34f4928c",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "59865cde6b1ecb5a5dd6be91ad2ed3daf3879adc97cfdb058017d79d2c99bd5e",
+      "review_pending": false
+    },
+    "magic-akari/domino": {
+      "game_call": "domino",
+      "text": "ドミノで上がりです",
+      "synthesis_text": "ドミノで上がりです",
+      "recognized_text": "ドミノであがりです!",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 48891,
+      "steps": 16,
+      "requested_seconds": 2.6,
+      "duration_seconds": 2.412,
+      "reference": [
+        "public/sfx/magic-voices/AKARI/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "cc8f95da12944cb96bc3da41e0e1a75383a4e47bec33b23f11d6756d34f4928c",
+      "instructions": "高校生の女性魔法主人公。明るくまっすぐな若い中高音。仲間を照らすリーダーらしく、前向きな台詞は弾むように、決意は力強く。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "da4bf6ccdcfddd3ee8f928698ad40e3bd831d838f2711e9b382e1b1e14963cae",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "magic-akari/bomb": {
+      "game_call": "bomb",
+      "text": "爆弾です",
+      "synthesis_text": "爆弾です",
+      "recognized_text": "爆弾です。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 49892,
+      "steps": 24,
+      "requested_seconds": 2.6,
+      "duration_seconds": 1.8,
+      "reference": [
+        "public/sfx/magic-voices/AKARI/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "cc8f95da12944cb96bc3da41e0e1a75383a4e47bec33b23f11d6756d34f4928c",
+      "instructions": "高校生の女性魔法主人公。明るくまっすぐな若い中高音。仲間を照らすリーダーらしく、前向きな台詞は弾むように、決意は力強く。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "689b2f413df26a2a83ed653df907acc8251739747e5a70076bf596033fd9b503",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 8,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "magic-akari/five-shi": {
+      "game_call": "five-shi",
+      "text": "ごしです",
+      "synthesis_text": "ごしです",
+      "recognized_text": "5紙です。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 48893,
+      "steps": 16,
+      "requested_seconds": 2.6,
+      "duration_seconds": 1.764,
+      "reference": [
+        "public/sfx/magic-voices/AKARI/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "cc8f95da12944cb96bc3da41e0e1a75383a4e47bec33b23f11d6756d34f4928c",
+      "instructions": "高校生の女性魔法主人公。明るくまっすぐな若い中高音。仲間を照らすリーダーらしく、前向きな台詞は弾むように、決意は力強く。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "d69e2c91eb1d9a782da85abd1c7aaf669e3ec5491ba08e017f1dd2bfdaf834d3",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "magic-akari/twenty": {
+      "game_call": "twenty",
+      "text": "二十点！",
+      "synthesis_text": "にじゅってん！",
+      "recognized_text": "20てん!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28894,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/AKARI/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "cc8f95da12944cb96bc3da41e0e1a75383a4e47bec33b23f11d6756d34f4928c",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "431d8f86c463e32addbfe6fbd14c8b8966f4474f01ecd6b2466266a519101a01",
+      "review_pending": false
+    },
+    "magic-shizuku/turn": {
+      "game_call": "turn",
+      "text": "私の番ですね",
+      "synthesis_text": "私の番ですね",
+      "recognized_text": "私の番ですね。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 48900,
+      "steps": 16,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/magic-voices/SHIZUKU/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "70c93b53ad57f0d633f701871fb3be26475a75a879af13399357d0aebf174a95",
+      "instructions": "高校生の女性魔法主人公。冷静で透明感のある中音。論理的に落ち着いて話し、感情が揺れる場面では抑えた優しさをにじませる。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "925fd5ac82d9c58f51f328300c2c512e4a8a9151df46ea64d139e1f58d07f2b6",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "magic-shizuku/domino": {
+      "game_call": "domino",
+      "text": "ドミノ！",
+      "synthesis_text": "ドミノ！",
+      "recognized_text": "ドミノ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28901,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/SHIZUKU/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "70c93b53ad57f0d633f701871fb3be26475a75a879af13399357d0aebf174a95",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "3aadc0bfd54a9e5cdadd1ee7aaafb571821d074a0c22a755b0c748940df4ea79",
+      "review_pending": false
+    },
+    "magic-shizuku/bomb": {
+      "game_call": "bomb",
+      "text": "ここでボムを出します",
+      "synthesis_text": "ここでボムを出します",
+      "recognized_text": "ボムを出しずつ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 32902,
+      "steps": 2,
+      "requested_seconds": 2.5,
+      "duration_seconds": 2.484,
+      "reference": [
+        "public/sfx/magic-voices/SHIZUKU/attack-1.ogg",
+        "public/sfx/card-club-voices/magic-shizuku/start.ogg",
+        "public/sfx/card-club-voices/magic-shizuku/win.ogg"
+      ],
+      "reference_pcm_sha256": "4513930cf0da3a54ada980608d49f445c7a140da9a5ca0eee02f3ecb5eae5a54",
+      "instructions": "落ち着いた対局。",
+      "sha256": "8e64f4dd89b1fe306a56e4b0cc31ae0fbf927777c2d34a5f4f42dd3b6b4a56f2",
+      "review_pending": false
+    },
+    "magic-shizuku/five-shi": {
+      "game_call": "five-shi",
+      "text": "ごしです",
+      "synthesis_text": "ごしです",
+      "recognized_text": "ゴシです。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 48903,
+      "steps": 16,
+      "requested_seconds": 2.6,
+      "duration_seconds": 1.728,
+      "reference": [
+        "public/sfx/magic-voices/SHIZUKU/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "70c93b53ad57f0d633f701871fb3be26475a75a879af13399357d0aebf174a95",
+      "instructions": "高校生の女性魔法主人公。冷静で透明感のある中音。論理的に落ち着いて話し、感情が揺れる場面では抑えた優しさをにじませる。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "0e41cc8338b154455123f9c5ac77d9e7cb7fc4c39248c31c56facd2f3a7be5f7",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "magic-shizuku/twenty": {
+      "game_call": "twenty",
+      "text": "二十点！",
+      "synthesis_text": "にじゅってん！",
+      "recognized_text": "20点。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28904,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/SHIZUKU/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "70c93b53ad57f0d633f701871fb3be26475a75a879af13399357d0aebf174a95",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "edb2d4e07648946b54c267a53ef3f8cd279c54d9ce72f73cc083911fade90450",
+      "review_pending": false
+    },
+    "magic-hiyori/turn": {
+      "game_call": "turn",
+      "text": "私の番、ですね。",
+      "synthesis_text": "私の番、ですね。",
+      "recognized_text": "番ですね。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28910,
+      "steps": 4,
+      "requested_seconds": 2.15,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/magic-voices/HIYORI/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "4c14668d1ea2e5753e2c09e72f65d723f11c9df91971f07795ce8cf1657978a0",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "df80b79b946a93195679cf98b5529e671399a2804731f1f0064b97fdda2b2726",
+      "review_pending": false
+    },
+    "magic-hiyori/domino": {
+      "game_call": "domino",
+      "text": "ドミノ！",
+      "synthesis_text": "ドミノ！",
+      "recognized_text": "ドミノ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28911,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/HIYORI/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "4c14668d1ea2e5753e2c09e72f65d723f11c9df91971f07795ce8cf1657978a0",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "9961bc59e697bea2cb7c16edbf14c8234a6c8c5022bd848ff0f35d4bdbcdab6d",
+      "review_pending": false
+    },
+    "magic-hiyori/bomb": {
+      "game_call": "bomb",
+      "text": "ここでボムを出します",
+      "synthesis_text": "ここでボムを出します",
+      "recognized_text": "ボムンムス。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 32912,
+      "steps": 2,
+      "requested_seconds": 2.5,
+      "duration_seconds": 2.556,
+      "reference": [
+        "public/sfx/magic-voices/HIYORI/attack-1.ogg",
+        "public/sfx/card-club-voices/magic-hiyori/start.ogg",
+        "public/sfx/card-club-voices/magic-hiyori/win.ogg"
+      ],
+      "reference_pcm_sha256": "bff92a23cb92a38c7be18c62cd07353e6b1405b3d4bb471dfd1956a2afcc1127",
+      "instructions": "落ち着いた対局。",
+      "sha256": "db1d98d260b4f5886dbbeda04f36cd0dcb312fb352a75a53477960cbc25bb3fd",
+      "review_pending": false
+    },
+    "magic-hiyori/five-shi": {
+      "game_call": "five-shi",
+      "text": "ごしです",
+      "synthesis_text": "ごしです",
+      "recognized_text": "ゴシです。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 48913,
+      "steps": 16,
+      "requested_seconds": 2.6,
+      "duration_seconds": 1.728,
+      "reference": [
+        "public/sfx/magic-voices/HIYORI/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "4c14668d1ea2e5753e2c09e72f65d723f11c9df91971f07795ce8cf1657978a0",
+      "instructions": "高校生の女性魔法主人公。柔らかく包み込む穏やかな中音。相手を安心させる温かさを持ち、守る決意は静かに強く。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "0e51e50a394777edad40ad83371317870e465972cdb41e138728fbd15e09c43b",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "magic-hiyori/twenty": {
+      "game_call": "twenty",
+      "text": "二十点！",
+      "synthesis_text": "にじゅってん！",
+      "recognized_text": "20点。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28914,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/HIYORI/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "4c14668d1ea2e5753e2c09e72f65d723f11c9df91971f07795ce8cf1657978a0",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "4d6289b3d50cd5b416fc1c9f11e67df44dd9af82f19f577ae1f7d9607ced930d",
+      "review_pending": false
+    },
+    "magic-tsubasa/turn": {
+      "game_call": "turn",
+      "text": "よし、私の番！",
+      "synthesis_text": "よし、私の番！",
+      "recognized_text": "わたしのばん!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28920,
+      "steps": 4,
+      "requested_seconds": 2.15,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/magic-voices/TSUBASA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "aa9e8cdaad0274fd2177c08b40b9fdaad7900f8502ee2bd694a434e8811d9c6d",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "b3d8d80a614fee4478d1f07d0a85ce57597f2a5b47e2c97c568af7ebbd56e5d1",
+      "review_pending": false
+    },
+    "magic-tsubasa/domino": {
+      "game_call": "domino",
+      "text": "ドミノ！",
+      "synthesis_text": "ドミノ！",
+      "recognized_text": "うん!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28921,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/TSUBASA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "aa9e8cdaad0274fd2177c08b40b9fdaad7900f8502ee2bd694a434e8811d9c6d",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "554d74bfe669254fa747d130f38e01006c8154019ba43a295d1171c389641a0c",
+      "review_pending": true
+    },
+    "magic-tsubasa/bomb": {
+      "game_call": "bomb",
+      "text": "ここでボムを出します",
+      "synthesis_text": "ここでボムを出します",
+      "recognized_text": "ボムをだすわ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 32922,
+      "steps": 2,
+      "requested_seconds": 2.5,
+      "duration_seconds": 2.484,
+      "reference": [
+        "public/sfx/magic-voices/TSUBASA/attack-1.ogg",
+        "public/sfx/card-club-voices/magic-tsubasa/start.ogg",
+        "public/sfx/card-club-voices/magic-tsubasa/win.ogg"
+      ],
+      "reference_pcm_sha256": "f44dee825aefb7271516946454b7456c287afd9efe455d2f3efb3c499d3abf2e",
+      "instructions": "落ち着いた対局。",
+      "sha256": "ff6134e95d8b7068060881e49707c763402af457f7b68730f90513a76b1b8198",
+      "review_pending": false
+    },
+    "magic-tsubasa/five-shi": {
+      "game_call": "five-shi",
+      "text": "ごしです",
+      "synthesis_text": "ごしです",
+      "recognized_text": "ごしです。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 48923,
+      "steps": 16,
+      "requested_seconds": 2.6,
+      "duration_seconds": 1.908,
+      "reference": [
+        "public/sfx/magic-voices/TSUBASA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "aa9e8cdaad0274fd2177c08b40b9fdaad7900f8502ee2bd694a434e8811d9c6d",
+      "instructions": "高校生の女性魔法主人公。熱血で率直な明るい中高音。短い言葉を勢いよく届け、仲間を鼓舞する場面ではまっすぐ熱く。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "4c9e014d83e1262f49cb4878d33e163da415f2e07a281763c54482572584d0c6",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "magic-tsubasa/twenty": {
+      "game_call": "twenty",
+      "text": "二十点です",
+      "synthesis_text": "二十点です",
+      "recognized_text": "20てんです。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 48924,
+      "steps": 16,
+      "requested_seconds": 2.6,
+      "duration_seconds": 2.628,
+      "reference": [
+        "public/sfx/magic-voices/TSUBASA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "aa9e8cdaad0274fd2177c08b40b9fdaad7900f8502ee2bd694a434e8811d9c6d",
+      "instructions": "高校生の女性魔法主人公。熱血で率直な明るい中高音。短い言葉を勢いよく届け、仲間を鼓舞する場面ではまっすぐ熱く。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "4cc63caf22b0b1d536170deeadb87ace6db29961bd7ff42e306ff2a5ef535f32",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "magic-rei/turn": {
+      "game_call": "turn",
+      "text": "次は私の番です",
+      "synthesis_text": "次は私の番です",
+      "recognized_text": "つぎはわたくしのばんです。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 38930,
+      "steps": 4,
+      "requested_seconds": 2.55,
+      "duration_seconds": 2.376,
+      "reference": [
+        "public/sfx/magic-voices/REI/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "dac310f9c10e8f1073fad27966db7d1a41ecb80fe62410ca0116730210fec047",
+      "instructions": "参照と同じ声ではっきり発音。",
+      "sha256": "80bdea284741273ec43767f32444200cb84f81f1b342061363d1a62e2c04514a",
+      "review_pending": false
+    },
+    "magic-rei/domino": {
+      "game_call": "domino",
+      "text": "ドミノ！",
+      "synthesis_text": "ドミノ！",
+      "recognized_text": "ドミノ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28931,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/REI/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "dac310f9c10e8f1073fad27966db7d1a41ecb80fe62410ca0116730210fec047",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "2944f22edca320819a4b065fbd266d29dcf8aac9d96092766e417077fe3b7b0a",
+      "review_pending": false
+    },
+    "magic-rei/bomb": {
+      "game_call": "bomb",
+      "text": "ボムを出すよ",
+      "synthesis_text": "ボムを出すよ",
+      "recognized_text": "ボムを出すよ。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 48932,
+      "steps": 16,
+      "requested_seconds": 2.6,
+      "duration_seconds": 1.8,
+      "reference": [
+        "public/sfx/magic-voices/REI/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "dac310f9c10e8f1073fad27966db7d1a41ecb80fe62410ca0116730210fec047",
+      "instructions": "高校生の女性魔法主人公。寡黙で厳格な低めの声。無駄なく静かに話し、守る言葉だけに深い庇護と意志を込める。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "c8949edd7fa488f171557fcda176f4e0342c263ce4c53644da5e8aac897e2cec",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "magic-rei/five-shi": {
+      "game_call": "five-shi",
+      "text": "ごしです",
+      "synthesis_text": "ごしです",
+      "recognized_text": "5氏です。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 48933,
+      "steps": 16,
+      "requested_seconds": 2.6,
+      "duration_seconds": 1.764,
+      "reference": [
+        "public/sfx/magic-voices/REI/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "dac310f9c10e8f1073fad27966db7d1a41ecb80fe62410ca0116730210fec047",
+      "instructions": "高校生の女性魔法主人公。寡黙で厳格な低めの声。無駄なく静かに話し、守る言葉だけに深い庇護と意志を込める。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "d48d02072a50359dfcf63ebad89f58dd1498a1e799b5d106e057cab4b2a29589",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "magic-rei/twenty": {
+      "game_call": "twenty",
+      "text": "二十点！",
+      "synthesis_text": "にじゅってん！",
+      "recognized_text": "20点前。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28934,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/REI/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "dac310f9c10e8f1073fad27966db7d1a41ecb80fe62410ca0116730210fec047",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "367420daea9cf88f902813d04590b2984b820f22bc26ab8b5e8a4b28772ec089",
+      "review_pending": false
+    },
+    "magic-madoka/turn": {
+      "game_call": "turn",
+      "text": "私の出番かな？",
+      "synthesis_text": "私の出番かな？",
+      "recognized_text": "別の出番かかな?",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28940,
+      "steps": 4,
+      "requested_seconds": 2.15,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/magic-voices/MADOKA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "68a8b7f1355328cd0bfd3da598dc243b65c72d8f71af58c329d583c82a38ed1e",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "4f0b125a0b2c46794b40361ba2a6bc8e851c3eaa519bf1fecda0dc22054cf120",
+      "review_pending": false
+    },
+    "magic-madoka/domino": {
+      "game_call": "domino",
+      "text": "ドミノで上がりです",
+      "synthesis_text": "ドミノで上がりです",
+      "recognized_text": "ドミノであがりです。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 48941,
+      "steps": 16,
+      "requested_seconds": 2.6,
+      "duration_seconds": 1.944,
+      "reference": [
+        "public/sfx/magic-voices/MADOKA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "68a8b7f1355328cd0bfd3da598dc243b65c72d8f71af58c329d583c82a38ed1e",
+      "instructions": "高校生の女性魔法主人公。内気で知的な若い中音。少し控えめだが研究への情熱があり、勇気を出す場面では声を一段明るくする。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "713a447a5e2591fe2fdbef89bee76a7f17ea66633df11e8d9a8569b185df7541",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "magic-madoka/bomb": {
+      "game_call": "bomb",
+      "text": "ボムを出すよ",
+      "synthesis_text": "ボムを出すよ",
+      "recognized_text": "ボムを出すよ。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 48942,
+      "steps": 16,
+      "requested_seconds": 2.6,
+      "duration_seconds": 2.016,
+      "reference": [
+        "public/sfx/magic-voices/MADOKA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "68a8b7f1355328cd0bfd3da598dc243b65c72d8f71af58c329d583c82a38ed1e",
+      "instructions": "高校生の女性魔法主人公。内気で知的な若い中音。少し控えめだが研究への情熱があり、勇気を出す場面では声を一段明るくする。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "205591077ac5a56a664c67a16caf9b75afc3c0c4875b3e7f41ba50ed08dfc60c",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "magic-madoka/five-shi": {
+      "game_call": "five-shi",
+      "text": "五しです。",
+      "synthesis_text": "ごしです。",
+      "recognized_text": "腰です。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28943,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/MADOKA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "68a8b7f1355328cd0bfd3da598dc243b65c72d8f71af58c329d583c82a38ed1e",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "80e321f824a3dd8c73813a0c5ec9eb6c51bb96384c236a53e7d457f9a3e50d53",
+      "review_pending": false
+    },
+    "magic-madoka/twenty": {
+      "game_call": "twenty",
+      "text": "二十点です",
+      "synthesis_text": "二十点です",
+      "recognized_text": "20点です。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 48944,
+      "steps": 16,
+      "requested_seconds": 2.6,
+      "duration_seconds": 1.872,
+      "reference": [
+        "public/sfx/magic-voices/MADOKA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "68a8b7f1355328cd0bfd3da598dc243b65c72d8f71af58c329d583c82a38ed1e",
+      "instructions": "高校生の女性魔法主人公。内気で知的な若い中音。少し控えめだが研究への情熱があり、勇気を出す場面では声を一段明るくする。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "bda6743b6b9fe0fe00cfc489d8f96385ccdf694fd33548bfabcbee39192135e4",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "magic-koharu/turn": {
+      "game_call": "turn",
+      "text": "あっ、私の番ですね。",
+      "synthesis_text": "あっ、私の番ですね。",
+      "recognized_text": "わたしのばんですね。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28950,
+      "steps": 4,
+      "requested_seconds": 2.15,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/magic-voices/KOHARU/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "f018405d6ee02e2252e5ea632eb65118de8b7239646081d13f5c67542b300ac1",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "84128b30777f7c40c8d583b84749b8a9b9b7774025f5a4a012ad419122876d49",
+      "review_pending": false
+    },
+    "magic-koharu/domino": {
+      "game_call": "domino",
+      "text": "ドミノ！",
+      "synthesis_text": "ドミノ！",
+      "recognized_text": "ドミノ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28951,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/KOHARU/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "f018405d6ee02e2252e5ea632eb65118de8b7239646081d13f5c67542b300ac1",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "58abe1db2d6aaef060164191b4fdadd2cf5b965e0f764a93e221a6ce6b47cb8a",
+      "review_pending": false
+    },
+    "magic-koharu/bomb": {
+      "game_call": "bomb",
+      "text": "ボムを出すよ",
+      "synthesis_text": "ボムを出すよ",
+      "recognized_text": "ボムを出すよ。",
+      "model": "Irodori-TTS-v4.1-Small",
+      "seed": 48952,
+      "steps": 16,
+      "requested_seconds": 2.6,
+      "duration_seconds": 2.016,
+      "reference": [
+        "public/sfx/magic-voices/KOHARU/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "f018405d6ee02e2252e5ea632eb65118de8b7239646081d13f5c67542b300ac1",
+      "instructions": "高校生の女性魔法主人公。穏やかで自然体の中音。風のように柔らかく話し、仲間を導く時は落ち着いた芯を見せる。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
+      "sha256": "abbfc04f5aea68a4b4a1edc3b0a89777e1c550b1ee46630f8f85c7e14f7c099c",
+      "review_pending": false,
+      "cfg_guidance_mode": "independent",
+      "cfg_scale_text": 7,
+      "cfg_scale_speaker": 2,
+      "cfg_scale_instructions": 1
+    },
+    "magic-koharu/five-shi": {
+      "game_call": "five-shi",
+      "text": "五しです。",
+      "synthesis_text": "ごしです。",
+      "recognized_text": "すげえ声です。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28953,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/KOHARU/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "f018405d6ee02e2252e5ea632eb65118de8b7239646081d13f5c67542b300ac1",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "f04b35af6e4d3adaf19603c34740dd4325827c27369489dd31ba409da7c58edf",
+      "review_pending": true
+    },
+    "magic-koharu/twenty": {
+      "game_call": "twenty",
+      "text": "二十点！",
+      "synthesis_text": "にじゅってん！",
+      "recognized_text": "20分。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28954,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/KOHARU/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "f018405d6ee02e2252e5ea632eb65118de8b7239646081d13f5c67542b300ac1",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "bdab236c71f6b000fe93afa5fe013c51f93360c3b3610a8ca4d0733f032904d4",
+      "review_pending": true
+    },
+    "magic-mirai/turn": {
+      "game_call": "turn",
+      "text": "私の番だね！",
+      "synthesis_text": "私の番だね！",
+      "recognized_text": "私の番だね。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28960,
+      "steps": 4,
+      "requested_seconds": 2.15,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/magic-voices/MIRAI/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "dba6912db6db306dea85571ffd61d8271b08218f4101e10dd40595447c8035bc",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "bf867dbe11e3e032c79e99599a0a3bbb8986a1a0876e8bbc29594bd511bcaf6f",
+      "review_pending": false
+    },
+    "magic-mirai/domino": {
+      "game_call": "domino",
+      "text": "ドミノ！",
+      "synthesis_text": "ドミノ！",
+      "recognized_text": "ドミノ!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28961,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/MIRAI/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "dba6912db6db306dea85571ffd61d8271b08218f4101e10dd40595447c8035bc",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "d8eff163ec7829099e7fcf0d995896a5139b6be5bcacc14237a9615164f67812",
+      "review_pending": false
+    },
+    "magic-mirai/bomb": {
+      "game_call": "bomb",
+      "text": "ボム！",
+      "synthesis_text": "ボム！",
+      "recognized_text": "バム!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28962,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/MIRAI/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "dba6912db6db306dea85571ffd61d8271b08218f4101e10dd40595447c8035bc",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "91404357c2d7b073d03b11bb17bb40289ee6946c6df7906511a7937f97c587de",
+      "review_pending": true
+    },
+    "magic-mirai/five-shi": {
+      "game_call": "five-shi",
+      "text": "五しです。",
+      "synthesis_text": "ごしです。",
+      "recognized_text": "コッシーです!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28963,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/MIRAI/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "dba6912db6db306dea85571ffd61d8271b08218f4101e10dd40595447c8035bc",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "d7fdb7129a3b72cbafe8004a51143374e6cc72f028ca1d577ba152e7a49d712f",
+      "review_pending": true
+    },
+    "magic-mirai/twenty": {
+      "game_call": "twenty",
+      "text": "二十点！",
+      "synthesis_text": "にじゅってん！",
+      "recognized_text": "20点!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28964,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/MIRAI/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "dba6912db6db306dea85571ffd61d8271b08218f4101e10dd40595447c8035bc",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "cff476d6d05d2c90602e879f1a578b6f81917c8bd3c1676e99a34d2627ef2222",
+      "review_pending": false
+    },
+    "magic-sera/turn": {
+      "game_call": "turn",
+      "text": "では、私の番です。",
+      "synthesis_text": "では、私の番です。",
+      "recognized_text": "では私の番です。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28970,
+      "steps": 4,
+      "requested_seconds": 2.15,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/magic-voices/SERA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "25c207ac47f263015b8f79a8bb59826d75274518040d424b010a3514da3aa687",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "ae13a00369fb0d1f8cb9dbcce2aa008c5cdee3b60d1999d23d83d4a7af90fcbe",
+      "review_pending": false
+    },
+    "magic-sera/domino": {
+      "game_call": "domino",
+      "text": "ドミノ！",
+      "synthesis_text": "ドミノ！",
+      "recognized_text": "ドミノ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28971,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/SERA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "25c207ac47f263015b8f79a8bb59826d75274518040d424b010a3514da3aa687",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "db32dd78231679da8aacb9cf83ff6ee9653c839bd584a72739f21b108d4c911e",
+      "review_pending": false
+    },
+    "magic-sera/bomb": {
+      "game_call": "bomb",
+      "text": "ボムを出します",
+      "synthesis_text": "ボムを出します",
+      "recognized_text": "ボムを出します。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 38972,
+      "steps": 4,
+      "requested_seconds": 2.4,
+      "duration_seconds": 1.98,
+      "reference": [
+        "public/sfx/magic-voices/SERA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "25c207ac47f263015b8f79a8bb59826d75274518040d424b010a3514da3aa687",
+      "instructions": "参照と同じ声ではっきり発音。",
+      "sha256": "0809ff9af12dc6dbba211029be2508481af5d6170e2f33040e97156569dd0869",
+      "review_pending": false
+    },
+    "magic-sera/five-shi": {
+      "game_call": "five-shi",
+      "text": "五しです。",
+      "synthesis_text": "ごしです。",
+      "recognized_text": "エヘヘヘ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28973,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/SERA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "25c207ac47f263015b8f79a8bb59826d75274518040d424b010a3514da3aa687",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "707843224c0d52215e81e9a6582e84245afe463f416b9d8d3563af5b875725f3",
+      "review_pending": true
+    },
+    "magic-sera/twenty": {
+      "game_call": "twenty",
+      "text": "二十点！",
+      "synthesis_text": "にじゅってん！",
+      "recognized_text": "20ぷん!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28974,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/SERA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "25c207ac47f263015b8f79a8bb59826d75274518040d424b010a3514da3aa687",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "a5be95f536c52a78a2228972abb4275d88acbd46ca823adc78eac2731008c1f0",
+      "review_pending": true
+    },
+    "magic-ren/turn": {
+      "game_call": "turn",
+      "text": "よし、俺の番だな。",
+      "synthesis_text": "よし、俺の番だな。",
+      "recognized_text": "俺の番だな。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28980,
+      "steps": 4,
+      "requested_seconds": 2.15,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/magic-voices/REN/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "4b393cac3eb6cfad7f1041dafc4873e9f914365c1680dc8ff2d4e544d70061f8",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "9665f9a34d4c7dad954c44be5083a2bbdbf1def3ad516cfb199748f696572b8f",
+      "review_pending": false
+    },
+    "magic-ren/domino": {
+      "game_call": "domino",
+      "text": "ドミノ！",
+      "synthesis_text": "ドミノ！",
+      "recognized_text": "ドミノ!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28981,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/REN/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "4b393cac3eb6cfad7f1041dafc4873e9f914365c1680dc8ff2d4e544d70061f8",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "3739cbc2e4180be82f671b3bc13de6ba0ef0ff437c9493d230ff51b6eae53c0a",
+      "review_pending": false
+    },
+    "magic-ren/bomb": {
+      "game_call": "bomb",
+      "text": "ここでボムを出します",
+      "synthesis_text": "ここでボムを出します",
+      "recognized_text": "ここでボムを出します。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 32982,
+      "steps": 2,
+      "requested_seconds": 2.5,
+      "duration_seconds": 2.34,
+      "reference": [
+        "public/sfx/magic-voices/REN/attack-1.ogg",
+        "public/sfx/card-club-voices/magic-ren/start.ogg",
+        "public/sfx/card-club-voices/magic-ren/win.ogg"
+      ],
+      "reference_pcm_sha256": "153e3bf0be310eaccd56092fb11ead8f57d6f33fbf4c16caddef19fcb806fec5",
+      "instructions": "落ち着いた対局。",
+      "sha256": "9f487846c34cb74881db368274825f8c614c5417eeb4b01b6f977bdbce7a42b2",
+      "review_pending": false
+    },
+    "magic-ren/five-shi": {
+      "game_call": "five-shi",
+      "text": "五しです。",
+      "synthesis_text": "ごしです。",
+      "recognized_text": "腰です。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28983,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/REN/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "4b393cac3eb6cfad7f1041dafc4873e9f914365c1680dc8ff2d4e544d70061f8",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "a01282724bd631b4672d129dd0b58f07441984234ebb16510d625ecb54a7c910",
+      "review_pending": false
+    },
+    "magic-ren/twenty": {
+      "game_call": "twenty",
+      "text": "二十点！",
+      "synthesis_text": "にじゅってん！",
+      "recognized_text": "20点!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28984,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/REN/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "4b393cac3eb6cfad7f1041dafc4873e9f914365c1680dc8ff2d4e544d70061f8",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "bb86f134fca475d7d94e5901a4aceb36a2e073a11559242f9b9d182678db9e6f",
+      "review_pending": false
+    },
+    "magic-soma/turn": {
+      "game_call": "turn",
+      "text": "俺の番だ",
+      "synthesis_text": "俺の番だ",
+      "recognized_text": "おれの番だ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 38990,
+      "steps": 4,
+      "requested_seconds": 2.55,
+      "duration_seconds": 1.404,
+      "reference": [
+        "public/sfx/magic-voices/SOMA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "73a19eeebf6d1a3b4611fe405e08d1aa6d68ac786ac3f08f2f12f41275e0aafd",
+      "instructions": "参照と同じ声ではっきり発音。",
+      "sha256": "c7167164e1a0a197f02b881a7332e2d8ed4bc921d19fbf9b916d2e0275b9c0bd",
+      "review_pending": false
+    },
+    "magic-soma/domino": {
+      "game_call": "domino",
+      "text": "ドミノ！",
+      "synthesis_text": "ドミノ！",
+      "recognized_text": "よっ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28991,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/SOMA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "73a19eeebf6d1a3b4611fe405e08d1aa6d68ac786ac3f08f2f12f41275e0aafd",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "9f660ec7e3df2053ed27f7855f8bf75e93c7fe7c89ce353f5dd4efd3161900d1",
+      "review_pending": true
+    },
+    "magic-soma/bomb": {
+      "game_call": "bomb",
+      "text": "ボムを出します",
+      "synthesis_text": "ボムを出します",
+      "recognized_text": "ボムを出します。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 38992,
+      "steps": 4,
+      "requested_seconds": 2.4,
+      "duration_seconds": 1.908,
+      "reference": [
+        "public/sfx/magic-voices/SOMA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "73a19eeebf6d1a3b4611fe405e08d1aa6d68ac786ac3f08f2f12f41275e0aafd",
+      "instructions": "参照と同じ声ではっきり発音。",
+      "sha256": "d1d088483559189df293cb1adf61981619104c7bdc7cd205c2405c35ff2b8822",
+      "review_pending": false
+    },
+    "magic-soma/five-shi": {
+      "game_call": "five-shi",
+      "text": "五しです。",
+      "synthesis_text": "ごしです。",
+      "recognized_text": "はい。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28993,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/SOMA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "73a19eeebf6d1a3b4611fe405e08d1aa6d68ac786ac3f08f2f12f41275e0aafd",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "38647df81f0556abb90a1c6926f5b43f10644c0c6e9bdeaa71498db2c1527f0d",
+      "review_pending": true
+    },
+    "magic-soma/twenty": {
+      "game_call": "twenty",
+      "text": "二十点！",
+      "synthesis_text": "にじゅってん！",
+      "recognized_text": "20分。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28994,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/SOMA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "73a19eeebf6d1a3b4611fe405e08d1aa6d68ac786ac3f08f2f12f41275e0aafd",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "63a497c22833d7dc5ff1cd272c8242d815302bb04a5a230e8b0b5fda284be183",
+      "review_pending": true
+    },
+    "magic-minato/turn": {
+      "game_call": "turn",
+      "text": "僕の番だね。",
+      "synthesis_text": "僕の番だね。",
+      "recognized_text": "僕の番だね。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29000,
+      "steps": 4,
+      "requested_seconds": 2.15,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/magic-voices/MINATO/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "1f71082589374b573312345fcda1ffe7f373c98390d4d4b53e2d6a1f85615143",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "3b666f36aeca62ffe1ee6360b225e5ad649e6be56350da659b60a7b8011dad39",
+      "review_pending": false
+    },
+    "magic-minato/domino": {
+      "game_call": "domino",
+      "text": "ドミノ！",
+      "synthesis_text": "ドミノ！",
+      "recognized_text": "ドミノさいご。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29001,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/MINATO/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "1f71082589374b573312345fcda1ffe7f373c98390d4d4b53e2d6a1f85615143",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "26918266ca7a60e8abada50691e56d699f8d58ec5524eb95c74a65f2befb2893",
+      "review_pending": false
+    },
+    "magic-minato/bomb": {
+      "game_call": "bomb",
+      "text": "ボム！",
+      "synthesis_text": "ボム！",
+      "recognized_text": "ボボム。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29002,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/MINATO/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "1f71082589374b573312345fcda1ffe7f373c98390d4d4b53e2d6a1f85615143",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "b6ddb2de74a434a376ed5bfab698161a2cb5cfa51f3ef749adf3d42fc3542d4d",
+      "review_pending": false
+    },
+    "magic-minato/five-shi": {
+      "game_call": "five-shi",
+      "text": "五しです。",
+      "synthesis_text": "ごしです。",
+      "recognized_text": "星です。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29003,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/MINATO/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "1f71082589374b573312345fcda1ffe7f373c98390d4d4b53e2d6a1f85615143",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "657d5d41ef68feb900225db97330a1341b26df310ee711ee3189cee7b96ec9f0",
+      "review_pending": true
+    },
+    "magic-minato/twenty": {
+      "game_call": "twenty",
+      "text": "二十点！",
+      "synthesis_text": "にじゅってん！",
+      "recognized_text": "20点!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29004,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/MINATO/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "1f71082589374b573312345fcda1ffe7f373c98390d4d4b53e2d6a1f85615143",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "1185b82e0ad59db4b16dd8aeb0049939593138f8b196e4b8a39a37be33fe3f3e",
+      "review_pending": false
+    },
+    "magic-riku/turn": {
+      "game_call": "turn",
+      "text": "おっと、俺の番か。",
+      "synthesis_text": "おっと、俺の番か。",
+      "recognized_text": "俺の番か。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29010,
+      "steps": 4,
+      "requested_seconds": 2.15,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/magic-voices/RIKU/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "d87a55ca36efc795987131ef156d6d7804c16420348a9dd7e537425fde5ab660",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "ac0669a12ce0e775989a751e706b9b94dc52a375cd979e21fbf2d1acd9096abb",
+      "review_pending": false
+    },
+    "magic-riku/domino": {
+      "game_call": "domino",
+      "text": "ドミノ！",
+      "synthesis_text": "ドミノ！",
+      "recognized_text": "ドミノ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29011,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/RIKU/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "d87a55ca36efc795987131ef156d6d7804c16420348a9dd7e537425fde5ab660",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "f3a389308f8bc02a0802e2cc32ff0c51311a71bfa11ef4fd98a319c9a4fa913a",
+      "review_pending": false
+    },
+    "magic-riku/bomb": {
+      "game_call": "bomb",
+      "text": "ボムを出します",
+      "synthesis_text": "ボムを出します",
+      "recognized_text": "ボムをふします。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 39012,
+      "steps": 4,
+      "requested_seconds": 2.4,
+      "duration_seconds": 2.232,
+      "reference": [
+        "public/sfx/magic-voices/RIKU/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "d87a55ca36efc795987131ef156d6d7804c16420348a9dd7e537425fde5ab660",
+      "instructions": "参照と同じ声ではっきり発音。",
+      "sha256": "ea7c77734be2f71cc5a8de5294d815a44f0420d310b088212b64b9a996062ea9",
+      "review_pending": false
+    },
+    "magic-riku/five-shi": {
+      "game_call": "five-shi",
+      "text": "五しです。",
+      "synthesis_text": "ごしです。",
+      "recognized_text": "コッシーです。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29013,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/RIKU/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "d87a55ca36efc795987131ef156d6d7804c16420348a9dd7e537425fde5ab660",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "0a54edf98f187b7359e38f6885e998b956de9068ffba8efb829f92cc725d4a4f",
+      "review_pending": true
+    },
+    "magic-riku/twenty": {
+      "game_call": "twenty",
+      "text": "二十点！",
+      "synthesis_text": "にじゅってん！",
+      "recognized_text": "20かい!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29014,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/RIKU/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "d87a55ca36efc795987131ef156d6d7804c16420348a9dd7e537425fde5ab660",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "0eaedfe2dd7b83b9ade4f68f4df1cb22e0d5b655becb3f987f701614cf8fc6ad",
+      "review_pending": true
+    },
+    "magic-yamato/turn": {
+      "game_call": "turn",
+      "text": "俺の番だぜ",
+      "synthesis_text": "俺の番だぜ",
+      "recognized_text": "俺の番だぜ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 39020,
+      "steps": 4,
+      "requested_seconds": 2.55,
+      "duration_seconds": 2.556,
+      "reference": [
+        "public/sfx/magic-voices/YAMATO/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "6c47e3e445948ddc9322be3c516ba4e8af0226ad6772b83bb7dbf9c818ab65c4",
+      "instructions": "参照と同じ声ではっきり発音。",
+      "sha256": "ced8283559b34e494a425212badff9515bb7bffbf1f227a07c04dd61a67d8acf",
+      "review_pending": false
+    },
+    "magic-yamato/domino": {
+      "game_call": "domino",
+      "text": "ドミノ！",
+      "synthesis_text": "ドミノ！",
+      "recognized_text": "はい。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29021,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/YAMATO/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "6c47e3e445948ddc9322be3c516ba4e8af0226ad6772b83bb7dbf9c818ab65c4",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "a1479e58f386866758174a50aca5c9c24270ab562344dd1c5d1ea4a907f928c5",
+      "review_pending": true
+    },
+    "magic-yamato/bomb": {
+      "game_call": "bomb",
+      "text": "ボム！",
+      "synthesis_text": "ボム！",
+      "recognized_text": "ボム。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29022,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/YAMATO/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "6c47e3e445948ddc9322be3c516ba4e8af0226ad6772b83bb7dbf9c818ab65c4",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "d0cf301ff3069b1d9258b2aee529ed2538f134b43ad7ddfb1492c15c70d80c01",
+      "review_pending": false
+    },
+    "magic-yamato/five-shi": {
+      "game_call": "five-shi",
+      "text": "五しです。",
+      "synthesis_text": "ごしです。",
+      "recognized_text": "5市です。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29023,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/YAMATO/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "6c47e3e445948ddc9322be3c516ba4e8af0226ad6772b83bb7dbf9c818ab65c4",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "38bec425e8b67e03cee6358c8585cf7d6a6d7651df6c1990e52885b4c31fe820",
+      "review_pending": false
+    },
+    "magic-yamato/twenty": {
+      "game_call": "twenty",
+      "text": "二十点！",
+      "synthesis_text": "にじゅってん！",
+      "recognized_text": "20点。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29024,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/YAMATO/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "6c47e3e445948ddc9322be3c516ba4e8af0226ad6772b83bb7dbf9c818ab65c4",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "9bdbc42042540911c5ba65047ed20c15cca714a174588c57264e4e45d060e4ac",
+      "review_pending": false
+    },
+    "magic-leon/turn": {
+      "game_call": "turn",
+      "text": "さあ、僕の出番だ。",
+      "synthesis_text": "さあ、僕の出番だ。",
+      "recognized_text": "僕の出番だ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29030,
+      "steps": 4,
+      "requested_seconds": 2.15,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/magic-voices/LEON/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "133391ac5d6b73b6e1febb0c569a7fad9f2be7ccb890197b5daf5a83cbc67c75",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "e6c0aeea12d0888600ab712ed708f4ba63b44270c2649c6d21f8a632acc33e31",
+      "review_pending": false
+    },
+    "magic-leon/domino": {
+      "game_call": "domino",
+      "text": "ドミノ！",
+      "synthesis_text": "ドミノ！",
+      "recognized_text": "ドミノ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29031,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/LEON/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "133391ac5d6b73b6e1febb0c569a7fad9f2be7ccb890197b5daf5a83cbc67c75",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "43fa0490bbf02b2444e1cd51cd798f932430150edb52fe55e75eb9acfe3684ed",
+      "review_pending": false
+    },
+    "magic-leon/bomb": {
+      "game_call": "bomb",
+      "text": "爆弾のボムだ",
+      "synthesis_text": "爆弾のボムだ",
+      "recognized_text": "爆弾のボムだ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 40032,
+      "steps": 4,
+      "requested_seconds": 2.4,
+      "duration_seconds": 2.124,
+      "reference": [
+        "public/sfx/magic-voices/LEON/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "133391ac5d6b73b6e1febb0c569a7fad9f2be7ccb890197b5daf5a83cbc67c75",
+      "instructions": "参照と同じ声ではっきり発音。",
+      "sha256": "a0e2882fc42d1de6ee2b3d5f17a10907d99244530399d4214c265a63c000fc33",
+      "review_pending": false
+    },
+    "magic-leon/five-shi": {
+      "game_call": "five-shi",
+      "text": "五しです。",
+      "synthesis_text": "ごしです。",
+      "recognized_text": "5市です。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29033,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/LEON/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "133391ac5d6b73b6e1febb0c569a7fad9f2be7ccb890197b5daf5a83cbc67c75",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "50f3a963cb2c5ec1503a0f4a8587223f57fe850ef68584c13f4ab04b158e17ed",
+      "review_pending": false
+    },
+    "magic-leon/twenty": {
+      "game_call": "twenty",
+      "text": "二十点！",
+      "synthesis_text": "にじゅってん！",
+      "recognized_text": "20点!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29034,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/LEON/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "133391ac5d6b73b6e1febb0c569a7fad9f2be7ccb890197b5daf5a83cbc67c75",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "f960b1be00a7c0611dceead9fe94b07dd46b6ad47d24d18fd3338ecac14cbbf2",
+      "review_pending": false
+    },
+    "magic-elliot/turn": {
+      "game_call": "turn",
+      "text": "では、僕の番ですね。",
+      "synthesis_text": "では、僕の番ですね。",
+      "recognized_text": "ではぼくのばんですね。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29040,
+      "steps": 4,
+      "requested_seconds": 2.15,
+      "duration_seconds": 2.196,
+      "reference": [
+        "public/sfx/magic-voices/ELLIOT/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "6a53046db08516828e74cdfa002b4f09945d5ddb22f7060f506188c9baca84d6",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "8ab5db2af62fbe61837047d87ab396a79b8a9b023c966f928e33fff4bb7dc10d",
+      "review_pending": false
+    },
+    "magic-elliot/domino": {
+      "game_call": "domino",
+      "text": "ドミノ！",
+      "synthesis_text": "ドミノ！",
+      "recognized_text": "弱かった?",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29041,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/ELLIOT/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "6a53046db08516828e74cdfa002b4f09945d5ddb22f7060f506188c9baca84d6",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "0370eb8016cae512653dc87e1c99f57e8d7316422fa4e9429a60148a388bc549",
+      "review_pending": true
+    },
+    "magic-elliot/bomb": {
+      "game_call": "bomb",
+      "text": "ボム！",
+      "synthesis_text": "ボム！",
+      "recognized_text": "ポンポン。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29042,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/ELLIOT/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "6a53046db08516828e74cdfa002b4f09945d5ddb22f7060f506188c9baca84d6",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "10b3fb24feae0e6d2196a12173423049495da50ef5c809db8bdefd9a088f38ad",
+      "review_pending": true
+    },
+    "magic-elliot/five-shi": {
+      "game_call": "five-shi",
+      "text": "五しです。",
+      "synthesis_text": "ごしです。",
+      "recognized_text": "甲州駅です。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29043,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/ELLIOT/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "6a53046db08516828e74cdfa002b4f09945d5ddb22f7060f506188c9baca84d6",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "4238b90c221ee7ac9bb3f9156cef66809424a6ef3f26305b08088bf085904a5a",
+      "review_pending": true
+    },
+    "magic-elliot/twenty": {
+      "game_call": "twenty",
+      "text": "二十点！",
+      "synthesis_text": "にじゅってん！",
+      "recognized_text": "20分。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29044,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/ELLIOT/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "6a53046db08516828e74cdfa002b4f09945d5ddb22f7060f506188c9baca84d6",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "16cd47807c9007dc2f58df40abad59f590367afe46f886067a1735a9acc12143",
+      "review_pending": true
+    },
+    "magic-sakuya/turn": {
+      "game_call": "turn",
+      "text": "俺の手番か",
+      "synthesis_text": "俺の手番か",
+      "recognized_text": "俺の手番か?",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 33050,
+      "steps": 2,
+      "requested_seconds": 2.55,
+      "duration_seconds": 2.556,
+      "reference": [
+        "public/sfx/magic-voices/SAKUYA/attack-1.ogg",
+        "public/sfx/card-club-voices/magic-sakuya/start.ogg",
+        "public/sfx/card-club-voices/magic-sakuya/win.ogg"
+      ],
+      "reference_pcm_sha256": "3db4760c6e24fbc0db0de949f7ec5cd5773b3ce2c7acbf84cfcecaf5446ce2d4",
+      "instructions": "落ち着いた対局。",
+      "sha256": "b98f49c1868839d7e727f9c266c51de1de47ea952761b765fcf2bc5129480310",
+      "review_pending": false
+    },
+    "magic-sakuya/domino": {
+      "game_call": "domino",
+      "text": "ドミノ！",
+      "synthesis_text": "ドミノ！",
+      "recognized_text": "あっ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29051,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/SAKUYA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "f2c9f369eaa514e00de6cb937d643886dcdf0f96baf7b284c5901757137f3484",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "e4dffa5bcbce40350bd2ebca88c4ba1e26c3bd6ce56c4da54a7dbfa7ffd1286d",
+      "review_pending": true
+    },
+    "magic-sakuya/bomb": {
+      "game_call": "bomb",
+      "text": "ボム！",
+      "synthesis_text": "ボム！",
+      "recognized_text": "ボム。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29052,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/SAKUYA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "f2c9f369eaa514e00de6cb937d643886dcdf0f96baf7b284c5901757137f3484",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "54ef327b874c9ed05741e4a41da01be2fc258b77ec65976e4b856fc4ee102036",
+      "review_pending": false
+    },
+    "magic-sakuya/five-shi": {
+      "game_call": "five-shi",
+      "text": "五しです。",
+      "synthesis_text": "ごしです。",
+      "recognized_text": "5市です。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29053,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/SAKUYA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "f2c9f369eaa514e00de6cb937d643886dcdf0f96baf7b284c5901757137f3484",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "096d88a12b3af6d4dcad70fcd1baeab652d5cbf09372b7cc7c0c28b382cb67ae",
+      "review_pending": false
+    },
+    "magic-sakuya/twenty": {
+      "game_call": "twenty",
+      "text": "二十点！",
+      "synthesis_text": "にじゅってん！",
+      "recognized_text": "20点。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29054,
+      "steps": 4,
+      "requested_seconds": 1.55,
+      "duration_seconds": 1.62,
+      "reference": [
+        "public/sfx/magic-voices/SAKUYA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "f2c9f369eaa514e00de6cb937d643886dcdf0f96baf7b284c5901757137f3484",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "6814651eb2cb3fd4c77a10778138941f05db1bd0563ea2ec4cc5d700b1274ba8",
+      "review_pending": false
+    },
+    "high-school-warrior/table-start": {
+      "game_call": "table-start",
+      "text": "よし、ひと勝負だ。",
+      "synthesis_text": "よし、ひと勝負だ。",
+      "recognized_text": "しとしょうぶだ。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28805,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/high-school-voices/WARRIOR/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "dacd463697b622140c4f1c9d6f6a5f07269683517c65b09b080c354ab1d6e7a8",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "1fb825c4247b1f2be8995065cd633b47ab70c56b49e8754f6b2b9ae1a1824d82",
+      "review_pending": false
+    },
+    "high-school-caretaker/table-start": {
+      "game_call": "table-start",
+      "text": "ゆっくり楽しもうね。",
+      "synthesis_text": "ゆっくり楽しもうね。",
+      "recognized_text": "もも!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28815,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/high-school-voices/CARETAKER/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "97a2ec58e4a5ea0885de039d93fc5ae4610e37d1976ad81db11696b2582a1626",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "45333f0c2ce077de15e9c49b49271842a98e2a0e570e787ecd16e564256d8e14",
+      "review_pending": true
+    },
+    "high-school-assassin/table-start": {
+      "game_call": "table-start",
+      "text": "さて、始めよう。",
+      "synthesis_text": "さて、始めよう。",
+      "recognized_text": "さてはじめよう。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28825,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/high-school-voices/ASSASSIN/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "da0e3a607c281ae2145da523b3645cd30bda935a0a277134cb489dc9087aa229",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "6c77fe6d0682ee9d3b4214ffd2e2005260a19be94aed66467d7388791a148e40",
+      "review_pending": false
+    },
+    "high-school-mage/table-start": {
+      "game_call": "table-start",
+      "text": "面白いルールね、始めましょう。",
+      "synthesis_text": "面白いルールね、始めましょう。",
+      "recognized_text": "はじめましょう。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28835,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/high-school-voices/MAGE/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "d4a1fd6dc8bdda6ebcae5e62c3ccb7fe22b74f11068fc33da7cea73c3f99f9be",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "f1797440895942b5936f20b0d3ca7bfea40d4e6ae2fa259d239e90ea0f0ee773",
+      "review_pending": false
+    },
+    "high-school-dodgeball/table-start": {
+      "game_call": "table-start",
+      "text": "よし、全力でいくぞ！",
+      "synthesis_text": "よし、全力でいくぞ！",
+      "recognized_text": "全力でいくぞ!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28845,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/high-school-voices/DODGEBALL/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "e617d125da934d666c1a906c8631f7e26e480fe0917379c11a2835f1e36934fd",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "48708b67020fba0d437fe2ac95ef2b56a91f02b3d6665499bd3b0f7dfb8f2b39",
+      "review_pending": false
+    },
+    "high-school-bard/table-start": {
+      "game_call": "table-start",
+      "text": "それでは、対局開始です！",
+      "synthesis_text": "それでは、対局開始です！",
+      "recognized_text": "それでは対局開始です。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28855,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/high-school-voices/BARD/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "d102b92db9041b649463b315e5350bcf96fceba22fb3d594755e33002fec0a34",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "4533aa5bd301dae1c98d399891dee2db44bb16529af6e137543d47d2e8983627",
+      "review_pending": false
+    },
+    "high-school-librarian/table-start": {
+      "game_call": "table-start",
+      "text": "準備はいいですか？",
+      "synthesis_text": "準備はいいですか？",
+      "recognized_text": "いいですか?",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28865,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/high-school-voices/LIBRARIAN/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "3ff20a8061c22151638739c68a8292d687e8d8dbd7cbe197d019d7bb252c3135",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "aed89f0561b996e37ce4f9253d6e3c16d1760f6eda0ab4306e3213526e63b355",
+      "review_pending": false
+    },
+    "high-school-chef/table-start": {
+      "game_call": "table-start",
+      "text": "さあ、ひと勝負どうだ？",
+      "synthesis_text": "さあ、ひと勝負どうだ？",
+      "recognized_text": "ひとしょうぶどうだ?",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28875,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/high-school-voices/CHEF/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "14caa82e9c3b8318da0ca96986c29edc26c36e0bd7e2cee5eb905e850d3577c3",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "069fc93995175e2a71e5344ded9bdf817d8fc03667e70edf14fe95f73f58028c",
+      "review_pending": false
+    },
+    "high-school-gardener/table-start": {
+      "game_call": "table-start",
+      "text": "一緒に楽しみましょう。",
+      "synthesis_text": "一緒に楽しみましょう。",
+      "recognized_text": "一緒に楽しみましょう。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28885,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/high-school-voices/GARDENER/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "1bcda516217aa45c9deaf8c444a4e669939f344f949ac158326b041f827524eb",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "45fd88695173e588aa64dad0509fe1b50bcda136afff642a5f7c8c702c64229d",
+      "review_pending": false
+    },
+    "magic-akari/table-start": {
+      "game_call": "table-start",
+      "text": "よーし、始めよう！",
+      "synthesis_text": "よーし、始めよう！",
+      "recognized_text": "よし始めよう!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28895,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/magic-voices/AKARI/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "cc8f95da12944cb96bc3da41e0e1a75383a4e47bec33b23f11d6756d34f4928c",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "a95cacd0d050671d07e0bdf6ff8e514a6ee21da3dfcea72c0ae697410a504f68",
+      "review_pending": false
+    },
+    "magic-shizuku/table-start": {
+      "game_call": "table-start",
+      "text": "落ち着いていきましょう。",
+      "synthesis_text": "落ち着いていきましょう。",
+      "recognized_text": "落ち着いていきましょうアンホー。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28905,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/magic-voices/SHIZUKU/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "70c93b53ad57f0d633f701871fb3be26475a75a879af13399357d0aebf174a95",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "6151d8c233a185caaf5752ded8d9a7eaf0b39cda5eb358b094d478c15ebdbe18",
+      "review_pending": false
+    },
+    "magic-hiyori/table-start": {
+      "game_call": "table-start",
+      "text": "ふふ、楽しみですね。",
+      "synthesis_text": "ふふ、楽しみですね。",
+      "recognized_text": "楽しみですね。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28915,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/magic-voices/HIYORI/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "4c14668d1ea2e5753e2c09e72f65d723f11c9df91971f07795ce8cf1657978a0",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "64325c0fca4f43a76a25b15723eb7d72b137299b816a1b2972c559bdc528ee6f",
+      "review_pending": false
+    },
+    "magic-tsubasa/table-start": {
+      "game_call": "table-start",
+      "text": "集中していくよ！",
+      "synthesis_text": "集中していくよ！",
+      "recognized_text": "集中していくよ!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28925,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/magic-voices/TSUBASA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "aa9e8cdaad0274fd2177c08b40b9fdaad7900f8502ee2bd694a434e8811d9c6d",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "c2c143d80ece7a78a86c2e896ebc23c2dd77a83c8a4023b92d49cf480e2d16f9",
+      "review_pending": false
+    },
+    "magic-rei/table-start": {
+      "game_call": "table-start",
+      "text": "勝負を始めよう。",
+      "synthesis_text": "勝負を始めよう。",
+      "recognized_text": "はい。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28935,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/magic-voices/REI/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "dac310f9c10e8f1073fad27966db7d1a41ecb80fe62410ca0116730210fec047",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "b11386d4995c0628b4a1fa0b6c1e160c1ff1051c2d4dc7f21969bd7dbe08b974",
+      "review_pending": true
+    },
+    "magic-madoka/table-start": {
+      "game_call": "table-start",
+      "text": "どんな展開かな？",
+      "synthesis_text": "どんな展開かな？",
+      "recognized_text": "どんなてんかいかな?",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28945,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/magic-voices/MADOKA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "68a8b7f1355328cd0bfd3da598dc243b65c72d8f71af58c329d583c82a38ed1e",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "0437861c15f119a0a2a1c948b8fde947b463b132a2246cfee7e44dd4500e4be1",
+      "review_pending": false
+    },
+    "magic-koharu/table-start": {
+      "game_call": "table-start",
+      "text": "よろしくお願いします。",
+      "synthesis_text": "よろしくお願いします。",
+      "recognized_text": "よろしくお願いします。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28955,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/magic-voices/KOHARU/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "f018405d6ee02e2252e5ea632eb65118de8b7239646081d13f5c67542b300ac1",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "561385783c05689d185aa311cc711006031e29b4d12e216a0ed4364308c3457b",
+      "review_pending": false
+    },
+    "magic-mirai/table-start": {
+      "game_call": "table-start",
+      "text": "さあ、私も本気でいくよ！",
+      "synthesis_text": "さあ、私も本気でいくよ！",
+      "recognized_text": "わたしも本気でいくよ!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28965,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/magic-voices/MIRAI/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "dba6912db6db306dea85571ffd61d8271b08218f4101e10dd40595447c8035bc",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "94fc1c87faad49b2fd969f956a4b9eb4c7e91e03225c90f404cfe641a53886de",
+      "review_pending": false
+    },
+    "magic-sera/table-start": {
+      "game_call": "table-start",
+      "text": "この勝負も、記録に残します。",
+      "synthesis_text": "この勝負も、記録に残します。",
+      "recognized_text": "ぶも記録にのこします!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28975,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/magic-voices/SERA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "25c207ac47f263015b8f79a8bb59826d75274518040d424b010a3514da3aa687",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "f4aba4d178ccda58e1af58c4d97c82bfa9d691dee328619f8c93e553bcc4c010",
+      "review_pending": false
+    },
+    "magic-ren/table-start": {
+      "game_call": "table-start",
+      "text": "よし、準備はいいか？",
+      "synthesis_text": "よし、準備はいいか？",
+      "recognized_text": "準備はいいか?",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28985,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/magic-voices/REN/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "4b393cac3eb6cfad7f1041dafc4873e9f914365c1680dc8ff2d4e544d70061f8",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "e0f2c37865e19ae2062720750b512a5606124a7800cefe76d1bfbfebaabc34e7",
+      "review_pending": false
+    },
+    "magic-soma/table-start": {
+      "game_call": "table-start",
+      "text": "正々堂々、始めよう。",
+      "synthesis_text": "正々堂々、始めよう。",
+      "recognized_text": "正々堂々、始めよう。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 28995,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/magic-voices/SOMA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "73a19eeebf6d1a3b4611fe405e08d1aa6d68ac786ac3f08f2f12f41275e0aafd",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "04f441d21903570efb26e4656aea57efc7e1e4da3168f618cd6c4b450b4724d2",
+      "review_pending": false
+    },
+    "magic-minato/table-start": {
+      "game_call": "table-start",
+      "text": "よし、やってみよう。",
+      "synthesis_text": "よし、やってみよう。",
+      "recognized_text": "あの。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29005,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/magic-voices/MINATO/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "1f71082589374b573312345fcda1ffe7f373c98390d4d4b53e2d6a1f85615143",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "e133ce7d3211592e714aad6fa0a47b8be5333688f5f32b25bd1c311c8f82c2ef",
+      "review_pending": true
+    },
+    "magic-riku/table-start": {
+      "game_call": "table-start",
+      "text": "さて、どう出るかな？",
+      "synthesis_text": "さて、どう出るかな？",
+      "recognized_text": "さてどういうデルかな?",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29015,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/magic-voices/RIKU/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "d87a55ca36efc795987131ef156d6d7804c16420348a9dd7e537425fde5ab660",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "c24eba55a1cd33b8704824741c58d28d17dd8e211f5736a14a54f73ec88912e6",
+      "review_pending": false
+    },
+    "magic-yamato/table-start": {
+      "game_call": "table-start",
+      "text": "さあ、勝負だぜ！",
+      "synthesis_text": "さあ、勝負だぜ！",
+      "recognized_text": "さあしょうぶだぜ!",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29025,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/magic-voices/YAMATO/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "6c47e3e445948ddc9322be3c516ba4e8af0226ad6772b83bb7dbf9c818ab65c4",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "c765b68c5eca553989639828a7d44bf0cb25cefd18790e517f13145a7f6042d3",
+      "review_pending": false
+    },
+    "magic-leon/table-start": {
+      "game_call": "table-start",
+      "text": "華麗な一手をお見せしよう。",
+      "synthesis_text": "華麗な一手をお見せしよう。",
+      "recognized_text": "華麗な一手をお見せしよう。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29035,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/magic-voices/LEON/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "133391ac5d6b73b6e1febb0c569a7fad9f2be7ccb890197b5daf5a83cbc67c75",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "df37a0da70df39f3141ed03b5ce8e064125e534f6b4e49c3f9cd263f6a0894fc",
+      "review_pending": false
+    },
+    "magic-elliot/table-start": {
+      "game_call": "table-start",
+      "text": "では、始めましょう。",
+      "synthesis_text": "では、始めましょう。",
+      "recognized_text": "でははじめましょう。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29045,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/magic-voices/ELLIOT/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "6a53046db08516828e74cdfa002b4f09945d5ddb22f7060f506188c9baca84d6",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "ddc9fd19276b3eea5a2bbe65fbe85da5857ccc36bc93af58962d3f9f47ae8c7f",
+      "review_pending": false
+    },
+    "magic-sakuya/table-start": {
+      "game_call": "table-start",
+      "text": "楽しませてもらおう。",
+      "synthesis_text": "楽しませてもらおう。",
+      "recognized_text": "楽しませてもらおう。",
+      "model": "Irodori-TTS-v4.1-Small-MF",
+      "seed": 29055,
+      "steps": 4,
+      "requested_seconds": 2.7,
+      "duration_seconds": 2.736,
+      "reference": [
+        "public/sfx/magic-voices/SAKUYA/attack-1.ogg"
+      ],
+      "reference_pcm_sha256": "f2c9f369eaa514e00de6cb937d643886dcdf0f96baf7b284c5901757137f3484",
+      "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
+      "sha256": "da2405588dfe0c512f81cfa1231d0fe293c03eeed93409f7dc0c3fb1670bae44",
+      "review_pending": false
+    }
+  },
+  "pending_voice_review": [
+    "high-school-chef__domino",
+    "magic-tsubasa__domino",
+    "magic-koharu__five-shi",
+    "magic-koharu__twenty",
+    "magic-mirai__bomb",
+    "magic-mirai__five-shi",
+    "magic-sera__five-shi",
+    "magic-sera__twenty",
+    "magic-soma__domino",
+    "magic-soma__five-shi",
+    "magic-soma__twenty",
+    "magic-minato__five-shi",
+    "magic-riku__five-shi",
+    "magic-riku__twenty",
+    "magic-yamato__domino",
+    "magic-elliot__domino",
+    "magic-elliot__bomb",
+    "magic-elliot__five-shi",
+    "magic-elliot__twenty",
+    "magic-sakuya__domino",
+    "high-school-caretaker__table-start",
+    "magic-rei__table-start",
+    "magic-minato__table-start"
+  ]
+}
