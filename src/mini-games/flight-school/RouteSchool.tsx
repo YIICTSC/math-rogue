@@ -1,3 +1,4 @@
+import { multiTouchAction } from '../../utils/multiTouchAction';
 import { readLicenses, longHaulRequirement } from './licenses';
 import MiniGameProblemChallenge from '../../components/MiniGameProblemChallenge';
 import { PilotPicker, RadioCaption, type FlightCrew } from './FlightRadio';
@@ -156,7 +157,7 @@ export default function RouteSchool({
   return (
     <div className="fs-shell">
       <nav className="fs-nav">
-        <button onClick={back}>
+        <button {...multiTouchAction(back)}>
           <ArrowLeft size={16} />
           {t('格納庫', 'Hangar', 'かくのうこ')}
         </button>
@@ -209,17 +210,17 @@ export default function RouteSchool({
             <div className="fs-which">
               <button
                 className="fs-main"
-                onClick={() => {
+                {...multiTouchAction(() => {
                   crew.stop();
                   if (report.medal) swap(!reverse);
                   show('planning');
-                }}
+                })}
               >
                 {report.medal
                   ? t('折り返し便へ', 'Plan return flight', 'おりかえしびんへ')
                   : t('航路選択へ', 'Route selection', 'こうろせんたくへ')}
               </button>
-              <button onClick={beginStudy}>
+              <button {...multiTouchAction(beginStudy)}>
                 {t('もう一度飛ぶ', 'Fly again', 'もういちど とぶ')}
               </button>
             </div>

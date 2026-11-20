@@ -1,3 +1,4 @@
+import { multiTouchAction } from '../../utils/multiTouchAction';
 import { ADVANCED_MISSIONS, advancedLesson } from './advancedMissions';
 import { readLicenses } from './licenses';
 import React, { useEffect, useRef, useState } from 'react';
@@ -168,7 +169,7 @@ export default function CombatSchool({
   return (
     <div className="fs-shell">
       <nav className="fs-nav">
-        <button onClick={onExit}>
+        <button {...multiTouchAction(onExit)}>
           <ArrowLeft size={16} />
           {t('格納庫', 'Hangar', 'かくのうこ')}
         </button>
@@ -329,10 +330,10 @@ export default function CombatSchool({
                 {sortie.shots}
               </p>
               <div className="fs-which">
-                <button className="fs-main" onClick={beginStudy}>
+                <button className="fs-main" {...multiTouchAction(beginStudy)}>
                   {t('再挑戦', 'Retry', 'さいちょうせん')}
                 </button>
-                <button onClick={brief}>
+                <button {...multiTouchAction(brief)}>
                   {t('課目選択へ', 'Mission select', 'かもくせんたくへ')}
                 </button>
               </div>

@@ -98,6 +98,14 @@ try {
     if (m.type() === 'error') console.error('CONSOLE', m.text().slice(0, 300));
   });
   await page.goto('http://127.0.0.1:' + vite.httpServer.address().port + '/flight-result-qa');
+  // WebKit can omit the compatibility click while another finger is held.
+  const pressWithoutClick = (name) =>
+    page.getByRole('button', { name, exact: true }).dispatchEvent('pointerdown', {
+      pointerType: 'touch',
+      pointerId: 7,
+      button: 0,
+      isPrimary: false,
+    });
   await page.getByRole('button', { name: '空港間フライト', exact: false }).tap();
   await page.getByRole('button', { name: '座学と技能検定', exact: true }).tap();
   await page.getByRole('button', { name: 'QA 座学終了' }).tap();
@@ -135,7 +143,7 @@ try {
     'Flight controls must release captures before showing results',
   );
   await page.mouse.up();
-  await page.getByRole('button', { name: '折り返し便へ', exact: true }).tap();
+  await pressWithoutClick('折り返し便へ');
   await page.getByRole('button', { name: '座学と技能検定', exact: true }).waitFor();
   console.log('PASS return planning button');
   await page.getByRole('button', { name: '座学と技能検定', exact: true }).tap();
@@ -156,7 +164,7 @@ try {
     };
   });
   await page.getByText('到着しました', { exact: true }).waitFor();
-  await page.getByRole('button', { name: 'もう一度飛ぶ', exact: true }).tap();
+  await pressWithoutClick('もう一度飛ぶ');
   await page.getByRole('button', { name: 'QA 座学終了' }).waitFor();
   console.log('PASS fly again button');
   await page.reload();
@@ -180,7 +188,7 @@ try {
     };
   });
   await page.getByText('任務達成', { exact: true }).waitFor();
-  await page.getByRole('button', { name: '課目選択へ', exact: true }).tap();
+  await pressWithoutClick('課目選択へ');
   await page.getByRole('button', { name: '座学と技能検定', exact: true }).waitFor();
   console.log('PASS combat mission select button');
   await page.getByRole('button', { name: '座学と技能検定', exact: true }).tap();
@@ -202,7 +210,7 @@ try {
     };
   });
   await page.getByText('任務達成', { exact: true }).waitFor();
-  await page.getByRole('button', { name: '再挑戦', exact: true }).tap();
+  await pressWithoutClick('再挑戦');
   await page.getByRole('button', { name: 'QA 座学終了' }).waitFor();
   console.log('PASS combat retry button');
   for (const retry of [false, true]) {

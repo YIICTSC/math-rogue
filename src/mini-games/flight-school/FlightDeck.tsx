@@ -210,7 +210,11 @@ export default function FlightDeck({
   const clear = useCallback(() => {
     // Release held controls before replacing the flight screen.
     for (const [id, control] of capturedPointers.current) {
-      if (control.hasPointerCapture(id)) control.releasePointerCapture(id);
+      try {
+        if (control.hasPointerCapture(id)) control.releasePointerCapture(id);
+      } catch {
+        // A cancelled touch can already have lost its active pointer during landing.
+      }
       delete control.dataset.held;
     }
     capturedPointers.current.clear();
@@ -466,6 +470,7 @@ export default function FlightDeck({
         onPointerDown={(e) => {
           e.preventDefault();
           e.currentTarget.setPointerCapture(e.pointerId);
+          capturedPointers.current.set(e.pointerId, e.currentTarget);
           touches.current.set(e.pointerId, action);
           if (action === 'missile') missileTap.current = true;
           if (action === 'primary') primaryTap.current = true;
