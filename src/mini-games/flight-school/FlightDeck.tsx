@@ -1,3 +1,4 @@
+import { seaNearby } from './scenery';
 import { Cockpit, panels } from './Cockpit';
 import { adjustTrim, configure, logFix, selectPanel } from './instruments';
 import { VirtualStick } from '../gakuro-craft/TouchControls';
@@ -55,7 +56,7 @@ type Props = {
   onRetry: () => void;
   routeImages?: RouteImages;
   patrol?: Patrol;
-  onRadio?: (event: RadioEvent) => void;
+  onRadio?: (event: RadioEvent, seaVisible?: boolean) => void;
   onRadioStop?: () => void;
   onPatrolLost?: () => void;
 };
@@ -351,7 +352,9 @@ export default function FlightDeck({
       while (accumulator >= STEP && !s.result && !patrol?.failed) {
         if (patrol) {
           const inBattle = patrol.phase === 'fight';
-          stepPatrol(s, patrol, input, (event) => callbacks.current.onRadio?.(event));
+          stepPatrol(s, patrol, input, (event) =>
+            callbacks.current.onRadio?.(event, event === 'vista' ? seaNearby(s) : undefined),
+          );
           if (inBattle && patrol.sortie.sound) audioService.playFlightSound(patrol.sortie.sound);
           if (patrol.phase === 'fight') survey.current = false;
         } else stepFlight(s, input);
@@ -375,7 +378,7 @@ export default function FlightDeck({
       if (!patrol && s.airborne && !s.result) {
         if (!sawScenery && s.elapsed > 4 && altitude(s) > 15) {
           sawScenery = true;
-          callbacks.current.onRadio?.('vista');
+          callbacks.current.onRadio?.('vista', seaNearby(s));
         }
         if (!calledHome && lesson.aircraft === 'plane' && s.nextGate === lesson.gates.length) {
           calledHome = true;

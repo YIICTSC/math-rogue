@@ -99,7 +99,10 @@ export function useFlightCrew() {
   }, []);
   useEffect(() => stop, [stop, pilot]);
   const cue = useCallback(
-    async (event: RadioEvent) => {
+    async (event: RadioEvent, seaVisible = false) => {
+      // This pair explicitly describes the sea. Keep its audio and captions together,
+      // and leave the other pilots' sky/cloud conversations available inland.
+      if (event === 'vista' && pilot === 'WARRIOR' && !seaVisible) return;
       const ch = channel.current;
       // Finish the current call and its reply, even when touchdown opens the debrief.
       if (event === 'land') ch.pending = ch.pending.filter((item) => item === 'home');

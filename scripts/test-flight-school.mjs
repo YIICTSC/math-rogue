@@ -4,7 +4,7 @@ import { readFile, stat } from 'node:fs/promises';
 const base = './src/mini-games/flight-school/';
 const { outputFiles } = await build({
   stdin: {
-    contents: ['courses', 'simulation', 'logbook', 'combat', 'routes', 'patrol', 'instruments']
+    contents: ['courses', 'simulation', 'logbook', 'combat', 'routes', 'patrol', 'instruments', 'scenery']
       .map((n) => 'export * from ' + JSON.stringify(base + n))
       .join('\n'),
     resolveDir: process.cwd(),
@@ -455,3 +455,16 @@ for (const [lead, entry] of Object.entries(scripts)) {
 }
 assert.equal(clips, 126);
 console.log('PASS grounded and failed patrols, nine pilot portraits and 126 voiced radio lines.');
+
+// Sea dialogue must follow the current scenery, including inland route departures.
+for (const airport of AIRPORTS) {
+  const s = beginFlight(makeLesson(airport, 'plane', 'checkride'));
+  s.y = 150;
+  assert.equal(sim.seaNearby(s), ['coast', 'bay', 'port', 'island', 'reef'].includes(airport.region), airport.code);
+}
+for (const region of sim.ROUTES) {
+  const s = beginFlight(sim.makeRouteLesson(region, false, false));
+  s.y += 300;
+  assert.equal(sim.seaNearby(s), region.key !== 'mmj-toy', region.key);
+}
+console.log('PASS scenery radio excludes inland airports and mountain-route departures.');
