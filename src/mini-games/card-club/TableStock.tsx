@@ -1,9 +1,5 @@
 import React from 'react';
 
-/** Decorative piles use counts only, including when an opponent's hand is hidden. */
-export function HandBacks({count}:{count:number}){
-  return <span className="cc-hand-backs" aria-hidden="true">{Array.from({length:Math.min(5,count)},(_,i)=><i key={i} style={{'--cc-back-index':i} as React.CSSProperties}/>)}</span>;
-}
 export function TableStock({count,discard,pile,l,aces}:{count:number;discard:number;pile?:number;aces?:number;l:(jp:string,en:string)=>string}){
   return <div className="cc-stock-row">
     <div className={`cc-stock ${count?'':'cc-stock-empty'}`} data-stock-count={count} aria-label={`${l('山札','Stock')}: ${count}`}>

@@ -136,6 +136,17 @@ try {
         const main = document.querySelector('.tt-playing');
         return main && main.scrollHeight <= main.clientHeight + 1;
       });
+      const seatCounts = await page.locator('.tt-seat').evaluateAll((seats) =>
+        seats.map((seat) => {
+          const badge = seat.querySelector('.table-hand-count');
+          if (!badge || !/^\d+/.test(badge.textContent)) return false;
+          const bounds = seat.getBoundingClientRect();
+          const count = badge.getBoundingClientRect();
+          return count.width > 0 && count.left >= bounds.left && count.right <= bounds.right &&
+            count.right <= innerWidth && count.top >= bounds.top && count.bottom <= bounds.bottom;
+        }),
+      );
+      assert(seatCounts.length > 1 && seatCounts.every(Boolean), game + ': hand count clipped');
       const metrics = await page.evaluate(() => {
         const rect = (el) => {
           const r = el.getBoundingClientRect();

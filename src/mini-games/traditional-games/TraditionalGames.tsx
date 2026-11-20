@@ -1,3 +1,4 @@
+import { SeatHandCount } from '../shared/SeatHandCount';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ArrowLeft,
@@ -140,6 +141,7 @@ function Seats({ view: v, language }: { view: TableView; language: LanguageMode 
         <div
           key={p.id}
           className="tt-seat"
+          title={p.name}
           data-turn={v.phase === 'play' && v.turn === seat}
           data-team={
             v.game === 'goita' ? Number(seat % 2 !== v.self % 2) : v.teams ? seat % 2 : undefined
@@ -160,9 +162,19 @@ function Seats({ view: v, language }: { view: TableView; language: LanguageMode 
                     : p.cpu
                       ? 'CPU'
                       : ''}
-              {v.kind !== 'crokinole' && ` · ${v.counts[seat]} ${l('枚', 'tiles', 'まい')}`}
             </small>
           </div>
+          <SeatHandCount
+            count={v.kind === 'crokinole' ? v.remaining[seat] : v.counts[seat]}
+            label={
+              v.kind === 'crokinole'
+                ? l('残りの駒', 'Discs left', 'のこりのこま')
+                : l('手駒', 'Tiles', 'てごま')
+            }
+            unit={
+              language === 'ENGLISH' ? '' : v.kind === 'crokinole' ? l('個', '', 'こ') : l('枚', '', 'まい')
+            }
+          />
           <b>{v.scores[seat]}</b>
         </div>
       ))}

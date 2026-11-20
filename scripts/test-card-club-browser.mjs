@@ -4,7 +4,7 @@ import {createServer} from 'vite';
 import {chromium} from 'playwright';
 import {spawn} from 'node:child_process';
 import {createServer as createTcpServer} from 'node:net';
-const file=`.card-club-qa-${process.pid}.tsx`,dir='build/card-club-qa';let server,browser,signaling,turn;
+const file=`.card-club-qa-${process.pid}.tsx`,dir=process.env.CARD_CLUB_SCREENSHOT_DIR||'build/card-club-qa';let server,browser,signaling,turn;
 const lobbyTest=process.argv.includes('--lobby')||process.env.CLUB_NETWORK==='1';
 try{
  if(lobbyTest){
@@ -32,7 +32,7 @@ try{
  await fs.mkdir(dir,{recursive:true});
  await fs.writeFile(file,`import {CARD_CLUB_VOICE_HEROES,CARD_CLUB_VOICE_MS} from './src/data/cardClubVoices';import React from 'react';import {createRoot} from 'react-dom/client';import CardClub from './src/mini-games/card-club/CardClub';import * as engine from './src/mini-games/card-club/engine';import {DIVERSITY_IDS} from './src/mini-games/card-club/diversityCatalog';import {TRADITIONAL_IDS} from './src/mini-games/card-club/traditionalCatalog';import {WORLD_IDS} from './src/mini-games/card-club/worldCatalog';import {POPULAR_IDS} from './src/mini-games/card-club/popularCatalog';import {definition,CLUB_GAMES} from './src/mini-games/card-club/catalog';import {audioService} from './src/services/audioService';audioService.playBGM=async()=>{};if(!location.search.includes('voiceTest')){audioService.playCardClubVoice=async()=>false;audioService.playCardClubScoreVoice=async()=>false;}Object.assign(window,{CARD_CLUB_VOICE_HEROES,CARD_CLUB_VOICE_MS,audioService,engine,popular:[...POPULAR_IDS,...WORLD_IDS,...TRADITIONAL_IDS,...DIVERSITY_IDS],games:CLUB_GAMES,implemented:CLUB_GAMES.length,world:WORLD_IDS,definition});createRoot(document.getElementById('root')).render(<CardClub languageMode={new URLSearchParams(location.search).get('lang')||'JAPANESE'} onBack={()=>{}}/>);`);
  const hook=`(window as any).__club={room:()=>room.current,choose,setHero,load:(id:GameId,n:number)=>{room.current?.close();const client=new CardClubRoom(p=>setPacket(p),m=>setError(m));room.current=client;client.practice(profile());client.configure(id,n);client.start();clearInterval((client as any).cpuTimer);const session=(client as any).session;session.state=(window as any).engine.createClubGame(id,session.state.players,42);session.publish();}};`;
- server=await createServer({cacheDir:'node_modules/.vite-card-club-qa',optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','peerjs']},server:{host:'127.0.0.1',port:5243,hmr:false},plugins:[{name:'card-club-qa',enforce:'pre',transform(code,id){if(id.endsWith('/card-club/CardClub.tsx'))return code.replace('  return <main',hook+'\n  return <main');},configureServer(s){s.middlewares.use('/__club',async(req,res)=>{res.setHeader('Content-Type','text/html');res.end(await s.transformIndexHtml('/__club',`<html><head><link rel="icon" href="data:,"/><meta name="viewport" content="width=device-width, initial-scale=1"/><style>body{margin:0}</style></head><body><div id="root"></div><script type="module" src="/${file}"></script></body></html>`));});}}],logLevel:'error'});
+ server=await createServer({cacheDir:process.env.CARD_CLUB_VITE_CACHE||'node_modules/.vite-card-club-qa',optimizeDeps:{noDiscovery:true,include:['react','react-dom/client','react/jsx-runtime','peerjs']},server:{host:'127.0.0.1',port:5243,hmr:false},plugins:[{name:'card-club-qa',enforce:'pre',transform(code,id){if(id.endsWith('/card-club/CardClub.tsx'))return code.replace('  return <main',hook+'\n  return <main');},configureServer(s){s.middlewares.use('/__club',async(req,res)=>{res.setHeader('Content-Type','text/html');res.end(await s.transformIndexHtml('/__club',`<html><head><link rel="icon" href="data:,"/><meta name="viewport" content="width=device-width, initial-scale=1"/><style>body{margin:0}</style></head><body><div id="root"></div><script type="module" src="/${file}"></script></body></html>`));});}}],logLevel:'error'});
  await server.listen();browser=await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_PATH||await fs.access('/usr/bin/chromium').then(()=>'/usr/bin/chromium',()=>undefined),args:['--no-sandbox','--disable-features=WebRtcHideLocalIpsWithMdns']});
  const page=await browser.newPage({viewport:{width:1280,height:900}}),errors=[];page.on('pageerror',e=>{errors.push(e.message);console.error('PAGEERROR',e.message);});page.on('console',m=>{if(m.type()==='error'){errors.push(m.text());console.error('CONSOLE',m.text());}});
  if(lobbyTest){
@@ -361,7 +361,7 @@ try{
   await page.waitForFunction(()=>document.querySelectorAll('.cc-flight-layer').length===0);
   const cues=await page.evaluate(()=>window.cardCues.length);await page.evaluate(()=>window.__club.room().session.publish());await page.evaluate(()=>new Promise(r=>requestAnimationFrame(r)));assert.equal(await page.evaluate(()=>window.cardCues.length),cues,'Identical publication does not replay cues');
   await page.setViewportSize({width:844,height:390});await load('sergent');await page.screenshot({path:`${dir}/effects-hand-landscape.png`});
-  assert(await page.locator('.cc-hand-backs').count());assert(await page.locator('.cc-stock-stack').count());
+  assert(await page.locator('.cc-player-ring .table-hand-count').count());assert(await page.locator('.cc-stock-stack').count());
   await load('doubt',4);await mutate(s=>{s.turn=0;});await page.evaluate(()=>{const session=window.__club.room().session,s=session.state;session.command(s.players[0].id,{type:'play',cards:[s.players[0].hand[0]]},s.revision);});
   await page.waitForFunction(()=>!!document.querySelector('.cc-flight-layer .cc-flying-back'));assert(await page.locator('.cc-table-cards .cc-card').evaluateAll(es=>es.every(e=>e.dataset.card==='-1'&&!e.querySelector('.cc-card-front').textContent)),'Bluff plays stay face down');
   await page.waitForFunction(()=>document.querySelectorAll('.cc-flight-layer').length===0);
@@ -382,13 +382,35 @@ try{
   assert(sound.generated>=17);await fs.writeFile(`${dir}/paper-sounds.webm`,Buffer.from(sound.recording,'base64'));
   assert.deepEqual(errors,[]);console.log(JSON.stringify({effects:true,flip:true,blindQueueFlip:true,faceDownAgain:true,playFlight:true,blindPlay:true,immediateAction:true,deduplicated:true,reducedMotion:true,soundKinds:sound.kinds,sources:sound.generated,mute:sound.mute,zeroVolume:sound.zeroVolume,browserErrors:errors.length}));
  }else if(process.env.CLUB_LANDSCAPE==='1'||process.argv.includes('--landscape')||process.argv.includes('--responsive')){
-  let cases=0;const snapshots=['memory','fantan','sergent','chinesewhist','shithead2','sedmice','truc','petrangola','speculation'];
+  let cases=0;const snapshots=['memory','fantan','ginrummy','golf','pokerbull','trumpcrew','sergent','chinesewhist','shithead2','sedmice','truc','petrangola','speculation'];
   const sizes=[{width:568,height:320},{width:667,height:375},{width:844,height:390},...process.argv.includes('--responsive')?[{width:320,height:568},{width:360,height:640},{width:390,height:844}]:[]];
   for(const size of sizes){
    await page.setViewportSize(size);
    for(const game of await page.evaluate(()=>window.games))for(const count of [...new Set([game.players[0],game.players.at(-1)])]){
     await load(game.id,count);await page.evaluate(()=>{const session=window.__club.room().session,s=session.state;for(let i=0;i<80&&s.turn!==0&&!['round','result'].includes(s.phase);i++){const a=window.engine.cpuAction(window.engine.viewFor(s,s.turn));if(!a||!window.engine.applyAction(s,s.turn,a))break;}session.publish();});await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
-    const bounds=await page.evaluate(()=>{const root=document.querySelector('.card-club'),board=document.querySelector('.cc-playfield'),hand=document.querySelector('.cc-hand-area'),actions=document.querySelector('.cc-actions');const inside=e=>{const r=e.getBoundingClientRect();return r.left>=-1&&r.top>=-1&&r.right<=innerWidth+1&&r.bottom<=innerHeight+1;};return {root:root.scrollWidth<=root.clientWidth+1&&root.scrollHeight<=root.clientHeight+1,board:inside(board),hand:!hand||inside(hand),actions:!actions||inside(actions)&&actions.clientHeight>=44};});assert(Object.values(bounds).every(Boolean),`${game.id}/${count} ${size.width}x${size.height}: ${JSON.stringify(bounds)}`);cases++;
+    const bounds=await page.evaluate(()=>{const root=document.querySelector('.card-club'),board=document.querySelector('.cc-playfield'),hand=document.querySelector('.cc-hand-area'),actions=document.querySelector('.cc-actions');const inside=e=>{const r=e.getBoundingClientRect();return r.left>=-1&&r.top>=-1&&r.right<=innerWidth+1&&r.bottom<=innerHeight+1;};return {root:root.scrollWidth<=root.clientWidth+1&&root.scrollHeight<=root.clientHeight+1,board:inside(board),hand:!hand||inside(hand),actions:!actions?.childElementCount||inside(actions)&&actions.clientHeight>=44};});assert(Object.values(bounds).every(Boolean),`${game.id}/${count} ${size.width}x${size.height}: ${JSON.stringify(bounds)}`);cases++;
+    const counts=await page.evaluate(()=>{
+     const expected=window.__club.room().last.view.players.map(player=>player.handCount);
+     const shown=[...document.querySelectorAll('.cc-player-ring .table-hand-count')].map(badge=>{
+      const box=badge.getBoundingClientRect();
+      const seat=badge.closest('article').getBoundingClientRect();
+      const visible=box.width>0&&box.height>0&&box.left>=seat.left-1&&box.right<=seat.right+1&&
+       box.top>=seat.top-1&&box.bottom<=seat.bottom+1&&box.right<=innerWidth+1&&box.bottom<=innerHeight+1;
+      return visible?parseInt(badge.textContent,10):null;
+     });
+     return {shown,expected};
+    });
+    assert.deepEqual(counts.shown,counts.expected,`${game.id}/${count} ${size.width}×${size.height}: visible hand counts`);
+    const memoryBoard=page.locator('.cc-memory-board');
+    if(game.id==='memory'&&await memoryBoard.count()){
+     assert(await memoryBoard.evaluate(board=>{
+      const pane=board.closest('.cc-board-content').getBoundingClientRect();
+      return [...board.children].every(slot=>{
+       const r=slot.getBoundingClientRect();
+       return r.width>0&&r.height>0&&r.left>=pane.left-1&&r.right<=pane.right+1&&r.bottom<=pane.bottom+1;
+      });
+     }),`All memory slots are visible at ${size.width}×${size.height}`);
+    }
     if(count===game.players.at(-1)&&snapshots.includes(game.id))await snapshot(`${dir}/fit-${game.id}-${size.width}.png`);
    }
    await load('whist');await mutate(s=>{s.phase='round';s.turn=0;});const next=page.getByRole('button',{name:'次の配札へ',exact:true});assert(await next.evaluate(e=>{const r=e.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight;}),'Deal progression stays inside screen');await next.click();await page.waitForFunction(()=>window.__club.room().session.state.phase==='play');
@@ -398,15 +420,15 @@ try{
   assert.deepEqual(errors,[]);console.log(JSON.stringify({responsiveCases:cases,games:await page.evaluate(()=>window.games.length),sizes:sizes.length,viewportFit:true,resultControls:true,ruleModal:true,browserErrors:errors.length}));
  }else{
  // Previously added popular games and the new world games open a real playable state with a specialized controller.
- for(const game of await page.evaluate(()=>window.popular)){await load(game);assert(await page.locator('.cc-classic').count());assert(await page.locator('.cc-match-heading h1').innerText());}
+ for(const game of await page.evaluate(()=>window.popular)){await load(game);assert(await page.locator('.cc-classic').count());assert(await page.locator('.cc-compact-title h1').innerText());}
  await load('golf',2);await mutate(s=>{s.turn=0;});const initial=await page.evaluate(()=>window.__club.room().session.state.revision);await page.locator('.cc-golf-grid').first().getByRole('button').nth(0).click();await page.waitForFunction(r=>window.__club.room().session.state.revision>r,initial);assert.equal(await page.locator('.cc-golf-grid').first().getByRole('button').nth(0).getAttribute('disabled'),'');
  await load('cribbage');await mutate(s=>{s.turn=0;});const hand=page.locator('.cc-hand .cc-card');await hand.nth(0).click();await hand.nth(1).click();assert.equal(await page.locator('.cc-hand .cc-selected').count(),2);assert.equal(await page.locator('.cc-actions button').count(),1);await page.locator('.cc-actions button').click();await page.waitForFunction(()=>window.__club.room().session.state.extra.classic.crib.length===2);assert.equal(await page.locator('.cc-classic .cc-public-hand .cc-back').count(),2);
  await load('cassino');await mutate(s=>{s.turn=0;s.players[0].hand=[4,6,19];s.table=[1,2,17];s.extra.classic.rows=[];});await page.locator('.cc-hand .cc-card').nth(0).click();for(let i=0;i<3;i++)await page.locator('.cc-table-cards .cc-card').nth(i).click();await page.getByRole('button',{name:'選んだ場札を獲得',exact:true}).click();await page.waitForFunction(()=>window.__club.room().session.state.players[0].taken.length===4);
  await load('cassino');await mutate(s=>{s.turn=0;s.players[0].hand=[3,6,19];s.table=[2];s.extra.classic.rows=[];});await page.locator('.cc-hand .cc-card').nth(0).click();await page.locator('.cc-table-cards .cc-card').click();await page.getByRole('button',{name:'選択札でビルド → 7',exact:true}).click();await page.waitForFunction(()=>window.__club.room().session.state.extra.classic.rows.length===1);assert.equal(await page.locator('.cc-builds article').count(),1);
  // Exercise new controls through the actual DOM, not only engine calls.
- await load('66');await mutate(s=>{s.turn=0;s.trump=0;s.players[0].hand=[11,12,9,8,10,0];s.extra.points=[0,0];});await page.getByRole('button',{name:'マリッジを宣言してリード: ♣Q',exact:true}).click();await page.waitForFunction(()=>window.__club.room().session.state.extra.points[0]===40);assert.equal(await page.locator('.cc-declarations .cc-card').count(),2);
+ await load('66');await mutate(s=>{s.turn=0;s.trump=0;s.players[0].hand=[11,12,9,8,10,0];s.extra.points=[0,0];});await page.getByRole('button',{name:'マリッジを宣言してリード: ♣Q',exact:true}).click();await page.waitForFunction(()=>window.__club.room().session.state.extra.classic.pendingMarriage[0]===40);assert.equal(await page.locator('.cc-declarations .cc-card').count(),2);
  await load('blacklady');await mutate(s=>{s.turn=0;});await page.locator('.cc-hand .cc-card').nth(0).click();await page.locator('.cc-hand .cc-card').nth(1).click();assert.equal(await page.locator('.cc-hand .cc-selected').count(),2);assert.equal(await page.locator('.cc-actions>button').count(),1);await page.locator('.cc-actions>button').click();await page.waitForFunction(()=>window.__club.room().session.state.extra.selections[0].length===2);
- await load('sergent');await mutate(s=>{s.turn=0;s.extra.step='sergentDiscard';s.trump=0;});for(let i=0;i<4;i++)await page.locator('.cc-hand .cc-card').nth(i).click();assert.equal(await page.locator('.cc-actions>button').count(),1);await page.locator('.cc-actions>button').click();await page.waitForFunction(()=>window.__club.room().session.state.extra.step==='play');
+ await load('sergent');await mutate(s=>{s.turn=0;s.extra.step='sergentDiscard';s.trump=0;});for(let i=0;i<4;i++)await page.locator('.cc-hand .cc-card').nth(i).click({position:{x:12,y:18}});assert.equal(await page.locator('.cc-actions>button').count(),1);await page.locator('.cc-actions>button').click();await page.waitForFunction(()=>window.__club.room().session.state.extra.step==='play');
  await load('shithead2',2);await mutate(s=>{s.turn=0;});const oldExposed=await page.evaluate(()=>window.__club.room().session.state.extra.classic.rows[0][0]);await page.locator('.cc-hand .cc-card').nth(0).click();await page.locator('.cc-palace-layouts article').first().locator('.cc-public-hand').first().getByRole('button').first().click();assert(await page.evaluate(card=>window.__club.room().session.state.players[0].hand.includes(card),oldExposed));await page.getByRole('button',{name:'準備完了',exact:true}).click();
  await mutate(s=>{s.turn=0;s.extra.step='play';s.stock=[];s.players[0].hand=[];s.extra.classic.rows[0]=[];s.extra.classic.hidden[0]=[2];s.table=[0];});await page.locator('.cc-palace-layouts article').first().locator('.cc-back:enabled').click();await page.waitForFunction(()=>window.__club.room().session.state.players[0].hand.length===2);assert.equal(await page.locator('.cc-hand .cc-card').count(),2);
  await load('ecarte');await mutate(s=>{s.turn=0;s.dealer=1;});await page.getByRole('button',{name:'交換を提案',exact:true}).click();assert(await page.evaluate(()=>window.__club.room().session.state.extra.step==='ecarteReply'));
