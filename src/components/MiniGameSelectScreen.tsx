@@ -36,6 +36,7 @@ const MINI_GAME_SPRITE_ICONS: Record<string, MiniGameSpriteDefinition> = {
   AFTER_SCHOOL_RUSH: { src: 'sprites/after-school-rush/menu-icon-v1.webp', columns: 1, rows: 1, index: 0 },
   STAR_TIDE: { src: 'sprites/star-tide/menu-icon.webp', columns: 1, rows: 1, index: 0 },
   CARD_CLUB: { src: 'sprites/card-club/menu-icon.webp', columns: 1, rows: 1, index: 0 },
+  TRADITIONAL: { src: 'sprites/traditional-games/disc-red.webp', columns: 1, rows: 1, index: 0, photographic: true },
   GO_HOME: { src: 'sprites/go-home-dash-8-loop-grid.webp', columns: 8, rows: 1, index: 2 },
   SURVIVOR: { src: 'sprites/schoolyard-survivor/menu-icon.webp', columns: 1, rows: 1, index: 0, photographic: true },
   POKER: { src: 'sprites/after-school-poker-card-ornaments.webp', columns: 8, rows: 2, index: 0 },

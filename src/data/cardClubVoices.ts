@@ -1,4 +1,4 @@
-export type CardClubVoiceEvent='start'|'play'|'win'|'lose';
+export type CardClubVoiceEvent='start'|'play'|'win'|'lose'|'turn'|'domino'|'bomb'|'five-shi'|'twenty'|'table-start';
 export const CARD_CLUB_VOICE_HEROES=["high-school-warrior", "high-school-caretaker", "high-school-assassin", "high-school-mage", "high-school-dodgeball", "high-school-bard", "high-school-librarian", "high-school-chef", "high-school-gardener", "magic-akari", "magic-shizuku", "magic-hiyori", "magic-tsubasa", "magic-rei", "magic-madoka", "magic-koharu", "magic-mirai", "magic-sera", "magic-ren", "magic-soma", "magic-minato", "magic-riku", "magic-yamato", "magic-leon", "magic-elliot", "magic-sakuya"] as const;
 export const CARD_CLUB_VOICE_MS:Record<string,number>={
   "high-school-warrior/start": 2640,
@@ -107,6 +107,8 @@ export const CARD_CLUB_VOICE_MS:Record<string,number>={
   "magic-sakuya/lose": 3120
 };
 export function cardClubVoice(hero:string,event:CardClubVoiceEvent){
+ if(['turn','domino','bomb','five-shi','twenty','table-start'].includes(event)&&CARD_CLUB_VOICE_HEROES.some(id=>id===hero))
+  return {path:`sfx/traditional-table-voices/${hero}/${event}.mp3`,maxDurationMs:4200};
  const ms=CARD_CLUB_VOICE_MS[hero+'/'+event];return ms?{path:`sfx/card-club-voices/${hero}/${event}.ogg`,maxDurationMs:ms+500}:null;
 }
 

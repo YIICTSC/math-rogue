@@ -8,6 +8,7 @@ const GakuroGear = deferredScreen(() => import('../mini-games/gakurogear/VrTitle
 const FlightSchool = deferredScreen(() => import('../mini-games/flight-school/FlightSchool'));
 const KotobaLife = deferredScreen(() => import('../mini-games/kotoba-life/KotobaLife'));
 const PokerGameScreen = deferredScreen(() => import('./PokerGameScreen'));
+const TraditionalGames = deferredScreen(() => import('../mini-games/traditional-games/TraditionalGames'));
 const CardClub = deferredScreen(() => import('../mini-games/card-club/CardClub'));
 const AfterSchoolRush = deferredScreen(() => import('../mini-games/after-school-rush/AfterSchoolRush'));
 const SchoolyardSurvivorScreen = deferredScreen(() => import('./SchoolyardSurvivorScreen'));
@@ -72,6 +73,7 @@ const MINI_GAME_MAP: Partial<Record<GameScreen, React.ComponentType<MiniGameComp
     [GameScreen.MINI_GAME_GAKUROGEAR]: GakuroGear,
     [GameScreen.MINI_GAME_POKER]: PokerGameScreen,
     [GameScreen.MINI_GAME_CARD_CLUB]: CardClub,
+    [GameScreen.MINI_GAME_TRADITIONAL]: TraditionalGames,
     [GameScreen.MINI_GAME_AFTER_SCHOOL_RUSH]: AfterSchoolRush,
     [GameScreen.MINI_GAME_SURVIVOR]: SchoolyardSurvivorScreen,
     [GameScreen.MINI_GAME_STAR_TIDE]: StarTide,

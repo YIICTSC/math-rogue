@@ -116,8 +116,9 @@ try{
   const tabs=[host,guest,third];
   await tabs[first].evaluate(()=>{const room=window.__club.room();room.command(room.last.view.actions[0]);});
   await host.waitForFunction(first=>window.__club.room().last.view.turn!==first,first);
-  const next=await host.evaluate(()=>window.__club.room().last.view.players[window.__club.room().last.view.turn].hero);
-  for(const tab of tabs)await tab.waitForFunction(hero=>window.turnVoices.some(call=>call.hero===hero&&call.event==='play'),next);
+  for(const tab of tabs) {
+   assert.deepEqual(await tab.evaluate(()=>window.turnVoices.map(call=>call.event)), ['start'], 'Each seat hears its own welcome once, with no chatter on the first turn change');
+  }
   await host.evaluate(()=>window.__club.room().finish());
   await guest.getByText('When the host chooses another game', {exact:false}).waitFor();
   await host.getByRole('button',{name:'Choose another game',exact:true}).click();
@@ -131,7 +132,7 @@ try{
   await third.getByRole('button',{name:'Leave room',exact:true}).click();
   await host.waitForFunction(()=>window.__club.room().last.view.players.find(p=>p.name.startsWith('Guest C'))?.cpu);
   assert.deepEqual(errors,[]);
-  console.log('PASS: 3-browser WebRTC, host-first selection, copied URL, direct link entry, full-width code, seats and recommendations, remote turn voices, and switching games in the same room.');
+  console.log('PASS: 3-browser WebRTC, host-first selection, copied URL, direct link entry, full-width code, seats and recommendations, start voice and quiet turns, and switching games in the same room.');
   process.exitCode=0;
  }else{
  await page.goto('http://127.0.0.1:5243/__club'+(process.argv.includes('--voices')?'?voiceTest=1':''));await page.locator('.cc-title-copy').waitFor();
@@ -309,7 +310,17 @@ try{
   await page.waitForFunction(()=>[...window.audioService.activeHtmlSfx.entries()].some(([name,audios])=>name.startsWith('card-club-voice-')&&[...audios].some(a=>!a.paused)));
   assert(await page.evaluate(()=>[...window.audioService.activeHtmlSfx.values()].flatMap(a=>[...a]).every(a=>Math.abs(a.volume-.35)<.01)),'Voices use the independent voice volume even with SE muted');
   const count=await page.evaluate(()=>window.voiceEvents.length);await page.evaluate(()=>window.__club.room().session.publish());await page.evaluate(()=>new Promise(r=>requestAnimationFrame(r)));assert.equal(await page.evaluate(()=>window.voiceEvents.length),count);
-  await mutate(s=>{s.turn=1;s.revision++;});await mutate(s=>{s.turn=0;s.revision++;});await page.waitForFunction(()=>window.voiceEvents.some(v=>v.event==='play'));
+  await page.clock.install({time:new Date()});
+  await page.clock.fastForward(15000);
+  await page.evaluate(()=>window.audioService.stopCardClubVoices());
+  for(let t=0;t<4;t++){
+   await mutate(s=>{s.turn=1;s.revision++;});await mutate(s=>{s.turn=0;s.revision++;});
+  }
+  assert(!await page.evaluate(()=>window.voiceEvents.some(v=>v.event==='turn')));
+  await mutate(s=>{s.turn=1;s.revision++;});await mutate(s=>{s.turn=0;s.revision++;});
+  await page.waitForFunction(()=>window.voiceEvents.some(v=>v.event==='turn'));
+  assert.equal(await page.evaluate(()=>window.voiceEvents.filter(v=>v.event==='turn').length),1);
+  assert(!await page.evaluate(()=>window.voiceEvents.some(v=>v.event==='play')));
   await mutate(s=>{s.phase='result';s.resultReason='score';s.winners=[0];s.revision++;});await page.waitForFunction(()=>window.voiceEvents.some(v=>v.event==='win'));
   await mutate(s=>{s.phase='play';s.revision++;});await mutate(s=>{s.phase='result';s.resultReason='score';s.winners=[1];s.revision++;});await page.waitForFunction(()=>window.voiceEvents.some(v=>v.event==='lose'));
   await page.evaluate(()=>window.audioService.setVoiceVolume(0));assert.equal(await page.evaluate(()=>[...window.audioService.activeHtmlSfx.keys()].filter(n=>n.startsWith('card-club-voice-')).length),0);assert.equal(await page.evaluate(()=>window.audioService.playCardClubVoice('magic-akari','start')),false);
@@ -325,7 +336,7 @@ try{
    assert.match(await page.locator('[data-score-reward]').first().innerText(),/スイープ.*1/);
   }
 
-  assert.deepEqual(errors,[]);console.log(JSON.stringify({voices:true,...metadata,start:true,play:true,win:true,lose:true,independentVoiceVolume:true,mute:true,zeroVoiceVolume:true,leaveStops:true,deduplicated:true,browserErrors:errors.length}));
+  assert.deepEqual(errors,[]);console.log(JSON.stringify({voices:true,...metadata,start:true,occasionalTurn:true,win:true,lose:true,independentVoiceVolume:true,mute:true,zeroVoiceVolume:true,leaveStops:true,deduplicated:true,browserErrors:errors.length}));
  }else if(process.argv.includes('--effects')){
   await page.evaluate(()=>{
    const audio=window.audioService;audio.init();window.cardCues=[];window.audioStarts=[];

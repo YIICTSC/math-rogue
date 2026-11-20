@@ -1,3 +1,4 @@
+import { traditionalInviteCode, TRADITIONAL_ROOM_PARAM } from './mini-games/traditional-games/invite';
 import {cardClubInviteCode,CARD_CLUB_ROOM_PARAM} from './mini-games/card-club/invite';
 import {academyInvitation} from './mini-games/academy-sports/onlineInvite';
 import { MINI_GAME_UNIT_CORRECT_EVENT, type MiniGameUnitCorrectDetail } from './services/miniGameUnitProgress';
@@ -962,6 +963,7 @@ const LAUNCH_LOCK_DEFERRED_SCREEN_SET = new Set<GameScreen>([
     GameScreen.MINI_GAME_AFTER_SCHOOL_RUSH,
     GameScreen.MINI_GAME_FLIGHT_SCHOOL,
     GameScreen.MINI_GAME_CARD_CLUB,
+    GameScreen.MINI_GAME_TRADITIONAL,
     GameScreen.MINI_GAME_SURVIVOR,
     GameScreen.MINI_GAME_STAR_TIDE,
     GameScreen.MINI_GAME_LANTERN_WAR,
@@ -1684,6 +1686,8 @@ const App: React.FC = () => {
     const [vrInviteOpen,setVrInviteOpen]=useState(Boolean(vrCode));
     const cardClubCode=useMemo(()=>typeof window==='undefined'?'':cardClubInviteCode(window.location.href),[]);
     const [cardClubInviteOpen,setCardClubInviteOpen]=useState(Boolean(cardClubCode));
+    const traditionalCode = useMemo(() => typeof window === 'undefined' ? '' : traditionalInviteCode(window.location.href), []);
+    const [traditionalInviteOpen, setTraditionalInviteOpen] = useState(Boolean(traditionalCode));
     const kartCode = useMemo(() => typeof window === 'undefined' ? '' : kartInviteCode(window.location.href), []);
     const [kartInviteOpen, setKartInviteOpen] = useState(Boolean(kartCode));
     const golfCode = useMemo(() => typeof window === 'undefined' ? '' : golfInviteCode(window.location.href), []);
@@ -2648,9 +2652,13 @@ const App: React.FC = () => {
     const [isDebugMode, setIsDebugMode] = useState(isAdminDebugLaunch);
     const isDebugModeActive = DEBUG_FEATURES_ENABLED && isDebugMode;
     useEffect(()=>{if(DEBUG_FEATURES_ENABLED&&gameState.screen===GameScreen.DEBUG_MENU)enableDebugRewards();},[gameState.screen]);
-    const onlineInviteActive = !OFFLINE_DISTRIBUTABLE && ((cardClubInviteOpen&&!!cardClubCode)||(vrInviteOpen&&!!vrCode)||(kartInviteOpen&&!!kartCode)||(golfInviteOpen&&!!golfCode)||(tennisInviteOpen&&!!tennisCode)||(academyInviteOpen&&!!academyInvite)||(basketballInviteOpen&&!!basketballCode)||(dodgeballInviteOpen&&!!dodgeballCode)||(!!rpgInviteCode&&!!gameState.rpgOnline));
+    const onlineInviteActive = !OFFLINE_DISTRIBUTABLE && ((traditionalInviteOpen&&!!traditionalCode)||(cardClubInviteOpen&&!!cardClubCode)||(vrInviteOpen&&!!vrCode)||(kartInviteOpen&&!!kartCode)||(golfInviteOpen&&!!golfCode)||(tennisInviteOpen&&!!tennisCode)||(academyInviteOpen&&!!academyInvite)||(basketballInviteOpen&&!!basketballCode)||(dodgeballInviteOpen&&!!dodgeballCode)||(!!rpgInviteCode&&!!gameState.rpgOnline));
     useEffect(()=>{if(gameState.screen===GameScreen.GAKURO_CRAFT)setGameState(prev=>({...prev,screen:GameScreen.START_MENU}));},[gameState.screen]);
     useEffect(()=>{if(vrInviteOpen&&!OFFLINE_DISTRIBUTABLE)setGameState(prev=>prev.screen===GameScreen.MINI_GAME_GAKUROGEAR?prev:{...prev,screen:GameScreen.MINI_GAME_GAKUROGEAR});},[vrInviteOpen]);
+    useEffect(() => {
+        if (traditionalInviteOpen && !OFFLINE_DISTRIBUTABLE)
+            setGameState(prev => prev.screen === GameScreen.MINI_GAME_TRADITIONAL ? prev : {...prev, screen: GameScreen.MINI_GAME_TRADITIONAL});
+    }, [traditionalInviteOpen]);
     useEffect(()=>{if(cardClubInviteOpen&&!OFFLINE_DISTRIBUTABLE)setGameState(prev=>prev.screen===GameScreen.MINI_GAME_CARD_CLUB?prev:{...prev,screen:GameScreen.MINI_GAME_CARD_CLUB});},[cardClubInviteOpen]);
     useEffect(()=>{if(kartInviteOpen&&!OFFLINE_DISTRIBUTABLE)setGameState(prev=>prev.screen===GameScreen.GAKURO_KART?prev:{...prev,screen:GameScreen.GAKURO_KART});},[kartInviteOpen]);
     const isRpgInviteParticipantActive = !OFFLINE_DISTRIBUTABLE
@@ -7363,7 +7371,7 @@ const App: React.FC = () => {
         }
         audioService.playSound('select');
         setPendingMiniGameScreen(screen);
-        if (screen === GameScreen.MINI_GAME_GAKUROGEAR || screen === GameScreen.MINI_GAME_CARD_CLUB) {
+        if (screen === GameScreen.MINI_GAME_GAKUROGEAR || screen === GameScreen.MINI_GAME_CARD_CLUB || screen === GameScreen.MINI_GAME_TRADITIONAL) {
             setPendingMiniGameScreen(null);
             setGameState(prev => ({ ...prev, screen }));
             return;
@@ -21346,7 +21354,15 @@ const App: React.FC = () => {
                         <MiniGameRouter
                             key={`${gameState.screen}:${uiPreviewMiniGameOutcome ?? 'DEFAULT'}`}
                             screen={gameState.screen}
-                            onBack={gameState.screen === GameScreen.MINI_GAME_AFTER_SCHOOL_RUSH || gameState.screen === GameScreen.MINI_GAME_FLIGHT_SCHOOL
+                            onBack={gameState.screen === GameScreen.MINI_GAME_TRADITIONAL ? () => {
+                                if (traditionalInviteOpen) {
+                                    setTraditionalInviteOpen(false);
+                                    const url = new URL(window.location.href);
+                                    url.searchParams.delete(TRADITIONAL_ROOM_PARAM);
+                                    window.history.replaceState(null, '', url.toString());
+                                }
+                                setGameState(prev => ({...prev, screen: GameScreen.MINI_GAME_SELECT}));
+                            } : gameState.screen === GameScreen.MINI_GAME_AFTER_SCHOOL_RUSH || gameState.screen === GameScreen.MINI_GAME_FLIGHT_SCHOOL
                                 ? () => setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_SELECT }))
                                 : gameState.screen === GameScreen.MINI_GAME_CRANE ? handleCraneGameBack : ()=>{if(gameState.screen===GameScreen.MINI_GAME_CARD_CLUB){setCardClubInviteOpen(false);const url=new URL(window.location.href);url.searchParams.delete(CARD_CLUB_ROOM_PARAM);window.history.replaceState(null,'',url.toString());}if(gameState.screen===GameScreen.MINI_GAME_GAKUROGEAR){setVrInviteOpen(false);const url=new URL(window.location.href);url.searchParams.delete(VR_ROOM_PARAM);window.history.replaceState(null,'',url.toString());}returnToTitle();}}
                             inviteCode={vrInviteOpen?vrCode:''}

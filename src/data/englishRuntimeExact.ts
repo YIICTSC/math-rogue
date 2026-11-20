@@ -19,6 +19,10 @@ export const ENGLISH_RUNTIME_EXACT: Record<string, string> = {
   "駒の動きを覚え、キングを守る戦略を磨こう。": "Learn chess moves and tactics to protect your king.",
 
   "武器を育て、校庭に迫る敵の大群を切り抜けよう。": "Upgrade weapons. Survive the schoolyard hordes.",
+  '世界の伝統ゲーム集': 'Traditional Games of the World',
+  '世界の': 'World',
+  '伝統ゲーム集': 'Traditional Games',
+  'ドミノ、ピーパー、クロキノール、ごいたをCPU戦やオンラインで。': 'Dominoes, Peeper, Crokinole and Goita, solo or online.',
   "世界のトランプゲームを、ひとりでもオンラインでも。": "World card games, solo or online.",
   "道具とひらめき技を駆使して、毎回変わる迷宮を探索。": "Explore shifting dungeons with items and techniques.",
   "仲間を編成し、作戦と部隊指揮で戦場を切り開こう。": "Build squads, plan tactics and command the battlefield.",

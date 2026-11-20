@@ -183,6 +183,7 @@ export default function FlightDeck({
   const canvas = useRef<HTMLCanvasElement>(null),
     keys = useRef(new Set<string>()),
     touches = useRef(new Map<number, string>());
+  const capturedPointers = useRef(new Map<number, HTMLElement>());
   const stick = useRef({ turn: 0, pitch: 0 });
   const pad = useRef(neutralInput()),
     halted = useRef(false),
@@ -204,6 +205,12 @@ export default function FlightDeck({
     ? t('バースト', 'Burst', 'バースト') + ' ' + patrol.sortie.energy + '/5'
     : localize(discipline.secondary, language);
   const clear = useCallback(() => {
+    // Release held controls before replacing the flight screen.
+    for (const [id, control] of capturedPointers.current) {
+      if (control.hasPointerCapture(id)) control.releasePointerCapture(id);
+      delete control.dataset.held;
+    }
+    capturedPointers.current.clear();
     keys.current.clear();
     touches.current.clear();
     primaryTap.current = false;
@@ -353,6 +360,8 @@ export default function FlightDeck({
         accumulator -= STEP;
       }
       if (patrol?.failed) {
+        halted.current = true;
+        clear();
         callbacks.current.onPatrolLost?.();
         return;
       }
@@ -387,6 +396,8 @@ export default function FlightDeck({
           );
       }
       if (s.result) {
+        halted.current = true;
+        clear();
         if (!patrol && s.result.reason === 'landed') callbacks.current.onRadio?.('land');
         done.current(s.result);
         return;
@@ -407,12 +418,12 @@ export default function FlightDeck({
     return () => {
       cancelAnimationFrame(frame);
       clear();
-      scene.dispose();
       window.removeEventListener('keydown', key, true);
       window.removeEventListener('keyup', key, true);
       window.removeEventListener('blur', blur);
       document.removeEventListener('visibilitychange', hidden);
       surface.removeEventListener('webglcontextlost', contextLost);
+      scene.dispose();
     };
   }, [s, lesson, clear, pause, routeImages, patrol]);
   function press(action: string, face: React.ReactNode, label: string, shortcut?: string) {
@@ -481,6 +492,11 @@ export default function FlightDeck({
       data-expert={!!s.instruments}
       data-airborne={s.airborne}
       data-canopy={s.canopy}
+      onGotPointerCapture={(e) => {
+        if (e.target instanceof HTMLElement)
+          capturedPointers.current.set(e.pointerId, e.target);
+      }}
+      onLostPointerCapture={(e) => capturedPointers.current.delete(e.pointerId)}
     >
       <canvas
         ref={canvas}
