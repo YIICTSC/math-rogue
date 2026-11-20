@@ -105,14 +105,15 @@
       "seed": 28804,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.188,
       "reference": [
         "public/sfx/high-school-voices/WARRIOR/attack-1.ogg"
       ],
       "reference_pcm_sha256": "dacd463697b622140c4f1c9d6f6a5f07269683517c65b09b080c354ab1d6e7a8",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "af2eac1e2ee61ccd5b36c7af88dc9109b983e36da0a1923fc39c73a1734b1d86",
-      "review_pending": false
+      "sha256": "fb6db7a0904df73bbed27d71d6601a72a1e9638a57dfd61579129074653dcb53",
+      "review_pending": false,
+      "tail_trim_seconds": 0.4929
     },
     "high-school-caretaker/turn": {
       "game_call": "turn",
@@ -123,14 +124,15 @@
       "seed": 28810,
       "steps": 4,
       "requested_seconds": 2.15,
-      "duration_seconds": 2.196,
+      "duration_seconds": 2.052,
       "reference": [
         "public/sfx/high-school-voices/CARETAKER/attack-1.ogg"
       ],
       "reference_pcm_sha256": "97a2ec58e4a5ea0885de039d93fc5ae4610e37d1976ad81db11696b2582a1626",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "8ef9ccf1ddfd58e10c80d385b98f1e09b657f6d501157a5b75276ddaef0d343d",
-      "review_pending": false
+      "sha256": "f44e22e982051bf2263d836377f00fc6ec213a6baca95c6b37f99e01419cd3f1",
+      "review_pending": false,
+      "tail_trim_seconds": 0.1926
     },
     "high-school-caretaker/domino": {
       "game_call": "domino",
@@ -305,14 +307,15 @@
       "seed": 28824,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.152,
       "reference": [
         "public/sfx/high-school-voices/ASSASSIN/attack-1.ogg"
       ],
       "reference_pcm_sha256": "da0e3a607c281ae2145da523b3645cd30bda935a0a277134cb489dc9087aa229",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "4332eb8b1d0079e52eeed6a046d5b0aa4bbe1ccda61b57315d919cbfd33a4c1d",
-      "review_pending": false
+      "sha256": "57adee7ef0c3b4abe713ffe09f525815003cc387f9f8b35d8fe90793f9ba5379",
+      "review_pending": false,
+      "tail_trim_seconds": 0.5062
     },
     "high-school-mage/turn": {
       "game_call": "turn",
@@ -463,14 +466,15 @@
       "seed": 28842,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.44,
       "reference": [
         "public/sfx/high-school-voices/DODGEBALL/attack-1.ogg"
       ],
       "reference_pcm_sha256": "e617d125da934d666c1a906c8631f7e26e480fe0917379c11a2835f1e36934fd",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "ea22361654182ecdd5f30f62c5ff5148b2ab9f47133fc99c01032533a2d101c2",
-      "review_pending": false
+      "sha256": "dc2ec157d9c3fe0134ffa58b693e2866aaea55d08b728bfc331f0e74b0a5d3f7",
+      "review_pending": false,
+      "tail_trim_seconds": 0.2332
     },
     "high-school-dodgeball/five-shi": {
       "game_call": "five-shi",
@@ -481,14 +485,15 @@
       "seed": 38843,
       "steps": 4,
       "requested_seconds": 2.35,
-      "duration_seconds": 0.9,
+      "duration_seconds": 0.756,
       "reference": [
         "public/sfx/high-school-voices/DODGEBALL/attack-1.ogg"
       ],
       "reference_pcm_sha256": "e617d125da934d666c1a906c8631f7e26e480fe0917379c11a2835f1e36934fd",
       "instructions": "参照と同じ声ではっきり発音。",
-      "sha256": "c4521e92a28f7ff0d72339d77cc87828a6f8f86e833150e73bf9e4ea8c1f4c0c",
-      "review_pending": false
+      "sha256": "c4fde367833e379d94fc67ea337cf66e90d5110591d988cf5d8a1e87c631c0f6",
+      "review_pending": false,
+      "tail_trim_seconds": 0.1983
     },
     "high-school-dodgeball/twenty": {
       "game_call": "twenty",
@@ -499,14 +504,15 @@
       "seed": 28844,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.26,
       "reference": [
         "public/sfx/high-school-voices/DODGEBALL/attack-1.ogg"
       ],
       "reference_pcm_sha256": "e617d125da934d666c1a906c8631f7e26e480fe0917379c11a2835f1e36934fd",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "b28657cee2fff1914ff2b61af32989d5f73e806d24ce64fdec1c018e10df3165",
-      "review_pending": false
+      "sha256": "a06cf1c83545e4cc5dbd9e769ffdb8b58e48c9ae4a9a087a848700ac73d41967",
+      "review_pending": false,
+      "tail_trim_seconds": 0.4259
     },
     "high-school-bard/turn": {
       "game_call": "turn",
@@ -593,14 +599,15 @@
       "seed": 28854,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.224,
       "reference": [
         "public/sfx/high-school-voices/BARD/attack-1.ogg"
       ],
       "reference_pcm_sha256": "d102b92db9041b649463b315e5350bcf96fceba22fb3d594755e33002fec0a34",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "3c0e33f5b8f099da0f5c906190cb217ba8a2b0a9181d6960b66d3377b3d08cde",
-      "review_pending": false
+      "sha256": "eef8d78e8d89b51ac1f0897d0f45e2b46ac851da7dc80cb4f16e5e1b042236fb",
+      "review_pending": false,
+      "tail_trim_seconds": 0.4348
     },
     "high-school-librarian/turn": {
       "game_call": "turn",
@@ -735,18 +742,19 @@
       "seed": 48871,
       "steps": 16,
       "requested_seconds": 2.3,
-      "duration_seconds": 2.196,
+      "duration_seconds": 1.692,
       "reference": [
         "public/sfx/high-school-voices/CHEF/attack-1.ogg"
       ],
       "reference_pcm_sha256": "14caa82e9c3b8318da0ca96986c29edc26c36e0bd7e2cee5eb905e850d3577c3",
       "instructions": "高校生の男子アニメ主人公。気さくで頼れる明るい中低音。料理長らしい面倒見のよさと勢いを持ち、冗談は親しみやすく、決意は力強く。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
-      "sha256": "fb44b3cb3c41d641412963ff2671e620893ec3a7f90c3183028cafcc484ee873",
+      "sha256": "cfd9765d6c78966d9f50f6cf5887a4495eb3a6c0707e7f05ee8d9a9a68d930cb",
       "review_pending": false,
       "cfg_guidance_mode": "independent",
       "cfg_scale_text": 7,
       "cfg_scale_speaker": 2,
-      "cfg_scale_instructions": 1
+      "cfg_scale_instructions": 1,
+      "tail_trim_seconds": 0.5604
     },
     "high-school-chef/bomb": {
       "game_call": "bomb",
@@ -799,14 +807,15 @@
       "seed": 28874,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.26,
       "reference": [
         "public/sfx/high-school-voices/CHEF/attack-1.ogg"
       ],
       "reference_pcm_sha256": "14caa82e9c3b8318da0ca96986c29edc26c36e0bd7e2cee5eb905e850d3577c3",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "6132821a22e31e826a15fb98aaf2dfda0e4eaa55fca75401d8cdd27d8444e50b",
-      "review_pending": false
+      "sha256": "2297e4bae85a25c91959d7a062e86d568392e516063b1671c56e9e7cc4c88f11",
+      "review_pending": false,
+      "tail_trim_seconds": 0.4147
     },
     "high-school-gardener/turn": {
       "game_call": "turn",
@@ -911,14 +920,15 @@
       "seed": 28890,
       "steps": 4,
       "requested_seconds": 2.15,
-      "duration_seconds": 2.196,
+      "duration_seconds": 2.088,
       "reference": [
         "public/sfx/magic-voices/AKARI/attack-1.ogg"
       ],
       "reference_pcm_sha256": "cc8f95da12944cb96bc3da41e0e1a75383a4e47bec33b23f11d6756d34f4928c",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "59865cde6b1ecb5a5dd6be91ad2ed3daf3879adc97cfdb058017d79d2c99bd5e",
-      "review_pending": false
+      "sha256": "5fd1aaeef802175f5c364de4d227c8718beb8b5bdeecc274f3b8489d796532fd",
+      "review_pending": false,
+      "tail_trim_seconds": 0.1565
     },
     "magic-akari/domino": {
       "game_call": "domino",
@@ -995,14 +1005,15 @@
       "seed": 28894,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.26,
       "reference": [
         "public/sfx/magic-voices/AKARI/attack-1.ogg"
       ],
       "reference_pcm_sha256": "cc8f95da12944cb96bc3da41e0e1a75383a4e47bec33b23f11d6756d34f4928c",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "431d8f86c463e32addbfe6fbd14c8b8966f4474f01ecd6b2466266a519101a01",
-      "review_pending": false
+      "sha256": "bfd38be9bf1b2c645d03a3147defbefba3efba76a03f73f006e19866825816c0",
+      "review_pending": false,
+      "tail_trim_seconds": 0.4111
     },
     "magic-shizuku/turn": {
       "game_call": "turn",
@@ -1053,7 +1064,7 @@
       "seed": 32902,
       "steps": 2,
       "requested_seconds": 2.5,
-      "duration_seconds": 2.484,
+      "duration_seconds": 1.98,
       "reference": [
         "public/sfx/magic-voices/SHIZUKU/attack-1.ogg",
         "public/sfx/card-club-voices/magic-shizuku/start.ogg",
@@ -1061,8 +1072,9 @@
       ],
       "reference_pcm_sha256": "4513930cf0da3a54ada980608d49f445c7a140da9a5ca0eee02f3ecb5eae5a54",
       "instructions": "落ち着いた対局。",
-      "sha256": "8e64f4dd89b1fe306a56e4b0cc31ae0fbf927777c2d34a5f4f42dd3b6b4a56f2",
-      "review_pending": false
+      "sha256": "c73189e0a92f8508527568873168ad5d632e36286fd9734f2d6f9d4faa48744a",
+      "review_pending": false,
+      "tail_trim_seconds": 0.574
     },
     "magic-shizuku/five-shi": {
       "game_call": "five-shi",
@@ -1095,14 +1107,15 @@
       "seed": 28904,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.296,
       "reference": [
         "public/sfx/magic-voices/SHIZUKU/attack-1.ogg"
       ],
       "reference_pcm_sha256": "70c93b53ad57f0d633f701871fb3be26475a75a879af13399357d0aebf174a95",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "edb2d4e07648946b54c267a53ef3f8cd279c54d9ce72f73cc083911fade90450",
-      "review_pending": false
+      "sha256": "94d8064ea6999068500e303561bef85e132173a0cf6f4097ff59ba747c40f9be",
+      "review_pending": false,
+      "tail_trim_seconds": 0.3758
     },
     "magic-hiyori/turn": {
       "game_call": "turn",
@@ -1131,14 +1144,15 @@
       "seed": 28911,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.296,
       "reference": [
         "public/sfx/magic-voices/HIYORI/attack-1.ogg"
       ],
       "reference_pcm_sha256": "4c14668d1ea2e5753e2c09e72f65d723f11c9df91971f07795ce8cf1657978a0",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "9961bc59e697bea2cb7c16edbf14c8234a6c8c5022bd848ff0f35d4bdbcdab6d",
-      "review_pending": false
+      "sha256": "9e34f8f184aa0f6f4e68d2565e003e3e69291798c9956a67b2d1552e43d34580",
+      "review_pending": false,
+      "tail_trim_seconds": 0.3841
     },
     "magic-hiyori/bomb": {
       "game_call": "bomb",
@@ -1191,14 +1205,15 @@
       "seed": 28914,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.26,
       "reference": [
         "public/sfx/magic-voices/HIYORI/attack-1.ogg"
       ],
       "reference_pcm_sha256": "4c14668d1ea2e5753e2c09e72f65d723f11c9df91971f07795ce8cf1657978a0",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "4d6289b3d50cd5b416fc1c9f11e67df44dd9af82f19f577ae1f7d9607ced930d",
-      "review_pending": false
+      "sha256": "2c54cf4f7d1230a02f5c6ced1ac30ba6e7b39cb32c09ed81f9fb68f9fa6e2e46",
+      "review_pending": false,
+      "tail_trim_seconds": 0.413
     },
     "magic-tsubasa/turn": {
       "game_call": "turn",
@@ -1227,18 +1242,19 @@
       "seed": 49921,
       "steps": 24,
       "requested_seconds": 2.9,
-      "duration_seconds": 2.844,
+      "duration_seconds": 2.7,
       "reference": [
         "public/sfx/magic-voices/TSUBASA/attack-1.ogg"
       ],
       "reference_pcm_sha256": "aa9e8cdaad0274fd2177c08b40b9fdaad7900f8502ee2bd694a434e8811d9c6d",
       "instructions": "高校生の女性魔法主人公。熱血で率直な明るい中高音。短い言葉を勢いよく届け、仲間を鼓舞する場面ではまっすぐ熱く。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
-      "sha256": "1224605f620c874cf9efdb9c6db4f9c82fb4d94354a83b33af3ea455a245cf62",
+      "sha256": "690c491ebbd0409b4f4ad41cd51d0c3d61a5b6b271a325cae66f8c6ccff735c7",
       "review_pending": false,
       "cfg_guidance_mode": "independent",
       "cfg_scale_text": 8,
       "cfg_scale_speaker": 2,
-      "cfg_scale_instructions": 1
+      "cfg_scale_instructions": 1,
+      "tail_trim_seconds": 0.1983
     },
     "magic-tsubasa/bomb": {
       "game_call": "bomb",
@@ -1313,14 +1329,15 @@
       "seed": 38930,
       "steps": 4,
       "requested_seconds": 2.55,
-      "duration_seconds": 2.376,
+      "duration_seconds": 2.16,
       "reference": [
         "public/sfx/magic-voices/REI/attack-1.ogg"
       ],
       "reference_pcm_sha256": "dac310f9c10e8f1073fad27966db7d1a41ecb80fe62410ca0116730210fec047",
       "instructions": "参照と同じ声ではっきり発音。",
-      "sha256": "80bdea284741273ec43767f32444200cb84f81f1b342061363d1a62e2c04514a",
-      "review_pending": false
+      "sha256": "ca49976fefa3235fefc34471af6456a8c8863db7abb5fc79a80e53de29a96231",
+      "review_pending": false,
+      "tail_trim_seconds": 0.2652
     },
     "magic-rei/domino": {
       "game_call": "domino",
@@ -1393,14 +1410,15 @@
       "seed": 28934,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.296,
       "reference": [
         "public/sfx/magic-voices/REI/attack-1.ogg"
       ],
       "reference_pcm_sha256": "dac310f9c10e8f1073fad27966db7d1a41ecb80fe62410ca0116730210fec047",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "367420daea9cf88f902813d04590b2984b820f22bc26ab8b5e8a4b28772ec089",
-      "review_pending": false
+      "sha256": "f295edbf5bfbbb4c6d6d1de24dfa346e7199301548ae32ff48a4cb0c937de069",
+      "review_pending": false,
+      "tail_trim_seconds": 0.3898
     },
     "magic-madoka/turn": {
       "game_call": "turn",
@@ -1411,14 +1429,15 @@
       "seed": 28940,
       "steps": 4,
       "requested_seconds": 2.15,
-      "duration_seconds": 2.196,
+      "duration_seconds": 1.872,
       "reference": [
         "public/sfx/magic-voices/MADOKA/attack-1.ogg"
       ],
       "reference_pcm_sha256": "68a8b7f1355328cd0bfd3da598dc243b65c72d8f71af58c329d583c82a38ed1e",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "4f0b125a0b2c46794b40361ba2a6bc8e851c3eaa519bf1fecda0dc22054cf120",
-      "review_pending": false
+      "sha256": "e6c807a7a0c581d3e7535ebb22ef7472ce4162e943ebcb3e627eaaa105778f8b",
+      "review_pending": false,
+      "tail_trim_seconds": 0.3845
     },
     "magic-madoka/domino": {
       "game_call": "domino",
@@ -1513,14 +1532,15 @@
       "seed": 28950,
       "steps": 4,
       "requested_seconds": 2.15,
-      "duration_seconds": 2.196,
+      "duration_seconds": 1.62,
       "reference": [
         "public/sfx/magic-voices/KOHARU/attack-1.ogg"
       ],
       "reference_pcm_sha256": "f018405d6ee02e2252e5ea632eb65118de8b7239646081d13f5c67542b300ac1",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "84128b30777f7c40c8d583b84749b8a9b9b7774025f5a4a012ad419122876d49",
-      "review_pending": false
+      "sha256": "d1f030c9a4251319c80db59b690ee9e61b14a7ddd12f1f726555a403cfb40ba7",
+      "review_pending": false,
+      "tail_trim_seconds": 0.6127
     },
     "magic-koharu/domino": {
       "game_call": "domino",
@@ -1633,14 +1653,15 @@
       "seed": 28961,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.224,
       "reference": [
         "public/sfx/magic-voices/MIRAI/attack-1.ogg"
       ],
       "reference_pcm_sha256": "dba6912db6db306dea85571ffd61d8271b08218f4101e10dd40595447c8035bc",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "d8eff163ec7829099e7fcf0d995896a5139b6be5bcacc14237a9615164f67812",
-      "review_pending": false
+      "sha256": "6c821ca402883afda74d530638fe0ea292384036d7427def2047ee2b032f888c",
+      "review_pending": false,
+      "tail_trim_seconds": 0.4604
     },
     "magic-mirai/bomb": {
       "game_call": "bomb",
@@ -1695,14 +1716,15 @@
       "seed": 28964,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.26,
       "reference": [
         "public/sfx/magic-voices/MIRAI/attack-1.ogg"
       ],
       "reference_pcm_sha256": "dba6912db6db306dea85571ffd61d8271b08218f4101e10dd40595447c8035bc",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "cff476d6d05d2c90602e879f1a578b6f81917c8bd3c1676e99a34d2627ef2222",
-      "review_pending": false
+      "sha256": "1a8a671ea688c312368320e834b2f60deefe39e6fd6ea4d39d0d3a793981964c",
+      "review_pending": false,
+      "tail_trim_seconds": 0.4258
     },
     "magic-sera/turn": {
       "game_call": "turn",
@@ -1713,14 +1735,15 @@
       "seed": 28970,
       "steps": 4,
       "requested_seconds": 2.15,
-      "duration_seconds": 2.196,
+      "duration_seconds": 1.908,
       "reference": [
         "public/sfx/magic-voices/SERA/attack-1.ogg"
       ],
       "reference_pcm_sha256": "25c207ac47f263015b8f79a8bb59826d75274518040d424b010a3514da3aa687",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "ae13a00369fb0d1f8cb9dbcce2aa008c5cdee3b60d1999d23d83d4a7af90fcbe",
-      "review_pending": false
+      "sha256": "e8ab94ca6e262d5c5f4e1f63a4b76f9382255400f5e6d34dbf03420829c6bc90",
+      "review_pending": false,
+      "tail_trim_seconds": 0.3523
     },
     "magic-sera/domino": {
       "game_call": "domino",
@@ -1731,14 +1754,15 @@
       "seed": 28971,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.404,
       "reference": [
         "public/sfx/magic-voices/SERA/attack-1.ogg"
       ],
       "reference_pcm_sha256": "25c207ac47f263015b8f79a8bb59826d75274518040d424b010a3514da3aa687",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "db32dd78231679da8aacb9cf83ff6ee9653c839bd584a72739f21b108d4c911e",
-      "review_pending": false
+      "sha256": "f85b5b093fc164f1434ab87dbb2d626c4ae9bfbf238943e2b23c41ea089a8544",
+      "review_pending": false,
+      "tail_trim_seconds": 0.2796
     },
     "magic-sera/bomb": {
       "game_call": "bomb",
@@ -1811,14 +1835,15 @@
       "seed": 28980,
       "steps": 4,
       "requested_seconds": 2.15,
-      "duration_seconds": 2.196,
+      "duration_seconds": 1.836,
       "reference": [
         "public/sfx/magic-voices/REN/attack-1.ogg"
       ],
       "reference_pcm_sha256": "4b393cac3eb6cfad7f1041dafc4873e9f914365c1680dc8ff2d4e544d70061f8",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "9665f9a34d4c7dad954c44be5083a2bbdbf1def3ad516cfb199748f696572b8f",
-      "review_pending": false
+      "sha256": "cde0a41ea14f15af9cf5695e84f4bb886372668287208aae58aa1ecec91201e1",
+      "review_pending": false,
+      "tail_trim_seconds": 0.4053
     },
     "magic-ren/domino": {
       "game_call": "domino",
@@ -1829,14 +1854,15 @@
       "seed": 28981,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.224,
       "reference": [
         "public/sfx/magic-voices/REN/attack-1.ogg"
       ],
       "reference_pcm_sha256": "4b393cac3eb6cfad7f1041dafc4873e9f914365c1680dc8ff2d4e544d70061f8",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "3739cbc2e4180be82f671b3bc13de6ba0ef0ff437c9493d230ff51b6eae53c0a",
-      "review_pending": false
+      "sha256": "68cd71a3e7f1164da8f729641a616416e13d9ef7d672233e2c9a921e0718ec69",
+      "review_pending": false,
+      "tail_trim_seconds": 0.4358
     },
     "magic-ren/bomb": {
       "game_call": "bomb",
@@ -1847,7 +1873,7 @@
       "seed": 32982,
       "steps": 2,
       "requested_seconds": 2.5,
-      "duration_seconds": 2.34,
+      "duration_seconds": 2.124,
       "reference": [
         "public/sfx/magic-voices/REN/attack-1.ogg",
         "public/sfx/card-club-voices/magic-ren/start.ogg",
@@ -1855,8 +1881,9 @@
       ],
       "reference_pcm_sha256": "153e3bf0be310eaccd56092fb11ead8f57d6f33fbf4c16caddef19fcb806fec5",
       "instructions": "落ち着いた対局。",
-      "sha256": "9f487846c34cb74881db368274825f8c614c5417eeb4b01b6f977bdbce7a42b2",
-      "review_pending": false
+      "sha256": "62901ce0571fc9f17f6177dd40df600c3334ec3083ee5cb4a4e1ef74d412d22b",
+      "review_pending": false,
+      "tail_trim_seconds": 0.2573
     },
     "magic-ren/five-shi": {
       "game_call": "five-shi",
@@ -1867,14 +1894,15 @@
       "seed": 28983,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.296,
       "reference": [
         "public/sfx/magic-voices/REN/attack-1.ogg"
       ],
       "reference_pcm_sha256": "4b393cac3eb6cfad7f1041dafc4873e9f914365c1680dc8ff2d4e544d70061f8",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "a01282724bd631b4672d129dd0b58f07441984234ebb16510d625ecb54a7c910",
-      "review_pending": false
+      "sha256": "b0b47bcc4a97e270d8262b32de197eb86dee85984a775475ba5d49eabe6140b4",
+      "review_pending": false,
+      "tail_trim_seconds": 0.3915
     },
     "magic-ren/twenty": {
       "game_call": "twenty",
@@ -1885,14 +1913,15 @@
       "seed": 28984,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.26,
       "reference": [
         "public/sfx/magic-voices/REN/attack-1.ogg"
       ],
       "reference_pcm_sha256": "4b393cac3eb6cfad7f1041dafc4873e9f914365c1680dc8ff2d4e544d70061f8",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "bb86f134fca475d7d94e5901a4aceb36a2e073a11559242f9b9d182678db9e6f",
-      "review_pending": false
+      "sha256": "3df2c700cf7e2e270ab63ce1a577b526578fe76435679a81e23a15b237bb62fc",
+      "review_pending": false,
+      "tail_trim_seconds": 0.4052
     },
     "magic-soma/turn": {
       "game_call": "turn",
@@ -2023,14 +2052,15 @@
       "seed": 29001,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.224,
       "reference": [
         "public/sfx/magic-voices/MINATO/attack-1.ogg"
       ],
       "reference_pcm_sha256": "1f71082589374b573312345fcda1ffe7f373c98390d4d4b53e2d6a1f85615143",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "26918266ca7a60e8abada50691e56d699f8d58ec5524eb95c74a65f2befb2893",
-      "review_pending": false
+      "sha256": "25a446c855770d2c7708f63ddd204fcaef6f74b437d9a97a00cffbcc0148b606",
+      "review_pending": false,
+      "tail_trim_seconds": 0.4668
     },
     "magic-minato/bomb": {
       "game_call": "bomb",
@@ -2041,14 +2071,15 @@
       "seed": 29002,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.26,
       "reference": [
         "public/sfx/magic-voices/MINATO/attack-1.ogg"
       ],
       "reference_pcm_sha256": "1f71082589374b573312345fcda1ffe7f373c98390d4d4b53e2d6a1f85615143",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "b6ddb2de74a434a376ed5bfab698161a2cb5cfa51f3ef749adf3d42fc3542d4d",
-      "review_pending": false
+      "sha256": "26da64b7ccb1f450fd719c20ce5a0111a911c1aaf9d8a82800f0fad429584c4e",
+      "review_pending": false,
+      "tail_trim_seconds": 0.4026
     },
     "magic-minato/five-shi": {
       "game_call": "five-shi",
@@ -2059,18 +2090,19 @@
       "seed": 50003,
       "steps": 24,
       "requested_seconds": 2.8,
-      "duration_seconds": 2.556,
+      "duration_seconds": 2.232,
       "reference": [
         "public/sfx/magic-voices/MINATO/attack-1.ogg"
       ],
       "reference_pcm_sha256": "1f71082589374b573312345fcda1ffe7f373c98390d4d4b53e2d6a1f85615143",
       "instructions": "高校生の男性魔法主人公。素直で努力家の若い中音。少し控えめな親しみやすさから始め、成長と決意の場面では前向きに声を張る。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
-      "sha256": "cbbef7e4ed7b754f26b8d225a5cc516efc3f8bdf1cd29f1d8ff18ddf2c33ef2b",
+      "sha256": "d1fa8cf0429190e304811c93f26aeb86efabb374ff0f0535e3f3c3fbcf631e80",
       "review_pending": false,
       "cfg_guidance_mode": "independent",
       "cfg_scale_text": 8,
       "cfg_scale_speaker": 2,
-      "cfg_scale_instructions": 1
+      "cfg_scale_instructions": 1,
+      "tail_trim_seconds": 0.3807
     },
     "magic-minato/twenty": {
       "game_call": "twenty",
@@ -2081,14 +2113,15 @@
       "seed": 29004,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.26,
       "reference": [
         "public/sfx/magic-voices/MINATO/attack-1.ogg"
       ],
       "reference_pcm_sha256": "1f71082589374b573312345fcda1ffe7f373c98390d4d4b53e2d6a1f85615143",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "1185b82e0ad59db4b16dd8aeb0049939593138f8b196e4b8a39a37be33fe3f3e",
-      "review_pending": false
+      "sha256": "71e32275a9299cbffa0ec2d74ae4b40e35f51041cacffbc8acc73ce7243b1bde",
+      "review_pending": false,
+      "tail_trim_seconds": 0.4128
     },
     "magic-riku/turn": {
       "game_call": "turn",
@@ -2099,14 +2132,15 @@
       "seed": 29010,
       "steps": 4,
       "requested_seconds": 2.15,
-      "duration_seconds": 2.196,
+      "duration_seconds": 1.872,
       "reference": [
         "public/sfx/magic-voices/RIKU/attack-1.ogg"
       ],
       "reference_pcm_sha256": "d87a55ca36efc795987131ef156d6d7804c16420348a9dd7e537425fde5ab660",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "ac0669a12ce0e775989a751e706b9b94dc52a375cd979e21fbf2d1acd9096abb",
-      "review_pending": false
+      "sha256": "583e3f945b8afcdefea7e0e12ff6cce82f2c2353201b0f0ebe966a21dd67210f",
+      "review_pending": false,
+      "tail_trim_seconds": 0.3949
     },
     "magic-riku/domino": {
       "game_call": "domino",
@@ -2135,14 +2169,15 @@
       "seed": 39012,
       "steps": 4,
       "requested_seconds": 2.4,
-      "duration_seconds": 2.232,
+      "duration_seconds": 1.908,
       "reference": [
         "public/sfx/magic-voices/RIKU/attack-1.ogg"
       ],
       "reference_pcm_sha256": "d87a55ca36efc795987131ef156d6d7804c16420348a9dd7e537425fde5ab660",
       "instructions": "参照と同じ声ではっきり発音。",
-      "sha256": "ea7c77734be2f71cc5a8de5294d815a44f0420d310b088212b64b9a996062ea9",
-      "review_pending": false
+      "sha256": "5edf687602bcad2f2b4b8e1ff82e3a6701ea960a0b774f29e281117ac8e73272",
+      "review_pending": false,
+      "tail_trim_seconds": 0.3836
     },
     "magic-riku/five-shi": {
       "game_call": "five-shi",
@@ -2153,18 +2188,19 @@
       "seed": 49013,
       "steps": 16,
       "requested_seconds": 2.8,
-      "duration_seconds": 2.7,
+      "duration_seconds": 2.412,
       "reference": [
         "public/sfx/magic-voices/RIKU/attack-1.ogg"
       ],
       "reference_pcm_sha256": "d87a55ca36efc795987131ef156d6d7804c16420348a9dd7e537425fde5ab660",
       "instructions": "高校生の男性魔法主人公。飄々とした軽やかな中音。知的な余裕と遊び心を持ち、仲間を選ぶ場面では静かな本気を見せる。 放課後に友達とトランプを遊ぶ自然な会話。声色は参照の本人に合わせる。明瞭な日本語。音楽や効果音なし。",
-      "sha256": "ada3ec29f1bbd30656af27a5062a3898d202e2f6f5d5fb8d81f872c9f990d565",
+      "sha256": "e481771e19e30e5b8ac9baf45cf0a69f9ebf6930fb229cd447ba8ce48d3ee93b",
       "review_pending": false,
       "cfg_guidance_mode": "independent",
       "cfg_scale_text": 7,
       "cfg_scale_speaker": 2,
-      "cfg_scale_instructions": 1
+      "cfg_scale_instructions": 1,
+      "tail_trim_seconds": 0.3459
     },
     "magic-riku/twenty": {
       "game_call": "twenty",
@@ -2255,14 +2291,15 @@
       "seed": 29023,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.26,
       "reference": [
         "public/sfx/magic-voices/YAMATO/attack-1.ogg"
       ],
       "reference_pcm_sha256": "6c47e3e445948ddc9322be3c516ba4e8af0226ad6772b83bb7dbf9c818ab65c4",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "38bec425e8b67e03cee6358c8585cf7d6a6d7651df6c1990e52885b4c31fe820",
-      "review_pending": false
+      "sha256": "a2fbc3ba6ee44dfbc01d4f5ab4c13051d572c3e7256ef49ab67c124700f45542",
+      "review_pending": false,
+      "tail_trim_seconds": 0.3973
     },
     "magic-yamato/twenty": {
       "game_call": "twenty",
@@ -2273,14 +2310,15 @@
       "seed": 29024,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.224,
       "reference": [
         "public/sfx/magic-voices/YAMATO/attack-1.ogg"
       ],
       "reference_pcm_sha256": "6c47e3e445948ddc9322be3c516ba4e8af0226ad6772b83bb7dbf9c818ab65c4",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "9bdbc42042540911c5ba65047ed20c15cca714a174588c57264e4e45d060e4ac",
-      "review_pending": false
+      "sha256": "eb220b5885cc02ae71f5240fdc1bcc511e046c4e92c15b0cb1dc7f268062902e",
+      "review_pending": false,
+      "tail_trim_seconds": 0.4599
     },
     "magic-leon/turn": {
       "game_call": "turn",
@@ -2291,14 +2329,15 @@
       "seed": 29030,
       "steps": 4,
       "requested_seconds": 2.15,
-      "duration_seconds": 2.196,
+      "duration_seconds": 1.836,
       "reference": [
         "public/sfx/magic-voices/LEON/attack-1.ogg"
       ],
       "reference_pcm_sha256": "133391ac5d6b73b6e1febb0c569a7fad9f2be7ccb890197b5daf5a83cbc67c75",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "e6c0aeea12d0888600ab712ed708f4ba63b44270c2649c6d21f8a632acc33e31",
-      "review_pending": false
+      "sha256": "aea8f81f5e1f82dc85d1354aaaf14947e34cb7455062cd6bdf8e362b6976de11",
+      "review_pending": false,
+      "tail_trim_seconds": 0.4248
     },
     "magic-leon/domino": {
       "game_call": "domino",
@@ -2309,14 +2348,15 @@
       "seed": 29031,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.26,
       "reference": [
         "public/sfx/magic-voices/LEON/attack-1.ogg"
       ],
       "reference_pcm_sha256": "133391ac5d6b73b6e1febb0c569a7fad9f2be7ccb890197b5daf5a83cbc67c75",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "43fa0490bbf02b2444e1cd51cd798f932430150edb52fe55e75eb9acfe3684ed",
-      "review_pending": false
+      "sha256": "eb40737d41cd27afc470f28de87d70aa7407b3289adddb6a8f820a00e8eb17b3",
+      "review_pending": false,
+      "tail_trim_seconds": 0.4074
     },
     "magic-leon/bomb": {
       "game_call": "bomb",
@@ -2345,14 +2385,15 @@
       "seed": 29033,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.296,
       "reference": [
         "public/sfx/magic-voices/LEON/attack-1.ogg"
       ],
       "reference_pcm_sha256": "133391ac5d6b73b6e1febb0c569a7fad9f2be7ccb890197b5daf5a83cbc67c75",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "50f3a963cb2c5ec1503a0f4a8587223f57fe850ef68584c13f4ab04b158e17ed",
-      "review_pending": false
+      "sha256": "a7887d0062772e11e2a49f4c6b72ab879de8776bb43d7f085463d655508c7744",
+      "review_pending": false,
+      "tail_trim_seconds": 0.3727
     },
     "magic-leon/twenty": {
       "game_call": "twenty",
@@ -2363,14 +2404,15 @@
       "seed": 29034,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.224,
       "reference": [
         "public/sfx/magic-voices/LEON/attack-1.ogg"
       ],
       "reference_pcm_sha256": "133391ac5d6b73b6e1febb0c569a7fad9f2be7ccb890197b5daf5a83cbc67c75",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "f960b1be00a7c0611dceead9fe94b07dd46b6ad47d24d18fd3338ecac14cbbf2",
-      "review_pending": false
+      "sha256": "dac938c0bd316f56ea2edf9d9ca40ed2addcffb8ab037662d46480f851e566b7",
+      "review_pending": false,
+      "tail_trim_seconds": 0.4459
     },
     "magic-elliot/turn": {
       "game_call": "turn",
@@ -2381,14 +2423,15 @@
       "seed": 29040,
       "steps": 4,
       "requested_seconds": 2.15,
-      "duration_seconds": 2.196,
+      "duration_seconds": 1.8,
       "reference": [
         "public/sfx/magic-voices/ELLIOT/attack-1.ogg"
       ],
       "reference_pcm_sha256": "6a53046db08516828e74cdfa002b4f09945d5ddb22f7060f506188c9baca84d6",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "8ab5db2af62fbe61837047d87ab396a79b8a9b023c966f928e33fff4bb7dc10d",
-      "review_pending": false
+      "sha256": "c853f6ddb784da45f320cc9acae3ae2fb911c873ee1b075554897145af8f22a3",
+      "review_pending": false,
+      "tail_trim_seconds": 0.443
     },
     "magic-elliot/domino": {
       "game_call": "domino",
@@ -2547,14 +2590,15 @@
       "seed": 29053,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.404,
       "reference": [
         "public/sfx/magic-voices/SAKUYA/attack-1.ogg"
       ],
       "reference_pcm_sha256": "f2c9f369eaa514e00de6cb937d643886dcdf0f96baf7b284c5901757137f3484",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "096d88a12b3af6d4dcad70fcd1baeab652d5cbf09372b7cc7c0c28b382cb67ae",
-      "review_pending": false
+      "sha256": "cecdea0694a244a1483fa9d8b0208f866b80186567f66657bb61750f135f9d3c",
+      "review_pending": false,
+      "tail_trim_seconds": 0.2801
     },
     "magic-sakuya/twenty": {
       "game_call": "twenty",
@@ -2565,14 +2609,15 @@
       "seed": 29054,
       "steps": 4,
       "requested_seconds": 1.55,
-      "duration_seconds": 1.62,
+      "duration_seconds": 1.26,
       "reference": [
         "public/sfx/magic-voices/SAKUYA/attack-1.ogg"
       ],
       "reference_pcm_sha256": "f2c9f369eaa514e00de6cb937d643886dcdf0f96baf7b284c5901757137f3484",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "6814651eb2cb3fd4c77a10778138941f05db1bd0563ea2ec4cc5d700b1274ba8",
-      "review_pending": false
+      "sha256": "b964eca7bfc7b0ca131d264cac9d96459040111557676f03f04a45fbea75be30",
+      "review_pending": false,
+      "tail_trim_seconds": 0.4098
     },
     "high-school-warrior/table-start": {
       "game_call": "table-start",
@@ -2749,14 +2794,15 @@
       "seed": 28895,
       "steps": 4,
       "requested_seconds": 2.7,
-      "duration_seconds": 2.736,
+      "duration_seconds": 2.556,
       "reference": [
         "public/sfx/magic-voices/AKARI/attack-1.ogg"
       ],
       "reference_pcm_sha256": "cc8f95da12944cb96bc3da41e0e1a75383a4e47bec33b23f11d6756d34f4928c",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "a95cacd0d050671d07e0bdf6ff8e514a6ee21da3dfcea72c0ae697410a504f68",
-      "review_pending": false
+      "sha256": "0bb4268854c0e26fd3a0aa8d305c80d55d619f21d45e720915563ca28b1f30a5",
+      "review_pending": false,
+      "tail_trim_seconds": 0.246
     },
     "magic-shizuku/table-start": {
       "game_call": "table-start",
@@ -2785,14 +2831,15 @@
       "seed": 28915,
       "steps": 4,
       "requested_seconds": 2.7,
-      "duration_seconds": 2.736,
+      "duration_seconds": 2.16,
       "reference": [
         "public/sfx/magic-voices/HIYORI/attack-1.ogg"
       ],
       "reference_pcm_sha256": "4c14668d1ea2e5753e2c09e72f65d723f11c9df91971f07795ce8cf1657978a0",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "64325c0fca4f43a76a25b15723eb7d72b137299b816a1b2972c559bdc528ee6f",
-      "review_pending": false
+      "sha256": "4bb3387a7924a33f3c7c23a3d2fa7ad0462c87bd8d3551859ef024b572758b73",
+      "review_pending": false,
+      "tail_trim_seconds": 0.6156
     },
     "magic-tsubasa/table-start": {
       "game_call": "table-start",
@@ -2843,14 +2890,15 @@
       "seed": 28945,
       "steps": 4,
       "requested_seconds": 2.7,
-      "duration_seconds": 2.736,
+      "duration_seconds": 2.592,
       "reference": [
         "public/sfx/magic-voices/MADOKA/attack-1.ogg"
       ],
       "reference_pcm_sha256": "68a8b7f1355328cd0bfd3da598dc243b65c72d8f71af58c329d583c82a38ed1e",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "0437861c15f119a0a2a1c948b8fde947b463b132a2246cfee7e44dd4500e4be1",
-      "review_pending": false
+      "sha256": "a529b2e333a251254b5f2dc80d4037845dce49ae5e76bb9585a16e1e5f624249",
+      "review_pending": false,
+      "tail_trim_seconds": 0.1901
     },
     "magic-koharu/table-start": {
       "game_call": "table-start",
@@ -2897,14 +2945,15 @@
       "seed": 28975,
       "steps": 4,
       "requested_seconds": 2.7,
-      "duration_seconds": 2.736,
+      "duration_seconds": 2.34,
       "reference": [
         "public/sfx/magic-voices/SERA/attack-1.ogg"
       ],
       "reference_pcm_sha256": "25c207ac47f263015b8f79a8bb59826d75274518040d424b010a3514da3aa687",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "f4aba4d178ccda58e1af58c4d97c82bfa9d691dee328619f8c93e553bcc4c010",
-      "review_pending": false
+      "sha256": "89b3ca296bd82102412b43b5959d62ade5ed5c24cb9277e72276b7b879bc5e0c",
+      "review_pending": false,
+      "tail_trim_seconds": 0.4388
     },
     "magic-ren/table-start": {
       "game_call": "table-start",
@@ -2915,14 +2964,15 @@
       "seed": 28985,
       "steps": 4,
       "requested_seconds": 2.7,
-      "duration_seconds": 2.736,
+      "duration_seconds": 2.412,
       "reference": [
         "public/sfx/magic-voices/REN/attack-1.ogg"
       ],
       "reference_pcm_sha256": "4b393cac3eb6cfad7f1041dafc4873e9f914365c1680dc8ff2d4e544d70061f8",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "e0f2c37865e19ae2062720750b512a5606124a7800cefe76d1bfbfebaabc34e7",
-      "review_pending": false
+      "sha256": "5a0cd886164a9b2c4470a73f2a9b75b1f36e04191d076a7be92d398b87e0282b",
+      "review_pending": false,
+      "tail_trim_seconds": 0.3898
     },
     "magic-soma/table-start": {
       "game_call": "table-start",
@@ -2973,14 +3023,15 @@
       "seed": 29015,
       "steps": 4,
       "requested_seconds": 2.7,
-      "duration_seconds": 2.736,
+      "duration_seconds": 2.412,
       "reference": [
         "public/sfx/magic-voices/RIKU/attack-1.ogg"
       ],
       "reference_pcm_sha256": "d87a55ca36efc795987131ef156d6d7804c16420348a9dd7e537425fde5ab660",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "c24eba55a1cd33b8704824741c58d28d17dd8e211f5736a14a54f73ec88912e6",
-      "review_pending": false
+      "sha256": "c1c4fd240aefe925b0aa26b7107bcf9e6d48ddab44399d5acb146fdd1628d173",
+      "review_pending": false,
+      "tail_trim_seconds": 0.3823
     },
     "magic-yamato/table-start": {
       "game_call": "table-start",
@@ -3009,14 +3060,15 @@
       "seed": 29035,
       "steps": 4,
       "requested_seconds": 2.7,
-      "duration_seconds": 2.736,
+      "duration_seconds": 2.34,
       "reference": [
         "public/sfx/magic-voices/LEON/attack-1.ogg"
       ],
       "reference_pcm_sha256": "133391ac5d6b73b6e1febb0c569a7fad9f2be7ccb890197b5daf5a83cbc67c75",
       "instructions": "自然な短い会話。参照音声と同じ声の日本語。語尾まで明瞭に。音楽なし。",
-      "sha256": "df37a0da70df39f3141ed03b5ce8e064125e534f6b4e49c3f9cd263f6a0894fc",
-      "review_pending": false
+      "sha256": "180f06be7a02b47911ff4b39c0394a27fe4c963f9e193716a3964d8b54421211",
+      "review_pending": false,
+      "tail_trim_seconds": 0.4583
     },
     "magic-elliot/table-start": {
       "game_call": "table-start",

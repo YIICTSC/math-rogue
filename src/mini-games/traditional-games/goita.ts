@@ -26,7 +26,7 @@ export interface GoitaState extends TableBase {
 }
 
 const partner = (seat: number) => (seat + 2) % 4;
-const previousSeat = (seat: number) => (seat + 3) % 4;
+const followingSeat = (seat: number) => (seat + 1) % 4;
 const pawns = (hand: number[]) => hand.filter((tile) => goitaKind(tile) === 0).length;
 
 function score(s: GoitaState, seat: number, points: number, special = false) {
@@ -139,7 +139,7 @@ export function applyGoita(s: GoitaState, seat: number, a: TableAction) {
     return true;
   }
   if (a.type === 'pass') {
-    s.turn = previousSeat(seat);
+    s.turn = followingSeat(seat);
     s.event = { key: 'pass', seat };
     return true;
   }
@@ -149,7 +149,7 @@ export function applyGoita(s: GoitaState, seat: number, a: TableAction) {
   remove(s.hands[seat], a.attack);
   s.rows[seat].push({ cover: free ? null : a.cover, attack: a.attack });
   s.attack = { seat, tile: a.attack };
-  s.turn = previousSeat(seat);
+  s.turn = followingSeat(seat);
   s.event = { key: 'attack', seat };
   if (!s.hands[seat].length) {
     const kind = goitaKind(a.attack);
