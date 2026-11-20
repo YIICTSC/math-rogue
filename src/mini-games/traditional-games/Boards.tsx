@@ -1,3 +1,4 @@
+import { DominoTable } from './DominoTable';
 import React, { useEffect, useRef, useState } from 'react';
 import type { LanguageMode } from '../../types';
 import {
@@ -30,17 +31,19 @@ type TileProps = {
   family: 'domino' | 'peeper' | 'goita';
   language: LanguageMode;
   selected?: boolean;
+  playable?: boolean;
   disabled?: boolean;
   onClick: () => void;
 };
 
-function TileButton({ tile, family, language, selected, disabled, onClick }: TileProps) {
+function TileButton({ tile, family, language, selected, playable, disabled, onClick }: TileProps) {
   return (
     <button
       className="tt-tile-button"
       type="button"
       aria-label={pieceLabel(tile, family, language)}
       aria-pressed={selected}
+      data-playable={playable || undefined}
       disabled={disabled}
       onClick={onClick}
     >
@@ -73,62 +76,22 @@ export function DominoBoard({ view: v, language, send, disabled }: Props<'domino
   return (
     <>
       <section className="tt-playfield tt-domino-field">
-        {v.hub === null ? (
-          <div className="tt-empty">
-            {l(
-              '最初の牌を置きましょう',
-              'Set down the opening tile',
-              'さいしょの はいを おきましょう',
-            )}
-          </div>
-        ) : (
-          <>
-            <div className="tt-domino-hub">
-              <Piece tile={v.hub} family="domino" />
-              {['five-up', 'sniff', 'seven-rocks', 'bergen', 'fives-threes'].includes(v.game) && (
-                <span>
-                  {l('端の合計', 'Exposed total', 'はしの ごうけい')} <b>{openPips(v)}</b>
-                </span>
-              )}
+        {['five-up', 'sniff', 'seven-rocks', 'bergen', 'fives-threes'].includes(v.game) &&
+          v.hub !== null && (
+            <div className="tt-domino-total">
+              {l('端の合計', 'Exposed total', 'はしの ごうけい')} <b>{openPips(v)}</b>
             </div>
-            <div className="tt-lanes">
-              {v.lines.map((line, i) => {
-                const target = chosen.find((a) => a.end === i);
-                const branch = line.parent >= 0 && v.lines[line.parent].tiles[line.anchor];
-                const priority = v.forced.includes(i);
-                return (
-                  <div className="tt-lane" key={i}>
-                    <span>
-                      {label(i)}
-                      {priority && ' ◆'}
-                    </span>
-                    {typeof branch === 'number' && (
-                      <span className="tt-branch">
-                        <span aria-hidden="true">↳</span>
-                        <Piece tile={branch} family="domino" />
-                      </span>
-                    )}
-                    <div className="tt-line">
-                      {line.tiles.map((id, j) => (
-                        <Piece key={j} tile={id} family="domino" />
-                      ))}
-                    </div>
-                    <button
-                      type="button"
-                      className="tt-end"
-                      disabled={!available || !target}
-                      onClick={() => target && send(target)}
-                      aria-label={label(i) + ' · ' + line.pip}
-                    >
-                      {line.pip}
-                      {!!target && <span aria-hidden="true">＋</span>}
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        )}
+          )}
+        <DominoTable
+          view={v}
+          language={language}
+          label={label}
+          targets={available ? chosen.map((a) => a.end) : []}
+          place={(end) => {
+            const target = chosen.find((a) => a.end === end);
+            if (available && target) send(target);
+          }}
+        />
       </section>
       <div className="tt-play-actions">
         {v.actions.some((a) => a.type === 'draw') && (
@@ -153,6 +116,13 @@ export function DominoBoard({ view: v, language, send, disabled }: Props<'domino
           </small>
         )}
       </div>
+      <small className="tt-playable-help">
+        {l(
+          '光っている牌を出せます',
+          'Highlighted tiles can be played',
+          'ひかっている はいを だせます',
+        )}
+      </small>
       <Hand label={l('手牌', 'Your tiles', 'てはい')}>
         {v.hand.map((id) => {
           const options = moves.filter((a) => a.tile === id);
@@ -163,6 +133,7 @@ export function DominoBoard({ view: v, language, send, disabled }: Props<'domino
               language={language}
               tile={id}
               selected={id === tile}
+              playable={available && options.length > 0}
               disabled={!available || !options.length}
               onClick={() =>
                 options.length === 1 ? send(options[0]) : pick(id === tile ? null : id)
@@ -252,6 +223,7 @@ export function FortyTwoBoard({ view: v, language, send, disabled }: Props<'fort
               family="domino"
               language={language}
               disabled={disabled || !action}
+              playable={!disabled && !!action}
               onClick={() => action && send(action)}
             />
           );

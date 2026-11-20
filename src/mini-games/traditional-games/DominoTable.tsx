@@ -1,0 +1,244 @@
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import type { LanguageMode } from '../../types';
+import type { TableView } from './engine';
+import { say } from './catalog';
+import { Piece } from './Pieces';
+import { layoutDomino, type DominoPoint } from './dominoLayout';
+
+type View = Extract<TableView, { kind: 'domino' }>;
+type Camera = { zoom: number; x: number; y: number };
+const fitted: Camera = { zoom: 1, x: 0, y: 0 };
+const distance = (a: DominoPoint, b: DominoPoint) => Math.hypot(a.x - b.x, a.y - b.y);
+export function DominoTable({
+  view,
+  language,
+  label,
+  targets,
+  place,
+}: {
+  view: View;
+  language: LanguageMode;
+  label: (line: number) => string;
+  targets: number[];
+  place: (line: number) => void;
+}) {
+  const l = (ja: string, en: string, kana?: string) => say(language, [ja, en, kana]);
+  const layout = useMemo(() => layoutDomino(view.hub, view.lines), [view.hub, view.lines]);
+  const svg = useRef<SVGSVGElement>(null);
+  const pointers = useRef(new Map<number, DominoPoint>());
+  const [ratio, setRatio] = useState(1.6);
+  const [camera, setCamera] = useState<Camera>(fitted);
+  const [auto, setAuto] = useState(true);
+  const bounds = layout.bounds;
+  const height = Math.max(bounds.height, bounds.width / ratio),
+    width = height * ratio;
+  const center = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
+  const fit = () => {
+    setCamera(fitted);
+    setAuto(true);
+  };
+  useEffect(() => {
+    if (auto) setCamera(fitted);
+  }, [auto, layout]);
+  useEffect(() => {
+    fit();
+  }, [view.round, view.game]);
+  useEffect(() => {
+    const element = svg.current;
+    if (!element) return;
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry.contentRect.height > 0)
+        setRatio(entry.contentRect.width / entry.contentRect.height);
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+  const zoomAt = (factor: number, client?: DominoPoint) => {
+    const rect = svg.current?.getBoundingClientRect();
+    setAuto(false);
+    setCamera((old) => {
+      const zoom = Math.max(1, Math.min(8, old.zoom * factor));
+      const x = rect && client ? (client.x - rect.left) / rect.width - 0.5 : 0;
+      const y = rect && client ? (client.y - rect.top) / rect.height - 0.5 : 0;
+      return {
+        zoom,
+        x: old.x + x * width * (1 / old.zoom - 1 / zoom),
+        y: old.y + y * height * (1 / old.zoom - 1 / zoom),
+      };
+    });
+  };
+  useEffect(() => {
+    const element = svg.current;
+    if (!element) return;
+    const wheel = (event: WheelEvent) => {
+      event.preventDefault();
+      zoomAt(Math.exp(-event.deltaY * 0.002), { x: event.clientX, y: event.clientY });
+    };
+    element.addEventListener('wheel', wheel, { passive: false });
+    return () => element.removeEventListener('wheel', wheel);
+  }, [width, height]);
+  const release = (event: React.PointerEvent<SVGSVGElement>) => {
+    pointers.current.delete(event.pointerId);
+    if (event.currentTarget.hasPointerCapture(event.pointerId))
+      event.currentTarget.releasePointerCapture(event.pointerId);
+  };
+  return (
+    <div className="tt-domino-table">
+      <div className="tt-board-tools">
+        <button type="button" onClick={fit} aria-pressed={auto}>
+          {l('全体表示', 'Fit table', 'ぜんたいひょうじ')}
+        </button>
+        <button
+          type="button"
+          onClick={() => zoomAt(1 / 1.4)}
+          disabled={camera.zoom <= 1}
+          aria-label={l('縮小', 'Zoom out', 'しゅくしょう')}
+        >
+          −
+        </button>
+        <span>{Math.round(camera.zoom * 100)}%</span>
+        <button
+          type="button"
+          onClick={() => zoomAt(1.4)}
+          disabled={camera.zoom >= 8}
+          aria-label={l('拡大', 'Zoom in', 'かくだい')}
+        >
+          ＋
+        </button>
+      </div>
+      <svg
+        ref={svg}
+        className="tt-domino-map"
+        role="group"
+        aria-label={l('ドミノの盤面', 'Domino table', 'ドミノの ばんめん')}
+        viewBox={`${center.x + camera.x - width / camera.zoom / 2} ${center.y + camera.y - height / camera.zoom / 2} ${width / camera.zoom} ${height / camera.zoom}`}
+        onDoubleClick={fit}
+        onPointerDown={(event) => {
+          if (event.button !== 0 || (event.target as Element).closest('button, [role="button"]'))
+            return;
+          event.currentTarget.setPointerCapture(event.pointerId);
+          pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+        }}
+        onPointerMove={(event) => {
+          const old = pointers.current.get(event.pointerId);
+          if (!old) return;
+          const before = [...pointers.current.values()];
+          const next = { x: event.clientX, y: event.clientY };
+          pointers.current.set(event.pointerId, next);
+          const after = [...pointers.current.values()];
+          const rect = event.currentTarget.getBoundingClientRect();
+          const a =
+            before.length > 1
+              ? { x: (before[0].x + before[1].x) / 2, y: (before[0].y + before[1].y) / 2 }
+              : old;
+          const b =
+            after.length > 1
+              ? { x: (after[0].x + after[1].x) / 2, y: (after[0].y + after[1].y) / 2 }
+              : next;
+          const factor =
+            before.length > 1
+              ? distance(after[0], after[1]) / Math.max(1, distance(before[0], before[1]))
+              : 1;
+          setAuto(false);
+          setCamera((current) => {
+            const zoom = Math.max(1, Math.min(8, current.zoom * factor));
+            return {
+              zoom,
+              x:
+                current.x +
+                (((a.x - rect.left) / rect.width - 0.5) * width) / current.zoom -
+                (((b.x - rect.left) / rect.width - 0.5) * width) / zoom,
+              y:
+                current.y +
+                (((a.y - rect.top) / rect.height - 0.5) * height) / current.zoom -
+                (((b.y - rect.top) / rect.height - 0.5) * height) / zoom,
+            };
+          });
+        }}
+        onPointerUp={release}
+        onPointerCancel={release}
+        onLostPointerCapture={(event) => pointers.current.delete(event.pointerId)}
+      >
+        <g className="tt-domino-connections" aria-hidden="true">
+          {layout.links.map((d, i) => (
+            <path d={d} key={i} />
+          ))}
+        </g>
+        {layout.labels.map((point) => (
+          <text key={point.line} x={point.x - 38} y={point.y} className="tt-domino-line-label">
+            {label(point.line)}
+            {view.forced.includes(point.line) ? ' ◆' : ''}
+          </text>
+        ))}
+        {layout.nodes.map((node) => (
+          <foreignObject
+            key={node.key}
+            x={node.x - 38}
+            y={node.y - 19}
+            width="76"
+            height="38"
+            className="tt-domino-map-tile"
+            data-tile={node.tile}
+          >
+            <Piece tile={node.tile} family="domino" />
+          </foreignObject>
+        ))}
+        {layout.ends.map((end) => (
+          <g
+            key={end.line}
+            className="tt-domino-map-end"
+            data-target={targets.includes(end.line)}
+            role="button"
+            tabIndex={targets.includes(end.line) ? 0 : -1}
+            aria-disabled={!targets.includes(end.line)}
+            aria-label={label(end.line) + ' · ' + end.pip}
+            onClick={() => targets.includes(end.line) && place(end.line)}
+            onKeyDown={(event) => {
+              if ((event.key === 'Enter' || event.key === ' ') && targets.includes(end.line)) {
+                event.preventDefault();
+                place(end.line);
+              }
+            }}
+            transform={`translate(${end.x},${end.y})`}
+          >
+            <circle r="20" />
+            <text textAnchor="middle" dominantBaseline="central">
+              {end.pip}
+            </text>
+          </g>
+        ))}
+        {view.hub === null && (
+          <text textAnchor="middle" dominantBaseline="central" className="tt-domino-line-label">
+            {l(
+              '最初の牌を置きましょう',
+              'Set down the opening tile',
+              'さいしょの はいを おきましょう',
+            )}
+          </text>
+        )}
+      </svg>
+      <small className="tt-map-help">
+        {l(
+          'ドラッグで移動・2本指で拡大縮小',
+          'Drag to pan · Pinch or scroll to zoom',
+          'ドラッグで いどう・2ほんゆびで かくだいしゅくしょう',
+        )}
+      </small>
+      <div className="tt-domino-ends">
+        {layout.ends.map((end) => (
+          <button
+            type="button"
+            key={end.line}
+            className="tt-end"
+            disabled={!targets.includes(end.line)}
+            onClick={() => place(end.line)}
+          >
+            {label(end.line)}
+            {view.forced.includes(end.line) ? ' ◆' : ''} · <b>{end.pip}</b>
+            {targets.includes(end.line) ? ' ＋' : ''}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}

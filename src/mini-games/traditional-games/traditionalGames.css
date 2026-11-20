@@ -340,55 +340,6 @@
   min-height: 96px;
   text-shadow: 0 2px 5px #100d12;
 }
-.tt-domino-hub {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 8px;
-}
-.tt-lanes {
-  display: grid;
-  gap: 5px;
-}
-.tt-lane {
-  display: grid;
-  grid-template-columns: minmax(48px, max-content) auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 5px;
-  min-width: 0;
-  border-radius: 4px;
-  background: #08201b91;
-}
-.tt-lane > span {
-  max-width: 12ch;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.8em;
-}
-.tt-branch {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-.tt-line {
-  grid-column: 3;
-  display: flex;
-  gap: 2px;
-  min-width: 0;
-  overflow-x: auto;
-}
-.tt-line > * {
-  flex-shrink: 0;
-}
-.tt-lane .tt-end {
-  grid-column: 4;
-  min-width: 38px;
-  min-height: 33px;
-  padding: 2px 6px;
-}
 .tt-end:not(:disabled) {
   color: #17120b;
   background: #f7d895;
@@ -446,9 +397,6 @@
   aspect-ratio: 1.86;
   background-image: var(--tt-domino-art);
   justify-content: space-around;
-}
-.tt-domino-hub .tt-piece {
-  width: clamp(57px, 8.5vw, 91px);
 }
 .tt-pips {
   display: grid;
@@ -1039,4 +987,157 @@
  .tt-title h1 { top: 16%; font-size: 34px; }
  .tt-title-menu { left: auto; right: 4%; transform: none; width: min(40%,350px); gap: 6px; }
  .traditional-tables .tt-title-menu button { min-height: 40px; }
+}
+
+/* The table camera fits every branch, while hands and placement controls keep their size. */
+.tt-domino-field {
+  padding: 8px;
+}
+.tt-domino-table {
+  min-width: 0;
+}
+.tt-board-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.tt-board-tools button {
+  min-height: 40px;
+  min-width: 42px;
+  padding: 5px 10px;
+}
+.tt-board-tools button[aria-pressed='true'] {
+  border-color: #b4f5b8;
+  background: #245e46;
+}
+.tt-board-tools span {
+  min-width: 3.5em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.tt-domino-map {
+  display: block;
+  width: 100%;
+  height: clamp(250px, 43dvh, 440px);
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+}
+.tt-domino-map:active {
+  cursor: grabbing;
+}
+.tt-domino-connections path {
+  fill: none;
+  stroke: #eee1bd;
+  stroke-width: 7px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tt-domino-map-tile {
+  overflow: visible;
+  pointer-events: none;
+}
+.tt-domino-map-tile .tt-domino {
+  width: 76px;
+  height: 38px;
+  aspect-ratio: auto;
+  border: 1px solid #a29477;
+  box-shadow: 0 2px 3px #0007;
+}
+.tt-domino-line-label {
+  fill: #fff2cf;
+  font:
+    16px system-ui,
+    sans-serif;
+  paint-order: stroke;
+  stroke: #16271e;
+  stroke-width: 3px;
+}
+.tt-domino-map-end circle {
+  fill: #17392e;
+  stroke: #afc3ad;
+  stroke-width: 2px;
+}
+.tt-domino-map-end text {
+  fill: #fff6d9;
+  font:
+    bold 19px system-ui,
+    sans-serif;
+}
+.tt-domino-map-end[data-target='true'] circle {
+  fill: #ffe198;
+  stroke: #fff5ce;
+  stroke-width: 4px;
+}
+.tt-domino-map-end[data-target='true'] text {
+  fill: #14251d;
+}
+.tt-map-help {
+  display: block;
+  text-align: center;
+  color: var(--tt-muted);
+  margin: 0 0 8px;
+}
+.tt-domino-ends {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tt-domino-ends button {
+  min-height: 40px;
+  padding: 6px 10px;
+}
+.tt-domino-total {
+  text-align: center;
+  color: var(--tt-gold);
+}
+.tt-playable-help {
+  color: #c6f8bf;
+}
+.traditional-tables .tt-tile-button[data-playable='true'] {
+  position: relative;
+  border-color: #21833e;
+  outline: 2px solid #79e88d;
+  outline-offset: 1px;
+  background: #e5ffd9;
+  box-shadow:
+    0 0 10px #8dfa9970,
+    0 3px 3px #0005;
+}
+.traditional-tables .tt-tile-button[data-playable='true']::after {
+  content: '✓';
+  position: absolute;
+  right: -5px;
+  top: -7px;
+  width: 19px;
+  height: 19px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #176333;
+  color: white;
+  border: 1px solid #d9ffd5;
+  font:
+    bold 13px system-ui,
+    sans-serif;
+}
+.traditional-tables .tt-tile-button[data-playable='true'][aria-pressed='true'] {
+  border-color: #066c94;
+  outline: 3px solid #58d7ff;
+  background: #ffe49a;
+}
+@media (orientation: landscape) and (max-height: 550px) {
+  .tt-domino-map {
+    height: 250px;
+  }
+}
+
+.tt-domino-map-end[data-target='true'] {
+  cursor: pointer;
+}
+.tt-domino-map-end:focus-visible circle {
+  stroke: #58d7ff;
+  stroke-width: 5px;
 }
