@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { LanguageMode } from '../../types';
 import type { TableView } from './engine';
 import { say } from './catalog';
-import { Piece } from './Pieces';
+import { Piece, tableArt } from './Pieces';
 import { layoutDomino, type DominoPoint } from './dominoLayout';
 
 type View = Extract<TableView, { kind: 'domino' }>;
@@ -22,6 +22,7 @@ export function DominoTable({
   targets: number[];
   place: (line: number) => void;
 }) {
+  const grain = useId().replace(/:/g, '');
   const l = (ja: string, en: string, kana?: string) => say(language, [ja, en, kana]);
   const layout = useMemo(() => layoutDomino(view.hub, view.lines), [view.hub, view.lines]);
   const svg = useRef<SVGSVGElement>(null);
@@ -159,24 +160,48 @@ export function DominoTable({
         onPointerCancel={release}
         onLostPointerCapture={(event) => pointers.current.delete(event.pointerId)}
       >
-        <g className="tt-domino-connections" aria-hidden="true">
-          {layout.links.map((d, i) => (
-            <path d={d} key={i} />
-          ))}
-        </g>
+        {layout.engine && (
+          <>
+            <defs>
+              <pattern
+                id={grain}
+                width="220"
+                height="220"
+                patternUnits="userSpaceOnUse"
+                x="-110"
+                y="-110"
+              >
+                <image href={tableArt('maple')} width="220" height="220" />
+              </pattern>
+            </defs>
+            <path
+              className="tt-domino-engine"
+              d="M-45,-105H45L105,-45V45L45,105H-45L-105,45V-45Z"
+              fill={`url(#${grain})`}
+            />
+          </>
+        )}
         {layout.labels.map((point) => (
-          <text key={point.line} x={point.x - 38} y={point.y} className="tt-domino-line-label">
-            {label(point.line)}
-            {view.forced.includes(point.line) ? ' ◆' : ''}
+          <text
+            key={point.line}
+            x={point.x}
+            y={point.y}
+            className="tt-domino-slot-label"
+            textAnchor="middle"
+            dominantBaseline="central"
+          >
+            <title>{label(point.line)}</title>
+            {point.line === view.players.length ? '★' : point.line + 1}
           </text>
         ))}
         {layout.nodes.map((node) => (
           <foreignObject
             key={node.key}
-            x={node.x - 38}
-            y={node.y - 19}
-            width="76"
-            height="38"
+            x={-node.width / 2}
+            y={-node.height / 2}
+            width={node.width}
+            height={node.height}
+            transform={`translate(${node.x},${node.y}) rotate(${(node.angle * 180) / Math.PI})`}
             className="tt-domino-map-tile"
             data-tile={node.tile}
           >
@@ -201,22 +226,22 @@ export function DominoTable({
             }}
             transform={`translate(${end.x},${end.y})`}
           >
-            <circle r="20" />
+            <circle r="15" />
             <text textAnchor="middle" dominantBaseline="central">
               {end.pip}
             </text>
           </g>
         ))}
-        {view.hub === null && (
-          <text textAnchor="middle" dominantBaseline="central" className="tt-domino-line-label">
-            {l(
-              '最初の牌を置きましょう',
-              'Set down the opening tile',
-              'さいしょの はいを おきましょう',
-            )}
-          </text>
-        )}
       </svg>
+      {view.hub === null && (
+        <div className="tt-domino-opening">
+          {l(
+            '最初の牌を置きましょう',
+            'Set down the opening tile',
+            'さいしょの はいを おきましょう',
+          )}
+        </div>
+      )}
       <small className="tt-map-help">
         {l(
           'ドラッグで移動・2本指で拡大縮小',
@@ -225,19 +250,21 @@ export function DominoTable({
         )}
       </small>
       <div className="tt-domino-ends">
-        {layout.ends.map((end) => (
-          <button
-            type="button"
-            key={end.line}
-            className="tt-end"
-            disabled={!targets.includes(end.line)}
-            onClick={() => place(end.line)}
-          >
-            {label(end.line)}
-            {view.forced.includes(end.line) ? ' ◆' : ''} · <b>{end.pip}</b>
-            {targets.includes(end.line) ? ' ＋' : ''}
-          </button>
-        ))}
+        {layout.ends
+          .filter((end) => targets.includes(end.line))
+          .map((end) => (
+            <button
+              type="button"
+              key={end.line}
+              className="tt-end"
+              disabled={!targets.includes(end.line)}
+              onClick={() => place(end.line)}
+            >
+              {label(end.line)}
+              {view.forced.includes(end.line) ? ' ◆' : ''} · <b>{end.pip}</b>
+              {targets.includes(end.line) ? ' ＋' : ''}
+            </button>
+          ))}
       </div>
     </div>
   );

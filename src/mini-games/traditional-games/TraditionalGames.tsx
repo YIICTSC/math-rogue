@@ -461,7 +461,8 @@ export default function TraditionalGames({
 
   return (
     <main
-      className={`traditional-tables tt-theme-${family.id}`}
+      className={`traditional-tables tt-theme-${family.id}${current ? ' tt-playing' : ''}`}
+      data-table-kind={current?.kind}
       data-gamepad-navigation-root
       data-table-game={activeGame}
       style={
@@ -545,12 +546,14 @@ export default function TraditionalGames({
                   </span>
                 )}
               </div>
-              <TableBoard
-                view={current}
-                language={languageMode}
-                send={(action) => room.current?.command(action)}
-                disabled={error === 'HOST_DISCONNECTED'}
-              />
+              <div className="tt-table-area">
+                <TableBoard
+                  view={current}
+                  language={languageMode}
+                  send={(action) => room.current?.command(action)}
+                  disabled={error === 'HOST_DISCONNECTED'}
+                />
+              </div>
               {event && eventCopy[event.key] && (
                 <div className="tt-last-play" data-event={event.key} role="status">
                   <b>{current.players[event.seat]?.name}</b> ·{' '}

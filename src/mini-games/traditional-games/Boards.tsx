@@ -60,6 +60,7 @@ function Hand({ children, label }: { children: React.ReactNode; label: string })
 }
 export function DominoBoard({ view: v, language, send, disabled }: Props<'domino'>) {
   const [tile, pick] = useState<number | null>(null);
+  useEffect(() => pick(null), [v.revision]);
   const l = (ja: string, en: string, kana?: string) => say(language, [ja, en, kana]);
   const moves = v.actions.filter((a) => a.type === 'place');
   const chosen = moves.filter((a) => a.tile === tile);
@@ -732,7 +733,7 @@ export function TableBoard({
   const phaseKey = view.game + '-' + view.revision;
   switch (view.kind) {
     case 'domino':
-      return <DominoBoard key={phaseKey} view={view} {...props} />;
+      return <DominoBoard key={view.game + '-' + view.round} view={view} {...props} />;
     case 'forty-two':
       return <FortyTwoBoard view={view} {...props} />;
     case 'peeper':

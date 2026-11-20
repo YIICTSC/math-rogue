@@ -19,10 +19,21 @@ const dotLayouts: number[][] = [
   [0, 1, 2, 3, 4, 5, 6, 7, 8],
 ];
 const pips = (value: number) =>
-  value <= 9 ? (
-    <span className="tt-pips" aria-hidden="true">
-      {Array.from({ length: 9 }, (_, i) => (
-        <i key={i} className={dotLayouts[value].includes(i) ? 'tt-dot' : undefined} />
+  value <= 12 ? (
+    <span className={value > 9 ? 'tt-pips tt-pips-wide' : 'tt-pips'} aria-hidden="true">
+      {Array.from({ length: value > 9 ? 12 : 9 }, (_, i) => (
+        <i
+          key={i}
+          className={
+            (
+              value > 9
+                ? value === 12 || (i !== 5 && (value === 11 || i !== 6))
+                : dotLayouts[value].includes(i)
+            )
+              ? 'tt-dot'
+              : undefined
+          }
+        />
       ))}
     </span>
   ) : (

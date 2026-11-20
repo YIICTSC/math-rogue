@@ -1028,13 +1028,6 @@
 .tt-domino-map:active {
   cursor: grabbing;
 }
-.tt-domino-connections path {
-  fill: none;
-  stroke: #eee1bd;
-  stroke-width: 7px;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
 .tt-domino-map-tile {
   overflow: visible;
   pointer-events: none;
@@ -1140,4 +1133,456 @@
 .tt-domino-map-end:focus-visible circle {
   stroke: #58d7ff;
   stroke-width: 5px;
+}
+
+/* During a match, reserve space for the hand and controls before sizing the table. */
+.traditional-tables.tt-playing {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+  padding: max(6px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right))
+    max(6px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+}
+.tt-playing .tt-nav {
+  flex: 0 0 auto;
+  margin-bottom: 0;
+  min-height: 34px;
+}
+.tt-playing .tt-nav button {
+  min-height: 34px;
+  padding: 3px 8px;
+}
+.tt-playing .tt-nav > strong {
+  font-size: clamp(13px, 2.7vw, 19px);
+}
+.tt-playing .tt-match {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 4px;
+}
+.tt-playing .tt-seats {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 3px;
+}
+.tt-playing .tt-seat {
+  flex: 1 0 65px;
+  padding: 3px 5px;
+  gap: 4px;
+  font-size: 11px;
+}
+.tt-playing .tt-seat .cc-face {
+  width: 24px;
+  height: 24px;
+}
+.tt-playing .tt-seat > b {
+  font-size: 12px;
+}
+.tt-playing .tt-seat strong {
+  max-width: 16ch;
+}
+.tt-playing .tt-match-bar {
+  gap: 4px 10px;
+  font-size: 12px;
+}
+.tt-playing .tt-last-play {
+  min-height: 22px;
+  padding: 2px 6px;
+  gap: 3px;
+  font-size: 12px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.tt-playing .tt-last-play b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tt-table-area {
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.tt-table-area > .tt-playfield {
+  flex: 1;
+  min-height: 0;
+  padding: 6px;
+  overflow: hidden;
+}
+.tt-table-area > .tt-hand {
+  flex: 0 0 auto;
+  max-height: min(24dvh, 155px);
+  overflow: auto;
+  padding: 6px;
+  gap: 6px;
+  margin: 0;
+}
+.tt-table-area > .tt-play-actions {
+  flex: 0 0 auto;
+  max-height: 100px;
+  overflow: auto;
+  gap: 5px;
+}
+.tt-table-area > .tt-play-actions button {
+  min-height: 36px;
+  padding: 4px 9px;
+}
+.tt-table-area > small {
+  flex: 0 0 auto;
+  font-size: 11px;
+}
+.tt-table-area .tt-hand .tt-domino {
+  width: clamp(49px, 7vw, 68px);
+}
+.tt-table-area .tt-hand .tt-peeper {
+  width: clamp(29px, 5vw, 40px);
+  font-size: 21px;
+}
+.tt-table-area .tt-hand .tt-goita {
+  width: 29px;
+  font-size: 23px;
+}
+.tt-playing .tt-tile-button {
+  padding: 3px;
+  min-height: 36px;
+}
+.tt-playing .tt-domino-field,
+.tt-playing .tt-domino-table {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.tt-playing .tt-domino-table {
+  flex: 1;
+}
+.tt-playing .tt-domino-map {
+  flex: 1;
+  min-height: 0;
+  height: 0;
+}
+.tt-playing .tt-board-tools {
+  gap: 4px;
+  flex: 0 0 auto;
+}
+.tt-playing .tt-board-tools button {
+  min-height: 32px;
+  padding: 3px 8px;
+}
+.tt-playing .tt-map-help {
+  font-size: 10px;
+  margin: 2px 0;
+}
+.tt-playing .tt-domino-ends {
+  flex: 0 0 auto;
+  max-height: 80px;
+  overflow: auto;
+}
+.tt-playing .tt-domino-ends:empty {
+  display: none;
+}
+.tt-playing .tt-domino-ends button {
+  min-height: 34px;
+}
+.tt-playing .tt-trick-field,
+.tt-playing .tt-peeper-field {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+.tt-playing .tt-trick-tiles {
+  max-width: 100%;
+  max-height: 100%;
+  overflow: auto;
+}
+.tt-playing .tt-goita-field {
+  display: flex;
+  flex-direction: column;
+  container-type: size;
+}
+.tt-playing .tt-goita-team-scores {
+  flex: 0 0 auto;
+  margin-bottom: 4px;
+  gap: 4px;
+}
+.tt-playing .tt-goita-team-scores > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 3px 6px;
+  font-size: 11px;
+}
+.tt-playing .tt-goita-team-scores strong {
+  font-size: 13px;
+  white-space: nowrap;
+}
+.tt-playing .tt-goita-table {
+  flex: 1;
+  min-height: 0;
+  grid-template-rows: minmax(0, 1fr) minmax(64px, 0.9fr) minmax(0, 1fr);
+  gap: 4px;
+}
+.tt-playing .tt-goita-partners {
+  min-height: 0;
+}
+.tt-playing .tt-goita-player {
+  padding: 1px;
+}
+.tt-playing .tt-goita-player .cc-face {
+  width: 21px;
+  height: 21px;
+  min-width: 21px;
+}
+.tt-playing .tt-goita-table .tt-goita-row {
+  padding: 2px;
+  font-size: 10px;
+}
+.tt-playing .tt-goita-role {
+  margin-bottom: 1px;
+  font-size: 10px;
+}
+.tt-playing .tt-goita-field .tt-goita-table .tt-goita-column > .tt-piece,
+.tt-playing .tt-goita-table .tt-goita-column > i {
+  width: min(100%, clamp(9px, 4cqh, 24px));
+  font-size: clamp(11px, 4cqh, 19px);
+}
+.tt-playing .tt-goita-award {
+  flex: 0 0 auto;
+  max-height: 80px;
+  overflow: auto;
+  font-size: 12px;
+}
+.tt-playing .tt-goita-award .tt-goita {
+  width: 20px;
+  font-size: 17px;
+}
+.tt-playing .tt-round-summary {
+  position: absolute;
+  z-index: 2;
+  inset: auto 0 0;
+  max-height: 45%;
+  overflow: auto;
+  padding: 10px;
+  box-shadow: 0 -5px 20px #0008;
+  border-color: var(--tt-gold);
+}
+.tt-playing .tt-croki-layout {
+  flex: 1;
+  min-height: 0;
+  container-type: size;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 5px;
+}
+.tt-playing .tt-croki-board {
+  width: min(100%, calc(100cqh - 150px));
+}
+.tt-playing .tt-shot-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px 8px;
+  padding: 6px;
+  font-size: 12px;
+}
+.tt-playing .tt-shot-controls .tt-pull-help,
+.tt-playing .tt-croki-points {
+  grid-column: 1 / -1;
+}
+.tt-playing .tt-pull-help {
+  font-size: 11px;
+  line-height: 1.25;
+  margin: 0;
+}
+.tt-playing .tt-shot-controls label {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+.tt-playing .tt-shot-controls input[type='range'] {
+  min-width: 0;
+  min-height: 24px;
+  margin: 0;
+}
+.tt-playing .tt-shot-controls > button {
+  grid-column: 1 / -1;
+  min-height: 36px;
+  padding: 3px;
+}
+@media (orientation: landscape) and (min-width: 480px) {
+  .tt-playing .tt-table-area {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(215px, 32%);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 6px;
+  }
+  .tt-playing .tt-table-area > .tt-playfield {
+    grid-column: 1;
+    grid-row: 1 / -1;
+  }
+  .tt-playing .tt-table-area > .tt-play-actions {
+    grid-column: 2;
+    grid-row: 1;
+    max-height: min(32dvh, 130px);
+  }
+  .tt-playing .tt-table-area > .tt-hand {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: start;
+    max-height: 100%;
+  }
+  .tt-playing .tt-table-area > small {
+    grid-column: 2;
+    grid-row: 3;
+  }
+  .tt-playing .tt-seat {
+    flex-basis: 70px;
+  }
+  .tt-playing .tt-seat .cc-face {
+    width: 21px;
+    height: 21px;
+  }
+  .tt-playing .tt-croki-layout {
+    grid-column: 1 / -1;
+    grid-row: 1 / -1;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 32%);
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .tt-playing .tt-croki-board {
+    width: min(100%, 100cqh);
+  }
+  .tt-playing .tt-shot-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: 100%;
+    overflow: auto;
+  }
+  .tt-playing .tt-shot-controls > button {
+    grid-column: auto;
+    align-self: end;
+  }
+}
+.tt-playing .tt-goita-table {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+.tt-playing .tt-goita-table .tt-goita-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 3px;
+}
+.tt-playing .tt-goita-table .tt-goita-row small,
+.tt-playing .tt-goita-role {
+  font-size: 10px;
+  line-height: 1.2;
+  margin: 0;
+}
+.tt-playing .tt-goita-table .tt-goita-columns {
+  grid-column: 1 / -1;
+}
+.tt-playing .tt-goita-field .tt-goita-table .tt-goita-column > .tt-piece,
+.tt-playing .tt-goita-table .tt-goita-column > i {
+  width: min(100%, clamp(8px, 5.5cqh, 26px));
+  font-size: clamp(10px, 5.5cqh, 21px);
+}
+.tt-playing .tt-goita-player .cc-face {
+  width: clamp(12px, 6cqh, 21px);
+  height: clamp(12px, 6cqh, 21px);
+  min-width: 0;
+}
+@media (max-width: 480px) {
+  .tt-playing .tt-seats:has(> .tt-seat:nth-child(5)) {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    overflow: visible;
+  }
+  .tt-playing .tt-seats:has(> .tt-seat:nth-child(5)) .cc-face {
+    display: none;
+  }
+  .tt-playing .tt-seats:has(> .tt-seat:nth-child(5)) .tt-seat {
+    font-size: 10px;
+    padding-block: 2px;
+  }
+}
+/* Ivory faces, bevels and recessed pips retain their scale in the overhead camera. */
+.tt-piece.tt-domino {
+  position: relative;
+  background: linear-gradient(145deg, #fffef7 0%, #f6f1e5 58%, #e4dcc9 100%);
+  border: 1px solid #c5baa4;
+  border-radius: 4px;
+  box-shadow:
+    0 2px 0 #b2a48b,
+    1px 3px 3px #0007,
+    inset 0 1px 1px #fff,
+    inset 0 -1px 1px #d4c9b2;
+  text-shadow: none;
+}
+.tt-piece.tt-domino::after {
+  content: '';
+  position: absolute;
+  left: calc(50% - 0.5px);
+  top: 10%;
+  bottom: 10%;
+  width: 1px;
+  background: #a3988466;
+  box-shadow: 1px 0 0 #fff9;
+}
+.tt-domino .tt-pips .tt-dot {
+  width: 64%;
+  background: radial-gradient(circle at 65% 70%, #30312f, #080b09 75%);
+  box-shadow:
+    inset 0 1px 1px #000,
+    0 0.5px 0.5px #fff;
+}
+.tt-domino-map-tile .tt-piece.tt-domino {
+  width: 64px;
+  height: 32px;
+}
+.tt-domino-engine {
+  stroke: #665032;
+  stroke-width: 4px;
+  filter: drop-shadow(1px 4px 3px #0008);
+}
+.tt-domino-map-end {
+  opacity: 0.35;
+}
+.tt-domino-map-end[data-target='true'] {
+  opacity: 1;
+}
+.tt-domino-map-end text {
+  font-size: 16px;
+}
+.tt-domino-field {
+  background:
+    radial-gradient(ellipse at 45% 35%, #39795b88, #0c3528c9),
+    var(--tt-surface) center / cover;
+  border-color: #7a8268;
+  box-shadow:
+    inset 0 0 24px #071e17b3,
+    inset 0 1px 0 #d7d6a640;
+}
+.tt-domino-map-end:not([data-target='true']) {
+  opacity: 0;
+  pointer-events: none;
+}
+.tt-pips.tt-pips-wide {
+  grid-template-columns: repeat(4, 1fr);
+  aspect-ratio: 4/3;
+}
+.tt-domino-slot-label {
+  fill: #3c2c15;
+  font:
+    bold 15px system-ui,
+    sans-serif;
+}
+.tt-domino-table { position: relative; }
+.tt-domino-opening {
+  position: absolute; inset: 44px 12px 28px; display: grid; place-items: center;
+  text-align: center; font-size: clamp(13px, 2vw, 17px); pointer-events: none;
+  text-shadow: 0 2px 4px #0008;
 }

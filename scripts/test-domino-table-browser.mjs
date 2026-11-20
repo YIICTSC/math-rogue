@@ -35,14 +35,27 @@ try {
   const base = '/src/mini-games/traditional-games/';
   const engine = await vite.ssrLoadModule(base + 'engine.ts');
   const model = await vite.ssrLoadModule(base + 'model.ts');
-  const { layoutDomino } = await vite.ssrLoadModule(base + 'dominoLayout.ts');
+  const { layoutDomino, dominoCorners, dominoOverlap } = await vite.ssrLoadModule(
+    base + 'dominoLayout.ts',
+  );
   const voices = await vite.ssrLoadModule('/src/data/cardClubVoices.ts');
+  const edgeDistance = (p, a, b) => {
+    const dx = b.x - a.x,
+      dy = b.y - a.y;
+    const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy)));
+    return Math.hypot(p.x - a.x - t * dx, p.y - a.y - t * dy);
+  };
+  const gap = (a, b) =>
+    Math.min(
+      ...a.flatMap((p) => b.map((q, i) => edgeDistance(p, q, b[(i + 1) % 4]))),
+      ...b.flatMap((p) => a.map((q, i) => edgeDistance(p, q, a[(i + 1) % 4]))),
+    );
   const fixtures = [];
   let checked = 0;
   for (const game of model.DOMINO_GAMES.filter((g) => g !== 'forty-two')) {
     let best,
       bestCount = -1;
-    for (let seed = 1; seed <= 8; seed++) {
+    for (let seed = 1; seed <= Number(process.env.DOMINO_LAYOUT_SEEDS || 8); seed++) {
       const n = model.seatsFor(game).at(-1);
       const state = engine.createTable(
         game,
@@ -55,28 +68,40 @@ try {
         seed,
       );
       while (state.phase === 'play') {
-        const layout = layoutDomino(state.hub, state.lines);
+        let layout;
+        try {
+          layout = layoutDomino(state.hub, state.lines);
+        } catch (e) {
+          console.error(game, seed, state.hub, JSON.stringify(state.lines));
+          throw e;
+        }
         const count =
           state.lines.reduce((n, line) => n + line.tiles.length, 0) + Number(state.hub !== null);
         assert.equal(layout.nodes.length, count);
         assert.equal(layout.ends.length, state.hub === null ? 0 : state.lines.length);
         assert.equal(new Set(layout.nodes.map((node) => node.key)).size, count);
-        for (const node of [...layout.nodes, ...layout.ends]) {
-          assert(
-            node.x - 38 >= layout.bounds.x && node.x + 38 <= layout.bounds.x + layout.bounds.width,
-          );
-          assert(
-            node.y - 19 >= layout.bounds.y && node.y + 19 <= layout.bounds.y + layout.bounds.height,
-          );
+        for (const node of [...layout.nodes.flatMap(dominoCorners), ...layout.ends]) {
+          assert(node.x >= layout.bounds.x && node.x <= layout.bounds.x + layout.bounds.width);
+          assert(node.y >= layout.bounds.y && node.y <= layout.bounds.y + layout.bounds.height);
         }
         for (let i = 0; i < layout.nodes.length; i++) {
-          for (let j = 0; j < i; j++) {
-            assert(
-              Math.abs(layout.nodes[i].x - layout.nodes[j].x) >= 76 ||
-                Math.abs(layout.nodes[i].y - layout.nodes[j].y) >= 38,
-              game + ': overlapping tiles',
-            );
-          }
+          for (let j = 0; j < i; j++)
+            assert(!dominoOverlap(layout.nodes[i], layout.nodes[j]), game + ': overlapping tiles');
+        }
+        for (const node of layout.nodes.filter((n) => n.key !== 'hub')) {
+          const [li, j] = node.key.split(':').map(Number),
+            line = state.lines[li];
+          const parentKey = j
+            ? li + ':' + (j - 1)
+            : line.parent < 0
+              ? 'hub'
+              : line.parent + ':' + line.anchor;
+          const parent = layout.nodes.find((n) => n.key === parentKey);
+          assert(parent, 'missing connection');
+          const pip = parentKey === 'hub' && li === 0 ? parent.tile >> 4 : parent.tile & 15;
+          assert.equal(node.tile >> 4, pip, 'touching halves must match');
+          if (!(parentKey === 'hub' && layout.engine))
+            assert(gap(dominoCorners(node), dominoCorners(parent)) < 1.2, 'disconnected domino');
         }
         if (
           count > bestCount &&
@@ -89,6 +114,7 @@ try {
         assert(engine.playTableCpu(state));
       }
     }
+    console.log('Checked', game, checked);
     if (['competitive', 'chicken', 'mexican'].includes(game)) fixtures.push(best);
   }
   assert.equal(fixtures.length, 3);
@@ -133,6 +159,15 @@ createRoot(document.getElementById('root')!).render(<App/>);
       else await page.locator('.tt-domino-ends button:enabled').first().click();
     }
     assert.match(await page.locator('output').textContent(), /"type":"place"/);
+    assert(
+      await map.locator('.tt-domino-map-tile').evaluateAll((tiles) =>
+        tiles.every((el) => {
+          const tile = Number(el.getAttribute('data-tile'));
+          return el.querySelectorAll('.tt-dot').length === (tile >> 4) + (tile & 15);
+        }),
+      ),
+      'each face must show the actual pips, including double twelve',
+    );
     await map.scrollIntoViewIfNeeded();
     await page.screenshot({ path: scratch + '/' + game + '-portrait.png', fullPage: true });
   }
