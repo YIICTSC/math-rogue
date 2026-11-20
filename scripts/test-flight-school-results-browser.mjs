@@ -94,7 +94,9 @@ try {
   const page = await context.newPage();
   page.setDefaultTimeout(35000);
   page.on('pageerror', (e) => console.error('PAGE ERROR', e.message));
+  const shaderErrors = [];
   page.on('console', (m) => {
+    if (m.text().includes('Shader Error')) shaderErrors.push(m.text());
     if (m.type() === 'error') console.error('CONSOLE', m.text().slice(0, 300));
   });
   await page.goto('http://127.0.0.1:' + vite.httpServer.address().port + '/flight-result-qa');
@@ -106,10 +108,20 @@ try {
       button: 0,
       isPrimary: false,
     });
+  await page.evaluate(() => localStorage.setItem(
+    'learning-rogue:flight-school:routes:v1',
+    JSON.stringify({ 'KIX-UKB': 90, 'UKB-KIX': 90 }),
+  ));
   await page.getByRole('button', { name: '空港間フライト', exact: false }).tap();
+  await page.locator('.fs-route-plan select').first().selectOption('hnd-mmj');
+  const detail = page.waitForResponse((response) =>
+    response.url().includes('/corridors/hnd-mmj-') && response.ok(),
+  );
   await page.getByRole('button', { name: '座学と技能検定', exact: true }).tap();
   await page.getByRole('button', { name: 'QA 座学終了' }).tap();
   await page.locator('.fs-deck').waitFor();
+  await detail;
+  console.log('PASS long-haul corridor imagery loads while the flight deck is active.');
 
   await page.waitForTimeout(800);
   const held = await page.locator('.fs-ctl[data-flight-control="primary"]').boundingBox();
@@ -277,6 +289,7 @@ try {
     () => window.__flightQA?.flight.lesson.carrier && window.__flightQA?.patrol.tomcat,
   );
   assert.equal(await page.locator('.fs-cover').count(), 0);
+  assert.deepEqual(shaderErrors, []);
   console.log('PASS legacy log unlocks and carrier deck launch with selected F-14.');
 } finally {
   await browser?.close();

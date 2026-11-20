@@ -1,3 +1,4 @@
+import { corridorPhotos } from './corridorPhotos';
 import { makeFormation } from './combatScene';
 import type { Sortie } from './combat';
 import * as THREE from 'three';
@@ -32,6 +33,7 @@ export function makeRouteScene(
     return map;
   });
   const { region, grid, from, to } = route;
+  const corridor = corridorPhotos(region.key, textures[0]);
   const geometry = new THREE.PlaneGeometry(
     region.width,
     region.height,
@@ -45,21 +47,35 @@ export function makeRouteScene(
   const localCenter = (p: Route['from']) => new THREE.Vector2(center(p).x, center(p).z);
   const surface = new THREE.ShaderMaterial({
     uniforms: {
+      ...corridor.uniforms,
       wide: { value: textures[0] },
       departure: { value: textures[1] },
       arrival: { value: textures[2] },
       a: { value: carrier ? new THREE.Vector2(1e8, 1e8) : localCenter(from) },
       b: { value: localCenter(to) },
     },
-    vertexShader: `varying vec2 atlasUV; varying vec2 ground; varying float relief; varying float haze;
+    vertexShader: `varying vec2 atlasUV; varying vec2 ground; varying float relief; varying float haze; varying float closeView;
       void main(){atlasUV=uv;ground=position.xz;relief=clamp(dot(normal,normalize(vec3(-0.45,1.0,0.25))),0.,1.);
-        vec4 eye=modelViewMatrix*vec4(position,1.); haze=smoothstep(6000.,82000.,-eye.z);gl_Position=projectionMatrix*eye;}`,
+        vec4 eye=modelViewMatrix*vec4(position,1.); haze=smoothstep(6000.,82000.,-eye.z); closeView=1.-smoothstep(4200.,9000.,length(eye.xyz));gl_Position=projectionMatrix*eye;}`,
     fragmentShader: `uniform sampler2D wide,departure,arrival;uniform vec2 a,b;
-      varying vec2 atlasUV;varying vec2 ground;varying float relief;varying float haze;
+      uniform sampler2D corridorMaps[3]; uniform vec3 corridorBounds[3];
+      varying vec2 atlasUV;varying vec2 ground;varying float relief;varying float haze; varying float closeView;
       vec4 detail(sampler2D img,vec2 center){
         vec2 uv=(ground-center)*vec2(1.,-1.)/5200.+.5;vec2 edge=min(uv,1.-uv);
         return vec4(texture2D(img,clamp(uv,0.,1.)).rgb,smoothstep(0.,.055,min(edge.x,edge.y)));}
+      vec4 corridorPhoto(sampler2D img,vec3 tile){
+        vec2 uv=(ground-tile.xy)*vec2(1.,-1.)/12000.+.5;
+        vec2 edge=min(uv,1.-uv);
+        float weight=smoothstep(0.,.14,min(edge.x,edge.y))*tile.z;
+        return vec4(texture2D(img,clamp(uv,0.,1.)).rgb*weight,weight);
+      }
       void main(){vec3 terrain=texture2D(wide,atlasUV).rgb;vec4 d=detail(departure,a),e=detail(arrival,b);
+        if (closeView>0. && corridorBounds[0].z+ corridorBounds[1].z+corridorBounds[2].z>0.) {
+        vec4 photo=corridorPhoto(corridorMaps[0],corridorBounds[0])
+          +corridorPhoto(corridorMaps[1],corridorBounds[1])
+          +corridorPhoto(corridorMaps[2],corridorBounds[2]);
+        terrain=mix(terrain,photo.rgb/max(photo.a,.0001),min(1.,photo.a)*closeView);
+        }
         terrain=mix(mix(terrain,d.rgb,d.a),e.rgb,e.a)*(.80+.27*relief);
         gl_FragColor=vec4(mix(terrain,vec3(.38,.57,.69),haze*.91),1.);
         #include <colorspace_fragment>
@@ -151,6 +167,7 @@ export function makeRouteScene(
       chase.y = Math.max(chase.y, surfaceHeight(route, chase.x, chase.z) + 3);
       // Follow the aircraft's translation immediately during accelerated cruise.
       camera.position.copy(chase);
+      corridor.update(chase.x, chase.z);
       look.set(s.x + fx * lead, s.y + s.pitch * 12, s.z + fz * lead);
       camera.lookAt(look);
       sky.position.copy(camera.position);
@@ -178,6 +195,7 @@ export function makeRouteScene(
       });
       geometrySet.forEach((g) => g.dispose());
       materialSet.forEach((m) => m.dispose());
+      corridor.dispose();
       textures.forEach((t) => t.dispose());
       renderer.dispose();
       if (!canvas.isConnected) renderer.forceContextLoss();
