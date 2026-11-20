@@ -1,3 +1,4 @@
+import type { TableMaterial } from '../../services/traditionalTableSound';
 import {
   addPoints,
   nextSeat,
@@ -11,6 +12,7 @@ import {
 export type Shot = Extract<TableAction, { type: 'shot' }>;
 export type Disc = { id: number; seat: number; x: number; y: number };
 type MovingDisc = Disc & { vx: number; vy: number; off: boolean; twenty: boolean };
+export type CrokinoleImpact = { frame: number; material: TableMaterial; strength: number };
 export type ShotReplay = { before: Disc[]; shot: Shot; seat: number; discId: number };
 export interface CrokinoleState extends TableBase {
   kind: 'crokinole';
@@ -106,6 +108,19 @@ export function resolveShot(
   const hadEnemy = before.some((d) => activeTeam(seat) !== activeTeam(d.seat));
   let enemyHit = false;
   const frames: Disc[][] = [];
+  const sounds: CrokinoleImpact[] = replay
+    ? [{ frame: 0, material: 'flick', strength: shot.power }]
+    : [];
+  const impact = (frame: number, material: TableMaterial, speed: number) => {
+    if (!replay || speed < 0.06) return;
+    const strength = Math.min(1, speed / 1.6);
+    const sampleFrame = Math.floor(frame / 8);
+    const previous = sounds
+      .slice(-8)
+      .find((s) => s.material === material && s.frame === sampleFrame);
+    if (previous) previous.strength = Math.max(previous.strength, strength);
+    else sounds.push({ frame: sampleFrame, material, strength });
+  };
   const dt = 1 / 150;
   for (let f = 0; f < 640; f++) {
     let moving = false;
@@ -121,10 +136,12 @@ export function resolveShot(
       d.vy *= factor;
       const dist = length(d.x, d.y);
       if (dist > 1 + DISC_R * 0.5) {
+        impact(f, 'drop', speed);
         d.off = true;
         continue;
       }
       if (dist < 0.026 && speed < 0.53) {
+        impact(f, 'pocket', 0.8);
         d.twenty = true;
         continue;
       }
@@ -140,6 +157,7 @@ export function resolveShot(
           d.x = peg.x + nx * radius;
           d.y = peg.y + ny * radius;
           if (impulse < 0) {
+            impact(f, 'peg', -impulse);
             d.vx -= 1.72 * impulse * nx;
             d.vy -= 1.72 * impulse * ny;
           }
@@ -164,6 +182,7 @@ export function resolveShot(
         b.y += ny * overlap;
         const speed = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
         if (speed <= 0) continue;
+        impact(f, 'wood', speed);
         touched.add(a.id);
         touched.add(b.id);
         if (activeTeam(a.seat) !== activeTeam(b.seat)) enemyHit = true;
@@ -189,7 +208,7 @@ export function resolveShot(
   const board = saved.filter((d) => inside(d) && discPoints(d) > 0).map(position);
   const sunk = saved.filter((d) => d.twenty).map((d) => d.seat);
   if (replay) frames.push(board);
-  return { board, sunk, valid, frames };
+  return { board, sunk, valid, frames, sounds };
 }
 
 const validShot = (a: Shot) =>

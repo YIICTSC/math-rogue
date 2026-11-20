@@ -1,3 +1,4 @@
+import { tableMaterialNames, nextMaterialTake, TABLE_MATERIAL_GAIN, materialFallback, type TableMaterial } from './traditionalTableSound';
 import academyBroadcastVoices from '../mini-games/academy-sports/broadcastVoices.generated.json';
 import {ACADEMY_VOICES} from '../mini-games/academy-sports/voiceCatalog';
 import {readPoints} from '../point-exchange/store';
@@ -104,6 +105,9 @@ const MINI_RUSH_FOLEY = 'mini-rush-foley';
 const MINI_RUSH_JINGLE = 'mini-rush-jingle';
 
 class AudioService {
+  private traditionalSoundGeneration = 0;
+  private traditionalSoundTake: Partial<Record<TableMaterial, number>> = {};
+  private htmlSfxLevels = new WeakMap<HTMLAudioElement, number>();
   private miniRushGeneration = 0;
   private rpgHeroVoice: {theme:'high-school'|'magic';heroId:string}|null=null;
   public setRpgHeroVoice(voice:{theme:'high-school'|'magic';heroId:string}|null){this.rpgHeroVoice=voice;}
@@ -564,7 +568,7 @@ class AudioService {
       this.activeHtmlSfx.forEach((audios, name) => {
           if (this.isVoiceSfxName(name)) return;
           audios.forEach(audio => {
-              audio.volume = Math.min(1, this.sfxVolume);
+              audio.volume = Math.min(1, this.sfxVolume * (this.htmlSfxLevels.get(audio) ?? 1));
               audio.muted = this.isMuted || this.sfxVolume <= 0;
           });
       });
@@ -1918,9 +1922,11 @@ class AudioService {
       overlap: boolean,
       generation: number,
       startDeadline = Infinity,
+      level = 1,
+      stillActive = () => true,
   ): Promise<boolean> {
       const lifecycle = this.appLifecycleGeneration;
-      const canPlay = () => performance.now() < startDeadline && !this.isMuted && this.appIsActive
+      const canPlay = () => stillActive() && performance.now() < startDeadline && !this.isMuted && this.appIsActive
           && lifecycle === this.appLifecycleGeneration
           && (typeof document === 'undefined' || !document.hidden)
           && this.getHtmlSfxVolume(name) > 0;
@@ -1932,7 +1938,8 @@ class AudioService {
           try {
               const audio = new Audio(path);
               audio.preload = 'auto';
-              const htmlVolume = Math.min(1, this.getHtmlSfxVolume(name));
+              const htmlVolume = Math.min(1, this.getHtmlSfxVolume(name) * level);
+              this.htmlSfxLevels.set(audio, level);
               audio.volume = htmlVolume;
               const didStart = await Promise.race([
                   audio.play().then(() => true).catch(() => false),
@@ -2103,7 +2110,7 @@ class AudioService {
       this.playSfxMp3(`rpg-life/${kind}`, () => this.playSound('select'), {maxDurationMs:kind==='reel'?1600:900,overlap:false});
   }
 
-  private playSfxMp3(name: string, fallback: () => void, options?: { maxDurationMs?: number; overlap?: boolean }) {
+  private playSfxMp3(name: string, fallback: () => void, options?: { maxDurationMs?: number; overlap?: boolean; volume?: number; maxDelayMs?: number; stillActive?: () => boolean }) {
       this.init();
       if (!this.ctx || !this.sfxGain) {
           fallback();
@@ -2111,24 +2118,27 @@ class AudioService {
       }
 
       const maxDurationMs = options?.maxDurationMs ?? 1400;
+      const volume = options?.volume ?? 1;
+      const deadline = options?.maxDelayMs === undefined ? Infinity : performance.now() + options.maxDelayMs;
       const overlap = options?.overlap ?? false;
       const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
       this.sfxPlaybackGenerations.set(name, generation);
 
       const lifecycle = this.appLifecycleGeneration;
       const canPlay = () => this.canPlaySfx() && lifecycle === this.appLifecycleGeneration
+          && performance.now() < deadline && (options?.stillActive?.() ?? true)
           && (overlap || this.sfxPlaybackGenerations.get(name) === generation);
       const startPlayback = () => {
           if (!canPlay()) return;
           const cached = this.sfxBuffers[name];
           if (cached && !this.foregroundRecoveryPromise && this.ctx?.state === 'running'
-              && this.startSfxSource(name, cached, maxDurationMs, overlap)) return;
+              && this.startSfxSource(name, cached, maxDurationMs, overlap, volume)) return;
 
           // Native media can still play while WebKit's context is interrupted.
           // Try it immediately, even for cached clips, without awaiting resume().
-          void this.playHtmlSfx(name, this.getSfxPlaybackPaths(name), maxDurationMs, overlap, generation)
+          void this.playHtmlSfx(name, this.getSfxPlaybackPaths(name), maxDurationMs, overlap, generation, deadline, volume, options?.stillActive)
               .then(played => {
-                  if (!played && canPlay()) this.runSfxWhenReady(fallback);
+                  if (!played && canPlay()) this.runSfxWhenReady(() => { if (canPlay()) fallback(); });
               });
           void this.loadSfxBuffer(name);
       };
@@ -3011,6 +3021,30 @@ class AudioService {
       };
       if (this.foregroundRecoveryPromise) void this.foregroundRecoveryPromise.then(start);
       else start();
+  }
+
+  public preloadTraditionalSounds() {
+      return this.preloadSfx(tableMaterialNames());
+  }
+
+  public playTraditionalSound(kind: TableMaterial, strength = 1) {
+      if (!this.canPlaySfx() || !Number.isFinite(strength) || strength <= 0) return;
+      const take = nextMaterialTake(this.traditionalSoundTake[kind]);
+      this.traditionalSoundTake[kind] = take;
+      const name = `traditional-table/${kind}-${take}`;
+      const scene = this.traditionalSoundGeneration;
+      const volume = TABLE_MATERIAL_GAIN[kind] * (.35 + .65 * Math.min(1, strength));
+      this.playSfxMp3(name, () => {
+          const ctx = this.ctx;
+          if (ctx) this.startSfxSource(name, materialFallback(ctx, kind), 350, true, volume);
+      }, {maxDurationMs: 420, overlap: true, volume, maxDelayMs: 220,
+          stillActive: () => scene === this.traditionalSoundGeneration});
+  }
+
+  public stopTraditionalSounds() {
+      this.traditionalSoundGeneration++;
+      const names = new Set([...this.activeSfxSources.keys(), ...this.activeHtmlSfx.keys()]);
+      for (const name of names) if (name.startsWith('traditional-table/')) this.stopActiveSfx(name);
   }
 
   /** Original paper foley for the card anthology, on the common SFX/mute bus. */

@@ -1,8 +1,9 @@
+import { dominoFaces } from './domino';
 import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { LanguageMode } from '../../types';
 import type { TableView } from './engine';
 import { say } from './catalog';
-import { Piece, tableArt } from './Pieces';
+import { pipPositions, tableArt } from './Pieces';
 import { layoutDomino, type DominoPoint } from './dominoLayout';
 
 type View = Extract<TableView, { kind: 'domino' }>;
@@ -24,7 +25,10 @@ export function DominoTable({
 }) {
   const grain = useId().replace(/:/g, '');
   const l = (ja: string, en: string, kana?: string) => say(language, [ja, en, kana]);
-  const layout = useMemo(() => layoutDomino(view.hub, view.lines), [view.hub, view.lines]);
+  const layout = useMemo(
+    () => layoutDomino(view.hub, view.lines, view.game === 'mexican'),
+    [view.hub, view.lines, view.game],
+  );
   const svg = useRef<SVGSVGElement>(null);
   const pointers = useRef(new Map<number, DominoPoint>());
   const [ratio, setRatio] = useState(1.6);
@@ -191,22 +195,57 @@ export function DominoTable({
             dominantBaseline="central"
           >
             <title>{label(point.line)}</title>
-            {point.line === view.players.length ? '★' : point.line + 1}
+            {view.game === 'mexican' && point.line === view.players.length ? '★' : point.line + 1}
           </text>
         ))}
+        <defs>
+          <linearGradient id={grain + '-ivory'} x2=".55" y2="1" gradientUnits="objectBoundingBox">
+            <stop stopColor="#fffef6" />
+            <stop offset=".65" stopColor="#f6f0de" />
+            <stop offset="1" stopColor="#daceb4" />
+          </linearGradient>
+          <radialGradient id={grain + '-pip'} cx=".65" cy=".75">
+            <stop stopColor="#424139" />
+            <stop offset="1" stopColor="#10100d" />
+          </radialGradient>
+        </defs>
         {layout.nodes.map((node) => (
-          <foreignObject
+          <g
             key={node.key}
-            x={-node.width / 2}
-            y={-node.height / 2}
-            width={node.width}
-            height={node.height}
-            transform={`translate(${node.x},${node.y}) rotate(${(node.angle * 180) / Math.PI})`}
             className="tt-domino-map-tile"
             data-tile={node.tile}
+            transform={`translate(${node.x} ${node.y}) rotate(${(node.angle * 180) / Math.PI})`}
           >
-            <Piece tile={node.tile} family="domino" />
-          </foreignObject>
+            <rect x="-32" y="-15" width="64" height="32" rx="3.8" fill="#8b816d" />
+            <rect
+              x="-31.7"
+              y="-16"
+              width="63.4"
+              height="31"
+              rx="3.5"
+              fill={`url(#${grain}-ivory)`}
+              stroke="#b9ac93"
+              strokeWidth=".65"
+            />
+            <path d="M0 -12V12" stroke="#b7ab90" strokeWidth=".85" />
+            {dominoFaces(node.tile).map((value, half) => {
+              const columns = value > 9 ? 4 : 3;
+              return pipPositions(value).map((i) => (
+                <circle
+                  key={half + '-' + i}
+                  className="tt-dot"
+                  cx={
+                    -16 +
+                    32 * half +
+                    ((i % columns) - (columns - 1) / 2) * (columns === 4 ? 5.8 : 7.3)
+                  }
+                  cy={(Math.floor(i / columns) - 1) * 7.2}
+                  r={columns === 4 ? 2.05 : 2.45}
+                  fill={`url(#${grain}-pip)`}
+                />
+              ));
+            })}
+          </g>
         ))}
         {layout.ends.map((end) => (
           <g

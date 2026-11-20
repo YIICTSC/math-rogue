@@ -205,6 +205,71 @@ try {
   await page.getByRole('button', { name: '再挑戦', exact: true }).tap();
   await page.getByRole('button', { name: 'QA 座学終了' }).waitFor();
   console.log('PASS combat retry button');
+  for (const retry of [false, true]) {
+    await page.reload();
+    await page.getByRole('button', { name: '軽飛行機', exact: true }).tap();
+    await page.getByRole('button', { name: '座学と技能検定', exact: true }).tap();
+    await page.getByRole('button', { name: 'QA 座学終了' }).tap();
+    await page.locator('.fs-deck').waitFor();
+    await page.waitForFunction(() => window.__flightQA?.flight?.lesson?.aircraft === 'plane');
+    await page.evaluate(() => {
+      window.__flightQA.flight.result = {
+        reason: 'landed',
+        medal: 'gold',
+        score: 85,
+        rings: 40,
+        precision: 23,
+        handling: 22,
+        distance: 23,
+        time: 77,
+        sink: 1,
+      };
+    });
+    const btn = page.getByRole('button', {
+      name: retry ? '同じ課目でもう一度' : '別の空港・種目へ',
+      exact: true,
+    });
+    await btn.waitFor();
+    // Secondary touch while the original flying finger is still on the glass:
+    // browsers may deliver pointerdown/up without synthesizing click.
+    await btn.dispatchEvent('pointerdown', {
+      pointerType: 'touch',
+      pointerId: 7,
+      button: 0,
+      isPrimary: false,
+    });
+    await page
+      .getByRole('button', { name: retry ? 'QA 座学終了' : '座学と技能検定', exact: true })
+      .waitFor();
+  }
+  console.log('PASS light-plane touch retry and course selection without a synthetic click.');
+  await page.evaluate(() => {
+    localStorage.setItem(
+      'learning-rogue:flight-school:sorties:v1',
+      JSON.stringify(
+        Object.fromEntries(
+          ['intercept', 'duel', 'base', 'escort', 'sprint', 'flagship'].map((id) => [
+            'SDJ/' + id + '/exam',
+            85,
+          ]),
+        ),
+      ),
+    );
+  });
+  await page.reload();
+  await page.getByRole('button', { name: '飛行日誌', exact: true }).tap();
+  await page.getByText('100%', { exact: true }).waitFor();
+  await page.getByRole('button', { name: '格納庫', exact: true }).tap();
+  await page.getByRole('button', { name: '戦闘訓練', exact: true }).tap();
+  await page.getByRole('button', { name: '大阪湾・海上発艦', exact: true }).tap();
+  await page.getByLabel('搭乗機').selectOption('f14');
+  await page.getByRole('button', { name: '座学と技能検定', exact: true }).tap();
+  await page.getByRole('button', { name: 'QA 座学終了' }).tap();
+  await page.waitForFunction(
+    () => window.__flightQA?.flight.lesson.carrier && window.__flightQA?.patrol.tomcat,
+  );
+  assert.equal(await page.locator('.fs-cover').count(), 0);
+  console.log('PASS legacy log unlocks and carrier deck launch with selected F-14.');
 } finally {
   await browser?.close();
   await vite.close();

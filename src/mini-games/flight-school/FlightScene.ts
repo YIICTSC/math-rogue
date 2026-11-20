@@ -7,7 +7,12 @@ import type { Lesson } from './courses';
 import { altitude, windAt, type Flight, type FlightInput } from './simulation';
 import { groundHeight, SEA_LEVEL } from './terrain';
 
-export function makeFlightScene(canvas: HTMLCanvasElement, lesson: Lesson, patrol = false) {
+export function makeFlightScene(
+  canvas: HTMLCanvasElement,
+  lesson: Lesson,
+  patrol = false,
+  tomcat = false,
+) {
   const renderer = new THREE.WebGLRenderer({
     canvas,
     antialias: true,
@@ -41,7 +46,7 @@ export function makeFlightScene(canvas: HTMLCanvasElement, lesson: Lesson, patro
   scene.add(sunlight);
   const w = new Workshop(),
     { field, sock } = makeAirfield(lesson.airport, w),
-    aircraft = makeAircraft(lesson.aircraft, w, patrol);
+    aircraft = makeAircraft(lesson.aircraft, w, patrol, tomcat);
   scene.add(field, aircraft.body);
   const routeMarkers = new THREE.Group();
   scene.add(routeMarkers);
@@ -129,7 +134,7 @@ export function makeFlightScene(canvas: HTMLCanvasElement, lesson: Lesson, patro
     lastWidth = 0,
     lastHeight = 0,
     oldGate = -1;
-  const formation = patrol ? makeFormation(scene, camera, w) : null;
+  const formation = patrol ? makeFormation(scene, camera, w, tomcat) : null;
   function draw(s: Flight, i: FlightInput, survey: boolean, dt: number, battle?: Sortie) {
     const width = canvas.clientWidth,
       height = canvas.clientHeight;

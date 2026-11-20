@@ -1,3 +1,4 @@
+import { towerRadio, isTowerCue } from './towerRadio';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Radio } from 'lucide-react';
 import script from './radio-script.json';
@@ -71,14 +72,17 @@ export function PilotPicker({
     picker
   );
 }
-type Caption = { actor: Pilot; text: Phrase };
+type Caption = { actor: Pilot; text: Phrase; tower?: boolean };
 export function RadioCaption({ line, language }: { line: Caption | null; language: LanguageMode }) {
   return line ? (
     <aside className="fs-radio" role="status">
       <img alt="" src={portrait(line.actor)} />
       <div>
         <b>
-          <Radio size={13} /> {localize(names[line.actor], language)}
+          <Radio size={13} />{' '}
+          {line.tower
+            ? localize(['管制・放送部', 'School tower', 'かんせい・ほうそうぶ'], language)
+            : localize(names[line.actor], language)}
         </b>
         <span>{localize(line.text, language)}</span>
       </div>
@@ -113,16 +117,19 @@ export function useFlightCrew() {
       const generation = ch.generation;
       while (ch.pending.length && generation === ch.generation) {
         const next = ch.pending.shift()!,
-          lines = script[pilot][next];
+          lines = isTowerCue(next) ? [towerRadio[next]] : script[pilot][next];
         for (const [index, text] of lines.entries()) {
           if (generation !== ch.generation) return;
           setLine({
-            actor: index ? (script[pilot].wing as Pilot) : pilot,
+            tower: isTowerCue(next),
+            actor: isTowerCue(next) ? 'BARD' : index ? (script[pilot].wing as Pilot) : pilot,
             text: [text[0], text[1], text[2]],
           });
           const captionMs = Math.max(1600, Math.min(4500, text[0].length * 105));
           await Promise.all([
-            audioService.playFlightRadio(pilot, next, index).catch(() => false),
+            audioService
+              .playFlightRadio(isTowerCue(next) ? 'tower' : pilot, next, index)
+              .catch(() => false),
             new Promise((resolve) => window.setTimeout(resolve, captionMs)),
           ]);
         }

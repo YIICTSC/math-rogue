@@ -76,12 +76,16 @@ type Task = {
   branch: number;
   root: boolean;
 };
-export function layoutDomino(hub: number | null, lines: readonly DominoLine[]): DominoLayout {
+export function layoutDomino(
+  hub: number | null,
+  lines: readonly DominoLine[],
+  trainStation = false,
+): DominoLayout {
   const result: DominoLayout = {
     nodes: [],
     ends: [],
     labels: [],
-    engine: lines.filter((l) => l.parent < 0).length > 4,
+    engine: hub !== null && (trainStation || lines.filter((l) => l.parent < 0).length > 4),
     bounds: { x: -180, y: -90, width: 360, height: 180 },
   };
   if (hub === null) return result;

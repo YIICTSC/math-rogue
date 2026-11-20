@@ -44,6 +44,7 @@ const controls: Record<string, string> = {
   KeyW: 'up',
   ArrowDown: 'down',
   KeyS: 'down',
+  KeyM: 'missile',
   Space: 'primary',
   ShiftLeft: 'brake',
   ShiftRight: 'brake',
@@ -190,7 +191,8 @@ export default function FlightDeck({
     halted = useRef(false),
     survey = useRef(false),
     primaryTap = useRef(false),
-    brakeTap = useRef(false);
+    brakeTap = useRef(false),
+    missileTap = useRef(false);
   const [paused, setPaused] = useState(false),
     [lost, setLost] = useState(false),
     [, refresh] = useState(0);
@@ -216,6 +218,7 @@ export default function FlightDeck({
     touches.current.clear();
     primaryTap.current = false;
     brakeTap.current = false;
+    missileTap.current = false;
     pad.current = neutralInput();
     stick.current = { turn: 0, pitch: 0 };
   }, []);
@@ -237,7 +240,10 @@ export default function FlightDeck({
     pad.current = { turn: p.x, pitch: -p.y, primary: p.buttons[PAD.A], brake: p.buttons[PAD.B] };
     if (p.pressed[PAD.B]) brakeTap.current = true;
     if (p.pressed[PAD.A]) primaryTap.current = true;
-    if (p.pressed[PAD.X]) changeView();
+    if (p.pressed[PAD.X]) {
+      if (fighting && patrol.sortie.guided) missileTap.current = true;
+      else changeView();
+    }
     if (s.instruments && !halted.current) {
       const c = s.instruments;
       if (p.pressed[PAD.Y]) selectPanel(s, panels[(panels.indexOf(c.panel) + 1) % 3]);
@@ -267,8 +273,15 @@ export default function FlightDeck({
     try {
       scene =
         lesson.route && routeImages
-          ? makeRouteScene(surface, lesson.route, routeImages, !!patrol)
-          : makeFlightScene(surface, lesson, !!patrol);
+          ? makeRouteScene(
+              surface,
+              lesson.route,
+              routeImages,
+              !!patrol,
+              patrol?.tomcat,
+              lesson.carrier,
+            )
+          : makeFlightScene(surface, lesson, !!patrol, patrol?.tomcat);
     } catch {
       setLost(true);
       pause(true);
@@ -321,6 +334,7 @@ export default function FlightDeck({
         e.preventDefault();
         keys.current.add(e.code);
         if (!e.repeat && controls[e.code] === 'primary') primaryTap.current = true;
+        if (!e.repeat && e.code === 'KeyM') missileTap.current = true;
         if (!e.repeat && controls[e.code] === 'brake') brakeTap.current = true;
       }
     };
@@ -345,6 +359,7 @@ export default function FlightDeck({
           pad.current.pitch +
           Number(active.has('up')) -
           Number(active.has('down')),
+        missile: missileTap.current,
         primary: primaryTap.current || pad.current.primary || active.has('primary'),
         brake: brakeTap.current || pad.current.brake || active.has('brake'),
       };
@@ -359,6 +374,8 @@ export default function FlightDeck({
           if (patrol.phase === 'fight') survey.current = false;
         } else stepFlight(s, input);
         primaryTap.current = false;
+        missileTap.current = false;
+        input.missile = false;
         brakeTap.current = false;
         accumulator -= STEP;
       }
@@ -378,7 +395,12 @@ export default function FlightDeck({
       if (!patrol && s.airborne && !s.result) {
         if (!sawScenery && s.elapsed > 4 && altitude(s) > 15) {
           sawScenery = true;
-          callbacks.current.onRadio?.('vista', seaNearby(s));
+          callbacks.current.onRadio?.(
+            lesson.route && ['hnd-mmj', 'hnd-kix'].includes(lesson.route.region.key)
+              ? 'cruise'
+              : 'vista',
+            seaNearby(s),
+          );
         }
         if (!calledHome && lesson.aircraft === 'plane' && s.nextGate === lesson.gates.length) {
           calledHome = true;
@@ -445,6 +467,7 @@ export default function FlightDeck({
           e.preventDefault();
           e.currentTarget.setPointerCapture(e.pointerId);
           touches.current.set(e.pointerId, action);
+          if (action === 'missile') missileTap.current = true;
           if (action === 'primary') primaryTap.current = true;
           if (action === 'brake') brakeTap.current = true;
           e.currentTarget.dataset.held = 'true';
@@ -496,8 +519,7 @@ export default function FlightDeck({
       data-airborne={s.airborne}
       data-canopy={s.canopy}
       onGotPointerCapture={(e) => {
-        if (e.target instanceof HTMLElement)
-          capturedPointers.current.set(e.pointerId, e.target);
+        if (e.target instanceof HTMLElement) capturedPointers.current.set(e.pointerId, e.target);
       }}
       onLostPointerCapture={(e) => capturedPointers.current.delete(e.pointerId)}
     >
@@ -658,6 +680,14 @@ export default function FlightDeck({
           />
         </div>
         <div className="fs-actions">
+          {fighting &&
+            patrol.sortie.guided &&
+            press(
+              'missile',
+              <>◎ {patrol.sortie.missiles}</>,
+              t('追尾ミサイル', 'Homing missile', 'ついびミサイル'),
+              'M / X',
+            )}
           {press(
             'brake',
             <>

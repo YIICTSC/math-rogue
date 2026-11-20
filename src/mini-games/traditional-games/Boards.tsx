@@ -1,3 +1,5 @@
+import { useTableFoley } from './useTableFoley';
+import { audioService } from '../../services/audioService';
 import { DominoTable } from './DominoTable';
 import React, { useEffect, useRef, useState } from 'react';
 import type { LanguageMode } from '../../types';
@@ -525,8 +527,18 @@ export function CrokinoleBoard({ view: v, language, send, disabled }: Props<'cro
     setReplay(p.frames[0]);
     setBusy(true);
     const start = performance.now();
+    let soundCursor = 0;
     const tick = (now: number) => {
       const frame = Math.floor(((now - start) * p.frames.length) / 1350);
+      // Consume every contact once. Do not burst old collisions after a hidden tab resumes.
+      while (
+        soundCursor < p.sounds.length &&
+        p.sounds[soundCursor].frame <= Math.min(frame, p.frames.length - 1)
+      ) {
+        const impact = p.sounds[soundCursor++];
+        if (!document.hidden && impact.frame >= frame - 2)
+          audioService.playTraditionalSound(impact.material, impact.strength);
+      }
       if (frame >= p.frames.length) {
         setReplay(null);
         setBusy(false);
@@ -729,6 +741,7 @@ export function TableBoard({
   send: Send;
   disabled?: boolean;
 }) {
+  useTableFoley(view);
   const props = { language, send, disabled };
   const phaseKey = view.game + '-' + view.revision;
   switch (view.kind) {

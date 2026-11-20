@@ -10,13 +10,21 @@ import {
   type Flight,
   type FlightInput,
 } from './simulation';
+import type { TowerCue } from './towerRadio';
 import type script from './radio-script.json';
 
-export type RadioEvent = Exclude<keyof typeof script.WARRIOR, 'wing'>;
-export function newPatrol(mission: Sortie['mission'], mode: Training, assist = false) {
+export type RadioEvent = Exclude<keyof typeof script.WARRIOR, 'wing'> | TowerCue;
+export function newPatrol(
+  mission: Sortie['mission'],
+  mode: Training,
+  assist = false,
+  guided = false,
+  tomcat = false,
+) {
   return {
     assist,
-    sortie: newSortie(mission, mode),
+    tomcat,
+    sortie: newSortie(mission, mode, guided),
     phase: 'launch' as 'launch' | 'climb' | 'vista' | 'search' | 'fight' | 'home',
     liftedAt: 0,
     searchedAt: 0,
@@ -64,11 +72,19 @@ export function stepPatrol(s: Flight, p: Patrol, i: FlightInput, cue: (event: Ra
       );
       controls.pitch = steer(((p.orbit.y - s.y) * 0.25 + 0.65) / (s.speed * 0.31));
     }
-    stepFlight(s, controls, STEP, { paceLimit: 1, extraTime: b.time, formationHold: true });
+    stepFlight(s, controls, STEP, {
+      paceLimit: b.mission.region ? 7 : 1,
+      extraTime: b.time,
+      formationHold: true,
+    });
     if (s.result) return;
     const kills = b.kills,
       wave = b.wave;
-    stepSortie(b, { x: i.turn, y: i.pitch, fire: i.primary, burst: i.brake }, STEP);
+    stepSortie(
+      b,
+      { x: i.turn, y: i.pitch, fire: i.primary, burst: i.brake, missile: i.missile },
+      STEP,
+    );
     if (b.finished === 'clear') {
       p.phase = 'home';
       cue('home');
@@ -90,11 +106,16 @@ export function stepPatrol(s: Flight, p: Patrol, i: FlightInput, cue: (event: Ra
   if (p.phase === 'launch') {
     p.liftedAt = s.elapsed;
     p.phase = 'climb';
-    cue('lift');
+    cue(s.lesson.carrier ? 'deck' : 'lift');
   } else if (p.phase === 'climb' && elapsed >= 4) {
     p.phase = 'vista';
     cue('vista');
-  } else if (p.phase === 'vista' && elapsed >= 12 && enRoute) {
+  } else if (
+    p.phase === 'vista' &&
+    elapsed >= 12 &&
+    enRoute &&
+    (b.mission.id !== 'ceiling' || s.y >= 11500)
+  ) {
     p.phase = 'search';
     p.searchedAt = s.elapsed;
     cue('search');
@@ -105,6 +126,6 @@ export function stepPatrol(s: Flight, p: Patrol, i: FlightInput, cue: (event: Ra
       z: s.z + Math.sin(s.heading) * 100,
       y: Math.max(85, s.y),
     };
-    cue('engage');
+    cue(b.mission.id === 'valley' ? 'valley' : b.mission.id === 'ceiling' ? 'ceiling' : 'engage');
   }
 }

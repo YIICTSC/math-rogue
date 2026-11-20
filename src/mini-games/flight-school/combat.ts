@@ -2,7 +2,9 @@ import type { Phrase, Training } from './courses';
 import { clamp } from './terrain';
 
 type Kind = 'drone' | 'ace' | 'relay' | 'fort' | 'carrier';
-type Mission = {
+export type Mission = {
+  required?: number;
+  region?: string;
   id: string;
   name: Phrase;
   brief: Phrase;
@@ -110,7 +112,7 @@ export function aircraftScreen(x: number, y: number) {
   return { x: x * 0.78, y: y * 0.68 - 0.3 };
 }
 export type CombatResult = 'clear' | 'shield' | 'escort' | 'time';
-export function newSortie(mission: Mission, mode: Training) {
+export function newSortie(mission: Mission, mode: Training, guided = false) {
   const state = {
     mission,
     mode,
@@ -121,6 +123,11 @@ export function newSortie(mission: Mission, mode: Training) {
     hull: mode === 'practice' ? 6 : 4,
     convoy: 3,
     energy: 0,
+    guided,
+    missiles: 4,
+    lock: null as number | null,
+    lockTime: 0,
+    missile: null as { target: number; x: number; y: number; age: number } | null,
     kills: 0,
     shots: 0,
     hits: 0,
@@ -173,7 +180,7 @@ export function scoreSortie(s: Sortie) {
 }
 export function stepSortie(
   s: Sortie,
-  input: { x: number; y: number; fire: boolean; burst: boolean },
+  input: { x: number; y: number; fire: boolean; burst: boolean; missile?: boolean },
   dt: number,
 ) {
   if (s.finished || dt <= 0 || dt > 0.05) return;
@@ -200,6 +207,41 @@ export function stepSortie(
       if (s.mission.escort) s.convoy--;
       else s.hull--;
       s.hurt = 0.35;
+    }
+  }
+  if (s.guided) {
+    const target = s.targets
+      .filter((t) => t.hp > 0 && !shielded(s, t))
+      .map((t) => ({ t, d: Math.hypot(s.x - t.x, s.y - t.y) }))
+      .filter((p) => p.d < 0.32)
+      .sort((a, b) => a.d - b.d)[0]?.t;
+    if (s.lock !== (target?.id ?? null)) s.lockTime = 0;
+    s.lock = target?.id ?? null;
+    if (target) s.lockTime = Math.min(0.4, s.lockTime + dt);
+    if (target && input.missile && s.lockTime >= 0.4 && !s.missile && s.missiles > 0) {
+      s.missile = { target: target.id, ...aircraftScreen(s.x, s.y), age: 0 };
+      s.missiles--;
+      s.shots++;
+      s.sound = 'thrust';
+    }
+    const shot = s.missile;
+    if (shot) {
+      const t = s.targets.find((t) => t.id === shot.target && t.hp > 0);
+      if (!t || shielded(s, t)) s.missile = null;
+      else {
+        shot.age += dt;
+        shot.x += (t.x - shot.x) * Math.min(1, dt * 7);
+        shot.y += (t.y - shot.y) * Math.min(1, dt * 7);
+        if (shot.age >= 0.55) {
+          t.hp = Math.max(0, t.hp - 4);
+          t.flash = 0.28;
+          s.hits++;
+          if (!t.hp) s.kills++;
+          s.sound = 'hit';
+          s.missile = null;
+          s.lockTime = 0;
+        }
+      }
     }
   }
   if (input.burst && s.energy >= 5) {

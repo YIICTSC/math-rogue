@@ -90,14 +90,57 @@ export function makeTrainingJet(w: Workshop, color: number) {
   return g;
 }
 
-export function makeAircraft(id: Aircraft, w: Workshop, patrol = false) {
+export function makeTomcat(w: Workshop) {
+  const g = new THREE.Group(),
+    hull = 0xa1acb3;
+  w.part(g, w.ball, hull, [0, 0, -0.18], [0.32, 0.31, 2.3]);
+  w.part(g, w.ball, 0x234355, [0, 0.26, -0.7], [0.24, 0.22, 0.74]);
+  for (const side of [-1, 1]) {
+    w.part(g, w.ball, 0x71838c, [side * 0.42, -0.08, 0.48], [0.25, 0.25, 1.52]);
+    w.part(g, w.tube, 0x403f42, [side * 0.42, -0.08, 1.89], [0.19, 0.23, 0.19]).rotation.x =
+      Math.PI / 2;
+    wingCloth(
+      w,
+      g,
+      [
+        [side * 0.26, 0.03, -0.47],
+        [side * 2.18, 0.03, 1.08],
+        [side * 0.37, 0.03, 0.82],
+      ],
+      hull,
+    );
+    wingCloth(
+      w,
+      g,
+      [
+        [side * 0.39, 0.06, 1.46],
+        [side * 0.55, 0.91, 1.76],
+        [side * 0.42, 0.08, 1.98],
+      ],
+      0x375370,
+    );
+    wingCloth(
+      w,
+      g,
+      [
+        [side * 0.39, 0.03, 1.19],
+        [side * 1.05, 0.03, 1.92],
+        [side * 0.42, 0.03, 1.86],
+      ],
+      hull,
+    );
+  }
+  return g;
+}
+
+export function makeAircraft(id: Aircraft, w: Workshop, patrol = false, tomcat = false) {
   const body = new THREE.Group(),
     pilotBody = new THREE.Group(),
     moving = new THREE.Group();
   let opening = 0;
   const wingmate = patrol ? makeTrainingJet(w, 0x479ccc) : null;
   if (wingmate) {
-    const jet = makeTrainingJet(w, 0xfff1bd);
+    const jet = tomcat ? makeTomcat(w) : makeTrainingJet(w, 0xfff1bd);
     jet.scale.setScalar(2.5);
     wingmate.scale.setScalar(2.5);
     body.add(jet, wingmate);

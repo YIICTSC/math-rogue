@@ -222,13 +222,6 @@ export default function TraditionalGames({
     () => audioService.acquireBgmScene(current ? 'poker_play' : 'poker_shop', undefined, 24),
     [!!current],
   );
-  useEffect(() => {
-    if (!current || !event) return;
-    if (current.revision > 0)
-      audioService.playCardClubSound(
-        event.key === 'draw' ? 'draw' : event.key === 'foul' ? 'select' : 'play',
-      );
-  }, [current?.revision]);
 
   function chooseHero(id: string) {
     setHero(id);
@@ -248,7 +241,9 @@ export default function TraditionalGames({
   }
   function audioGesture() {
     audioService.init();
+    void audioService.unlockAudio();
     audioService.resumeBGM();
+    void audioService.preloadTraditionalSounds();
   }
   function createRoom() {
     const active = new TraditionalRoom(

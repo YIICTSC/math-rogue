@@ -1,3 +1,4 @@
+import { readLicenses, longHaulRequirement } from './licenses';
 import MiniGameProblemChallenge from '../../components/MiniGameProblemChallenge';
 import { PilotPicker, RadioCaption, type FlightCrew } from './FlightRadio';
 import { loadRouteImages } from './routeImages';
@@ -7,7 +8,15 @@ import type { LanguageMode } from '../../types';
 import { assetUrl } from '../../utils/assetPaths';
 import { audioService } from '../../services/audioService';
 import { localize, type Lesson, type Phrase } from './courses';
-import { ROUTES, ROUTE_SCENERY, PORT_NAMES, center, makeRouteLesson, photo } from './routes';
+import {
+  ADVANCED_ROUTES,
+  ROUTES,
+  ROUTE_SCENERY,
+  PORT_NAMES,
+  center,
+  makeRouteLesson,
+  photo,
+} from './routes';
 import { FLIGHT_ROUTE_LOG_KEY } from './logbook';
 import type { Report } from './simulation';
 import type { RouteImages } from './routeScene';
@@ -49,6 +58,8 @@ export default function RouteSchool({
   exit: () => void;
 }) {
   const t = (...p: Phrase) => localize(p, language);
+  const cleared = readLicenses().route;
+  const charts = [...ROUTES, ...ADVANCED_ROUTES];
   const [region, select] = useState(
     () => ROUTES.find((r) => r.ports.some((p) => p.code === home)) ?? ROUTES[0],
   );
@@ -224,14 +235,16 @@ export default function RouteSchool({
               <select
                 value={region.key}
                 onChange={(e) => {
-                  select(ROUTES.find((r) => r.key === e.target.value)!);
+                  select(charts.find((r) => r.key === e.target.value)!);
                   swap(false);
                   show('planning');
                 }}
               >
-                {ROUTES.map((r) => (
-                  <option key={r.key} value={r.key}>
+                {charts.map((r) => (
+                  <option key={r.key} value={r.key} disabled={cleared < longHaulRequirement(r.key)}>
                     {r.ports.map((p) => name(p.code)).join(' ↔ ')}
+                    {cleared < longHaulRequirement(r.key) &&
+                      ' · ' + longHaulRequirement(r.key) + '/8'}
                   </option>
                 ))}
               </select>

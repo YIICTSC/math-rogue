@@ -1,3 +1,5 @@
+import { LicensePage } from './LicensePage';
+import { multiTouchAction } from '../../utils/multiTouchAction';
 import { titleArtPath } from '../shared/ResponsiveTitleArt';
 import { PilotPicker, RadioCaption, useFlightCrew } from './FlightRadio';
 import React, { useEffect, useRef, useState } from 'react';
@@ -265,7 +267,7 @@ export default function FlightSchool({
       ) : (
         <div className="fs-shell">
           <nav className="fs-nav">
-            <button onClick={stage === 'hangar' ? onBack : hangar}>
+            <button {...multiTouchAction(stage === 'hangar' ? onBack : hangar)}>
               <ArrowLeft size={16} />
               {stage === 'hangar'
                 ? t('ミニゲーム', 'Mini-games', 'ミニゲーム')
@@ -413,6 +415,7 @@ export default function FlightSchool({
                   {journalCount(book, master ? 'master' : 'exam')} / {journalTotal}
                 </strong>
               </div>
+              <LicensePage language={languageMode} />
               <table>
                 <thead>
                   <tr>
@@ -517,7 +520,6 @@ export default function FlightSchool({
                   ))}
                 </div>
                 <p>{localize(DEBRIEF[report.reason], languageMode)}</p>
-                <RadioCaption line={crew.line} language={languageMode} />
                 <div className="fs-flight-time">
                   <CircleDot size={14} />
                   {lesson.aircraft === 'plane'
@@ -526,15 +528,16 @@ export default function FlightSchool({
                   {Math.round(report.distance)} m · {Math.round(report.time)} s
                 </div>
                 <div className="fs-which">
-                  <button className="fs-main" onClick={retry}>
+                  <button className="fs-main" {...multiTouchAction(retry)}>
                     {t('同じ課目でもう一度', 'Fly this lesson again', 'おなじ かもくで もういちど')}
                     <ArrowRight size={17} />
                   </button>
-                  <button onClick={hangar}>
+                  <button {...multiTouchAction(hangar)}>
                     <Mountain size={17} />
                     {t('別の空港・種目へ', 'Choose another course', 'べつの くうこう・しゅもくへ')}
                   </button>
                 </div>
+                <RadioCaption line={crew.line} language={languageMode} />
               </section>
             )
           )}

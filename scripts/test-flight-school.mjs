@@ -4,7 +4,7 @@ import { readFile, stat } from 'node:fs/promises';
 const base = './src/mini-games/flight-school/';
 const { outputFiles } = await build({
   stdin: {
-    contents: ['courses', 'simulation', 'logbook', 'combat', 'routes', 'patrol', 'instruments', 'scenery']
+    contents: ['courses', 'simulation', 'logbook', 'combat', 'routes', 'patrol', 'instruments', 'scenery','licenses','advancedMissions']
       .map((n) => 'export * from ' + JSON.stringify(base + n))
       .join('\n'),
     resolveDir: process.cwd(),
@@ -232,6 +232,11 @@ globalThis.localStorage = {
 };
 store.set(sim.FLIGHT_LOG_KEY, '{malformed');
 assert.deepEqual(sim.readLog(), {});
+store.set(sim.FLIGHT_ROUTE_LOG_KEY, JSON.stringify({'HND-NRT':95,'NRT-HND':60,invalid:90,'HND-MMJ':85}));
+store.set(sim.FLIGHT_COMBAT_LOG_KEY, JSON.stringify({'CTS/duel/exam':82,'HND/duel/exam':90,'CTS/escort/exam':77,'fake/base/exam':99,'CTS/sprint/exam':-1}));
+assert.deepEqual(sim.readLicenses(),{route:2,sorties:2,routeTotal:8,combatTotal:6});
+assert.equal(sim.longHaulRequirement('hnd-mmj'),2);
+assert.equal(sim.longHaulRequirement('hnd-kix'),4);
 const report = fly(lesson).result;
 sim.recordFlight(lesson, report);
 sim.recordFlight(lesson, { ...report, score: report.score - 1 });
@@ -328,6 +333,30 @@ for (const region of sim.ROUTES) {
 }
 console.log('PASS eight airport routes from takeoff through touchdown on actual terrain.');
 
+for (const region of sim.ADVANCED_ROUTES) for (const reverse of [false,true]) {
+  const flight=beginFlight(sim.makeRouteLesson(region,reverse,true));
+  while(!flight.result && flight.elapsed<1200) stepFlight(flight,{turn:0,pitch:flight.airborne?0:1,primary:!flight.airborne,brake:false});
+  assert.equal(flight.result?.reason,'landed',JSON.stringify([region.key,reverse,flight.nextGate,flight.elapsed,flight.result]));
+}
+for(const mission of sim.ADVANCED_MISSIONS) {
+  const flight=beginFlight(sim.advancedLesson(mission,true)), p=sim.newPatrol(mission,'exam',true,true,true);
+  let top=0, fired=false;
+  while(!flight.result && !p.failed && flight.elapsed<1200) {
+    const input=sim.neutralInput();
+    if(!flight.airborne){input.primary=true;input.pitch=1}
+    if(p.phase==='fight'){
+      const a=aimAtTarget(p.sortie);
+      Object.assign(input,{turn:a.x,pitch:a.y,primary:fired && a.fire,brake:fired && a.burst,missile:true});
+    }
+    sim.stepPatrol(flight,p,input,()=>{});
+    top=Math.max(top,flight.y); fired ||= p.sortie.missiles<4;
+  }
+  assert.equal(flight.result?.reason,'landed',JSON.stringify([mission.id,flight.x,flight.y,flight.z,p.phase,flight.nextGate,flight.result]));
+  assert.equal(p.sortie.finished,'clear');
+  assert(fired);
+  if(mission.id==='ceiling') assert(top>11500);
+}
+console.log('PASS four long-haul directions, deck takeoff, valley chase, stratosphere flight and homing shots.');
 const manual = sim.makeRouteLesson(sim.ROUTES[0], false, false);
 const departure = sim.beginFlight(manual);
 const stationary = { x: departure.x, z: departure.z };

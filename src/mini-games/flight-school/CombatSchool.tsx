@@ -1,3 +1,5 @@
+import { ADVANCED_MISSIONS, advancedLesson } from './advancedMissions';
+import { readLicenses } from './licenses';
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, Flag } from 'lucide-react';
 import MiniGameProblemChallenge from '../../components/MiniGameProblemChallenge';
@@ -9,7 +11,7 @@ import { newPatrol } from './patrol';
 import { PilotPicker, RadioCaption, type FlightCrew } from './FlightRadio';
 import { useFlightMusic } from './music';
 import { FLIGHT_COMBAT_LOG_KEY } from './logbook';
-import { ROUTES, PORT_NAMES, makeRouteLesson } from './routes';
+import { ADVANCED_ROUTES, ROUTES, PORT_NAMES, makeRouteLesson } from './routes';
 import { loadRouteImages } from './routeImages';
 import type { RouteImages } from './routeScene';
 import type { Report } from './simulation';
@@ -50,11 +52,15 @@ export default function CombatSchool({
     [stage, setStage] = useState<'brief' | 'quiz' | 'loading' | 'error' | 'play' | 'result'>(
       'brief',
     );
+  const cleared = readLicenses().sorties;
+  const [tomcat, selectJet] = useState(false);
   const mode = 'exam';
   const { pilot, select: setPilot } = radio;
   const [routeKey, setRouteKey] = useState('local');
   const [reverse, setReverse] = useState(false);
-  const region = ROUTES.find((r) => r.key === routeKey);
+  const region = [...ROUTES, ...ADVANCED_ROUTES].find(
+    (r) => r.key === (mission.region ?? routeKey),
+  );
   const chartKey = region
     ? region.ports[reverse ? 1 : 0].code + '-' + region.ports[reverse ? 0 : 1].code
     : airport.code;
@@ -95,11 +101,13 @@ export default function CombatSchool({
       const images = region ? await loadRouteImages(region, reverse) : undefined;
       if (id !== request.current) return;
       setFlight({
-        lesson: region
-          ? makeRouteLesson(region, reverse, assist)
-          : makeLesson(airport, 'plane', mode),
+        lesson: mission.region
+          ? advancedLesson(mission, assist)
+          : region
+            ? makeRouteLesson(region, reverse, assist)
+            : makeLesson(airport, 'plane', mode),
         images,
-        patrol: newPatrol(mission, mode, assist),
+        patrol: newPatrol(mission, mode, assist, cleared >= 2, tomcat && cleared >= 4),
       });
       setLanding(null);
       setStage('play');
@@ -173,9 +181,18 @@ export default function CombatSchool({
         {stage === 'brief' ? (
           <>
             <div className="fs-crafts">
-              {MISSIONS.map((m) => (
-                <button key={m.id} aria-pressed={mission === m} onClick={() => select(m)}>
+              {[...MISSIONS, ...ADVANCED_MISSIONS].map((m) => (
+                <button
+                  key={m.id}
+                  aria-pressed={mission === m}
+                  disabled={cleared < (m.required ?? 0)}
+                  onClick={() => {
+                    select(m);
+                    setReverse(false);
+                  }}
+                >
                   {localize(m.name, language)}
+                  {cleared < (m.required ?? 0) && ' · ' + m.required + '/6'}
                 </button>
               ))}
             </div>
@@ -190,7 +207,8 @@ export default function CombatSchool({
             <label>
               {t('飛行空域', 'Flight area', 'ひこうくういき')}{' '}
               <select
-                value={routeKey}
+                disabled={!!mission.region}
+                value={mission.region ?? routeKey}
                 onChange={(e) => {
                   setRouteKey(e.target.value);
                   setReverse(false);
@@ -199,14 +217,14 @@ export default function CombatSchool({
                 <option value="local">
                   {localize(airport.name, language)} · {t('周回', 'Circuit', 'しゅうかい')}
                 </option>
-                {ROUTES.map((r) => (
+                {(mission.region ? [region!] : ROUTES).map((r) => (
                   <option value={r.key} key={r.key}>
                     {r.ports.map((p) => localize(PORT_NAMES[p.code], language)).join(' ↔ ')}
                   </option>
                 ))}
               </select>
             </label>
-            {region && (
+            {region && !mission.region && (
               <label>
                 <input
                   type="checkbox"
@@ -215,6 +233,29 @@ export default function CombatSchool({
                 />{' '}
                 {t('逆方向', 'Reverse route', 'ぎゃくほうこう')} · {chartKey}
               </label>
+            )}
+            <label>
+              {t('搭乗機', 'Aircraft', 'とうじょうき')}{' '}
+              <select
+                value={tomcat ? 'f14' : 'trainer'}
+                onChange={(e) => selectJet(e.target.value === 'f14')}
+              >
+                <option value="trainer">
+                  {t('訓練ジェット', 'Training jet', 'くんれんジェット')}
+                </option>
+                <option disabled={cleared < 4} value="f14">
+                  F-14 Tomcat {cleared < 4 && ' · 4/6'}
+                </option>
+              </select>
+            </label>
+            {cleared >= 2 && (
+              <p>
+                {t(
+                  '◎が出たら追尾弾（M）。発射は1出撃4回。',
+                  'When ◎ appears, press M for a homing shot. Four per sortie.',
+                  '◎が でたら ついびだん（M）。4かい まで。',
+                )}
+              </p>
             )}
             <PilotPicker pilot={pilot} select={setPilot} language={language} />
             <label>

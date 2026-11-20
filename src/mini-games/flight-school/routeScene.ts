@@ -12,6 +12,8 @@ export function makeRouteScene(
   route: Route,
   images: RouteImages,
   patrol = false,
+  tomcat = false,
+  carrier = false,
 ) {
   const renderer = new THREE.WebGLRenderer({
     canvas,
@@ -46,7 +48,7 @@ export function makeRouteScene(
       wide: { value: textures[0] },
       departure: { value: textures[1] },
       arrival: { value: textures[2] },
-      a: { value: localCenter(from) },
+      a: { value: carrier ? new THREE.Vector2(1e8, 1e8) : localCenter(from) },
       b: { value: localCenter(to) },
     },
     vertexShader: `varying vec2 atlasUV; varying vec2 ground; varying float relief; varying float haze;
@@ -82,7 +84,7 @@ export function makeRouteScene(
   light.position.set(-3, 6, -2);
   scene.add(light);
   const w = new Workshop(),
-    aircraft = makeAircraft('plane', w, patrol);
+    aircraft = makeAircraft('plane', w, patrol, tomcat);
   scene.add(aircraft.body);
   for (const strip of [from, to]) {
     const stripGroup = new THREE.Group();
@@ -91,6 +93,14 @@ export function makeRouteScene(
     stripGroup.rotation.y = -Math.atan2(strip.ux, -strip.uz);
     scene.add(stripGroup);
     w.part(stripGroup, w.box, 0x3a4346, [0, 0, 0], [strip.width, 0.45, strip.length]);
+    if (carrier && strip === from) {
+      // The flight deck and the physical takeoff strip use the same transform.
+      w.part(stripGroup, w.box, 0x596973, [0, -6, 0], [42, 10, strip.length - 8]);
+      w.part(stripGroup, w.pebble, 0x4e616c, [0, -8, 0], [24, 8, strip.length * 0.54]);
+      w.part(stripGroup, w.box, 0x849098, [21, 5, 18], [8, 12, 32]);
+      w.part(stripGroup, w.box, 0x394e60, [21, 13, 14], [9, 4, 19]);
+      w.rod(stripGroup, 0xa4b2b6, [21, 14, 20], [21, 24, 20], 0.55);
+    }
     const paint: THREE.Matrix4[] = [];
     function stripe(x: number, z: number, width: number, length: number) {
       paint.push(new THREE.Matrix4().makeScale(width, 0.12, length).setPosition(x, 0.36, z));
@@ -113,7 +123,7 @@ export function makeRouteScene(
     look = new THREE.Vector3();
   let lastW = 0,
     lastH = 0;
-  const formation = patrol ? makeFormation(scene, camera, w) : null;
+  const formation = patrol ? makeFormation(scene, camera, w, tomcat) : null;
   return {
     draw(s: Flight, input: FlightInput, survey: boolean, dt: number, battle?: Sortie) {
       const width = canvas.clientWidth,

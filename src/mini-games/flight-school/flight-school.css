@@ -1229,3 +1229,47 @@
     max-width: 35vw;
   }
 }
+
+.fs-license {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: 12px;
+  margin: 14px 0;
+}
+.fs-license article {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+}
+.fs-license header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+}
+.fs-license progress {
+  width: 66%;
+  accent-color: var(--teal);
+  margin-right: 8px;
+}
+.fs-license ul {
+  margin: 5px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.86em;
+}
+
+.fs-guided-shot {
+  position: absolute;
+  pointer-events: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #fff6ac;
+  box-shadow: 0 2px 8px 3px #fb8c30;
+  transform: translate(-50%, -50%);
+}
+.fs-ctl.fs-missile {
+  background: #3b596c;
+  color: #fff4d2;
+}

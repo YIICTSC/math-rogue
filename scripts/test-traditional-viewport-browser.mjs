@@ -11,11 +11,14 @@ await fs.writeFile(
   `
 import React from 'react';
 import {createRoot} from 'react-dom/client';
-import TraditionalGames from './src/mini-games/traditional-games/TraditionalGames';
+import MiniGameSelectScreen from './src/components/MiniGameSelectScreen';
+import MiniGameRouter from './src/components/MiniGameRouter';
+import {GameMode} from './src/types';
 import './src/styles.css';
 import {audioService} from './src/services/audioService';
 audioService.playBGM=async()=>{};
-createRoot(document.getElementById('root')!).render(<TraditionalGames onBack={()=>{}} languageMode="ENGLISH"/>);
+function Menu(){const [screen,select]=React.useState(null);return screen?<MiniGameRouter screen={screen} onBack={()=>select(null)} problemMode={GameMode.MIXED} languageMode="ENGLISH"/>:<MiniGameSelectScreen onSelect={select} onBack={()=>{}} totalMathCorrect={99999} mainClearCount={99} isDebug={false} languageMode="ENGLISH"/>}
+createRoot(document.getElementById('root')!).render(<Menu/>);
 `,
 );
 const vite = await createServer({
@@ -80,6 +83,10 @@ try {
   let checked = 0;
   for (const game of games) {
     await page.goto('http://127.0.0.1:' + vite.httpServer.address().port + '/viewport-qa');
+    await page
+      .locator('.mini-game-select-card')
+      .filter({ has: page.locator('[style*="sprites/traditional-games"]') })
+      .click();
     await page.getByRole('button', { name: 'Play solo', exact: true }).click();
     const family =
       game === 'crokinole'
@@ -102,6 +109,21 @@ try {
     );
     await page.getByRole('button', { name: 'Play against CPU', exact: true }).click();
     await page.locator('.tt-playing .tt-table-area').waitFor();
+    if (family === 'Dominoes' && game !== 'forty-two') {
+      for (let n = 0; n < 35 && (await page.locator('.tt-domino-map-tile').count()) < 3; n++) {
+        const move = page.locator('.tt-hand [data-playable="true"]:enabled').first();
+        if (await move.count()) await move.click();
+        const end = page.locator('.tt-domino-ends button:enabled').first();
+        if (await end.count()) await end.click();
+        const draw = page.locator('.tt-play-actions button:enabled').first();
+        if (await draw.count()) await draw.click();
+        await page.waitForTimeout(160);
+      }
+      assert(
+        (await page.locator('svg.tt-domino-map g.tt-domino-map-tile').count()) >= 3,
+        game + ' should paint the played chain',
+      );
+    }
     for (const viewport of sizes) {
       if (
         !['competitive', 'mexican', 'peeper', 'goita', 'crokinole', 'forty-two'].includes(game) &&

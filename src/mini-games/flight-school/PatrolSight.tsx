@@ -18,9 +18,11 @@ export function PatrolSight({ s }: { s: Sortie }) {
             style={position(o.x, o.y)}
           >
             {shielded(s, o) ? '◇ ' : ''}
+            {s.guided && s.lock === o.id && s.lockTime >= 0.4 ? '◎ ' : ''}
             {o.hp}
           </span>
         ))}
+      {s.missile && <i className="fs-guided-shot" style={position(s.missile.x, s.missile.y)} />}
       {s.warnings.map((w, i) => (
         <i
           key={i}

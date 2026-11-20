@@ -4,6 +4,7 @@ import { RUNWAY, type Lesson, type Point, type Position } from './courses';
 import { clamp, groundHeight, hitsBuilding, SEA_LEVEL } from './terrain';
 
 export interface FlightInput {
+  missile?: boolean;
   turn: number;
   pitch: number;
   primary: boolean;

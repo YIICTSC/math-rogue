@@ -1,0 +1,281 @@
+{
+  "license": "CC0 1.0",
+  "author": "Kenney",
+  "sources": {
+    "impact-sounds": {
+      "url": "https://kenney.nl/assets/impact-sounds",
+      "archive_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8"
+    },
+    "casino-audio": {
+      "url": "https://kenney.nl/assets/casino-audio",
+      "archive_sha256": "f36250766ac5bc378c13708ddf12a23a8e54a3251f8d482c7536e51b5dbafa18"
+    }
+  },
+  "format": "MP3 mono, 44100 Hz, 96 kbit/s",
+  "clips": {
+    "ivory-0": {
+      "source": "casino-audio/Audio/chip-lay-1.ogg",
+      "source_sha256": "4b2111252ccb64eed67f171e061053849cfbb29873536c03948646f244a3905c",
+      "filters": [
+        "atrim=start=0.039585:duration=0.154621,asetpts=PTS-STARTPTS,asetrate=44100,aresample=44100,highpass=f=180,lowpass=f=8200",
+        "volume=0.680270,afade=t=in:d=0.0006,afade=t=out:st=0.109902:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "681634131346ec8a9e0bf9dd5819b0523993732b9592f8c1514e8db9f571e1d9",
+      "seconds": 0.20898,
+      "bytes": 2865
+    },
+    "ivory-1": {
+      "source": "casino-audio/Audio/chip-lay-2.ogg",
+      "source_sha256": "8ca8b2d450741c04ed7b4ba51ed3f73c2400c8b3dbe83b974be4fe4774a76712",
+      "filters": [
+        "atrim=start=0.000000:duration=0.190000,asetpts=PTS-STARTPTS,asetrate=44100,aresample=44100,highpass=f=180,lowpass=f=8200",
+        "volume=0.998935,afade=t=in:d=0.0006,afade=t=out:st=0.164098:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "e34da82bb26d010be7d025cadf74a520031bd5304dfbfccbc355093f27f7056a",
+      "seconds": 0.26122,
+      "bytes": 3492
+    },
+    "ivory-2": {
+      "source": "casino-audio/Audio/chip-lay-3.ogg",
+      "source_sha256": "bf24ebb417b6279568800dffdb0205d3ec8854c7efe179e8964755a6341727aa",
+      "filters": [
+        "atrim=start=0.002397:duration=0.190000,asetpts=PTS-STARTPTS,asetrate=44100,aresample=44100,highpass=f=180,lowpass=f=8200",
+        "volume=0.680000,afade=t=in:d=0.0006,afade=t=out:st=0.166501:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "1a75085c1a514e2174054b19a3da57fb1fb8056067e7379d5bdd7a279f120ee2",
+      "seconds": 0.26122,
+      "bytes": 3492
+    },
+    "resin-0": {
+      "source": "casino-audio/Audio/chips-stack-1.ogg",
+      "source_sha256": "12bf175b9afcea112175b241ad3336c6244ac5fdcdff8b5942ecc03f2225e0c4",
+      "filters": [
+        "atrim=start=0.076048:duration=0.156617,asetpts=PTS-STARTPTS,asetrate=46305,aresample=44100,highpass=f=240,lowpass=f=7400",
+        "volume=0.768247,afade=t=in:d=0.0006,afade=t=out:st=0.126184:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "52ce6eca8eb12dbdab339bdb75ecc92e4eac4b95ca8b7e2ac762bebaa7ed9ccf",
+      "seconds": 0.2351,
+      "bytes": 3178
+    },
+    "resin-1": {
+      "source": "casino-audio/Audio/chips-stack-2.ogg",
+      "source_sha256": "9f985e766c3557eef1764240b48e30b2f0ffa870a99f05de85cd6bf0ea758ef5",
+      "filters": [
+        "atrim=start=0.004846:duration=0.150880,asetpts=PTS-STARTPTS,asetrate=46305,aresample=44100,highpass=f=240,lowpass=f=7400",
+        "volume=0.680000,afade=t=in:d=0.0006,afade=t=out:st=0.120719:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "f606e56920b8a196af8e22c52796f223b12384e0066c140d72c07314feb8a967",
+      "seconds": 0.20898,
+      "bytes": 2865
+    },
+    "resin-2": {
+      "source": "casino-audio/Audio/chips-stack-3.ogg",
+      "source_sha256": "48cc0f01e2b62be7677f2e8c02177906cab80e96fa8176fa05b3ced35bc2a9c2",
+      "filters": [
+        "atrim=start=0.000000:duration=0.220000,asetpts=PTS-STARTPTS,asetrate=46305,aresample=44100,highpass=f=240,lowpass=f=7400",
+        "volume=0.885868,afade=t=in:d=0.0006,afade=t=out:st=0.183780:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "72231f1c5901012e9bed8dd4fa184a5e07e7cd60dab4f96b6fa1fd8707bfd3e7",
+      "seconds": 0.28735,
+      "bytes": 3805
+    },
+    "bamboo-0": {
+      "source": "impact-sounds/Audio/impactWood_light_000.ogg",
+      "source_sha256": "eb45e35b4bed784d3f120de4afec4b0d6ac09d9e143cce8cfcb7d739e1b1f3c3",
+      "filters": [
+        "atrim=start=0.000000:duration=0.148379,asetpts=PTS-STARTPTS,asetrate=52038,aresample=44100,highpass=f=230,lowpass=f=7500,equalizer=f=1900:t=q:w=1.2:g=3",
+        "volume=0.680021,afade=t=in:d=0.0006,afade=t=out:st=0.100311:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "69d873bc479eaa62011aa0ea2b4a29490ad20880ba9c350658cfcc53a8223f4a",
+      "seconds": 0.20898,
+      "bytes": 2865
+    },
+    "bamboo-1": {
+      "source": "impact-sounds/Audio/impactWood_light_001.ogg",
+      "source_sha256": "4b76bf3ccc8e60d19188f3165b778a7817786faa6887c55d9049bcbeef3b425f",
+      "filters": [
+        "atrim=start=0.000000:duration=0.180000,asetpts=PTS-STARTPTS,asetrate=52038,aresample=44100,highpass=f=230,lowpass=f=7500,equalizer=f=1900:t=q:w=1.2:g=3",
+        "volume=0.914819,afade=t=in:d=0.0006,afade=t=out:st=0.127091:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "b59c40d19114fa856f1dd91dd3bf9c230f3db1dcce25e5632dad0691fdee6567",
+      "seconds": 0.2351,
+      "bytes": 3178
+    },
+    "bamboo-2": {
+      "source": "impact-sounds/Audio/impactWood_light_002.ogg",
+      "source_sha256": "b183cf7a5bd783817e0e4b82af34ac6658fa1927049089dadc8b15c2ecc771dc",
+      "filters": [
+        "atrim=start=0.000000:duration=0.152075,asetpts=PTS-STARTPTS,asetrate=52038,aresample=44100,highpass=f=230,lowpass=f=7500,equalizer=f=1900:t=q:w=1.2:g=3",
+        "volume=0.681956,afade=t=in:d=0.0006,afade=t=out:st=0.103440:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "e35c89fa9b545b5098624cfb276476d32ca1d781c8ef767dd57b2a79c5480d70",
+      "seconds": 0.20898,
+      "bytes": 2865
+    },
+    "wood-0": {
+      "source": "impact-sounds/Audio/impactWood_light_002.ogg",
+      "source_sha256": "b183cf7a5bd783817e0e4b82af34ac6658fa1927049089dadc8b15c2ecc771dc",
+      "filters": [
+        "atrim=start=0.000000:duration=0.152075,asetpts=PTS-STARTPTS,asetrate=44100,aresample=44100,highpass=f=160,lowpass=f=6100",
+        "volume=0.680021,afade=t=in:d=0.0006,afade=t=out:st=0.126184:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "877f98bf0df68289e972aaa3327bf36741ddcb69c5dfecc4970c14039fee7a4c",
+      "seconds": 0.2351,
+      "bytes": 3178
+    },
+    "wood-1": {
+      "source": "impact-sounds/Audio/impactWood_light_003.ogg",
+      "source_sha256": "cdfbe8af2fe7ff9ee28f337a0a989deee0f327620da456c8413644880e9d0004",
+      "filters": [
+        "atrim=start=0.000000:duration=0.170000,asetpts=PTS-STARTPTS,asetrate=44100,aresample=44100,highpass=f=160,lowpass=f=6100",
+        "volume=0.892039,afade=t=in:d=0.0006,afade=t=out:st=0.144098:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "2a16361e7033f691096f38b3f0a01882807c3abd7189dc4dfcc46527f01a622a",
+      "seconds": 0.2351,
+      "bytes": 3178
+    },
+    "wood-2": {
+      "source": "impact-sounds/Audio/impactWood_light_004.ogg",
+      "source_sha256": "e10009f67ddaeb3a59a3e1129cfc1615d84ba60ab578eae07e7092ac223f099c",
+      "filters": [
+        "atrim=start=0.000000:duration=0.170000,asetpts=PTS-STARTPTS,asetrate=44100,aresample=44100,highpass=f=160,lowpass=f=6100",
+        "volume=0.893900,afade=t=in:d=0.0006,afade=t=out:st=0.144098:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "79201926f273292ffb408cf81174ee2bf2b7a8ca232a6b8a0266b138eb2d3059",
+      "seconds": 0.2351,
+      "bytes": 3178
+    },
+    "peg-0": {
+      "source": "impact-sounds/Audio/impactWood_light_000.ogg",
+      "source_sha256": "eb45e35b4bed784d3f120de4afec4b0d6ac09d9e143cce8cfcb7d739e1b1f3c3",
+      "filters": [
+        "atrim=start=0.000000:duration=0.120000,asetpts=PTS-STARTPTS,asetrate=54684,aresample=44100,highpass=f=330,lowpass=f=7900",
+        "volume=0.784641,afade=t=in:d=0.0006,afade=t=out:st=0.071444:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "1a217df5e17d15bef7213d046c0982c5da23fec15b5fcf3325bfe475127e0725",
+      "seconds": 0.15674,
+      "bytes": 2238
+    },
+    "peg-1": {
+      "source": "impact-sounds/Audio/impactWood_light_002.ogg",
+      "source_sha256": "b183cf7a5bd783817e0e4b82af34ac6658fa1927049089dadc8b15c2ecc771dc",
+      "filters": [
+        "atrim=start=0.000000:duration=0.120000,asetpts=PTS-STARTPTS,asetrate=54684,aresample=44100,highpass=f=330,lowpass=f=7900",
+        "volume=0.805751,afade=t=in:d=0.0006,afade=t=out:st=0.071444:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "1162308b16f6efb145fd715bed03b259f6840cedc0e64a431244367962e94a58",
+      "seconds": 0.15674,
+      "bytes": 2238
+    },
+    "peg-2": {
+      "source": "impact-sounds/Audio/impactWood_light_004.ogg",
+      "source_sha256": "e10009f67ddaeb3a59a3e1129cfc1615d84ba60ab578eae07e7092ac223f099c",
+      "filters": [
+        "atrim=start=0.000000:duration=0.120000,asetpts=PTS-STARTPTS,asetrate=54684,aresample=44100,highpass=f=330,lowpass=f=7900",
+        "volume=0.938634,afade=t=in:d=0.0006,afade=t=out:st=0.071444:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "2d9855f5de5320143fa1d51d8af7a001f8d19e9f518d6b99906b88d27cb61643",
+      "seconds": 0.15674,
+      "bytes": 2238
+    },
+    "flick-0": {
+      "source": "impact-sounds/Audio/impactWood_light_001.ogg",
+      "source_sha256": "4b76bf3ccc8e60d19188f3165b778a7817786faa6887c55d9049bcbeef3b425f",
+      "filters": [
+        "atrim=start=0.000000:duration=0.120000,asetpts=PTS-STARTPTS,asetrate=39690,aresample=44100,highpass=f=190,lowpass=f=3800",
+        "volume=0.964975,afade=t=in:d=0.0006,afade=t=out:st=0.107113:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "c903ae791fc1313703b193b4e601bf4b77c84af1c0fa0f7c1e305f1c32c5d571",
+      "seconds": 0.20898,
+      "bytes": 2865
+    },
+    "flick-1": {
+      "source": "impact-sounds/Audio/impactWood_light_003.ogg",
+      "source_sha256": "cdfbe8af2fe7ff9ee28f337a0a989deee0f327620da456c8413644880e9d0004",
+      "filters": [
+        "atrim=start=0.000000:duration=0.120000,asetpts=PTS-STARTPTS,asetrate=39690,aresample=44100,highpass=f=190,lowpass=f=3800",
+        "volume=0.967951,afade=t=in:d=0.0006,afade=t=out:st=0.107113:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "b846e237a281c2d86efa691e5f598be22dce3825de1face1e4d1911e4e110b1b",
+      "seconds": 0.20898,
+      "bytes": 2865
+    },
+    "flick-2": {
+      "source": "impact-sounds/Audio/impactWood_light_004.ogg",
+      "source_sha256": "e10009f67ddaeb3a59a3e1129cfc1615d84ba60ab578eae07e7092ac223f099c",
+      "filters": [
+        "atrim=start=0.000000:duration=0.120000,asetpts=PTS-STARTPTS,asetrate=39690,aresample=44100,highpass=f=190,lowpass=f=3800",
+        "volume=0.893398,afade=t=in:d=0.0006,afade=t=out:st=0.107113:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "e25777b9376e380a35ee111cba3765806f74c83613f2fe3a701af40870651986",
+      "seconds": 0.20898,
+      "bytes": 2865
+    },
+    "drop-0": {
+      "source": "impact-sounds/Audio/impactWood_medium_000.ogg",
+      "source_sha256": "1723a9fd25103ed41af06054814e84e65f4a772bac86ab2dc927da93d9592ff5",
+      "filters": [
+        "atrim=start=0.000000:duration=0.240000,asetpts=PTS-STARTPTS,asetrate=44100,aresample=44100,highpass=f=130,lowpass=f=5500",
+        "volume=0.766872,afade=t=in:d=0.0006,afade=t=out:st=0.214098:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "d12fdd92d1cd440783da111e66216620979e597edd6f3ee75a6747156291af6e",
+      "seconds": 0.31347,
+      "bytes": 4119
+    },
+    "drop-1": {
+      "source": "impact-sounds/Audio/impactWood_medium_001.ogg",
+      "source_sha256": "15271dbe8e2872dbb0ff1aeb7b12b2d2b92b7c1951c88532b9ab9158c36dfc73",
+      "filters": [
+        "atrim=start=0.000000:duration=0.240000,asetpts=PTS-STARTPTS,asetrate=44100,aresample=44100,highpass=f=130,lowpass=f=5500",
+        "volume=0.782272,afade=t=in:d=0.0006,afade=t=out:st=0.214098:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "2e6012c97554aa3ee9c571c3dcc91c31d4e211b2d5e4772889608ef44f506868",
+      "seconds": 0.31347,
+      "bytes": 4119
+    },
+    "drop-2": {
+      "source": "impact-sounds/Audio/impactWood_medium_002.ogg",
+      "source_sha256": "3f3f1917428b828f733a963167833c707bf88296ff158e1559c57c5cb813d799",
+      "filters": [
+        "atrim=start=0.000000:duration=0.240000,asetpts=PTS-STARTPTS,asetrate=44100,aresample=44100,highpass=f=130,lowpass=f=5500",
+        "volume=0.734200,afade=t=in:d=0.0006,afade=t=out:st=0.214098:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "76aabf2a5b01f12112bfbec5c1f151a5379db3bb5f9fd9e976a3ccb2cdf41eb8",
+      "seconds": 0.31347,
+      "bytes": 4119
+    },
+    "pocket-0": {
+      "source": "impact-sounds/Audio/impactWood_medium_002.ogg",
+      "source_sha256": "3f3f1917428b828f733a963167833c707bf88296ff158e1559c57c5cb813d799",
+      "filters": [
+        "atrim=start=0.000000:duration=0.260000,asetpts=PTS-STARTPTS,asetrate=37485,aresample=44100,highpass=f=140,lowpass=f=4500",
+        "volume=0.765950,afade=t=in:d=0.0006,afade=t=out:st=0.279472:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "fe95693df5149f2e6dacb005d9913ef56df8f5c1af6e1b1997ce5dbcf0677f26",
+      "seconds": 0.36571,
+      "bytes": 4746
+    },
+    "pocket-1": {
+      "source": "impact-sounds/Audio/impactWood_medium_003.ogg",
+      "source_sha256": "635c37cfcd854b187d643d450ff0397798dcc29ae94da32192b814fae6bd854c",
+      "filters": [
+        "atrim=start=0.000000:duration=0.260000,asetpts=PTS-STARTPTS,asetrate=37485,aresample=44100,highpass=f=140,lowpass=f=4500",
+        "volume=0.779045,afade=t=in:d=0.0006,afade=t=out:st=0.279472:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "067ceb1b41ef6f7caf05d7548e6e3936631efb31857b37dccc95e604cd920b7c",
+      "seconds": 0.36571,
+      "bytes": 4746
+    },
+    "pocket-2": {
+      "source": "impact-sounds/Audio/impactWood_medium_004.ogg",
+      "source_sha256": "7ba48f2f99c91c71be420841a91f1e69c0cbc4fe887fcd7213144d67bb87b13a",
+      "filters": [
+        "atrim=start=0.000000:duration=0.260000,asetpts=PTS-STARTPTS,asetrate=37485,aresample=44100,highpass=f=140,lowpass=f=4500",
+        "volume=0.790571,afade=t=in:d=0.0006,afade=t=out:st=0.279472:d=0.023,apad=pad_dur=0.035"
+      ],
+      "sha256": "aa0e2e7992f01c95a91df450890d9b45e55ed9370f881947a869b85fff869409",
+      "seconds": 0.36571,
+      "bytes": 4746
+    }
+  }
+}

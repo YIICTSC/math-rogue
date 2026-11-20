@@ -70,7 +70,7 @@ try {
       while (state.phase === 'play') {
         let layout;
         try {
-          layout = layoutDomino(state.hub, state.lines);
+          layout = layoutDomino(state.hub, state.lines, game === 'mexican');
         } catch (e) {
           console.error(game, seed, state.hub, JSON.stringify(state.lines));
           throw e;

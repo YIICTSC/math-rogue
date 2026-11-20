@@ -1,13 +1,18 @@
 import * as THREE from 'three';
-import { Workshop, makeTrainingJet } from './aircraftModels';
+import { Workshop, makeTrainingJet, makeTomcat } from './aircraftModels';
 import { aircraftScreen, shielded, type CombatTarget, type Sortie } from './combat';
 
 // The formation is drawn in the flight camera's local frame; both landscapes use the same sights.
-export function makeFormation(world: THREE.Scene, camera: THREE.PerspectiveCamera, w: Workshop) {
+export function makeFormation(
+  world: THREE.Scene,
+  camera: THREE.PerspectiveCamera,
+  w: Workshop,
+  tomcat = false,
+) {
   const scene = new THREE.Group();
   scene.visible = false;
   world.add(scene);
-  const hero = makeTrainingJet(w, 0xfff1bd),
+  const hero = tomcat ? makeTomcat(w) : makeTrainingJet(w, 0xfff1bd),
     wingmate = makeTrainingJet(w, 0x479ccc),
     transport = makeTrainingJet(w, 0x55dbe0);
   scene.add(hero, wingmate, transport);

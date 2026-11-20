@@ -3,6 +3,7 @@ import { AIRPORTS } from './courses';
 import { clamp } from './terrain';
 import atlas from './route-atlas.json';
 
+export { default as ADVANCED_ROUTES } from './advanced-route-atlas.json';
 export const ROUTES = atlas;
 export type Region = (typeof atlas)[number];
 type Strip = Region['ports'][number];
@@ -17,6 +18,8 @@ export const PORT_NAMES: Record<string, Phrase> = {
   UEO: ['久米島', 'Kumejima', 'くめじま'],
 };
 export const ROUTE_SCENERY: Record<string, Phrase> = {
+  'hnd-mmj': ['甲信の山岳航路', 'Across the Koshin mountains', 'こうしんの さんがくこうろ'],
+  'hnd-kix': ['東海道長距離便', 'Tokaido long haul', 'とうかいどう ちょうきょりびん'],
   'kix-ukb': [
     '大阪湾の海上空港',
     'The island airports of Osaka Bay',
@@ -74,14 +77,18 @@ export function createRoute(region: Region, reverse: boolean, assist: boolean) {
   const from = orient(a, dx, dz),
     to = orient(b, dx, dz);
   // Level the sampled DEM within each runway. Outside the airport, use the original heights.
+  const flatRadius = Math.max(
+    750,
+    Math.hypot(region.width / (region.cols - 1), region.height / (region.rows - 1)) + 100,
+  );
   const grid = region.grid.map((height, i) => {
     const x = ((i % region.cols) / (region.cols - 1) - 0.5) * region.width;
     const z = (Math.floor(i / region.cols) / (region.rows - 1) - 0.5) * region.height;
     for (const strip of [from, to]) {
       const { along, cross } = runwayOffset(strip, { x, z });
       const d = Math.hypot(cross, Math.max(0, -along, along - strip.length));
-      if (d < 1400)
-        return strip.elevation + (height - strip.elevation) * clamp((d - 750) / 650, 0, 1);
+      if (d < flatRadius + 650)
+        return strip.elevation + (height - strip.elevation) * clamp((d - flatRadius) / 650, 0, 1);
     }
     return height;
   });
