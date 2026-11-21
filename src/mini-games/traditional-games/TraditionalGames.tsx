@@ -199,7 +199,9 @@ export default function TraditionalGames({
   const [page, setPage] = useState<'title' | 'select' | 'host' | 'join' | 'tutorial'>(
     inviteCode ? 'join' : 'title',
   );
-  const [game, setGame] = useState<TableGame>('competitive');
+  const [game, setGame] = useState<TableGame | null>(null);
+  const [dominoPickerOpen, setDominoPickerOpen] = useState(false);
+  const dominoPickerHeading = useRef<HTMLHeadingElement>(null);
   const [hero, setHero] = useState(() => {
     try {
       const selected = localStorage.getItem(profileKey) ?? localStorage.getItem('card-club-hero');
@@ -221,7 +223,8 @@ export default function TraditionalGames({
   const room = useRef<TraditionalRoom | null>(null);
   const current = packet?.phase === 'game' ? packet.view : null;
   const host = !!packet && packet.hostId === packet.selfId;
-  const activeGame = packet?.phase === 'lobby' ? packet.game : (current?.game ?? game);
+  const activeGame =
+    packet?.phase === 'lobby' ? packet.game : (current?.game ?? game ?? 'competitive');
   const family = familyEntries.find((entry) => entry.id === familyFor(activeGame))!;
   const entry = TABLE_GAMES[activeGame];
   const event = current?.event;
@@ -239,6 +242,9 @@ export default function TraditionalGames({
   );
 
   useEffect(() => () => room.current?.close(), []);
+  useEffect(() => {
+    if (dominoPickerOpen) dominoPickerHeading.current?.focus();
+  }, [dominoPickerOpen]);
   useEffect(
     () => audioService.acquireBgmScene(current ? 'poker_play' : 'poker_shop', undefined, 24),
     [!!current],
@@ -259,6 +265,7 @@ export default function TraditionalGames({
     setGame(id);
     setCount(seats);
     room.current?.configure(id, seats);
+    setDominoPickerOpen(false);
   }
   function audioGesture() {
     audioService.init();
@@ -280,6 +287,7 @@ export default function TraditionalGames({
     return active;
   }
   function playSolo() {
+    if (!game) return;
     audioGesture();
     const active = createRoom();
     active.practice({ name: name.trim() || l('プレイヤー', 'Player', 'プレイヤー'), hero });
@@ -296,7 +304,7 @@ export default function TraditionalGames({
     try {
       if (mode === 'host') {
         await active.create({ name: name.trim(), hero });
-        active.configure(game, count);
+        if (game) active.configure(game, count);
       } else await active.join({ name: name.trim(), hero }, code);
     } catch (e) {
       if (room.current === active) {
@@ -318,10 +326,15 @@ export default function TraditionalGames({
     setPacket(null);
     setError('');
     setRules(false);
+    setDominoPickerOpen(false);
     if (inviteCode) onBack();
     else setPage('title');
   }
   function back() {
+    if (dominoPickerOpen) {
+      setDominoPickerOpen(false);
+      return;
+    }
     if (packet || busy) {
       leave();
       return;
@@ -343,19 +356,16 @@ export default function TraditionalGames({
       {familyEntries.map((f) => (
         <button
           key={f.id}
-          aria-pressed={f.id === family.id}
+          aria-pressed={game !== null && f.id === family.id}
           disabled={
             packet?.phase === 'lobby' &&
             !seatsFor(f.game).some((n) => n >= packet.members.length) &&
             f.id !== 'domino'
           }
-          onClick={() =>
-            chooseGame(
-              f.id === 'domino' && packet?.phase === 'lobby' && packet.members.length > 4
-                ? 'cyprus'
-                : f.game,
-            )
-          }
+          onClick={() => {
+            if (f.id === 'domino') setDominoPickerOpen(true);
+            else chooseGame(f.game);
+          }}
           style={{
             backgroundImage: `linear-gradient(0deg,#151015bd,transparent 67%),url("${tableArt(f.surface)}")`,
           }}
@@ -367,7 +377,7 @@ export default function TraditionalGames({
     </div>
   );
 
-  const dominoVariants = DOMINO_GAMES.filter((id) => {
+  const dominoVariants = (dominoPickerOpen ? DOMINO_GAMES : []).filter((id) => {
     const { category, level } = dominoListing(id);
     return (
       (dominoCategory === 'all' || category === dominoCategory) && (!beginnerOnly || level === 0)
@@ -394,7 +404,7 @@ export default function TraditionalGames({
     }
     return first.level - second.level || DOMINO_GAMES.indexOf(a) - DOMINO_GAMES.indexOf(b);
   });
-  const dominoList = family.id === 'domino' && (
+  const dominoList = dominoPickerOpen && (
     <section className="tt-domino-picker">
       <div className="tt-domino-filters">
         <label>
@@ -439,12 +449,17 @@ export default function TraditionalGames({
         {dominoVariants.map((id) => {
           const { category, level } = dominoListing(id);
           const title = say(languageMode, TABLE_GAMES[id].title);
+          const seats = seatsFor(id);
+          const last = seats[seats.length - 1];
+          const seatLabel = seats.length > 2 && last - seats[0] === seats.length - 1
+            ? `${seats[0]}–${last}`
+            : seats.join(' / ');
           return (
             <button
               type="button"
               key={id}
               aria-label={title}
-              aria-pressed={id === activeGame}
+              aria-pressed={id === game}
               disabled={
                 packet?.phase === 'lobby' && !seatsFor(id).some((n) => n >= packet.members.length)
               }
@@ -453,7 +468,7 @@ export default function TraditionalGames({
               <strong>{title}</strong>
               <small>
                 {say(languageMode, DOMINO_CATEGORIES[category])} ·{' '}
-                {say(languageMode, DOMINO_LEVELS[level])} · {seatsFor(id).join(' / ')}
+                {say(languageMode, DOMINO_LEVELS[level])} · {seatLabel}
                 {l('人', ' players', 'にん')}
               </small>
             </button>
@@ -561,7 +576,7 @@ export default function TraditionalGames({
 
   return (
     <main
-      className={`traditional-tables tt-theme-${family.id}${current ? ' tt-playing' : ''}`}
+      className={`traditional-tables tt-theme-${dominoPickerOpen ? 'domino' : family.id}${current ? ' tt-playing' : dominoPickerOpen ? ' tt-browse-dominoes' : ''}`}
       data-table-kind={current?.kind}
       data-gamepad-navigation-root
       data-table-game={activeGame}
@@ -576,7 +591,7 @@ export default function TraditionalGames({
         } as React.CSSProperties
       }
     >
-      {page === 'tutorial' && !packet ? (
+      {page === 'tutorial' && game && !packet ? (
         <Tutorial game={game} hero={hero} language={languageMode} back={back} play={playSolo} />
       ) : (
         <>
@@ -585,15 +600,21 @@ export default function TraditionalGames({
               <ArrowLeft size={18} />
               {l('戻る', 'Back', 'もどる')}
             </button>
-            <strong>
-              {current
-                ? say(languageMode, entry.title)
-                : l(
-                    '世界の伝統ゲーム集',
-                    'Traditional Games of the World',
-                    'せかいの でんとうゲームしゅう',
-                  )}
-            </strong>
+            {dominoPickerOpen ? (
+              <h1 ref={dominoPickerHeading} tabIndex={-1}>
+                {l('ドミノのルールを選ぶ', 'Choose domino rules', 'ドミノの ルールを えらぶ')}
+              </h1>
+            ) : (
+              <strong>
+                {current
+                  ? say(languageMode, entry.title)
+                  : l(
+                      '世界の伝統ゲーム集',
+                      'Traditional Games of the World',
+                      'せかいの でんとうゲームしゅう',
+                    )}
+              </strong>
+            )}
             {current && (
               <button onClick={() => setRules(true)}>
                 <BookOpen size={18} />
@@ -697,6 +718,8 @@ export default function TraditionalGames({
                 </div>
               )}
             </section>
+          ) : dominoPickerOpen ? (
+            dominoList
           ) : packet?.phase === 'lobby' ? (
             <section className="tt-setup cc-panel cc-lobby">
               <div className="cc-lobby-heading">
@@ -727,42 +750,40 @@ export default function TraditionalGames({
                 {packet.members.length} {l('人が参加', 'human players', 'にんが さんか')} ＋ CPU{' '}
                 {packet.count - packet.members.length}
               </p>
-              {host && (
-                <>
-                  {selectFamily}
-                  {dominoList}
-                </>
+              {host && selectFamily}
+              {(!host || game) && (
+                <div className="tt-detail">
+                  <h1>{say(languageMode, entry.title)}</h1>
+                  <p>{say(languageMode, entry.tagline)}</p>
+                  {host ? (
+                    <label>
+                      {l('席数', 'Seats', 'せきすう')}
+                      <select
+                        value={packet.count}
+                        onChange={(e) => {
+                          const n = Number(e.target.value);
+                          setCount(n);
+                          room.current?.configure(packet.game, n);
+                        }}
+                      >
+                        {seatsFor(packet.game)
+                          .filter((n) => n >= packet.members.length)
+                          .map((n) => (
+                            <option key={n}>{n}</option>
+                          ))}
+                      </select>
+                    </label>
+                  ) : (
+                    <small>
+                      {packet.count} {l('人卓', 'seats', 'にんたく')}
+                    </small>
+                  )}
+                </div>
               )}
-              <div className="tt-detail">
-                <h1>{say(languageMode, entry.title)}</h1>
-                <p>{say(languageMode, entry.tagline)}</p>
-                {host ? (
-                  <label>
-                    {l('席数', 'Seats', 'せきすう')}
-                    <select
-                      value={packet.count}
-                      onChange={(e) => {
-                        const n = Number(e.target.value);
-                        setCount(n);
-                        room.current?.configure(packet.game, n);
-                      }}
-                    >
-                      {seatsFor(packet.game)
-                        .filter((n) => n >= packet.members.length)
-                        .map((n) => (
-                          <option key={n}>{n}</option>
-                        ))}
-                    </select>
-                  </label>
-                ) : (
-                  <small>
-                    {packet.count} {l('人卓', 'seats', 'にんたく')}
-                  </small>
-                )}
-              </div>
               {host ? (
                 <button
                   className="tt-primary"
+                  disabled={!game}
                   onClick={() => {
                     audioGesture();
                     room.current?.start();
@@ -797,42 +818,45 @@ export default function TraditionalGames({
           ) : (
             <section className="tt-setup">
               {selectFamily}
-              {dominoList}
-              <div className="tt-detail">
-                <h1>{say(languageMode, entry.title)}</h1>
-                <p>{say(languageMode, entry.tagline)}</p>
-                <label>
-                  {l('席数', 'Seats', 'せきすう')}
-                  <select value={count} onChange={(e) => setCount(Number(e.target.value))}>
-                    {seatsFor(game).map((n) => (
-                      <option key={n}>{n}</option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-              {personPicker}
-              <div className="tt-menu-actions">
-                <button type="button" className="tt-primary" onClick={playSolo}>
-                  <Dice5 size={18} />
-                  {l('CPUと対戦', 'Play against CPU', 'CPUと たいせん')}
-                </button>
-                <button type="button" onClick={() => setPage('tutorial')}>
-                  <BookOpen size={18} />
-                  {l('チュートリアル', 'Tutorial', 'チュートリアル')}
-                </button>
-                {!OFFLINE_DISTRIBUTABLE && (
-                  <>
-                    <button type="button" onClick={() => setPage('host')}>
-                      <UsersRound size={18} />
-                      {l('部屋を作る', 'Create room', 'へやを つくる')}
+              {game && (
+                <>
+                  <div className="tt-detail">
+                    <h1>{say(languageMode, entry.title)}</h1>
+                    <p>{say(languageMode, entry.tagline)}</p>
+                    <label>
+                      {l('席数', 'Seats', 'せきすう')}
+                      <select value={count} onChange={(e) => setCount(Number(e.target.value))}>
+                        {seatsFor(game).map((n) => (
+                          <option key={n}>{n}</option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                  {personPicker}
+                  <div className="tt-menu-actions">
+                    <button type="button" className="tt-primary" onClick={playSolo}>
+                      <Dice5 size={18} />
+                      {l('CPUと対戦', 'Play against CPU', 'CPUと たいせん')}
                     </button>
-                    <button type="button" onClick={() => setPage('join')}>
-                      <ChevronRight size={18} />
-                      {l('招待に参加', 'Join room', 'しょうたいに さんか')}
+                    <button type="button" onClick={() => setPage('tutorial')}>
+                      <BookOpen size={18} />
+                      {l('チュートリアル', 'Tutorial', 'チュートリアル')}
                     </button>
-                  </>
-                )}
-              </div>
+                    {!OFFLINE_DISTRIBUTABLE && (
+                      <>
+                        <button type="button" onClick={() => setPage('host')}>
+                          <UsersRound size={18} />
+                          {l('部屋を作る', 'Create room', 'へやを つくる')}
+                        </button>
+                        <button type="button" onClick={() => setPage('join')}>
+                          <ChevronRight size={18} />
+                          {l('招待に参加', 'Join room', 'しょうたいに さんか')}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
             </section>
           )}
         </>

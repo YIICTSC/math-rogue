@@ -1609,10 +1609,29 @@
   .tt-playing .tt-seats:has(> .tt-seat:nth-child(5)) .cc-face { display: none; }
 }
 
+.traditional-tables.tt-browse-dominoes {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.tt-browse-dominoes .tt-nav {
+  flex: 0 0 auto;
+  width: min(100%, 970px);
+}
+.tt-browse-dominoes .tt-nav button {
+  flex-shrink: 0;
+}
+.tt-browse-dominoes .tt-nav h1 {
+  font-size: clamp(17px, 3.6vw, 24px);
+}
 .tt-domino-picker {
-  display: grid;
-  gap: 8px;
-  min-width: 0;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 10px;
+  width: min(100%, 970px);
+  min-height: 0;
+  margin-inline: auto;
 }
 .tt-domino-filters {
   display: flex;
@@ -1644,9 +1663,12 @@
 }
 .tt-domino-picker .tt-variants {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 152px), 1fr));
-  max-height: min(42dvh, 370px);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 174px), 1fr));
+  grid-auto-rows: max-content;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow: auto;
+  overscroll-behavior: contain;
   padding: 3px;
   align-content: start;
 }
@@ -1656,7 +1678,8 @@
   white-space: normal;
   overflow-wrap: anywhere;
   gap: 3px;
-  padding: 7px 8px;
+  padding: 9px 10px;
+  min-height: 52px;
 }
 .tt-domino-picker .tt-variants small {
   color: var(--tt-muted);

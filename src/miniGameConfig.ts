@@ -134,7 +134,7 @@ export const MINI_GAMES: MiniGameConfig[] = [
     titleLines: ['放課後', 'トランプゲーム集'],
     description: '世界のトランプゲームを、ひとりでもオンラインでも。',
     screen: GameScreen.MINI_GAME_CARD_CLUB,
-    threshold: 1500,
+    threshold: 0,
     typeLabel: 'CARD CLUB',
     typeColor: 'bg-emerald-900',
     glowColor: 'rgba(234,208,142,0.5)',

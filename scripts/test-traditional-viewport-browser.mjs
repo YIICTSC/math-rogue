@@ -14,7 +14,11 @@ import {createRoot} from 'react-dom/client';
 import MiniGameSelectScreen from './src/components/MiniGameSelectScreen';
 import MiniGameRouter from './src/components/MiniGameRouter';
 import {GameMode} from './src/types';
-import {TraditionalSession} from './src/mini-games/traditional-games/session';
+import {TraditionalRoom, TraditionalSession} from './src/mini-games/traditional-games/session';
+TraditionalRoom.prototype.create = async function(profile) {
+  this.code = '246810';
+  this.practice(profile);
+};
 const startTable = TraditionalSession.prototype.start;
 TraditionalSession.prototype.start = function(seed) {
   return startTable.call(this, document.querySelector('.tt-theme-domino') ? 1995 : seed);
@@ -22,7 +26,7 @@ TraditionalSession.prototype.start = function(seed) {
 import './src/styles.css';
 import {audioService} from './src/services/audioService';
 audioService.playBGM=async()=>{};
-function Menu(){const [screen,select]=React.useState(null);return screen?<MiniGameRouter screen={screen} onBack={()=>select(null)} problemMode={GameMode.MIXED} languageMode="ENGLISH"/>:<MiniGameSelectScreen onSelect={select} onBack={()=>{}} totalMathCorrect={99999} mainClearCount={99} isDebug={false} languageMode="ENGLISH"/>}
+function Menu(){const [screen,select]=React.useState(null);return screen?<MiniGameRouter screen={screen} onBack={()=>select(null)} problemMode={GameMode.MIXED} languageMode="ENGLISH"/>:<MiniGameSelectScreen onSelect={select} onBack={()=>{}} totalMathCorrect={0} mainClearCount={0} isDebug={false} languageMode="ENGLISH"/>}
 createRoot(document.getElementById('root')!).render(<Menu/>);
 `,
 );
@@ -94,8 +98,51 @@ try {
   let checked = 0;
   await page.goto('http://127.0.0.1:' + vite.httpServer.address().port + '/viewport-qa');
   await page.locator('.mini-game-select-card')
+    .filter({ has: page.locator('[aria-label="After-School Card Club"]') })
+    .click();
+  await page.locator('.card-club.cc-page-title').getByRole('button', { name: 'Play with CPU' }).waitFor();
+  await page.locator('.card-club').getByRole('button', { name: 'Back', exact: true }).click();
+
+  await page.locator('.mini-game-select-card')
     .filter({ has: page.locator('[style*="sprites/traditional-games"]') })
     .click();
+  const families = page.getByRole('group', { name: 'Game families' });
+  const list = page.getByRole('group', { name: 'Domino rulesets' });
+  const dominoHeading = page.getByRole('heading', { name: 'Choose domino rules' });
+  const dominoButton = families.getByRole('button', { name: 'Dominoes', exact: true });
+  const back = page.locator('.traditional-tables .tt-nav').getByRole('button', { name: 'Back', exact: true });
+
+  await page.getByRole('button', { name: 'Play solo', exact: true }).click();
+  assert.equal(await list.count(), 0);
+  assert.equal(await page.getByRole('button', { name: 'Play against CPU', exact: true }).count(), 0);
+  await dominoButton.click();
+  await dominoHeading.waitFor();
+  assert.equal(await families.count(), 0);
+  await back.click();
+  await families.waitFor();
+  assert.equal(await list.count(), 0);
+  await back.click();
+
+  await page.getByRole('button', { name: 'Create online room', exact: true }).click();
+  await page.getByRole('button', { name: 'Create room', exact: true }).click();
+  const lobby = page.locator('.cc-lobby');
+  const invite = lobby.getByRole('textbox', { name: 'Invite URL' });
+  await invite.waitFor();
+  const inviteUrl = await invite.inputValue();
+  const startMatch = lobby.getByRole('button', { name: 'Start match', exact: true });
+  assert(await startMatch.isDisabled());
+  await dominoButton.click();
+  await dominoHeading.waitFor();
+  assert.equal(await lobby.count(), 0);
+  await back.click();
+  assert.equal(await invite.inputValue(), inviteUrl);
+  await dominoButton.click();
+  await list.getByRole('button', { name: 'Cyprus', exact: true }).click();
+  assert.equal(await invite.inputValue(), inviteUrl);
+  await lobby.getByRole('heading', { name: 'Cyprus' }).waitFor();
+  assert(await startMatch.isEnabled());
+  await back.click();
+
   for (const game of games) {
     await page.setViewportSize(sizes[0]);
     await page.getByRole('button', { name: 'Play solo', exact: true }).click();
@@ -109,8 +156,23 @@ try {
             : 'Dominoes';
     await page.locator('.tt-families').getByRole('button', { name: family, exact: true }).click();
     if (game === 'competitive') {
-      const list = page.getByRole('group', { name: 'Domino rulesets' });
       assert.equal(await list.getByRole('button').count(), model.DOMINO_GAMES.length);
+      for (const viewport of [sizes[0], sizes[1], sizes[3]]) {
+        await page.setViewportSize(viewport);
+        const last = list.getByRole('button').last();
+        await last.scrollIntoViewIfNeeded();
+        assert(await last.isVisible());
+        const bounds = await list.boundingBox();
+        assert(bounds.height >= 150 && bounds.y + bounds.height <= viewport.height);
+        assert(await back.isVisible());
+        assert(await list.getByRole('button').evaluateAll((buttons) => buttons.every((button) => {
+          const text = button.lastElementChild;
+          return text.getBoundingClientRect().bottom <= button.getBoundingClientRect().bottom - 3;
+        })), 'Every player-count label fits its ruleset card');
+        await list.evaluate((container) => { container.scrollTop = 0; });
+        await page.screenshot({ path: screenshots + '/domino-picker-' + viewport.width + '.png' });
+      }
+      await page.setViewportSize(sizes[0]);
       await page.getByRole('combobox', { name: 'Type', exact: true }).selectOption('tricks');
       assert.equal(await list.getByRole('button').count(), 4);
       await page.getByRole('checkbox', { name: 'Beginner', exact: true }).check();
@@ -136,6 +198,7 @@ try {
           exact: true,
         })
         .click();
+    assert.equal(await list.count(), 0);
     const seats = page.locator('.tt-detail select');
     await seats.selectOption(
       (await seats.locator('option').last().getAttribute('value')) ??
