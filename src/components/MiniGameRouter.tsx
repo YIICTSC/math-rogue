@@ -22,7 +22,7 @@ const GoHomeDash = deferredScreen(() => import('./GoHomeDash'));
 const TriviaMiniGameScreen = deferredScreen(() => import('./TriviaMiniGameScreen'));
 const PlacementTcgGame = deferredScreen(() => import('../mini-games/placement-tcg/PlacementTcgGame'));
 const ShogiMiniGame = deferredScreen(() => import('../mini-games/shogi/ShogiMiniGame'));
-const SchoolTrpgGame = deferredScreen(() => import('../mini-games/school-trpg/SchoolTrpgGame'));
+const SchoolTrpg = deferredScreen(() => import('../mini-games/school-trpg/SchoolTrpgEntry'));
 const CraneGame = deferredScreen(() => import('../mini-games/crane-game/CraneGame'));
 
 interface MiniGameRouterProps {
@@ -84,7 +84,7 @@ const MINI_GAME_MAP: Partial<Record<GameScreen, React.ComponentType<MiniGameComp
     [GameScreen.MINI_GAME_PAPER_PLANE]: PaperPlaneBattle,
     [GameScreen.MINI_GAME_GO_HOME]: GoHomeDash,
     [GameScreen.MINI_GAME_STONE_GLOW]: TriviaMiniGameScreen,
-    [GameScreen.MINI_GAME_SCHOOL_TRPG]: SchoolTrpgGame,
+    [GameScreen.MINI_GAME_SCHOOL_TRPG]: SchoolTrpg,
     [GameScreen.MINI_GAME_LEARNING_TCG]: PlacementTcgGame,
     [GameScreen.MINI_GAME_SHOGI]: ShogiMiniGame,
     [GameScreen.MINI_GAME_GO]: TriviaMiniGameScreen,

@@ -3,7 +3,7 @@ import { GameScreen } from './types';
 import { storageService } from './services/storageService';
 import { Plane, Club, Skull, Compass, Mountain, Crown, Send, LucideIcon, Rocket, Gem, Dice5, Sparkles, CircleDot, Grid3X3, Layers3, Heart } from 'lucide-react';
 import { FLIGHT_COMBAT_LOG_KEY, FLIGHT_LOG_KEY, FLIGHT_ROUTE_LOG_KEY } from './mini-games/flight-school/logbook';
-import { clearSchoolTrpgCampaign } from './mini-games/school-trpg/schoolTrpgSave';
+import { clearAllSchoolTrpgSaves } from './mini-games/school-trpg/schoolTrpgSave';
 import { RUSH_BEST_KEY, STORY_KEY } from './mini-games/after-school-rush/rules';
 
 export interface MiniGameConfig {
@@ -295,7 +295,7 @@ export const MINI_GAMES: MiniGameConfig[] = [
     id: 'SCHOOL_TRPG',
     name: '放課後スクールTRPG',
     titleLines: ['放課後', 'スクールTRPG'],
-    description: 'サイコロで進める、放課後の物語。',
+    description: '主人公をつくり、世界を旅し、町で暮らし、遺跡に挑もう。',
     screen: GameScreen.MINI_GAME_SCHOOL_TRPG,
     threshold: 0,
     mainClearRequired: 6,
@@ -303,7 +303,7 @@ export const MINI_GAMES: MiniGameConfig[] = [
     typeColor: 'bg-amber-600',
     glowColor: 'rgba(245,158,11,0.4)',
     icon: Dice5,
-    clearAction: () => clearSchoolTrpgCampaign()
+    clearAction: clearAllSchoolTrpgSaves
   },
   {
     id: 'LEARNING_TCG',

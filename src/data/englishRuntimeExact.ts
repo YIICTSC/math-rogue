@@ -5,6 +5,7 @@ export const ENGLISH_RUNTIME_EXACT: Record<string, string> = {
   "行動を予約し、連携で敵を倒す戦略バトル。": "Queue actions and outsmart your enemies.",
   "牌と遺物を集め、麻雀の冒険へ出かけよう。": "Learn mahjong. Explore with tiles and relics.",
   "石ころと鉱山カードで、得点を競い合おう。": "Gather pebbles, buy mines and compete for points.",
+  "主人公をつくり、世界を旅し、町で暮らし、遺跡に挑もう。": "Create your hero, roam the world, settle in town, or explore ruins.",
   "サイコロで進める、放課後の物語。": "Roll dice and live out a school-life adventure.",
   "カードを配置し、3レーンの制圧を目指そう。": "Place cards and capture three lanes.",
   "石を囲んで取り、盤上の陣地を広げよう。": "Surround and capture your opponent's stones.",

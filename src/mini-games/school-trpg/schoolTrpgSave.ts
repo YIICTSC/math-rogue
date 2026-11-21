@@ -4,6 +4,8 @@ import type { TrpgCampaignState } from './schoolTrpgTypes';
 export const SCHOOL_TRPG_SAVE_KEY = 'learning_rogue_school_trpg_campaign_v1_slot-1';
 const SCHOOL_TRPG_PENDING_KEY = 'learning_rogue_school_trpg_campaign_v1_pending';
 export const SCHOOL_TRPG_SAVE_VERSION = 2;
+export const SCHOOL_ADVENTURE_SAVE_KEY = 'learning_rogue_school_trpg_adventure_v1';
+export const SCHOOL_ADVENTURE_PENDING_KEY = SCHOOL_ADVENTURE_SAVE_KEY + '_pending';
 
 type SaveEnvelope = {
   schema: 'school-trpg-campaign';
@@ -94,12 +96,16 @@ const parseEnvelope = (raw: string | null): SaveEnvelope | null => {
 
 export const loadSchoolTrpgCampaign = (): TrpgCampaignState | null => {
   if (typeof window === 'undefined') return null;
-  const stable = parseEnvelope(window.localStorage.getItem(SCHOOL_TRPG_SAVE_KEY));
-  const pending = parseEnvelope(window.localStorage.getItem(SCHOOL_TRPG_PENDING_KEY));
-  const candidates = [stable, pending].filter((entry): entry is SaveEnvelope => Boolean(entry));
-  if (!candidates.length) return null;
-  candidates.sort((left, right) => Date.parse(right.updatedAt) - Date.parse(left.updatedAt));
-  return reconcileSchoolTrpgUnlocks(candidates[0].campaign);
+  try {
+    const stable = parseEnvelope(window.localStorage.getItem(SCHOOL_TRPG_SAVE_KEY));
+    const pending = parseEnvelope(window.localStorage.getItem(SCHOOL_TRPG_PENDING_KEY));
+    const candidates = [stable, pending].filter((entry): entry is SaveEnvelope => Boolean(entry));
+    if (!candidates.length) return null;
+    candidates.sort((left, right) => Date.parse(right.updatedAt) - Date.parse(left.updatedAt));
+    return reconcileSchoolTrpgUnlocks(candidates[0].campaign);
+  } catch {
+    return null;
+  }
 };
 
 export const saveSchoolTrpgCampaign = (campaign: TrpgCampaignState): boolean => {
@@ -126,3 +132,14 @@ export const clearSchoolTrpgCampaign = () => {
     // Storage can be unavailable in embedded previews.
   }
 };
+
+export function clearAllSchoolTrpgSaves() {
+  clearSchoolTrpgCampaign();
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.removeItem(SCHOOL_ADVENTURE_SAVE_KEY);
+    window.localStorage.removeItem(SCHOOL_ADVENTURE_PENDING_KEY);
+  } catch {
+    // Storage can be unavailable in embedded previews.
+  }
+}
