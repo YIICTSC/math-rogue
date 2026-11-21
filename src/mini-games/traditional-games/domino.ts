@@ -13,7 +13,7 @@ import {
 } from './model';
 
 export const dominoTile = (left: number, right: number) => left * 16 + right;
-export const dominoFaces = (tile: number): [number, number] => [tile >> 4, tile & 15];
+export const dominoFaces = (tile: number): [number, number] => [(tile >> 4) & 15, tile & 15];
 const pipTotal = (tile: number) => (tile >> 4) + (tile & 15);
 const double = (tile: number) => tile >> 4 === (tile & 15);
 const matches = (tile: number, end: number) => tile >> 4 === end || (tile & 15) === end;

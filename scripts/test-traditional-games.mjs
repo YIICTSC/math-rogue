@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { createServer } from 'vite';
 
 const vite = await createServer({
-  server: { middlewareMode: true },
+  server: { middlewareMode: true, watch: { ignored: () => true }, hmr: false },
   appType: 'custom',
   logLevel: 'error',
 });
@@ -32,14 +32,21 @@ try {
       for (let i = 0; i < 10000 && s.phase !== 'result'; i++) {
         for (const [index, hand] of s.hands.entries()) {
           const v = tableViewFor(s, index);
-          assert.deepEqual(
-            v.hand,
-            [...hand].sort((a, b) => a - b),
-          );
+          assert.deepEqual(v.hand, game === 'billitonnen' ? [] : [...hand].sort((a, b) => a - b));
           assert.equal(v.counts.length, n);
-          for (const key of ['rng', 'hands', 'opening'])
+          for (const key of [
+            'rng',
+            'hands',
+            'opening',
+            'opener',
+            'history',
+            'seen',
+            'exchange',
+            'captured',
+            'bonuses',
+          ])
             assert(!Object.hasOwn(v, key), `${game}: ${key}`);
-          if (s.kind === 'domino') assert.equal(v.stock, s.stock.length);
+          if ('stock' in s) assert.equal(v.stock, s.stock.length);
         }
         const revision = s.revision;
         const ok = s.phase === 'round' ? nextTableRound(s) : playTableCpu(s);
@@ -97,6 +104,55 @@ try {
   x.lines = [outer, { ...outer, pip: 4 }];
   x.forced = [1];
   assert.deepEqual(legalMoves(x, 0), [{ type: 'place', tile: domino.dominoTile(1, 4), end: 1 }]);
+
+  const tile = domino.dominoTile;
+  const edge = createTable('double-edged', profiles(2), 20);
+  Object.assign(edge, { turn: 0, hub: tile(4, 5), lines: [{ ...outer, pip: 4 }, { ...outer, pip: 5 }] });
+  edge.hands[0] = [tile(3, 4), tile(1, 5), tile(5, 6)];
+  assert(!applyTableAction(edge, 0, { type: 'place', tile: tile(3, 4), end: 8 }));
+  assert(applyTableAction(edge, 0, { type: 'pair', tile: tile(3, 4), other: tile(1, 5) }));
+  assert.deepEqual(edge.lines.map((l) => l.pip), [3, 1]);
+
+  const bluff = createTable('bluffing', profiles(3), 99);
+  const actor = bluff.turn;
+  const actual = bluff.hands[actor][0], declared = actual ? 0 : tile(6, 6);
+  const claim = { type: 'claim', tile: actual, end: -1, face: declared };
+  assert(applyTableAction(bluff, actor, claim));
+  const challenger = bluff.turn;
+  assert.equal(tableViewFor(bluff, challenger).hub, declared);
+  assert.equal(tableViewFor(bluff, challenger).revealed, null);
+  assert(applyTableAction(bluff, challenger, { type: 'option', value: 30 }));
+  assert.equal(tableViewFor(bluff, challenger).revealed, actual);
+  assert(bluff.hands[actor].includes(actual));
+
+  const speed = createTable('speed', profiles(2), 40);
+  const expired = speed.turn;
+  speed.deadline = Date.now() - 1;
+  assert(!applyTableAction(speed, expired, legalMoves(speed, expired)[0]));
+  assert(playTableCpu(speed), 'The host clock advances an expired human turn');
+  assert.notEqual(speed.turn, expired);
+  assert.notEqual(speed.hub, null, 'The mandatory opening tile still appears');
+
+  const sky = createTable('skyscraper', profiles(2), 14);
+  assert(!applyTableAction(sky, sky.turn, { type: 'grid', tile: sky.hands[sky.turn][0],
+    x: 0, y: 0, vertical: true, flip: false }));
+  for (let i = 0; i < 8; i++) {
+    const move = legalMoves(sky, sky.turn).find((a) => a.type === 'grid');
+    assert(move && applyTableAction(sky, sky.turn, move));
+  }
+  assert.equal(sky.cells.length, 16);
+  const stack = legalMoves(sky, sky.turn).find((a) => a.type === 'grid');
+  assert(stack && applyTableAction(sky, sky.turn, stack));
+  assert.equal(sky.cells.filter((c) => c.height === 2).length, 2);
+
+  const rummy = createTable('rummicube', profiles(2), 31);
+  rummy.hands[rummy.turn] = [tile(1, 2), tile(1, 3), tile(1, 4), tile(1, 5)];
+  const group = [tile(1, 2), tile(1, 3), tile(1, 4)];
+  assert(!applyTableAction(rummy, rummy.turn, { type: 'meld', groups: [[group[0], group[0], group[1]]] }));
+  assert(applyTableAction(rummy, rummy.turn, { type: 'meld', groups: [group] }));
+  assert.deepEqual(rummy.groups, [group]);
+  assert(!applyTableAction(rummy, rummy.turn, { type: 'meld', groups: [[...rummy.hands[rummy.turn].slice(0, 3)]] }),
+    'Rearrangement must retain public tiles');
 
   const packets = new Map();
   const host = new session.TraditionalSession('p0', '827451', (id, packet) => {

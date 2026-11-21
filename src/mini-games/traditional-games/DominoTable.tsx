@@ -4,9 +4,12 @@ import type { LanguageMode } from '../../types';
 import type { TableView } from './engine';
 import { say } from './catalog';
 import { pipPositions, tableArt } from './Pieces';
-import { layoutDomino, type DominoPoint } from './dominoLayout';
+import { layoutDomino, type DominoLayout, type DominoPoint } from './dominoLayout';
 
-type View = Extract<TableView, { kind: 'domino' }>;
+type View = Pick<
+  Extract<TableView, { kind: 'domino' | 'domino-lanes' }>,
+  'game' | 'round' | 'hub' | 'lines' | 'players' | 'forced'
+>;
 type Camera = { zoom: number; x: number; y: number };
 const fitted: Camera = { zoom: 1, x: 0, y: 0 };
 const distance = (a: DominoPoint, b: DominoPoint) => Math.hypot(a.x - b.x, a.y - b.y);
@@ -16,18 +19,20 @@ export function DominoTable({
   label,
   targets,
   place,
+  fixedLayout,
 }: {
   view: View;
   language: LanguageMode;
   label: (line: number) => string;
   targets: number[];
   place: (line: number) => void;
+  fixedLayout?: DominoLayout;
 }) {
   const grain = useId().replace(/:/g, '');
   const l = (ja: string, en: string, kana?: string) => say(language, [ja, en, kana]);
   const layout = useMemo(
-    () => layoutDomino(view.hub, view.lines, view.game === 'mexican'),
-    [view.hub, view.lines, view.game],
+    () => fixedLayout ?? layoutDomino(view.hub, view.lines, view.game === 'mexican'),
+    [view.hub, view.lines, view.game, fixedLayout],
   );
   const svg = useRef<SVGSVGElement>(null);
   const pointers = useRef(new Map<number, DominoPoint>());
@@ -214,10 +219,12 @@ export function DominoTable({
             key={node.key}
             className="tt-domino-map-tile"
             data-tile={node.tile}
+            data-claim={view.game === 'bluffing' || undefined}
             transform={`translate(${node.x} ${node.y}) rotate(${(node.angle * 180) / Math.PI})`}
           >
             <rect x="-32" y="-15" width="64" height="32" rx="3.8" fill="#8b816d" />
             <rect
+              className={view.game === 'bluffing' ? 'tt-traditional-claim' : undefined}
               x="-31.7"
               y="-16"
               width="63.4"

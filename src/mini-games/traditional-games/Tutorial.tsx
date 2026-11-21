@@ -8,7 +8,7 @@ import { dominoTile, type DominoLine } from './domino';
 import { TableBoard } from './Boards';
 import { say, TABLE_GAMES, type Copy } from './catalog';
 
-const practiceCopy: Record<TableGame, Copy> = {
+const practiceCopy: Partial<Record<TableGame, Copy>> = {
   competitive: [
     '2–5を、2の端につないでください。',
     'Connect 2–5 to the end showing 2.',
@@ -196,6 +196,16 @@ function drill(game: TableGame, hero: string, step: number): TableState {
     Array.from({ length: seatsFor(game)[0] }, (_, i) => player(i)),
     64732,
   );
+  if (
+    s.kind === 'domino-grid' ||
+    s.kind === 'domino-tricks' ||
+    s.kind === 'domino-lanes' ||
+    s.kind === 'domino-sets'
+  ) {
+    [s.players[0].cpu, s.players[s.turn].cpu] = [true, false];
+    if (s.kind === 'domino-lanes') s.deadline = null;
+    return s;
+  }
   s.phase = 'play';
   s.turn = 0;
   s.scores.fill(0);
@@ -352,7 +362,7 @@ function passed(game: TableGame, step: number, action: TableAction, s: TableStat
       : step === 1
         ? s.event?.amount === 60
         : action.type === 'five';
-  return action.type === 'place';
+  return s.kind.startsWith('domino-') || action.type === 'place';
 }
 
 export function RulesText({ game, language }: { game: TableGame; language: LanguageMode }) {
@@ -387,17 +397,18 @@ export function Tutorial({
   const [step, setStep] = useState(0);
   const [s, setState] = useState(() => drill(game, hero, 0));
   const [result, setResult] = useState<'pending' | 'done' | 'retry'>('pending');
-  const cases = [practiceCopy[game], ...(extra[game] ?? [])];
+  const cases = [practiceCopy[game] ?? TABLE_GAMES[game].tagline, ...(extra[game] ?? [])];
   const l = (ja: string, en: string, kana?: string) => say(language, [ja, en, kana]);
   const reset = (i: number) => {
     setStep(i);
     setState(drill(game, hero, i));
     setResult('pending');
   };
+  const practiceSeat = s.players.findIndex((player) => !player.cpu);
   const act = (action: TableAction) => {
     if (result !== 'pending') return;
     const trial = structuredClone(s);
-    if (!applyTableAction(trial, 0, action)) return;
+    if (!applyTableAction(trial, practiceSeat, action)) return;
     const done = passed(game, step, action, trial);
     setState(trial);
     setResult(done ? 'done' : 'retry');
@@ -446,7 +457,7 @@ export function Tutorial({
         )}
       </section>
       <TableBoard
-        view={tableViewFor(s, 0)}
+        view={tableViewFor(s, practiceSeat)}
         language={language}
         send={act}
         disabled={result !== 'pending'}

@@ -1,5 +1,6 @@
 import type { LanguageMode } from '../../types';
-import { DOMINO_GAMES, type TableGame } from './model';
+import { DOMINO_GAMES, EXTRA_DOMINO_GAMES, type TableGame } from './model';
+import { EXTRA_DOMINO_CATALOG } from './dominoCatalog';
 
 export type Copy = [ja: string, en: string, kana?: string];
 export const say = (language: LanguageMode, [ja, en, kana]: Copy) =>
@@ -12,7 +13,36 @@ interface Entry {
   source: string;
 }
 const dominoSource = (id: string) => `https://gamefarm.jp/rule/${id}.html`;
+const extraDominoEntries = Object.fromEntries(
+  EXTRA_DOMINO_GAMES.map((id): [typeof id, Entry] => {
+    const [title, page, , , ...instructions]: [Copy, string, string, number, ...Copy[]] =
+      EXTRA_DOMINO_CATALOG[id];
+    if (page === 'clarke') {
+      instructions.push([
+        '5局を行い、勝った局数が最も多い人が勝ちます。',
+        'Play five deals. Win the most deals to win the match.',
+        '5きょくを おこない、かった きょくすうが もっとも おおい ひとが かちです。',
+      ]);
+    } else if (id === 'buki') {
+      instructions.push([
+        '2・4・6チップから選び、5局の獲得チップで競います。',
+        'Choose a stake of two, four or six chips. Compare chip winnings after five deals.',
+        '2・4・6チップから えらび、5きょくの かくとくチップで きそいます。',
+      ]);
+    }
+    return [
+      id,
+      {
+        title,
+        tagline: instructions[0],
+        instructions,
+        source: dominoSource(page),
+      },
+    ];
+  }),
+) as Record<(typeof EXTRA_DOMINO_GAMES)[number], Entry>;
 export const TABLE_GAMES: Record<TableGame, Entry> = {
+  ...extraDominoEntries,
   competitive: {
     title: ['コンペティティブ・ドミノ', 'Competitive Dominoes'],
     tagline: [
@@ -118,7 +148,7 @@ export const TABLE_GAMES: Record<TableGame, Entry> = {
     source: dominoSource('mexicantrain'),
   },
   'five-up': {
-    title: ['ファイブアップ', 'Five Up'],
+    title: ['ファイブアップ（カンテット）', 'Five Up'],
     tagline: [
       '列端の合計を5の倍数にする',
       'Build exposed totals that divide by five',

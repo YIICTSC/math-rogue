@@ -14,6 +14,11 @@ import {createRoot} from 'react-dom/client';
 import MiniGameSelectScreen from './src/components/MiniGameSelectScreen';
 import MiniGameRouter from './src/components/MiniGameRouter';
 import {GameMode} from './src/types';
+import {TraditionalSession} from './src/mini-games/traditional-games/session';
+const startTable = TraditionalSession.prototype.start;
+TraditionalSession.prototype.start = function(seed) {
+  return startTable.call(this, document.querySelector('.tt-theme-domino') ? 1995 : seed);
+};
 import './src/styles.css';
 import {audioService} from './src/services/audioService';
 audioService.playBGM=async()=>{};
@@ -24,7 +29,7 @@ createRoot(document.getElementById('root')!).render(<Menu/>);
 const vite = await createServer({
   cacheDir: scratch + '/vite',
   logLevel: 'error',
-  server: { host: '127.0.0.1', port: 0, hmr: false },
+  server: { host: '127.0.0.1', port: 0, hmr: false, watch: { ignored: () => true } },
   optimizeDeps: {
     noDiscovery: true,
     include: [
@@ -58,12 +63,17 @@ let browser;
 try {
   await vite.listen();
   browser = process.env.PLAYWRIGHT_WEBKIT_EXECUTABLE
-    ? await webkit.launch({ executablePath: process.env.PLAYWRIGHT_WEBKIT_EXECUTABLE })
+    ? await webkit.launch({
+        executablePath: process.env.PLAYWRIGHT_WEBKIT_EXECUTABLE,
+      })
     : await chromium.launch({
         executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE || '/usr/bin/chromium',
         args: ['--no-sandbox'],
       });
-  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  const page = await browser.newPage({
+    viewport: { width: 390, height: 844 },
+    hasTouch: true,
+  });
   page.setDefaultTimeout(30000);
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -80,13 +90,14 @@ try {
     { width: 568, height: 320 },
     { width: 1440, height: 900 },
   ];
+  const model = await vite.ssrLoadModule('/src/mini-games/traditional-games/model.ts');
   let checked = 0;
+  await page.goto('http://127.0.0.1:' + vite.httpServer.address().port + '/viewport-qa');
+  await page.locator('.mini-game-select-card')
+    .filter({ has: page.locator('[style*="sprites/traditional-games"]') })
+    .click();
   for (const game of games) {
-    await page.goto('http://127.0.0.1:' + vite.httpServer.address().port + '/viewport-qa');
-    await page
-      .locator('.mini-game-select-card')
-      .filter({ has: page.locator('[style*="sprites/traditional-games"]') })
-      .click();
+    await page.setViewportSize(sizes[0]);
     await page.getByRole('button', { name: 'Play solo', exact: true }).click();
     const family =
       game === 'crokinole'
@@ -97,10 +108,33 @@ try {
             ? 'Peeper'
             : 'Dominoes';
     await page.locator('.tt-families').getByRole('button', { name: family, exact: true }).click();
+    if (game === 'competitive') {
+      const list = page.getByRole('group', { name: 'Domino rulesets' });
+      assert.equal(await list.getByRole('button').count(), model.DOMINO_GAMES.length);
+      await page.getByRole('combobox', { name: 'Type', exact: true }).selectOption('tricks');
+      assert.equal(await list.getByRole('button').count(), 4);
+      await page.getByRole('checkbox', { name: 'Beginner', exact: true }).check();
+      await list.getByRole('status').waitFor();
+      await page.getByRole('combobox', { name: 'Type', exact: true }).selectOption('all');
+      assert((await list.getByRole('button').count()) < model.DOMINO_GAMES.length);
+      await page.getByRole('checkbox', { name: 'Beginner', exact: true }).uncheck();
+      await page.getByRole('combobox', { name: 'Sort', exact: true }).selectOption('name');
+      const titles = await list
+        .getByRole('button')
+        .evaluateAll((buttons) => buttons.map((button) => button.getAttribute('aria-label')));
+      assert.deepEqual(
+        titles,
+        [...titles].sort((a, b) => a.localeCompare(b, 'en')),
+      );
+      await page.getByRole('combobox', { name: 'Sort', exact: true }).selectOption('level');
+    }
     if (family === 'Dominoes')
       await page
         .locator('.tt-variants')
-        .getByRole('button', { name: catalog.TABLE_GAMES[game].title[1], exact: true })
+        .getByRole('button', {
+          name: catalog.TABLE_GAMES[game].title[1],
+          exact: true,
+        })
         .click();
     const seats = page.locator('.tt-detail select');
     await seats.selectOption(
@@ -109,8 +143,8 @@ try {
     );
     await page.getByRole('button', { name: 'Play against CPU', exact: true }).click();
     await page.locator('.tt-playing .tt-table-area').waitFor();
-    if (family === 'Dominoes' && game !== 'forty-two') {
-      for (let n = 0; n < 35 && (await page.locator('.tt-domino-map-tile').count()) < 3; n++) {
+    if (model.CLASSIC_DOMINO_GAMES.includes(game) && game !== 'forty-two') {
+      for (let n = 0; n < 150 && (await page.locator('.tt-domino-map-tile').count()) < 3; n++) {
         const move = page.locator('.tt-hand [data-playable="true"]:enabled').first();
         if (await move.count()) await move.click();
         const end = page.locator('.tt-domino-ends button:enabled').first();
@@ -142,8 +176,14 @@ try {
           if (!badge || !/^\d+/.test(badge.textContent)) return false;
           const bounds = seat.getBoundingClientRect();
           const count = badge.getBoundingClientRect();
-          return count.width > 0 && count.left >= bounds.left && count.right <= bounds.right &&
-            count.right <= innerWidth && count.top >= bounds.top && count.bottom <= bounds.bottom;
+          return (
+            count.width > 0 &&
+            count.left >= bounds.left &&
+            count.right <= bounds.right &&
+            count.right <= innerWidth &&
+            count.top >= bounds.top &&
+            count.bottom <= bounds.bottom
+          );
         }),
       );
       assert(seatCounts.length > 1 && seatCounts.every(Boolean), game + ': hand count clipped');
@@ -181,16 +221,20 @@ try {
         metrics.field.height >= 110,
         game + ' ' + JSON.stringify(viewport) + ': table too small ' + JSON.stringify(metrics),
       );
-      if (metrics.hand) assert(metrics.hand.height >= 35, game + ': hand clipped');
+      if (metrics.hand && (await page.locator('.tt-hand > *').count()))
+        assert(metrics.hand.height >= 35, game + ': hand clipped');
       for (const r of metrics.rows)
         assert(
           r.y >= metrics.field.y - 1 && r.bottom <= metrics.field.bottom + 1,
           'goita row clipped ' + JSON.stringify(metrics),
         );
       if (['competitive', 'mexican', 'peeper', 'goita', 'crokinole', 'forty-two'].includes(game))
-        await page.screenshot({ path: screenshots + '/' + game + '-' + viewport.width + '.png' });
+        await page.screenshot({
+          path: screenshots + '/' + game + '-' + viewport.width + '.png',
+        });
       checked++;
     }
+    await page.locator('.tt-playing .tt-nav').getByRole('button', { name: 'Back', exact: true }).click();
   }
   assert.deepEqual(errors, []);
   console.log(

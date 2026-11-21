@@ -28,6 +28,12 @@ import { RulesText, Tutorial } from './Tutorial';
 import { tableArt } from './Pieces';
 import { TRADITIONAL_ROOM_PARAM, traditionalInviteCode } from './invite';
 import { familyFor, say, TABLE_GAMES, type Copy, type TableFamily } from './catalog';
+import {
+  DOMINO_CATEGORIES,
+  DOMINO_LEVELS,
+  dominoListing,
+  type DominoCategory,
+} from './dominoCatalog';
 import { DOMINO_GAMES, seatsFor, type TableGame } from './model';
 import { TraditionalRoom, type TablePacket } from './session';
 import type { TableView } from './engine';
@@ -204,6 +210,9 @@ export default function TraditionalGames({
   const [name, setName] = useState(() => l('プレイヤー', 'Player', 'プレイヤー'));
   const [code, setCode] = useState(inviteCode);
   const [count, setCount] = useState(4);
+  const [dominoCategory, setDominoCategory] = useState<DominoCategory | 'all'>('all');
+  const [beginnerOnly, setBeginnerOnly] = useState(false);
+  const [dominoSort, setDominoSort] = useState<'level' | 'category' | 'name'>('level');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [showHero, setShowHero] = useState(false);
@@ -358,25 +367,109 @@ export default function TraditionalGames({
     </div>
   );
 
+  const dominoVariants = DOMINO_GAMES.filter((id) => {
+    const { category, level } = dominoListing(id);
+    return (
+      (dominoCategory === 'all' || category === dominoCategory) && (!beginnerOnly || level === 0)
+    );
+  }).sort((a, b) => {
+    const first = dominoListing(a),
+      second = dominoListing(b);
+    const locale = languageMode === 'ENGLISH' ? 'en' : 'ja';
+    const byName = () =>
+      say(languageMode, TABLE_GAMES[a].title).localeCompare(
+        say(languageMode, TABLE_GAMES[b].title),
+        locale,
+      );
+    if (dominoSort === 'name') return byName();
+    if (dominoSort === 'category') {
+      return (
+        say(languageMode, DOMINO_CATEGORIES[first.category]).localeCompare(
+          say(languageMode, DOMINO_CATEGORIES[second.category]),
+          locale,
+        ) ||
+        first.level - second.level ||
+        byName()
+      );
+    }
+    return first.level - second.level || DOMINO_GAMES.indexOf(a) - DOMINO_GAMES.indexOf(b);
+  });
   const dominoList = family.id === 'domino' && (
-    <div
-      className="tt-variants"
-      role="group"
-      aria-label={l('ドミノのルール', 'Domino rulesets', 'ドミノの ルール')}
-    >
-      {DOMINO_GAMES.map((id) => (
-        <button
-          key={id}
-          aria-pressed={id === activeGame}
-          disabled={
-            packet?.phase === 'lobby' && !seatsFor(id).some((n) => n >= packet.members.length)
-          }
-          onClick={() => chooseGame(id)}
-        >
-          {say(languageMode, TABLE_GAMES[id].title)}
-        </button>
-      ))}
-    </div>
+    <section className="tt-domino-picker">
+      <div className="tt-domino-filters">
+        <label>
+          {l('種類', 'Type', 'しゅるい')}
+          <select
+            value={dominoCategory}
+            onChange={(e) => setDominoCategory(e.target.value as typeof dominoCategory)}
+          >
+            <option value="all">{l('すべて', 'All types', 'すべて')}</option>
+            {Object.entries(DOMINO_CATEGORIES).map(([id, name]) => (
+              <option key={id} value={id}>
+                {say(languageMode, name)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          {l('並び順', 'Sort', 'ならびじゅん')}
+          <select
+            value={dominoSort}
+            onChange={(e) => setDominoSort(e.target.value as typeof dominoSort)}
+          >
+            <option value="level">{l('難易度順', 'Difficulty', 'なんいどじゅん')}</option>
+            <option value="category">{l('種類順', 'Type', 'しゅるいじゅん')}</option>
+            <option value="name">{l('名前順', 'Name', 'なまえじゅん')}</option>
+          </select>
+        </label>
+        <label className="tt-domino-beginner">
+          <input
+            type="checkbox"
+            checked={beginnerOnly}
+            onChange={(e) => setBeginnerOnly(e.target.checked)}
+          />
+          {say(languageMode, DOMINO_LEVELS[0])}
+        </label>
+      </div>
+      <div
+        className="tt-variants"
+        role="group"
+        aria-label={l('ドミノのルール', 'Domino rulesets', 'ドミノの ルール')}
+      >
+        {dominoVariants.map((id) => {
+          const { category, level } = dominoListing(id);
+          const title = say(languageMode, TABLE_GAMES[id].title);
+          return (
+            <button
+              type="button"
+              key={id}
+              aria-label={title}
+              aria-pressed={id === activeGame}
+              disabled={
+                packet?.phase === 'lobby' && !seatsFor(id).some((n) => n >= packet.members.length)
+              }
+              onClick={() => chooseGame(id)}
+            >
+              <strong>{title}</strong>
+              <small>
+                {say(languageMode, DOMINO_CATEGORIES[category])} ·{' '}
+                {say(languageMode, DOMINO_LEVELS[level])} · {seatsFor(id).join(' / ')}
+                {l('人', ' players', 'にん')}
+              </small>
+            </button>
+          );
+        })}
+        {!dominoVariants.length && (
+          <p role="status">
+            {l(
+              '条件に合う種目はありません。',
+              'No rulesets match these filters.',
+              'この じょうけんに あう ゲームは ありません。',
+            )}
+          </p>
+        )}
+      </div>
+    </section>
   );
 
   const personPicker = (

@@ -1,6 +1,6 @@
 import { CARD_CLUB_VOICE_HEROES } from '../../data/cardClubVoices';
 
-export const DOMINO_GAMES = [
+export const CLASSIC_DOMINO_GAMES = [
   'competitive',
   'cyprus',
   'chicken',
@@ -12,11 +12,66 @@ export const DOMINO_GAMES = [
   'fives-threes',
   'forty-two',
 ] as const;
+export const EXTRA_DOMINO_GAMES = [
+  'buki',
+  'pulle',
+  'austrian-block',
+  'austrian-draw',
+  'nos',
+  'billitonnen',
+  'bluffing',
+  'double-edged',
+  'request',
+  'keep-left',
+  'give-or-take',
+  'speed',
+  'dead-space',
+  'one-up',
+  'pick-up',
+  'flower-scorpion',
+  'eleven-point',
+  'twenty-one-point',
+  'bingo',
+  'sidominos',
+  'broadway',
+  'skyscraper',
+  'shanghai',
+  'rummicube',
+] as const;
+export const DOMINO_GAMES = [...CLASSIC_DOMINO_GAMES, ...EXTRA_DOMINO_GAMES] as const;
+export type ExtraDominoGame = (typeof EXTRA_DOMINO_GAMES)[number];
 export type DominoGame = (typeof DOMINO_GAMES)[number];
-export type LineGame = Exclude<DominoGame, 'forty-two'>;
+export type LineGame = Exclude<(typeof CLASSIC_DOMINO_GAMES)[number], 'forty-two'>;
+export const isExtraDomino = (game: TableGame): game is ExtraDominoGame =>
+  (EXTRA_DOMINO_GAMES as readonly TableGame[]).includes(game);
 export type TableGame = DominoGame | 'peeper' | 'crokinole' | 'goita';
 export const seatsFor = (game: TableGame): readonly number[] => {
   switch (game) {
+    case 'bingo':
+      return [2];
+    case 'nos':
+    case 'billitonnen':
+      return [3, 4, 5];
+    case 'eleven-point':
+    case 'twenty-one-point':
+      return [3, 4];
+    case 'skyscraper':
+      return [2, 3];
+    case 'rummicube':
+      return [2, 3, 4, 5];
+    case 'bluffing':
+    case 'double-edged':
+    case 'request':
+    case 'keep-left':
+    case 'give-or-take':
+    case 'speed':
+    case 'dead-space':
+    case 'one-up':
+    case 'pick-up':
+      return [2, 3, 4, 5, 6, 7, 8];
+    case 'buki':
+    case 'pulle':
+    case 'broadway':
     case 'competitive':
     case 'goita':
     case 'forty-two':
@@ -57,9 +112,17 @@ export function isTableMember(value: unknown): value is TableMember {
 
 export const teamsFor = (game: TableGame, count: number) =>
   count === 4 &&
-  (['competitive', 'forty-two', 'goita', 'crokinole', 'five-up', 'sniff'] as TableGame[]).includes(
-    game,
-  );
+  (
+    [
+      'competitive',
+      'forty-two',
+      'broadway',
+      'goita',
+      'crokinole',
+      'five-up',
+      'sniff',
+    ] as TableGame[]
+  ).includes(game);
 
 type EventKey =
   | 'place'
@@ -95,6 +158,18 @@ export type TableAction =
   | { type: 'five'; accept: boolean }
   | { type: 'shot'; angle: number; aim: number; power: number }
   | { type: 'bid' | 'trump'; value: number }
+  | { type: 'option'; value: number }
+  | { type: 'pair'; tile: number; other: number }
+  | { type: 'claim'; tile: number; end: number; face: number }
+  | {
+      type: 'grid';
+      tile: number;
+      x: number;
+      y: number;
+      vertical: boolean;
+      flip: boolean;
+    }
+  | { type: 'meld'; groups: number[][] }
   | { type: 'draw' | 'pass' | 'next' };
 
 export type TableBase = {

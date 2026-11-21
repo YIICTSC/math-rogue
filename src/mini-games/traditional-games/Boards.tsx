@@ -1,6 +1,7 @@
 import { useTableFoley } from './useTableFoley';
 import { audioService } from '../../services/audioService';
 import { DominoTable } from './DominoTable';
+import { ExtraDominoBoard } from './ExtraDominoBoards';
 import React, { useEffect, useRef, useState } from 'react';
 import type { LanguageMode } from '../../types';
 import {
@@ -745,6 +746,11 @@ export function TableBoard({
   const props = { language, send, disabled };
   const phaseKey = view.game + '-' + view.revision;
   switch (view.kind) {
+    case 'domino-lanes':
+    case 'domino-grid':
+    case 'domino-tricks':
+    case 'domino-sets':
+      return <ExtraDominoBoard key={view.game + '-' + view.round} view={view} {...props} />;
     case 'domino':
       return <DominoBoard key={view.game + '-' + view.round} view={view} {...props} />;
     case 'forty-two':
