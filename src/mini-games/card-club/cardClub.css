@@ -148,12 +148,6 @@
   text-align: center;
   text-shadow: 0 2px 5px #080e18, 0 0 16px #080e18b3;
 }
-.cc-title-copy h1 span {
-  display: block;
-  margin-bottom: 4px;
-  font-size: .52em;
-  letter-spacing: .12em;
-}
 .cc-title-copy em {color: #ffe5a5; font-style: normal;}
 .cc-title-modes {
   display: flex;

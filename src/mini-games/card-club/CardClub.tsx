@@ -212,13 +212,13 @@ export default function CardClub({onBack,languageMode='JAPANESE'}:MiniGameCompon
     {!packet&&page==='title'&&<ResponsiveTitleArt game="card-club" className="cc-title-art" style={{objectPosition:'var(--cc-title-focus, center)'}}/>}
     <header className="cc-header">
       <button onClick={back}>{packet?.code?l('部屋を出る','Leave room'):l('戻る','Back')}</button>
-      <span className="cc-brand">{l('放課後トランプゲーム集','After-school Card Club')}</span>
+      <span className="cc-brand">{l('トランプゲーム集','Card Club')}</span>
       {current&&<div className="cc-compact-title"><h1>{title(current.game)}</h1><small>{l('配札','Deal')} {current.round+1}{current.trump>=0?` · ${l('切札','Trump')} ${current.trump===4?l('ジャック4枚','Four jacks'):SUITS[current.trump]}`:''}</small></div>}
       {(packet||page==='connect')&&<button onClick={()=>setRules(true)}>{l('遊び方','Rules')}</button>}
     </header>
     {error&&<div className="cc-notice" role="alert">{error}<button aria-label={l('閉じる','Close')} onClick={()=>setError('')}>×</button></div>}
     {!packet&&page==='title'&&<section className="cc-title-copy">
-      <h1><span>{l('放課後','After-school')}</span><em>{l('トランプゲーム集','Card Club')}</em></h1>
+      <h1><em>{l('トランプゲーム集','Card Club')}</em></h1>
       <nav className="cc-title-modes" aria-label={l('遊び方を選ぶ','Choose how to play')}>
         <button className="cc-primary" onClick={()=>setPage('hero')}>{l('CPUと遊ぶ','Play with CPU')}</button>
         {!OFFLINE_DISTRIBUTABLE&&<>

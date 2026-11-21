@@ -97,9 +97,14 @@ try {
   const model = await vite.ssrLoadModule('/src/mini-games/traditional-games/model.ts');
   let checked = 0;
   await page.goto('http://127.0.0.1:' + vite.httpServer.address().port + '/viewport-qa');
-  await page.locator('.mini-game-select-card')
-    .filter({ has: page.locator('[aria-label="After-School Card Club"]') })
-    .click();
+  const miniGameCards = page.locator('.mini-game-select-card');
+  assert.deepEqual(
+    await miniGameCards.locator('.mini-game-title').evaluateAll((titles) =>
+      titles.slice(0, 2).map((title) => title.getAttribute('aria-label')),
+    ),
+    ['Card Club', 'Traditional Games of the World'],
+  );
+  await miniGameCards.first().click();
   await page.locator('.card-club.cc-page-title').getByRole('button', { name: 'Play with CPU' }).waitFor();
   await page.locator('.card-club').getByRole('button', { name: 'Back', exact: true }).click();
 
