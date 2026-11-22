@@ -803,6 +803,14 @@
   display: grid;
   gap: 5px;
 }
+.sa-resident-portrait {
+  display: block;
+  flex: none;
+  background-color: #233935;
+  background-size: 300% 200%;
+  background-repeat: no-repeat;
+}
+.sa-people-list .sa-resident-portrait { display: block; }
 .sa-people-list > button {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
@@ -814,7 +822,7 @@
   align-items: center;
   gap: 10px;
 }
-.sa-npc-head img {
+.sa-npc-head .sa-portrait {
   width: clamp(72px, 18vw, 116px);
   height: clamp(82px, 20vw, 120px);
   object-fit: cover;
@@ -955,14 +963,39 @@
 .sa-dungeon-scene[data-combat] {
   grid-template-rows: auto minmax(0, 1fr);
 }
-.sa-dungeon-art {
-  z-index: -4;
+.sa-corridor {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
+  z-index: -2;
+  overflow: hidden;
+  container-type: size;
+  background: #111719;
+  pointer-events: none;
+}
+.sa-corridor-space {
+  --tile: min(82cqw, 570px);
+  --lamp: 1;
+  position: absolute;
+  inset: 0;
+  perspective: calc(0.59 * var(--tile));
+  perspective-origin: center center;
+  transform-style: preserve-3d;
+}
+.sa-dungeon-scene[data-dark] .sa-corridor-space { --lamp: 0.42; }
+.sa-corridor-plane {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--tile) + 1px);
+  height: calc(var(--tile) + 1px);
+  backface-visibility: hidden;
+  background-color: #353938;
+  background-repeat: no-repeat;
+  background-size: 300% 200%;
+  filter: brightness(calc(var(--shade) * var(--lamp)));
+}
+.sa-corridor-plane[data-surface='wall'] {
+  height: calc(0.64 * var(--tile) + 1px);
 }
 .sa-dungeon-scene::after {
   content: '';
@@ -971,29 +1004,6 @@
   inset: 0;
   z-index: -1;
   background: radial-gradient(ellipse at center, transparent 42%, #0b121bd9 100%);
-}
-.sa-dungeon-scene[data-dark] .sa-dungeon-art {
-  filter: brightness(0.45) saturate(0.65);
-}
-.sa-wall {
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  background: #111d1fbb;
-  pointer-events: none;
-}
-.sa-wall-left {
-  clip-path: polygon(0 0, 40% 32%, 40% 68%, 0 100%);
-  background: linear-gradient(90deg, #122222ed, #23353120);
-}
-.sa-wall-right {
-  clip-path: polygon(100% 0, 60% 32%, 60% 68%, 100% 100%);
-  background: linear-gradient(270deg, #122222ed, #23353120);
-}
-.sa-wall-front {
-  clip-path: polygon(32% 20%, 68% 20%, 68% 80%, 32% 80%);
-  background: #132722a0;
-  backdrop-filter: blur(4px) brightness(0.64);
 }
 .sa-scene-line {
   display: flex;
@@ -1548,3 +1558,95 @@
     font-size: 17px;
   }
 }
+
+/* Extra life and party details stay in the original adventure panels. */
+.sa-hunger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #d4e2bd;
+}
+.sa-hunger[data-hungry] { color: #fec197; font-weight: 750; }
+.sa-death-options {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0;
+  padding: 8px 10px;
+  border: 1px solid var(--sa-line);
+  border-radius: 7px;
+}
+.sa-death-options label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px;
+  border-radius: 6px;
+  background: #172e2c;
+  cursor: pointer;
+}
+.sa-death-options label span,
+.sa-blueprints button > span,
+.sa-road-list button > span { display: grid; text-align: start; }
+.sa-death-options small,
+.sa-blueprints button > span > small,
+.sa-road-list button small { color: var(--sa-muted); font-size: .82em; }
+.sa-blueprints { margin-block: 9px; }
+.sa-blueprints details + details { margin-block-start: 4px; }
+.sa-blueprints summary {
+  padding: 8px 6px;
+  min-height: 38px;
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--sa-gold);
+}
+.sa-combat-party {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 126px), 1fr));
+  gap: 5px;
+  margin-block: 7px;
+}
+.sa-combat-party article {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 5px;
+  border: 1px solid var(--sa-line);
+  border-radius: 6px;
+  background: #182c2b;
+}
+.sa-combat-party article[data-down] { opacity: .65; }
+.sa-combat-party .sa-portrait {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  object-position: center 16%;
+  border-radius: 4px;
+}
+.sa-combat-party article > span { display: grid; flex: 1; min-width: 0; }
+.sa-combat-party strong, .sa-combat-party small {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: .82em;
+}
+.sa-combat-party progress { width: 100%; height: 5px; }
+.sa-main > .sa-fallen {
+  width: min(100%, 720px);
+  margin: 16px auto;
+}
+.sa-fallen header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-block-end: 14px;
+}
+.sa-fallen header img {
+  width: 76px;
+  height: 96px;
+  object-fit: cover;
+  object-position: center 15%;
+  border-radius: 7px;
+}
+.sa-fallen ol { display: grid; gap: 7px; }

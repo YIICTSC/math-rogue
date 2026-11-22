@@ -242,18 +242,33 @@ export default function Creator({
                 'Checks add your attribute and other bonuses to a twenty-sided die, then compare the total to a target.',
               ])}
             </p>
+            <fieldset className="sa-death-options">
+              <legend>{t(['倒れたとき', 'When you fall', 'たおれたとき'])}</legend>
+              <label>
+                <input type="radio" name="death-rule" checked={draft.deathRule === 'permadeath'}
+                  onChange={() => choose('deathRule', 'permadeath')} />
+                <span><strong>{t(['一度きりの旅', 'One life', 'いちどきりの たび'])}</strong>
+                  <small>{t(['力尽きると旅は終了。記録は読み返せます。', 'Falling ends the run. Your journal stays available.', 'ちからつきると たびは おわり。きろくは よみかえせます。'])}</small></span>
+              </label>
+              <label>
+                <input type="radio" name="death-rule" checked={draft.deathRule === 'return-town'}
+                  onChange={() => choose('deathRule', 'return-town')} />
+                <span><strong>{t(['町から再開', 'Return to town', 'まちから さいかい'])}</strong>
+                  <small>{t(['町で手当てを受け、救助費を払って続けます。', 'Recover in town and continue after paying a rescue fee.', 'まちで てあてを うけ、きゅうじょひを はらって つづけます。'])}</small></span>
+              </label>
+            </fieldset>
             <button
               type="button"
               className="sa-text-button"
               aria-expanded={worldOpen}
               onClick={() => setWorldOpen(!worldOpen)}
             >
-              {t(['出発する世界', 'Starting world'])} · {t(realmName(draft.world || ACADEMY_WORLD))}
+              {t(['新しい世界を生成', 'Generate a new world', 'あたらしい せかいを つくる'])} · {t(realmName(draft.world || ACADEMY_WORLD))}
             </button>
             {worldOpen && (
               <div className="sa-inline">
                 <label className="sa-field">
-                  <span>{t(['世界コード', 'World code'])}</span>
+                  <span>{t(['世界コードの元', 'World seed', 'せかいコードの もと'])}</span>
                   <input
                     value={draft.world}
                     maxLength={28}

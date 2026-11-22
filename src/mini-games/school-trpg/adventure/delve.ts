@@ -1,22 +1,26 @@
 import {
   BIOMES,
+  COMPANION_ROLES,
   FOES,
+  GOODS,
   WEAPONS,
   type DamageType,
+  type Good,
   type Intent,
   type Stat,
   type Text,
 } from './content';
 import { enemyName, forgeGear } from './inventory';
 import { useSupply } from './life';
+import { companionTurn, formParty, targetOfEnemy } from './party';
 import {
   advance,
   armor,
   awardExperience,
   awardInspiration,
   equipped,
-  maxFocus,
-  maxHp,
+  finishDefeat,
+  missedMeals,
   nextRandom,
   note,
   recover,
@@ -186,7 +190,9 @@ function startEncounter(s: Adventure, guardian: boolean, bound: boolean) {
   );
   const tier = squareRootTier(d.floor);
   const risk = BIOMES[biome].risk;
-  const count = guardian ? 1 : bound && d.floor >= 3 ? 1 + nextRandom(s, d.floor >= 9 ? 3 : 2) : 1;
+  const count = guardian ? 1 : bound && (d.floor >= 3 || s.followers.length >= 3)
+    ? 1 + nextRandom(s, d.floor >= 9 || s.followers.length >= 4 ? 3 : 2)
+    : 1;
   const enemies = Array.from({ length: count }, (_, i): Enemy => {
     const template = guardian ? FOES.length - 1 : options[nextRandom(s, options.length)];
     const base = FOES[template];
@@ -208,6 +214,7 @@ function startEncounter(s: Adventure, guardian: boolean, bound: boolean) {
     cell: d.cell,
     turn: 1,
     enemies,
+    allies: formParty(s),
     combo: 0,
     guard: false,
     surprise: !bound,
@@ -232,25 +239,6 @@ function startEncounter(s: Adventure, guardian: boolean, bound: boolean) {
 const takeHit = (s: Adventure, damage: number) => {
   s.hp = Math.max(0, s.hp - damage);
 };
-function rescue(s: Adventure) {
-  if (s.hp > 0) return false;
-  const fee = Math.min(s.gold, 4 + Math.ceil(s.gold * 0.17));
-  s.gold -= fee;
-  s.delve = null;
-  advance(s, 7);
-  s.fatigue = 4;
-  s.hp = Math.ceil(maxHp(s) * 0.6);
-  s.focus = Math.ceil(maxFocus(s) * 0.5);
-  note(
-    s,
-    [
-      `町へ救助された。救助に${fee} Gを支払った。`,
-      `You are rescued and brought to town. The rescue costs ${fee} G.`,
-    ],
-    'risk',
-  );
-  return true;
-}
 function step(s: Adventure, d: Delve, direction: Extract<Action, { type: 'move' }>['direction']) {
   if (direction === 'left' || direction === 'right') {
     d.direction = (d.direction + (direction === 'left' ? 3 : 1)) % 4;
@@ -266,7 +254,8 @@ function step(s: Adventure, d: Delve, direction: Extract<Action, { type: 'move' 
   mapCell(s);
   d.threat++;
   if (s.character.calling !== 'scout' || d.threat % 2 === 0) d.light = Math.max(0, d.light - 1);
-  if (d.threat % 3 === 0) advance(s, 1);
+  if (d.threat % (missedMeals(s) >= 2 ? 2 : 3) === 0) advance(s, 1);
+  if (finishDefeat(s)) return true;
   if (d.threat % 7 === 0) s.fatigue = Math.min(9, s.fatigue + 1);
   const feature = floor.features[next];
   if (
@@ -400,7 +389,7 @@ function featureAction(s: Adventure, d: Delve, action: Extract<Action, { type: '
         ],
         'risk',
       );
-      rescue(s);
+      finishDefeat(s);
     }
     return true;
   }
@@ -442,7 +431,7 @@ function featureAction(s: Adventure, d: Delve, action: Extract<Action, { type: '
       'risk',
       check,
     );
-    rescue(s);
+    finishDefeat(s);
   }
   return true;
 }
@@ -451,7 +440,20 @@ function completeEncounter(s: Adventure, method: 'fight' | 'parley' | 'bypass', 
   const d = s.delve!,
     battle = d.encounter!;
   if (battle.bound) clearFeature(s, battle.cell);
-  if (method === 'fight') s.counters.combats++;
+  let loot: Text | undefined;
+  if (method === 'fight') {
+    s.counters.combats++;
+    const material = ({ academy: 'thread', grove: 'timber', coast: 'ore', alpine: 'ore', ember: 'ore', sky: 'thread' } as const)[townAt(s.location).biome];
+    const food: Good = townAt(s.location).biome === 'coast' ? 'fish' : 'meat';
+    const amount = battle.enemies.length;
+    s.goods[food] += amount;
+    s.goods[material] += amount + Number(battle.guardian);
+    const materialCount = amount + Number(battle.guardian);
+    loot = [
+      GOODS[food].name[0] + ' ×' + amount + '、' + GOODS[material].name[0] + ' ×' + materialCount,
+      GOODS[food].name[1] + ' ×' + amount + ', ' + GOODS[material].name[1] + ' ×' + materialCount,
+    ];
+  }
   if (method === 'parley') s.counters.pacified++;
   if (battle.guardian) {
     const key = addressKey(s.location);
@@ -480,7 +482,10 @@ function completeEncounter(s: Adventure, method: 'fight' | 'parley' | 'bypass', 
             'You reach an agreement and are allowed through.',
           ]
         : ['気づかれずに危険を抜けた。', 'You slip past the danger.'];
-  note(s, [`${phrases[0]} ${coins} G`, `${phrases[1]} ${coins} G`], 'good', check);
+  note(s, [
+    phrases[0] + ' ' + coins + ' G' + (loot ? ' · ' + loot[0] : ''),
+    phrases[1] + ' ' + coins + ' G' + (loot ? ' · ' + loot[1] : ''),
+  ], 'good', check);
   awardExperience(s, battle.guardian ? 21 + scale * 2 : 8 + battle.enemies.length * 3);
   d.encounter = null;
 }
@@ -496,6 +501,7 @@ function escape(s: Adventure) {
 }
 function enemyRound(s: Adventure, d: Delve, battle: Encounter) {
   let damageTaken = 0;
+  let allyDamage = 0;
   let counterDamage = 0;
   for (const enemy of battle.enemies) {
     if (enemy.hp <= 0) continue;
@@ -509,20 +515,26 @@ function enemyRound(s: Adventure, d: Delve, battle: Encounter) {
       continue;
     }
     if (intent === 'brace') continue;
-    if (intent === 'hex' && !battle.guard) s.focus = Math.max(0, s.focus - 2);
+    const ally = targetOfEnemy(s, battle);
+    if (!ally && intent === 'hex' && !battle.guard) s.focus = Math.max(0, s.focus - 2);
     if (intent === 'drain') d.light = Math.max(0, d.light - (battle.guard ? 1 : 3));
-    const companionWards = s.followers.filter((id) =>
-      ['smith', 'keeper'].includes(s.friends[id]?.resident.role),
-    ).length;
-    const protection = armor(s) + (battle.guard ? 3 : 0) + companionWards;
+    const protection = (ally
+      ? (COMPANION_ROLES[s.friends[ally.id].resident.role].ward ? 3 : 1) + Math.floor(s.level / 4)
+      : armor(s)) + (battle.guard ? 3 : 0);
     const attack =
       enemy.power +
       (intent === 'heavy' ? 4 : 0) -
       (intent === 'strike' ? 0 : 1) +
       Number(battle.surprise && battle.turn === 1);
     const damage = Math.max(1, attack - protection);
-    takeHit(s, damage);
-    damageTaken += damage;
+    if (ally) {
+      const absorbed = Math.min(ally.hp, damage);
+      ally.hp -= absorbed;
+      allyDamage += absorbed;
+    } else {
+      takeHit(s, damage);
+      damageTaken += damage;
+    }
     if (intent === 'heavy' && battle.guard) {
       const strength = 2 + scoreFor(s, 'might') + (s.character.calling === 'vanguard' ? 3 : 0);
       enemy.hp = Math.max(0, enemy.hp - strength);
@@ -530,27 +542,20 @@ function enemyRound(s: Adventure, d: Delve, battle: Encounter) {
     }
     if (s.hp <= 0) break;
   }
-  if (damageTaken) {
+  if (damageTaken || allyDamage) {
     const counter = counterDamage
       ? [` 反撃 ${counterDamage}。`, ` Countered for ${counterDamage}.`]
       : ['', ''];
     note(
       s,
       [
-        `敵の反撃で${damageTaken}ダメージ。${counter[0]}`,
-        `Enemy response deals ${damageTaken} damage.${counter[1]}`,
+        '敵の反撃。主人公 ' + damageTaken + '、仲間 ' + allyDamage + ' ダメージ。' + counter[0],
+        'Enemy response: hero ' + damageTaken + ', allies ' + allyDamage + ' damage.' + counter[1],
       ],
       'risk',
     );
   }
-  if (rescue(s)) return;
-  if (
-    battle.turn % 3 === 0 &&
-    s.followers.some(
-      (id) => s.friends[id]?.resident.role === 'grower' || s.friends[id]?.resident.role === 'host',
-    )
-  )
-    recover(s, 4, 1);
+  if (finishDefeat(s)) return;
   if (battle.enemies.every((enemy) => enemy.hp <= 0)) completeEncounter(s, 'fight');
   else {
     battle.turn++;
@@ -676,9 +681,27 @@ function combat(s: Adventure, action: Extract<Action, { type: 'combat' }>) {
     if (!enemy || enemy.hp <= 0) return false;
     attack(s, battle, enemy, move);
   }
+  companionTurn(s, battle);
   if (battle.enemies.every((enemy) => enemy.hp <= 0)) completeEncounter(s, 'fight');
   else enemyRound(s, d, battle);
   return true;
+}
+
+function autoCombat(s: Adventure, requested: number) {
+  const battle = s.delve!.encounter!;
+  const target = battle.enemies[requested]?.hp > 0
+    ? requested
+    : battle.enemies.findIndex((foe) => foe.hp > 0);
+  if (target < 0) return false;
+  const enemy = battle.enemies[target];
+  const weapon = WEAPONS[equipped(s, 'weapon')?.weapon ?? 'knife'];
+  const intent = foeIntent(battle, enemy);
+  const weak = enemy.known ? FOES[enemy.template].weak : undefined;
+  let move: CombatMove = 'strike';
+  if (s.focus >= COMBAT_MOVES.quick.cost && (intent === 'heavy' || (weak === 'wind' && weapon.style !== 'wind'))) move = 'quick';
+  else if (s.focus >= COMBAT_MOVES.spark.cost && weak === 'arcane' && weapon.style !== 'arcane') move = 'spark';
+  else if (s.focus >= COMBAT_MOVES.heavy.cost && (battle.combo >= 2 || intent === 'brace')) move = 'heavy';
+  return combat(s, { type: 'combat', move, target });
 }
 
 export function declarationDifficulty(s: Adventure, stat: Stat) {
@@ -784,7 +807,7 @@ function declareInDelve(s: Adventure, action: Extract<Action, { type: 'declare' 
     else if (type === 'trap' || type === 'runes') {
       takeHit(s, check.outcome === 'partial' ? 1 : 4);
       if (type === 'trap') clearFeature(s);
-      rescue(s);
+      finishDefeat(s);
     }
   }
   advance(s, 1);
@@ -802,7 +825,10 @@ export function applyDelveAction(s: Adventure, action: Action): boolean {
     if (d.encounter) enemyRound(s, d, d.encounter);
     return true;
   }
-  if (d.encounter) return action.type === 'combat' && combat(s, action);
+  if (d.encounter) {
+    if (action.type === 'auto-combat') return autoCombat(s, action.target);
+    return action.type === 'combat' && combat(s, action);
+  }
   if (action.type === 'move') return step(s, d, action.direction);
   if (action.type === 'feature') return featureAction(s, d, action);
   if (action.type === 'leave-delve') {

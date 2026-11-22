@@ -14,7 +14,8 @@ import {
   WEAPONS,
 } from './content';
 import { SLOT_IDS } from './inventory';
-import { ADVENTURE_VERSION, PORTRAIT_IDS, type Adventure } from './state';
+import { BUILDINGS } from './building';
+import { ADVENTURE_VERSION, DEATH_RULES, MAX_PARTY_SIZE, PORTRAIT_IDS, type Adventure } from './state';
 import { addressKey, hash, SIDE, type Address } from './world';
 
 export const ADVENTURE_SLOTS = 8;
@@ -44,9 +45,13 @@ function validSlot(slot: Adventure) {
     !integer(slot.revision) ||
     !validAddress(slot.location) ||
     !validAddress(slot.homeGate) ||
+    !integer(slot.lastMealAt, 0, slot.time) ||
+    !integer(slot.defeats) ||
     !c ||
     typeof c.name !== 'string' ||
     !PORTRAIT_IDS.includes(c.portrait) ||
+    !DEATH_RULES.includes(c.deathRule) ||
+    (slot.fallenAt === null ? slot.hp <= 0 : c.deathRule !== 'permadeath' || !integer(slot.fallenAt, 0, slot.time) || slot.hp !== 0 || slot.delve !== null) ||
     !Object.hasOwn(CALLINGS, c.calling) ||
     !Object.hasOwn(ORIGINS, c.origin) ||
     !Object.hasOwn(IDEALS, c.ideal) ||
@@ -89,6 +94,10 @@ function validSlot(slot: Adventure) {
     !slot.knownTowns[addressKey(slot.location)] ||
     !slot.floors ||
     !slot.workshop ||
+    !Object.values(slot.workshop).every((home) => home && integer(home.level, 1, 3) &&
+      Array.isArray(home.planted) && home.planted.every((time) => integer(time)) &&
+      (!home.additions || Object.entries(home.additions).every(([key, time]) =>
+        Object.hasOwn(BUILDINGS, key) && typeof time === 'number' && integer(time, 0, slot.time)))) ||
     !slot.friends ||
     !slot.deepest ||
     !slot.equipment ||
@@ -98,6 +107,9 @@ function validSlot(slot: Adventure) {
     !slot.townWork ||
     !slot.counters ||
     !Array.isArray(slot.followers) ||
+    slot.followers.length >= MAX_PARTY_SIZE ||
+    new Set(slot.followers).size !== slot.followers.length ||
+    !slot.followers.every((id) => typeof id === 'string' && Object.hasOwn(slot.friends, id)) ||
     !Array.isArray(slot.fulfilled) ||
     !Array.isArray(slot.goals) ||
     !Array.isArray(slot.journal)
@@ -114,6 +126,10 @@ function validSlot(slot: Adventure) {
     integer(d.threat) &&
     (e === null ||
       (integer(e.turn, 1) &&
+        (e.allies === undefined ||
+          (Array.isArray(e.allies) &&
+            new Set(e.allies.map((ally) => ally?.id)).size === e.allies.length &&
+            e.allies.every((ally) => ally && slot.followers.includes(ally.id) && integer(ally.max, 1) && integer(ally.hp, 0, ally.max)))) &&
         Array.isArray(e.enemies) &&
         e.enemies.length >= 1 &&
         e.enemies.every(
@@ -121,6 +137,21 @@ function validSlot(slot: Adventure) {
             integer(foe.template, 0, FOES.length - 1) && integer(foe.hp) && integer(foe.max, 1),
         )))
   );
+}
+
+function migrateSlot(entry: unknown): Adventure | null {
+  if (!entry || typeof entry !== 'object' || !('version' in entry)) return null;
+  const slot = entry as Adventure;
+  if (entry.version !== 1) return slot;
+  return {
+    ...slot,
+    version: ADVENTURE_VERSION,
+    character: { ...slot.character, deathRule: 'return-town' },
+    lastMealAt: slot.time,
+    fallenAt: null,
+    defeats: 0,
+    goods: { meat: 0, strongTonic: 0, fieldKit: 0, ...slot.goods },
+  };
 }
 
 function decode(raw: string | null): RecordBook | null {
@@ -132,11 +163,11 @@ function decode(raw: string | null): RecordBook | null {
       !integer(data.serial) ||
       !Array.isArray(data.slots) ||
       data.slots.length > ADVENTURE_SLOTS ||
-      hash(JSON.stringify(data.slots)) !== data.checksum ||
-      !data.slots.every(validSlot)
+      hash(JSON.stringify(data.slots)) !== data.checksum
     )
       return null;
-    return data;
+    const slots = data.slots.map(migrateSlot).filter((slot): slot is Adventure => slot !== null && validSlot(slot));
+    return slots.length === data.slots.length ? { ...data, slots } : null;
   } catch {
     return null;
   }
@@ -183,7 +214,7 @@ export function saveAdventure(slot: Adventure, expectedRevision: number | null):
     const book = read(storage);
     const slots = book?.slots ?? [];
     const previous = slots.find((entry) => entry.id === slot.id);
-    if ((previous?.revision ?? null) !== expectedRevision) return 'changed';
+    if ((previous?.revision ?? null) !== expectedRevision || (previous?.fallenAt != null && previous.fallenAt !== slot.fallenAt)) return 'changed';
     if (!previous && slots.length >= ADVENTURE_SLOTS) return 'full';
     if (!validSlot(slot)) return 'unavailable';
     write(

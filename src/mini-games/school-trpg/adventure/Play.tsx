@@ -12,6 +12,7 @@ import {
   Plus,
   Sparkles,
   Swords,
+  Utensils,
   X,
 } from 'lucide-react';
 import type {
@@ -40,7 +41,7 @@ import { declarationDifficulty } from './delve';
 import { BADGES, badgeProgress, type BadgeId } from './guild';
 import { gearName, gearType, gearValue, SLOT_IDS } from './inventory';
 import { LifePanel, PeoplePanel, TownOverview, WorldMap } from './Town';
-import { checkBonus, equipped, maxFocus, maxHp, scoreFor, xpGoal, type Adventure } from './state';
+import { checkBonus, equipped, hoursUntilMeal, hungerPenalty, maxFocus, maxHp, scoreFor, xpGoal, type Adventure } from './state';
 import type { SaveResult } from './save';
 import { addressKey, dayAt, hourAt, townAt, weatherAt } from './world';
 import { DiceResult, Portrait, type Local, type Send } from './ui';
@@ -88,6 +89,7 @@ const SAVE_COPY: Record<Exclude<SaveResult, 'saved'>, Text> = {
 function CharacterStatus({ s, t, back }: { s: Adventure; t: Local; back: () => void }) {
   const day = dayAt(s.time),
     hour = String(hourAt(s.time)).padStart(2, '0');
+  const penalty = hungerPenalty(s);
   return (
     <header className="sa-top sa-status">
       <button type="button" onClick={back}>
@@ -128,6 +130,13 @@ function CharacterStatus({ s, t, back }: { s: Adventure; t: Local; back: () => v
         </span>
         <small>
           {t(weatherAt(s.location, s.time))} · {t(['疲労', 'Fatigue'])} {s.fatigue}/9
+        </small>
+        <small className="sa-hunger" data-hungry={penalty > 0 || undefined}
+          title={t(['一日一食。食事を抜くと判定と回復に影響します。', 'Eat once per day. Missing meals impairs checks and recovery.', 'いちにち いっしょく。ぬくと はんていと かいふくに えいきょうします。'])}>
+          <Utensils size={13} aria-hidden="true" />
+          {penalty
+            ? t(['空腹 · 判定', 'Hungry · checks', 'くうふく · はんてい']) + ' −' + penalty
+            : t(['食事まで', 'Meal due in', 'しょくじまで']) + ' ' + hoursUntilMeal(s) + 'h'}
         </small>
       </div>
     </header>
@@ -485,6 +494,25 @@ function Declaration({
   );
 }
 
+function FallenJournal({ s, t, back }: { s: Adventure; t: Local; back: () => void }) {
+  return (
+    <section className="sa-panel sa-fallen">
+      <header>
+        <Portrait id={s.character.portrait} />
+        <div>
+          <h1>{t(['旅の終わり', 'The journey ends', 'たびの おわり'])}</h1>
+          <p>{s.character.name} · {t(townAt(s.location).name)} · {t(['日', 'Day', 'にち'])} {dayAt(s.time)} · Lv. {s.level}</p>
+        </div>
+      </header>
+      <h2>{t(['最後の足跡', 'Final journal entries', 'さいごの あしあと'])}</h2>
+      <ol>
+        {s.journal.slice(0, 10).map((entry, index) => <li key={index}>{t(entry.text)}</li>)}
+      </ol>
+      <button className="sa-primary" type="button" onClick={back}>{t(['タイトルへ', 'Title', 'タイトルへ'])}</button>
+    </section>
+  );
+}
+
 export default function AdventurePlay(props: PlayProps) {
   const {
     state: s,
@@ -503,6 +531,7 @@ export default function AdventurePlay(props: PlayProps) {
   const [tab, setTab] = useState<Tab>('town');
   const [declare, setDeclare] = useState(false);
   const [lesson, setLesson] = useState(false);
+  const fallen = s.fallenAt !== null;
   const delving = !!s.delve;
   const bgm = lesson ? 'math' : s.delve?.encounter ? 'battle' : delving ? 'dungeon_library' : 'map';
   useEffect(() => audioService.acquireBgmScene(bgm, undefined, 24), [bgm]);
@@ -516,7 +545,7 @@ export default function AdventurePlay(props: PlayProps) {
   return (
     <>
       <CharacterStatus s={s} t={t} back={back} />
-      {!delving && !lesson && (
+      {!fallen && !delving && !lesson && (
         <nav className="sa-nav" aria-label={t(['冒険メニュー', 'Adventure menu'])}>
           {(Object.keys(NAV) as Tab[]).map((id) => {
             const { name, icon: Icon } = NAV[id];
@@ -540,7 +569,7 @@ export default function AdventurePlay(props: PlayProps) {
             )}
           </div>
         )}
-        {lesson ? (
+        {fallen ? <FallenJournal s={s} t={t} back={back} /> : lesson ? (
           <section className="sa-panel sa-lesson">
             <button type="button" onClick={() => setLesson(false)}>
               <ArrowLeft size={16} />
@@ -585,13 +614,13 @@ export default function AdventurePlay(props: PlayProps) {
           <TravelJournal s={s} t={t} send={send} />
         )}
       </div>
-      {!lesson && latest && (
+      {!fallen && !lesson && latest && (
         <footer className="sa-feed" role="status">
           <p>{t(latest.text)}</p>
           {recentCheck && <DiceResult check={recentCheck} t={t} />}
         </footer>
       )}
-      {declare && <Declaration s={s} t={t} send={send} close={() => setDeclare(false)} />}
+      {!fallen && declare && <Declaration s={s} t={t} send={send} close={() => setDeclare(false)} />}
     </>
   );
 }

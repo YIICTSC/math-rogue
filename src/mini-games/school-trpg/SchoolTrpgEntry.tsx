@@ -67,7 +67,9 @@ export default function SchoolTrpgEntry(props: MiniGameComponentProps) {
       persist(next);
       setCampaign(next);
       const top = next.journal[0];
-      if (action.type === 'declare' || action.type === 'combat' || top?.check) {
+      if (action.type === 'auto-combat') {
+        if (!next.delve?.encounter) audioService.playSound(top?.tone === 'risk' ? 'wrong' : 'correct');
+      } else if (action.type === 'declare' || action.type === 'combat' || top?.check) {
         audioService.playSound(
           top?.tone === 'risk' ? 'wrong' : top?.tone === 'good' ? 'correct' : 'select',
         );
@@ -172,7 +174,9 @@ export default function SchoolTrpgEntry(props: MiniGameComponentProps) {
                       onClick={() => open(slots[0], true)}
                     >
                       <Compass size={19} />
-                      {t(['続きから', 'Continue', 'つづきから'])}
+                      {slots[0].fallenAt === null
+                        ? t(['続きから', 'Continue', 'つづきから'])
+                        : t(['最後の旅の記録', 'Last adventure record', 'さいごの たびの きろく'])}
                     </button>
                   )}
                   <button
@@ -214,6 +218,7 @@ export default function SchoolTrpgEntry(props: MiniGameComponentProps) {
                             <small>
                               {t(townAt(slot.location).name)} · {t(['日', 'Day'])}{' '}
                               {dayAt(slot.time)}
+                              {slot.fallenAt !== null && ' · ' + t(['旅を終えた', 'Journey ended', 'たびを おえた'])}
                             </small>
                           </span>
                         </button>

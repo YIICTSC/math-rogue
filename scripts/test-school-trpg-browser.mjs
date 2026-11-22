@@ -131,8 +131,13 @@ try {
   await view.setViewportSize({ width: 1300, height: 850 });
   await view.locator('.sa-app').evaluate((element) => (element.scrollTop = 0));
   await snap('creator-desktop');
+  await view.getByRole('radio', { name: /^Return to town/ }).check();
   await click('Begin the adventure');
-  await view.getByRole('heading', { name: 'Bellwick Academy' }).waitFor();
+  const model = await vite.ssrLoadModule('/src/mini-games/school-trpg/adventure/world.ts');
+  const startTown = await slot();
+  await view.getByRole('heading', { name: model.townAt(startTown.location).name[1] }).waitFor();
+  assert.match(startTown.location.world, /^road-/);
+  assert.equal(startTown.character.deathRule, 'return-town');
   assert.equal((await slot()).character.portrait, 'm20');
   assert.equal((await slot()).character.stats.presence, 4);
   await snap('town-desktop');
@@ -160,18 +165,26 @@ try {
   for (let i = 0; i < 3; i++) await click('Wait eight hours');
   await click('Harvest');
   assert.equal((await slot()).counters.harvests, 1);
+  assert((await slot()).time - (await slot()).lastMealAt >= 24, 'Waiting creates hunger');
+  await view.getByRole('button', { name: /^Get a hot meal/ }).click();
+  const fed = await slot();
+  assert(fed.time - fed.lastMealAt < 24);
+  const innkeeper = model.residentsAt(fed.location).find((person) => person.role === 'host');
+  for (let i = 0; i < 5 && !model.residentPresent(innkeeper, (await slot()).time); i++)
+    await view.getByRole('button', { name: /^Rest on a bench/ }).click();
   await click('People');
+  await view.locator('.sa-npc-head .sa-resident-portrait').waitFor();
   await click('Talk');
   await view.getByRole('button', { name: /^Give a gift/ }).click();
   await view.getByRole('button', { name: /^Invite to travel/ }).click();
   assert.equal((await slot()).followers.length, 1);
   await click('Map');
-  await view.getByRole('button', { name: /^East · Mirrorharbor/ }).click();
+  await view.getByRole('button', { name: /^East · / }).click();
   await view.getByLabel('World code', { exact: true }).fill('moon-tide');
   await click('Cross');
   assert.equal((await slot()).location.world, 'moon-tide');
-  await click('Return to your home base Bellwick Academy');
-  assert.equal((await slot()).location.world, 'bellreach');
+  await view.getByRole('button', { name: /^Return to your home base/ }).click();
+  assert.deepEqual((await slot()).location, startTown.location);
   await click('Journal');
   await view.getByLabel('Personal goal').fill('Open a village kitchen');
   await click('Add goal');
@@ -180,11 +193,16 @@ try {
 
   await click('Explore');
   await view.getByRole('button', { name: /^Enter the ruins/ }).click();
-  await view.getByRole('heading', { name: /Catacombs/ }).waitFor();
+  await view.locator('.sa-delve-head h1').waitFor();
+  await view.locator('.sa-corridor-plane[data-surface=wall]').first().waitFor();
+  for (const kind of ['floor', 'wall', 'ceiling']) {
+    const face = view.locator('.sa-corridor-plane[data-surface=' + kind + ']').first();
+    assert(await face.evaluate((el) => getComputedStyle(el).backgroundImage.includes('-atlas.png')));
+  }
+  assert.equal(await view.locator('.sa-dungeon-art').count(), 0);
   await view.setViewportSize({ width: 390, height: 844 });
   await checkViewport();
   await snap('dungeon-phone');
-  const model = await vite.ssrLoadModule('/src/mini-games/school-trpg/adventure/world.ts');
   const initial = await slot();
   const floor = model.generateFloor(initial.location, 1);
   const target = Object.entries(floor.features).find(([, feature]) => feature === 'pack');
@@ -209,6 +227,7 @@ try {
   for (const direction of moves) {
     const state = await slot();
     const feature = floor.features[state.delve.cell];
+    if (!state.delve.light && state.goods.lantern) await view.getByRole('button', { name: /^Lamp oil ×/ }).click();
     if (feature === 'runes') {
       await click('Inspect');
       await click(['Moon', 'Star', 'Flame'][floor.answer]);
@@ -218,6 +237,11 @@ try {
   }
   await click('Confront');
   await view.getByRole('group', { name: 'Combat targets' }).waitFor();
+  await click('Pause');
+  const pausedTurn = (await slot()).delve.encounter.turn;
+  await view.waitForTimeout(1000);
+  assert.equal((await slot()).delve.encounter.turn, pausedTurn);
+  assert.equal(await view.locator('.sa-combat-party article').count(), 2);
   await snap('battle-phone');
   for (const viewport of [
     { width: 844, height: 390 },
@@ -228,30 +252,17 @@ try {
       element.scrollTop = 0;
     });
     await checkViewport();
-    const strike = await view.getByRole('button', { name: 'Strike', exact: true }).boundingBox();
-    const read = await view
-      .getByRole('button', { name: 'Retreat to entrance', exact: true })
-      .boundingBox();
-    const bounds = await view.locator('.sa-main').boundingBox();
+    const retreat = view.getByRole('button', { name: 'Try to retreat', exact: true });
+    await retreat.scrollIntoViewIfNeeded();
+    assert(await retreat.isVisible(), 'Retreat remains accessible at width ' + viewport.width);
+    await view.locator('.sa-scene-line').scrollIntoViewIfNeeded();
     const round = await view.locator('.sa-scene-line').boundingBox();
     const enemy = await view.locator('.sa-foe').first().boundingBox();
     await snap('battle-landscape-' + viewport.width);
-    assert(
-      strike.y >= bounds.y && read.y + read.height <= bounds.y + bounds.height,
-      'Combat techniques stay visible in landscape ' +
-        viewport.width +
-        ' ' +
-        JSON.stringify({ strike, read, bounds }),
-    );
     assert(round.y + round.height <= enemy.y, 'Turn and combo stay above the combat targets');
   }
-  await click('Read weakness');
-  assert((await slot()).delve.encounter.enemies[0].known);
-  for (let i = 0; i < 8 && (await slot()).delve?.encounter; i++) {
-    const s = await slot();
-    if (s.hp < 11 && s.goods.tonic) await view.getByRole('button', { name: /^Tonic ×/ }).click();
-    else await view.getByRole('button', { name: /^Strike$/ }).click();
-  }
+  await click('Resume combat');
+  await view.getByRole('group', { name: 'Combat targets' }).waitFor({ state: 'detached', timeout: 25000 });
   assert((await slot()).counters.combats >= 1);
   await click('Return to town');
   await click('Title');
@@ -274,7 +285,7 @@ try {
   await jp.getByRole('button', { name: '物語を開く' }).click();
   await jp.locator('body').getByText('放課後スクールTRPG', { exact: false }).first().waitFor();
   console.log(
-    'PASS router, creator, rolls, work, gardening, companions, realms, goals, first-person combat, reload and legacy entry',
+    'PASS router, creator, rolls, meals, gardening, scheduled residents, realms, goals, textured corridors, paused/automatic combat, reload and legacy entry',
     out,
   );
 } finally {

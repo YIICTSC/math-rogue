@@ -37,9 +37,15 @@ try {
   );
   assert.equal(new Set(portraits).size, 40);
   for (const biome of ['academy', 'grove', 'coast', 'alpine', 'ember', 'sky']) {
-    for (const art of ['town-' + biome, 'town-' + biome + '-frontier', 'dungeon-' + biome]) {
+    for (const art of ['town-' + biome, 'town-' + biome + '-frontier']) {
       assert((await readFile('public/sprites/school-adventure/' + art + '.webp')).length > 10000);
     }
+  }
+  for (const surface of ['walls', 'floors', 'ceilings', 'residents']) {
+    const image = await readFile('public/sprites/school-adventure/' + surface + '-atlas.png');
+    assert(image.length > 10000);
+    assert.equal(image.readUInt32BE(16), 768);
+    assert.equal(image.readUInt32BE(20), 512);
   }
   assert.equal(startAdventure({ ...draft, stats: { ...draft.stats, might: 4 } }, 'invalid'), null);
   assert.equal(startAdventure({ ...draft, portrait: 'm999' }, 'invalid'), null);
@@ -110,7 +116,8 @@ try {
   };
   const beforeTale = { ...lifeGame, rng: seedFor((face) => face === 20) };
   lifeGame = play(beforeTale, { type: 'tale', option: 0 });
-  assert.equal(life.localBoon(lifeGame), 'roads');
+  const { TALES } = await vite.ssrLoadModule(path + 'tales.ts');
+  assert.equal(life.localBoon(lifeGame), TALES[world.townAt(lifeGame.location).biome].options[0].boon);
   assert.equal(
     transition(lifeGame, { type: 'tale', option: 1 }),
     lifeGame,
@@ -138,7 +145,7 @@ try {
   assert.equal(lifeGame.counters.contracts, 1);
   const bookmark = lifeGame.location;
   lifeGame = play(lifeGame, { type: 'gate', world: 'moon-tide' });
-  lifeGame = play(lifeGame, { type: 'gate', world: 'bellreach' });
+  lifeGame = play(lifeGame, { type: 'gate', world: bookmark.world });
   assert.deepEqual(lifeGame.location, bookmark, 'Realm gates remember the previous departure town');
   lifeGame = play(lifeGame, { type: 'return-home' });
   assert.deepEqual(
@@ -208,6 +215,89 @@ try {
   explorer = play(explorer, { type: 'enter', floor: 2 });
   assert.equal(explorer.delve.floor, 2);
 
+  const { missedMeals, hungerPenalty, hoursUntilMeal, checkBonus, MAX_PARTY_SIZE } = state;
+  let hungry = newGame();
+  const initialHp = hungry.hp, initialFocus = hungry.focus, bonus = checkBonus(hungry, 'might');
+  for (let i = 0; i < 3; i++) hungry = play(hungry, { type: 'rest', rest: 'bench', hours: 8 });
+  assert.equal(missedMeals(hungry), 1);
+  assert.equal(hungerPenalty(hungry), 3);
+  assert(hungry.hp < initialHp && hungry.focus < initialFocus);
+  assert(checkBonus(hungry, 'might') <= bonus - 3);
+  hungry = play(hungry, { type: 'use', good: 'ration' });
+  assert.equal(missedMeals(hungry), 0);
+  hungry = play(hungry, { type: 'rest', rest: 'bench', hours: 8 });
+  const beforeMeal = hungry.gold;
+  hungry = play(hungry, { type: 'inn-meal' });
+  assert.equal(hungry.gold, beforeMeal - life.INN_MEAL_PRICE);
+  assert.equal(hoursUntilMeal(hungry), 23);
+
+  let fallen = { ...newGame(), hp: 1, time: newGame().lastMealAt + 23 };
+  fallen = play(fallen, { type: 'rest', rest: 'bench', hours: 2 });
+  assert.equal(fallen.hp, 0);
+  assert.equal(fallen.fallenAt, fallen.time);
+  assert.equal(transition(fallen, { type: 'use', good: 'ration' }), fallen);
+  let rescued = startAdventure({ ...draft, deathRule: 'return-town' }, 'rescue');
+  rescued = play({ ...rescued, hp: 1, time: rescued.lastMealAt + 23 }, { type: 'rest', rest: 'inn' });
+  assert.equal(rescued.defeats, 1);
+  assert(rescued.hp > 0 && rescued.delve === null && rescued.fallenAt === null);
+  assert.equal(missedMeals(rescued), 0);
+
+  let builder = startAdventure(draft, 'builder');
+  Object.assign(builder.goods, { meat: 12, grain: 8, timber: 35, ore: 30, herb: 15, thread: 10, relic: 3 });
+  assert.equal(transition(builder, { type: 'fabricate', recipe: 'stew' }), builder);
+  builder = play(builder, { type: 'build', mode: 'raise' });
+  assert.equal(builder.goods.timber, 30);
+  builder = play(builder, { type: 'build-improvement', improvement: 'kitchen' });
+  builder = play(builder, { type: 'build-improvement', improvement: 'larder' });
+  const rationStock = builder.goods.ration;
+  builder = play(builder, { type: 'fabricate', recipe: 'stew' });
+  assert.equal(builder.goods.ration, rationStock + 4);
+  builder = play(builder, { type: 'fabricate', recipe: 'spear' });
+  assert.equal(builder.gear[0].weapon, 'spear');
+  builder = play(builder, { type: 'fabricate', recipe: 'ironCoat' });
+  assert.equal(builder.gear[0].affix, 'sturdy');
+  builder = play(builder, { type: 'use', good: 'ration' });
+  builder = play(builder, { type: 'rest', rest: 'home' });
+  const lineup = world.residentsAt(builder.location);
+  assert(lineup.every((resident) => world.residentRoutine(resident, builder.time).present));
+  assert(!world.residentRoutine(lineup[0], 2).present);
+  assert.match(world.residentRoutine(lineup[0], 12).activity[1], /Eating/);
+  for (const resident of lineup) {
+    builder.friends[resident.id] = { resident, trust: 6, visitedDay: 0, offeredDay: 0 };
+  }
+  for (const resident of lineup.slice(0, MAX_PARTY_SIZE - 1)) {
+    builder = play(builder, { type: 'social', id: resident.id, verb: 'recruit' });
+  }
+  assert.equal(builder.followers.length, MAX_PARTY_SIZE - 1);
+  assert.equal(transition(builder, { type: 'social', id: lineup.at(-1).id, verb: 'recruit' }), builder);
+  builder = play(builder, { type: 'enter' });
+  builder.delve.cell = world.generateFloor(builder.location, 1).seal;
+  builder = play(builder, { type: 'feature', verb: 'confront' });
+  assert.equal(builder.delve.encounter.allies.length, 5);
+  const materialCount = (game) => game.goods.timber + game.goods.ore + game.goods.thread;
+  const foodCount = (game) => game.goods.fish + game.goods.meat;
+  const materials = materialCount(builder), food = foodCount(builder);
+  for (let i = 0; i < 25 && builder.delve?.encounter; i++) {
+    builder = play(builder, { type: 'auto-combat', target: 0 });
+  }
+  assert.equal(builder.counters.combats, 1);
+  assert(materialCount(builder) > materials && foodCount(builder) > food);
+
+  const layouts = new Set();
+  const worlds = new Set();
+  const { corridorPlanes } = await vite.ssrLoadModule(path + 'corridor.ts');
+  for (let i = 0; i < 50; i++) {
+    const run = startAdventure(draft, 'new-run-' + i);
+    const floor = world.generateFloor(run.location, 1);
+    worlds.add(run.location.world);
+    assert.equal(paths(floor).size, floor.open.size);
+    layouts.add([...floor.open].sort((a, b) => a - b).join(','));
+    const planes = corridorPlanes(floor, world.ENTRY_CELL, i % 4);
+    assert.deepEqual(new Set(planes.map((plane) => plane.surface)), new Set(['floor', 'ceiling', 'wall']));
+  }
+  assert.equal(worlds.size, 50);
+  assert(layouts.size >= 44);
+
   const storage = new Map();
   globalThis.window = {
     localStorage: {
@@ -218,6 +308,28 @@ try {
   };
   const originalStory = await vite.ssrLoadModule('/src/mini-games/school-trpg/schoolTrpgSave.ts');
   storage.set(originalStory.SCHOOL_TRPG_SAVE_KEY, 'existing-story');
+  const legacy = structuredClone(original);
+  legacy.version = 1;
+  delete legacy.character.deathRule;
+  delete legacy.lastMealAt;
+  delete legacy.fallenAt;
+  delete legacy.defeats;
+  delete legacy.goods.meat;
+  delete legacy.goods.strongTonic;
+  delete legacy.goods.fieldKit;
+  const legacySlots = [legacy];
+  storage.set(originalStory.SCHOOL_ADVENTURE_SAVE_KEY,
+    JSON.stringify({ schema: 'school-adventure', serial: 1, checksum: world.hash(JSON.stringify(legacySlots)), slots: legacySlots }));
+  const migrated = save.loadAdventures()[0];
+  assert.deepEqual(migrated.location, original.location);
+  assert.equal(migrated.character.deathRule, 'return-town');
+  assert.equal(migrated.lastMealAt, original.time);
+  assert.equal(migrated.goods.meat, 0);
+  assert(save.deleteAdventure(migrated.id));
+  assert.equal(save.saveAdventure(fallen, null), 'saved');
+  assert.equal(save.loadAdventures()[0].fallenAt, fallen.fallenAt);
+  assert(save.deleteAdventure(fallen.id));
+
   assert.equal(save.saveAdventure(explorer, null), 'saved');
   assert.deepEqual(save.loadAdventures(), [explorer]);
   const newer = play(explorer, { type: 'goal', text: 'Return to floor three' });
@@ -232,7 +344,7 @@ try {
   assert.deepEqual(save.loadAdventures(), []);
   assert.equal(storage.get(originalStory.SCHOOL_TRPG_SAVE_KEY), 'existing-story');
   console.log(
-    `PASS 40 unique portraits, ${floors} seeded floors, work, homes, companions, commissions, changing worlds, nonviolent dungeon passage and save isolation.`,
+    `PASS 40 unique portraits, ${floors} seeded floors, procedural worlds, meals, permanent death, rescue, party combat, crafting, commissions, nonviolent passage and save migration.`,
   );
 } finally {
   await vite.close();

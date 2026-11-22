@@ -4,7 +4,6 @@ import {
   ArrowUp,
   ArrowUpToLine,
   Compass,
-  Eye,
   Flame,
   Map,
   RotateCcw,
@@ -14,7 +13,6 @@ import {
 } from 'lucide-react';
 import { BIOMES, FOES, GOODS, INTENTS, type Text } from './content';
 import {
-  COMBAT_MOVES,
   RUNES,
   damageNames,
   delveDestination,
@@ -23,11 +21,15 @@ import {
   runeClue,
 } from './delve';
 import { enemyName } from './inventory';
+import { canEat } from './life';
+import { formParty } from './party';
+import DungeonCorridor from './DungeonCorridor';
 import {
+  MAX_PARTY_SIZE,
   maxFocus,
   maxHp,
+  missedMeals,
   type Adventure,
-  type CombatMove,
   type DelveMove,
   type DungeonVerb,
 } from './state';
@@ -43,7 +45,7 @@ import {
   type Feature,
   type Floor,
 } from './world';
-import { art, type Local, type Send } from './ui';
+import { art, Portrait, ResidentPortrait, type Local, type Send } from './ui';
 
 const SYMBOLS: Record<Feature, string> = {
   pack: '!',
@@ -60,32 +62,30 @@ export function Supplies({ state: s, send, t }: { state: Adventure; send: Send; 
   const d = s.delve;
   return (
     <div className="sa-supplies">
-      <button
-        type="button"
-        disabled={!s.goods.tonic || s.hp >= maxHp(s)}
-        onClick={() => send({ type: 'use', good: 'tonic' })}
-      >
+      <button type="button" disabled={!s.goods.tonic || s.hp >= maxHp(s) || missedMeals(s) >= 2}
+        onClick={() => send({ type: 'use', good: 'tonic' })}>
         {t(GOODS.tonic.name)} ×{s.goods.tonic}
       </button>
-      <button
-        type="button"
-        disabled={
-          !s.goods.ration || (s.fatigue === 0 && s.hp >= maxHp(s) && s.focus >= maxFocus(s))
-        }
-        onClick={() => send({ type: 'use', good: 'ration' })}
-      >
-        {t(GOODS.ration.name)} ×{s.goods.ration}
+      {s.goods.strongTonic > 0 && <button type="button"
+        disabled={(s.hp >= maxHp(s) && s.focus >= maxFocus(s)) || missedMeals(s) >= 2}
+        onClick={() => send({ type: 'use', good: 'strongTonic' })}>
+        {t(GOODS.strongTonic.name)} ×{s.goods.strongTonic}
+      </button>}
+      <button type="button" disabled={!s.goods.ration || !canEat(s)}
+        onClick={() => send({ type: 'use', good: 'ration' })}>
+        {t(['弁当を食べる', 'Eat a packed meal', 'べんとうを たべる'])} ×{s.goods.ration}
       </button>
       {d && (
-        <button
-          type="button"
-          disabled={!s.goods.lantern || d.light >= 14}
-          onClick={() => send({ type: 'use', good: 'lantern' })}
-        >
+        <button type="button" disabled={!s.goods.lantern || d.light >= 14}
+          onClick={() => send({ type: 'use', good: 'lantern' })}>
           <Flame size={15} />
           {t(GOODS.lantern.name)} ×{s.goods.lantern}
         </button>
       )}
+      {d && s.goods.fieldKit > 0 && <button type="button" disabled={!!d.encounter || missedMeals(s) >= 2}
+        onClick={() => send({ type: 'use', good: 'fieldKit' })}>
+        {t(['野営する', 'Set up camp', 'やえいする'])} ×{s.goods.fieldKit}
+      </button>}
     </div>
   );
 }
@@ -262,8 +262,6 @@ function DungeonScene({
   const battle = d.encounter;
   const biome = townAt(s.location).biome;
   const front = floor.open.has(neighbor(d.cell, d.direction));
-  const port = floor.open.has(neighbor(d.cell, (d.direction + 3) % 4));
-  const starboard = floor.open.has(neighbor(d.cell, (d.direction + 1) % 4));
   const record = recordFor(s, d.floor);
   const feature = record.cleared.includes(d.cell) ? undefined : floor.features[d.cell];
   return (
@@ -272,14 +270,7 @@ function DungeonScene({
       data-combat={!!battle || undefined}
       data-dark={d.light <= 0 || undefined}
     >
-      <img className="sa-dungeon-art" src={art('dungeon-' + biome)} alt="" />
-      {!battle && (
-        <>
-          {!port && <div className="sa-wall sa-wall-left" />}
-          {!starboard && <div className="sa-wall sa-wall-right" />}
-          {!front && <div className="sa-wall sa-wall-front" />}
-        </>
-      )}
+      <DungeonCorridor floor={floor} cell={d.cell} direction={d.direction} biome={biome} />
       <div className="sa-scene-line">
         <span>
           <Compass size={17} />
@@ -369,11 +360,22 @@ export default function DelveView({
   const floor = useMemo(() => generateFloor(s.location, d.floor), [address, d.floor]);
   const battle = d.encounter;
   const [picked, setPicked] = useState(0);
+  const [paused, setPaused] = useState(false);
   const target =
     battle?.enemies[picked]?.hp && battle.enemies[picked].hp > 0
       ? picked
       : Math.max(0, battle?.enemies.findIndex((enemy) => enemy.hp > 0) ?? 0);
-  useEffect(() => setPicked(0), [battle?.cell, battle?.bound]);
+  useEffect(() => {
+    setPicked(0);
+    setPaused(false);
+  }, [battle?.cell, battle?.bound]);
+  useEffect(() => {
+    if (!battle || modalOpen || paused) return;
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') send({ type: 'auto-combat', target });
+    }, 850);
+    return () => window.clearInterval(timer);
+  }, [battle, modalOpen, paused, target, send]);
   useEffect(() => {
     if (battle || modalOpen) return;
     const keys: Record<string, DelveMove> = {
@@ -479,44 +481,39 @@ export default function DelveView({
           <div className="sa-section-row">
             <h2>
               <Swords size={18} />
-              {t(['戦闘', 'Combat', 'せんとう'])}
+              {t(['自動戦闘', 'Auto combat', 'じどうせんとう'])} · {s.followers.length + 1}/{MAX_PARTY_SIZE}
             </h2>
-            <button
-              type="button"
-              onClick={declare}
-              aria-label={t(['自由宣言', 'Declare an action'])}
-            >
-              <Sparkles size={16} />
-              {t(['自由宣言', 'Declare'])}
+            <button type="button" aria-pressed={paused} onClick={() => setPaused((value) => !value)}>
+              {paused ? t(['戦闘を再開', 'Resume combat', 'せんとうを さいかい']) : t(['一時停止', 'Pause', 'いちじていし'])}
             </button>
           </div>
-          <div className="sa-technique-grid">
-            {(Object.keys(COMBAT_MOVES) as CombatMove[]).map((move) => {
-              const technique = COMBAT_MOVES[move];
-              return (
-                <button
-                  type="button"
-                  disabled={s.focus < technique.cost}
-                  key={move}
-                  onClick={() => send({ type: 'combat', move, target })}
-                  title={t(technique.hint)}
-                >
-                  <strong>{t(technique.name)}</strong>
-                  {technique.cost > 0 && (
-                    <small>
-                      {t(['集中', 'Focus'])} −{technique.cost}
-                    </small>
-                  )}
-                </button>
-              );
+          <div className="sa-combat-party" aria-label={t(['戦闘中の仲間', 'Combat party', 'せんとうちゅうの なかま'])}>
+            <article>
+              <Portrait id={s.character.portrait} />
+              <span><strong>{s.character.name}</strong><small>HP {s.hp}/{maxHp(s)}</small>
+                <progress value={s.hp} max={maxHp(s)} aria-label={s.character.name + ' HP'} /></span>
+            </article>
+            {(battle.allies ?? formParty(s)).map((ally) => {
+              const { resident } = s.friends[ally.id];
+              const name = t(resident.name);
+              return <article key={ally.id} data-down={ally.hp <= 0 || undefined}>
+                <ResidentPortrait role={resident.role} />
+                <span><strong>{name}</strong>
+                  <small>{ally.hp <= 0 ? t(['戦闘不能', 'Knocked out', 'せんとうふのう']) : 'HP ' + ally.hp + '/' + ally.max}</small>
+                  <progress value={ally.hp} max={ally.max} aria-label={name + ' HP'} /></span>
+              </article>;
             })}
           </div>
+          <div className="sa-inline">
+            <button type="button" onClick={() => send({ type: 'combat', move: 'retreat', target })}>
+              {t(['退却を試みる', 'Try to retreat', 'たいきゃくを こころみる'])}
+            </button>
+            <button type="button" onClick={declare}>
+              <Sparkles size={16} />{t(['自由宣言', 'Declare', 'じゆうせんげん'])}
+            </button>
+          </div>
           <span className="sa-hint">
-            <Eye size={15} />
-            {t([
-              '敵の構えを見て、攻撃・防御・交渉を選べます。',
-              'Read the enemy’s intent before you attack, guard, or bargain.',
-            ])}
+            {t(['攻撃と援護は自動で進みます。狙う敵はタップで変更できます。', 'Attacks and support are automatic. Tap an enemy to change targets.', 'こうげきと えんごは じどうです。てきを タップして ねらいを かえられます。'])}
           </span>
         </section>
       ) : (
