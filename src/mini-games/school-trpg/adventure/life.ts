@@ -1,5 +1,10 @@
 import { TALES, type Boon } from './tales';
-import { HOUSE_MATERIALS, buildImprovement, fabricate, hasImprovement } from './building';
+import { HOUSE_MATERIALS, MAX_HOME_LEVEL, buildImprovement, fabricate, hasImprovement } from './building';
+import { relicPower, regionalMastery } from './journeyState';
+import { seasonAt } from './journeyContent';
+import { FOOD_GOODS, MEALS, mealEffect, mealRecipe, type MealId } from './provisions';
+import { BOND_STORIES } from './bondStories';
+import { alliesWith, changeStanding, standing } from './factions';
 import {
   BIOMES,
   GOODS,
@@ -14,10 +19,12 @@ import {
 import { adjustGearCaps, forgeGear, gearName, gearValue, SLOT_IDS } from './inventory';
 import {
   advance,
+  MAX_LIGHT,
   MAX_PARTY_SIZE,
   missedMeals,
   awardExperience,
   awardInspiration,
+  equipped,
   maxFocus,
   maxHp,
   note,
@@ -85,25 +92,30 @@ export const nextHarvest = (s: Adventure) =>
   ownDwelling(s)?.planted.filter((time) => s.time >= time).length ?? 0;
 
 export function marketPrice(s: Adventure, good: Good, sell: boolean) {
-  const biome = BIOMES[townAt(s.location).biome];
+  const region = townAt(s.location).biome;
+  const biome = BIOMES[region];
+  const favor = standing(s, region);
   const base =
     GOODS[good].price +
     (biome.local === good ? -2 : 0) +
+    (FOOD_GOODS.includes(good) ? seasonAt(s.time).food : 0) +
     (hash(addressKey(s.location) + good + dayAt(s.time)) % 3);
   const tradeFriend = residentsAt(s.location).find((r) => r.role === 'broker');
   const discount = tradeFriend && (s.friends[tradeFriend.id]?.trust ?? 0) >= 4 ? 1 : 0;
-  return sell
-    ? Math.max(1, Math.floor(base * 0.57))
-    : Math.max(2, base - discount - (localBoon(s) === 'trade' ? 2 : 0));
+  const buy = Math.max(2, base - discount - (localBoon(s) === 'trade' ? 2 : 0) -
+    Number(favor >= 3) - Number(favor >= 7) + Number(favor <= -3));
+  return sell ? Math.max(1, Math.min(buy - 1, Math.floor(base * 0.57))) : buy;
 }
 
 export function travelHours(s: Adventure, to: Address) {
   const road = roadBetween(s.location, to);
   return Math.max(1, activityHours(s,
     2 + road.hours + Number(isNight(s.time)) +
+    seasonAt(s.time).travel -
+    relicPower(s, 'coast') - mealEffect(s, 'travel') +
     Number(weatherIndexAt(to, s.time) === 1) -
     Number(localBoon(s) === 'roads') -
-    Number(hasImprovement(s, 'watchtower'))));
+    Number(hasImprovement(s, 'watchtower')) - Number(alliesWith(s, townAt(s.location).biome))));
 }
 
 function arrive(s: Adventure, to: Address, time: number, material?: Good) {
@@ -162,7 +174,10 @@ function life(s: Adventure, activity: LifeActivity) {
             ? 'fish'
             : 'grain'
           : biome.local;
-    const amount = 1 + Number(success) + Number(excellent) + Number(localBoon(s) === 'garden');
+    const season = seasonAt(s.time);
+    const amount = 1 + Number(success) + Number(excellent) + Number(localBoon(s) === 'garden') +
+      (activity === 'fish' ? season.fish : season.gather) + relicPower(s, 'grove') + mealEffect(s, 'gather') +
+      Number(equipped(s, 'coat')?.masterwork === 'groveVest');
     s.goods[good] += amount;
     const extra = activity === 'gather' ? good === 'ore' ? 'timber' :
       hash(addressKey(s.location) + '/supply/' + dayAt(s.time)) % 2 ? 'timber' : 'ore' : undefined;
@@ -237,6 +252,7 @@ function addTrust(s: Adventure, resident: Resident, amount: number) {
   const before = previous?.trust ?? 0;
   const trust = Math.max(0, Math.min(8, before + amount));
   s.friends[resident.id] = {
+    ...previous,
     resident,
     trust,
     visitedDay: previous?.visitedDay ?? 0,
@@ -250,6 +266,36 @@ function addTrust(s: Adventure, resident: Resident, amount: number) {
       'good',
     );
   }
+}
+
+export function residentStory(s: Adventure, resident: Resident) {
+  const friend = s.friends[resident.id];
+  const index = friend?.memories ?? 0;
+  if (!friend || friend.trust < (index === 0 ? 2 : 5)) return undefined;
+  return BOND_STORIES[resident.role][index];
+}
+
+function resolveBond(s: Adventure, action: Extract<Action, { type: 'bond' }>) {
+  const resident = residentsAt(s.location).find((person) => person.id === action.id);
+  if (!resident || (!s.followers.includes(resident.id) && !residentPresent(resident, s.time))) return false;
+  const scene = residentStory(s, resident);
+  const friend = s.friends[resident.id];
+  const day = dayAt(s.time);
+  if (!scene || friend.bondDay === day || !['give', 'talk'].includes(action.approach)) return false;
+  if (action.approach === 'give' && !spendGoods(s, { [scene.item]: 1 })) return false;
+  const check = action.approach === 'talk' ? rollCheck(s, scene.stat, 12 + (friend.memories ?? 0) * 2) : undefined;
+  friend.bondDay = day;
+  advance(s, 2);
+  if (check && !succeeded(check) && check.outcome !== 'partial') {
+    note(s, ['今日は答えを急がず、また会う約束をした。', 'You leave the question open and agree to meet again.'], 'story', check);
+    return true;
+  }
+  friend.memories = (friend.memories ?? 0) + 1;
+  addTrust(s, resident, 1);
+  s.goods[scene.gift]++;
+  awardExperience(s, 10);
+  note(s, scene.ending, 'good', check);
+  return true;
 }
 
 function interact(s: Adventure, action: Extract<Action, { type: 'social' }>) {
@@ -350,6 +396,7 @@ export function claimMission(s: Adventure) {
   // The board only offers today's jobs, so completed jobs from past days need not be retained.
   s.fulfilled = s.fulfilled.filter((id) => id.includes('/board/' + dayAt(s.time) + '/'));
   s.mission = null;
+  changeStanding(s, townAt(mission.from).biome, 1);
   awardExperience(s, 12);
   awardInspiration(s);
   note(
@@ -385,7 +432,7 @@ function build(s: Adventure, mode: Extract<Action, { type: 'build' }>['mode']) {
     if (!home) return false;
     if (mode === 'upgrade') {
       if (
-        home.level >= 3 ||
+        home.level >= MAX_HOME_LEVEL ||
         s.gold < home.level * 24 ||
         !spendGoods(s, { timber: home.level * 2, ore: 1 })
       )
@@ -463,6 +510,33 @@ function eatMeal(s: Adventure, inn: boolean) {
     : ['弁当を食べた。', 'You eat a packed meal.', 'べんとうを たべた。'], 'good');
 }
 
+export const knowsMeal = (s: Adventure, id: MealId) =>
+  Object.hasOwn(MEALS, id) &&
+  (townAt(s.location).biome === mealRecipe(id).biome || regionalMastery(s, mealRecipe(id).biome) > 0);
+
+function cookDish(s: Adventure, id: MealId) {
+  const count = s.journey.meals[id] ?? 0;
+  if (!knowsMeal(s, id) || count >= 20 || !spendGoods(s, mealRecipe(id).cost)) return false;
+  const recipe = mealRecipe(id);
+  const portions = Math.min(20 - count, 1 + Number(hasImprovement(s, 'kitchen')) + Number(hasImprovement(s, 'smokehouse')));
+  s.journey.meals[id] = count + portions;
+  s.counters.crafted++;
+  advance(s, 1);
+  note(s, [recipe.name[0] + 'を' + portions + '食作った。', 'Prepared ' + portions + ' portions of ' + recipe.name[1] + '.'], 'good');
+  return true;
+}
+
+export function eatDish(s: Adventure, id: MealId) {
+  if (!Object.hasOwn(MEALS, id) || !(s.journey.meals[id] > 0) || !canEat(s)) return false;
+  const recipe = mealRecipe(id);
+  s.journey.meals[id]--;
+  if (!s.journey.tasted.includes(id)) s.journey.tasted.push(id);
+  s.journey.meal = { id, until: s.time + recipe.hours };
+  eatMeal(s, false);
+  note(s, [recipe.name[0] + 'を食べた。' + recipe.benefit[0] + '。', 'Ate ' + recipe.name[1] + '. ' + recipe.benefit[1] + '.'], 'good');
+  return true;
+}
+
 export function useSupply(s: Adventure, good: Extract<Action, { type: 'use' }>['good']) {
   if (!(s.goods[good] > 0)) return false;
   const delve = s.delve;
@@ -477,11 +551,11 @@ export function useSupply(s: Adventure, good: Extract<Action, { type: 'use' }>['
     recover(s, (good === 'tonic' ? 14 : 24) + s.level, good === 'tonic' ? 0 : 5);
   } else if (good === 'lantern') {
     if (!delve || delve.light >= 14) return false;
-    delve.light = Math.min(18, delve.light + 12);
+    delve.light = Math.min(MAX_LIGHT, delve.light + 12);
   } else if (good === 'fieldKit') {
     if (!delve || delve.encounter || missedMeals(s) >= 2) return false;
     advance(s, 1);
-    delve.light = Math.min(18, delve.light + 3);
+    delve.light = Math.min(MAX_LIGHT, delve.light + 3);
     recover(s, 10, 5);
     s.fatigue = Math.max(0, s.fatigue - 3);
   } else return false;
@@ -535,6 +609,10 @@ export function declareInTown(s: Adventure, action: Extract<Action, { type: 'dec
 
 export function applyTownAction(s: Adventure, action: Action): boolean {
   switch (action.type) {
+    case 'cook-dish':
+      return cookDish(s, action.id);
+    case 'eat-dish':
+      return eatDish(s, action.id);
     case 'tale': {
       const key = addressKey(s.location),
         day = dayAt(s.time);
@@ -644,6 +722,8 @@ export function applyTownAction(s: Adventure, action: Action): boolean {
     }
     case 'social':
       return interact(s, action);
+    case 'bond':
+      return resolveBond(s, action);
     case 'build':
       return build(s, action.mode);
     case 'craft':

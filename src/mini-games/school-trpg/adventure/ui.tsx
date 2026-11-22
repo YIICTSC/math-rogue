@@ -3,7 +3,8 @@ import { Dice5 } from 'lucide-react';
 import type { LanguageMode } from '../../../types';
 import { assetUrl } from '../../../utils/assetPaths';
 import { RESIDENT_ROLE_IDS, STATS, text, type ResidentRole, type Text } from './content';
-import type { Action, Check } from './state';
+import { FORMATION_IDS, FORMATIONS } from './journeyState';
+import type { Action, Adventure, Check } from './state';
 
 export type Local = (copy: Text) => string;
 export const copyFor =
@@ -14,6 +15,19 @@ export type Send = (action: Action) => boolean;
 export const art = (asset: string) => assetUrl('sprites/school-adventure/' + asset + '.webp');
 export const atlasUrl = (asset: string) => assetUrl('sprites/school-adventure/' + asset + '-atlas.png');
 export const atlasPosition = (index: number) => (index % 3) * 50 + '% ' + Math.floor(index / 3) * 100 + '%';
+
+export function FormationChoice({ s, t, send }: { s: Adventure; t: Local; send: Send }) {
+  return (
+    <div className="sa-formation">
+      <label className="sa-field"><span>{t(['戦闘の方針', 'Combat formation', 'せんとうの ほうしん'])}</span>
+        <select value={s.journey.formation} onChange={(event) => send({ type: 'formation', id: event.target.value as typeof s.journey.formation })}>
+          {FORMATION_IDS.map((id) => <option key={id} value={id}>{t(FORMATIONS[id].name)}</option>)}
+        </select>
+      </label>
+      <small>{t(FORMATIONS[s.journey.formation].hint)}</small>
+    </div>
+  );
+}
 export function ResidentPortrait({ role }: { role: ResidentRole }) {
   return <span className="sa-portrait sa-resident-portrait" aria-hidden="true" style={{
     backgroundImage: 'url("' + atlasUrl('residents') + '")',

@@ -1,10 +1,11 @@
 import {
   AFFIXES,
-  FOES,
+  MASTERWORKS,
   RARITIES,
   SLOT_NAMES,
   WEAPONS,
   type Affix,
+  type Masterwork,
   type Rarity,
   type Slot,
   type Text,
@@ -19,6 +20,7 @@ const AFFIX_IDS = Object.keys(AFFIXES) as Affix[];
 const WEAPON_IDS = Object.keys(WEAPONS) as Weapon[];
 
 export function gearName(gear: Gear): Text {
+  if (gear.masterwork) return MASTERWORKS[gear.masterwork].name;
   const base: Text =
     gear.slot === 'weapon' && gear.weapon
       ? WEAPONS[gear.weapon].name
@@ -40,7 +42,7 @@ export function forgeGear(
   depth: number,
   minimum: number,
   forcedSlot?: Slot,
-  specification?: { weapon?: Weapon; affix?: Affix },
+  specification?: { weapon?: Weapon; affix?: Affix; masterwork?: Masterwork },
 ) {
   const roll = nextRandom(s, 100);
   const rarity = Math.max(minimum, roll < 3 ? 3 : roll < 14 ? 2 : roll < 43 ? 1 : 0);
@@ -54,6 +56,7 @@ export function forgeGear(
     found: dayAt(s.time),
     ...(slot === 'weapon' ? { weapon: specification?.weapon ?? WEAPON_IDS[nextRandom(s, WEAPON_IDS.length)] } : {}),
     ...(rarity > 0 ? { affix: specification?.affix ?? AFFIX_IDS[nextRandom(s, AFFIX_IDS.length)] } : {}),
+    ...(specification?.masterwork ? { masterwork: specification.masterwork } : {}),
   };
   if (s.gear.length >= 120) {
     s.goods.ore += 1 + rarity;
@@ -75,5 +78,3 @@ export function adjustGearCaps(s: Adventure) {
   s.hp = Math.min(s.hp, maxHp(s));
   s.focus = Math.min(s.focus, maxFocus(s));
 }
-export const enemyName = (template: number, guardian: boolean): Text =>
-  guardian ? ['境界の守護者', 'Threshold Warden'] : FOES[template].name;

@@ -30,6 +30,7 @@ import {
   DECLARATIONS,
   GOODS,
   GOOD_IDS,
+  MASTERWORKS,
   SLOT_NAMES,
   STATS,
   STAT_IDS,
@@ -38,13 +39,15 @@ import {
 } from './content';
 import DelveView, { Supplies } from './Delve';
 import { declarationDifficulty } from './delve';
+import { FieldNotes } from './FieldworkPanel';
 import { BADGES, badgeProgress, type BadgeId } from './guild';
 import { gearName, gearType, gearValue, SLOT_IDS } from './inventory';
+import { ExpeditionBoard, JourneyCollection } from './JourneyPanel';
 import { LifePanel, PeoplePanel, TownOverview, WorldMap } from './Town';
 import { checkBonus, equipped, hoursUntilMeal, hungerPenalty, maxFocus, maxHp, scoreFor, xpGoal, type Adventure } from './state';
 import type { SaveResult } from './save';
 import { addressKey, dayAt, hourAt, townAt, weatherAt } from './world';
-import { DiceResult, Portrait, type Local, type Send } from './ui';
+import { art, DiceResult, Portrait, type Local, type Send } from './ui';
 
 export interface PlayProps {
   state: Adventure;
@@ -70,6 +73,13 @@ const NAV = {
   journal: { name: ['旅日誌', 'Journal', 'たびにっし'], icon: BookOpen },
 } satisfies Record<string, { name: Text; icon: typeof Compass }>;
 type Tab = keyof typeof NAV;
+const JOURNAL_VIEWS = {
+  journal: ['旅の日誌', 'Travel notes', 'たびの にっし'],
+  routes: ['遠征', 'Expeditions', 'えんせい'],
+  collection: ['図鑑', 'Collections', 'ずかん'],
+  survey: ['調査録', 'Survey', 'ちょうさろく'],
+} satisfies Record<string, Text>;
+type JournalView = keyof typeof JOURNAL_VIEWS;
 
 const SAVE_COPY: Record<Exclude<SaveResult, 'saved'>, Text> = {
   changed: [
@@ -234,16 +244,16 @@ function GearPanel({ s, send, t }: { s: Adventure; send: Send; t: Local }) {
             .filter((gear) => filter === 'all' || filter === gear.slot)
             .map((gear) => {
               const worn = s.equipment[gear.slot] === gear.id;
+              const masterwork = gear.masterwork && MASTERWORKS[gear.masterwork];
               return (
                 <div className="sa-gear" key={gear.id} data-rarity={gear.rarity}>
-                  <div>
-                    <strong>
-                      {t(gearName(gear))} +{gear.power}
-                    </strong>
-                    <p>
-                      {t(gearType(gear))}
-                      {gear.affix && ' · ' + t(AFFIXES[gear.affix].hint)}
-                    </p>
+                  <div className="sa-gear-summary">
+                    {masterwork && <img src={art('expedition/' + masterwork.art)} alt="" loading="lazy" />}
+                    <span>
+                      <strong>{t(gearName(gear))} +{gear.power}</strong>
+                      <p>{t(gearType(gear))}{gear.affix && ' · ' + t(AFFIXES[gear.affix].hint)}</p>
+                      {masterwork && <small className="sa-gold">{t(masterwork.hint)}</small>}
+                    </span>
                   </div>
                   {worn ? (
                     <small>{t(['装備中', 'Equipped'])}</small>
@@ -529,6 +539,7 @@ export default function AdventurePlay(props: PlayProps) {
     onAnswerResult,
   } = props;
   const [tab, setTab] = useState<Tab>('town');
+  const [journalView, setJournalView] = useState<JournalView>('journal');
   const [declare, setDeclare] = useState(false);
   const [lesson, setLesson] = useState(false);
   const fallen = s.fallenAt !== null;
@@ -540,8 +551,13 @@ export default function AdventurePlay(props: PlayProps) {
   const main = useRef<HTMLDivElement>(null);
   useEffect(() => {
     main.current?.scrollTo({ top: 0 });
-  }, [tab, delving, lesson]);
+  }, [tab, journalView, delving, lesson]);
   const openDeclaration = () => setDeclare(true);
+  const showMap = () => setTab('map');
+  const showRoutes = () => {
+    setJournalView('routes');
+    setTab('journal');
+  };
   return (
     <>
       <CharacterStatus s={s} t={t} back={back} />
@@ -600,7 +616,8 @@ export default function AdventurePlay(props: PlayProps) {
             t={t}
             send={send}
             declare={openDeclaration}
-            showMap={() => setTab('map')}
+            showMap={showMap}
+            showRoutes={showRoutes}
           />
         ) : tab === 'map' ? (
           <WorldMap state={s} t={t} send={send} />
@@ -611,7 +628,17 @@ export default function AdventurePlay(props: PlayProps) {
         ) : tab === 'gear' ? (
           <GearPanel s={s} t={t} send={send} />
         ) : (
-          <TravelJournal s={s} t={t} send={send} />
+          <div className="sa-stack">
+            <nav className="sa-journal-tabs" aria-label={t(['旅の記録の種類', 'Journey views', 'たびの きろくの しゅるい'])}>
+              {(Object.keys(JOURNAL_VIEWS) as JournalView[]).map((view) => (
+                <button key={view} type="button" aria-pressed={journalView === view} onClick={() => setJournalView(view)}>{t(JOURNAL_VIEWS[view])}</button>
+              ))}
+            </nav>
+            {journalView === 'routes' ? <ExpeditionBoard s={s} t={t} send={send} showMap={showMap} showLife={() => setTab('life')} /> :
+              journalView === 'collection' ? <JourneyCollection s={s} t={t} send={send} /> :
+              journalView === 'survey' ? <FieldNotes s={s} t={t} send={send} /> :
+              <TravelJournal s={s} t={t} send={send} />}
+          </div>
         )}
       </div>
       {!fallen && !lesson && latest && (

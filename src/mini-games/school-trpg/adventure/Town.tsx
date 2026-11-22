@@ -23,9 +23,11 @@ import {
   COMPANION_ROLES,
   GOODS,
   GOOD_IDS,
+  MASTERWORKS,
   RECIPES,
   RESIDENT_ROLES,
   SLOT_NAMES,
+  STATS,
   type Goods,
   type Text,
 } from './content';
@@ -42,9 +44,16 @@ import {
   missionProgress,
   nextHarvest,
   ownDwelling,
+  knowsMeal,
+  residentStory,
   travelHours,
 } from './life';
-import { BLUEPRINT_IDS, BUILDINGS, HOUSE_MATERIALS, IMPROVEMENTS, blueprint, hasImprovement } from './building';
+import { BLUEPRINT_IDS, BUILDINGS, HOUSE_MATERIALS, IMPROVEMENTS, MAX_HOME_LEVEL, blueprint, hasImprovement } from './building';
+import { FACTIONS, favorAvailable, residentFaction, standing, standingName } from './factions';
+import { ExpeditionProgress } from './JourneyPanel';
+import { ROUTE_BY_ID, seasonAt } from './journeyContent';
+import { regionalMastery } from './journeyState';
+import { MEAL_IDS, mealRecipe } from './provisions';
 import { SLOT_IDS } from './inventory';
 import { MAX_PARTY_SIZE, affordable, freshWorldCode, hungerPenalty, worldCode, type Adventure, type LifeActivity } from './state';
 import {
@@ -65,7 +74,7 @@ import {
   type Mission,
 } from './world';
 import { BOONS, TALES } from './tales';
-import { art, ResidentPortrait, type Local, type Send } from './ui';
+import { art, FormationChoice, ResidentPortrait, type Local, type Send } from './ui';
 
 type PanelProps = { state: Adventure; send: Send; t: Local };
 const directionIcons = [ArrowUp, ArrowRight, ArrowDown, ArrowLeft];
@@ -178,7 +187,8 @@ export function TownOverview({
   t,
   declare,
   showMap,
-}: PanelProps & { declare: () => void; showMap: () => void }) {
+  showRoutes,
+}: PanelProps & { declare: () => void; showMap: () => void; showRoutes: () => void }) {
   const town = townAt(s.location),
     biome = BIOMES[town.biome];
   const deep = s.deepest[addressKey(s.location)] ?? 0;
@@ -186,6 +196,8 @@ export function TownOverview({
   const seenLandmark = s.exploredLandmarks[key];
   const tale = TALES[town.biome];
   const taleRecord = s.townTales[key];
+  const season = seasonAt(s.time);
+  const expedition = s.journey.expedition;
   return (
     <div className="sa-town-grid">
       <div>
@@ -199,6 +211,7 @@ export function TownOverview({
             <p>{t(town.lead)}</p>
           </div>
         </section>
+        <div className="sa-season"><Leaf size={16} aria-hidden="true" /><strong>{t(season.name)}</strong><span>{t(season.hint)}</span></div>
         <div className="sa-town-actions">
           <button className="sa-primary" type="button" onClick={() => send({ type: 'enter' })}>
             <DoorOpen size={21} />
@@ -236,6 +249,15 @@ export function TownOverview({
             ])}
           </button>
         )}
+        <button type="button" className="sa-town-expedition" onClick={showRoutes}>
+          <Compass size={23} aria-hidden="true" />
+          <div>
+            <strong>{expedition ? t(ROUTE_BY_ID[expedition.id].name) : t(['遠征掲示板', 'Expedition board', 'えんせい けいじばん'])}</strong>
+            {expedition ? <ExpeditionProgress s={s} e={expedition} t={t} /> :
+              <small>{t(['旅先で集めた手掛かりから、地元の依頼に挑む。', 'Follow road clues to solve local expeditions.', 'かいどうで てがかりを さがし、いらいに ちょうせん。'])}</small>}
+          </div>
+          <ArrowRight size={19} aria-hidden="true" />
+        </button>
         <section className="sa-panel sa-landmark">
           <div>
             <span className="sa-hint">{t(['町の名所', 'Local landmark'])}</span>
@@ -293,12 +315,15 @@ export function WorldMap({ state: s, send, t }: PanelProps) {
   const [code, setCode] = useState('');
   const [detail, setDetail] = useState<Address | null>(null);
   const location = s.location;
+  const expedition = s.journey.expedition;
+  const target = expedition && (expedition.stage === 'scout' ? expedition.station : expedition.source);
+  const targetNearby = target?.world === location.world && Math.abs(target.x - location.x) + Math.abs(target.y - location.y) <= 1;
   const cells = Array.from({ length: 25 }, (_, index) => ({
     world: location.world,
     x: location.x + (index % 5) - 2,
     y: location.y + Math.floor(index / 5) - 2,
   }));
-  const selected = detail?.world === location.world ? detail : location;
+  const selected = detail?.world === location.world ? detail : targetNearby ? target : location;
   const town = townAt(selected);
   const direction = DIRECTIONS.findIndex((_, index) =>
     sameAddress(atOffset(location, index), selected),
@@ -328,7 +353,11 @@ export function WorldMap({ state: s, send, t }: PanelProps) {
               const known = here || Boolean(s.knownTowns[key]);
               const near = Math.abs(cell.x - location.x) + Math.abs(cell.y - location.y) === 1;
               const place = townAt(cell);
-              const label = t(place.name) + ' · ' + cell.x + ', ' + cell.y;
+              const marked = target && sameAddress(target, cell) && (known || near);
+              const researched = Boolean(s.fieldwork.histories[key]);
+              const label = (marked ? t(['遠征の目的地', 'Expedition destination', 'えんせいの もくてきち']) + ' · ' : '') +
+                t(place.name) + ' · ' + cell.x + ', ' + cell.y +
+                (researched ? ' · ' + t(['刻印を発見済み', 'Inscriptions found', 'こくいんを はっけんずみ']) : '');
               return (
                 <button
                   type="button"
@@ -337,6 +366,8 @@ export function WorldMap({ state: s, send, t }: PanelProps) {
                   data-known={known || near || undefined}
                   data-biome={known || near ? place.biome : undefined}
                   data-here={here || undefined}
+                  data-expedition={marked || undefined}
+                  data-surveyed={researched || undefined}
                   aria-pressed={sameAddress(selected, cell)}
                   disabled={!known && !near}
                   aria-label={known || near ? label : t(['未踏', 'Uncharted'])}
@@ -345,7 +376,7 @@ export function WorldMap({ state: s, send, t }: PanelProps) {
                   {here ? (
                     <MapPin size={18} />
                   ) : known || near ? (
-                    <span>{t(place.name)}</span>
+                    <span>{marked ? <Compass size={12} aria-hidden="true" /> : researched ? <BookOpen size={12} aria-hidden="true" /> : null}{t(place.name)}</span>
                   ) : (
                     <span aria-hidden="true">·</span>
                   )}
@@ -359,9 +390,10 @@ export function WorldMap({ state: s, send, t }: PanelProps) {
             })}
           </div>
           <div className="sa-atlas-place">
-            <strong>
-              {t(town.name)} · {selected.x}, {selected.y}
-            </strong>
+            <div className="sa-atlas-visit">
+              <strong>{t(town.name)} · {selected.x}, {selected.y}</strong>
+              <small>{t(FACTIONS[town.biome].name)} · {t(standingName(standing(s, town.biome)))}</small>
+            </div>
             {direction >= 0 ? (
               <button
                 type="button"
@@ -504,9 +536,14 @@ function WorkshopBlueprints({ state: s, send, t }: PanelProps) {
           }).map((id) => {
             const plan = blueprint(id);
             const missing = plan.requires && !hasImprovement(s, plan.requires) ? plan.requires : null;
-            return <button type="button" key={id} disabled={Boolean(missing) || !affordable(s, plan.cost)}
+            const needMastery = plan.mastery && regionalMastery(s, plan.mastery) < 2;
+            const masterwork = 'masterwork' in plan.output && plan.output.masterwork && MASTERWORKS[plan.output.masterwork];
+            return <button type="button" key={id} disabled={Boolean(missing || needMastery) || !affordable(s, plan.cost)}
               onClick={() => send({ type: 'fabricate', recipe: id })}>
-              <span>{t(plan.name)}{missing && <small>{t(BUILDINGS[missing].name)}</small>}</span>
+              {masterwork && <img className="sa-blueprint-art" src={art('expedition/' + masterwork.art)} alt="" loading="lazy" />}
+              <span>{t(plan.name)}{masterwork && <small>{t(masterwork.hint)}</small>}{missing && <small>{t(BUILDINGS[missing].name)}</small>}
+                {needMastery && plan.mastery && <small>{t(BIOMES[plan.mastery].name)} · {t(['遠征2種類を報告', 'Complete two distinct routes', 'えんせい 2しゅるいを ほうこく'])}</small>}
+              </span>
               <small>{costList(plan.cost, t)} · {plan.hours}h</small>
             </button>;
           })}
@@ -514,6 +551,39 @@ function WorkshopBlueprints({ state: s, send, t }: PanelProps) {
       </details>
     ))}
   </div>;
+}
+
+function RegionalKitchen({ state: s, send, t }: PanelProps) {
+  const dishes = MEAL_IDS.filter((id) => knowsMeal(s, id) || (s.journey.meals[id] ?? 0) > 0);
+  const meal = s.journey.meal;
+  const current = meal && meal.until > s.time ? mealRecipe(meal.id) : null;
+  return (
+    <div className="sa-kitchen">
+      {meal && current && <p className="sa-meal-active"><Sparkles size={16} aria-hidden="true" />
+        <span><strong>{t(current.name)} · {meal.until - s.time}h</strong><small>{t(current.benefit)}</small></span>
+      </p>}
+      <details className="sa-blueprints">
+        <summary>{t(['郷土料理を作る', 'Cook regional dishes', 'ふるさとの りょうりを つくる'])} · {dishes.length}/{MEAL_IDS.length}</summary>
+        <p className="sa-hint">{t(['旅先の町で覚えられます。地方の遠征を報告すると、その料理をどこでも作れます。', 'Learn dishes in local towns. Complete a region’s expedition to cook its dishes anywhere.', 'その ちほうの まちで おぼえます。えんせいを ほうこくすると どこでも つくれます。'])}</p>
+        <div className="sa-dish-list">
+          {dishes.map((id) => {
+            const recipe = mealRecipe(id);
+            const portions = s.journey.meals[id] ?? 0;
+            return (
+              <article key={id} className="sa-dish">
+                <img src={art('expedition/' + id)} alt="" loading="lazy" />
+                <div><strong>{t(recipe.name)} · ×{portions}</strong><small>{t(recipe.benefit)} · {recipe.hours}h</small><small>{costList(recipe.cost, t)}</small></div>
+                <div className="sa-inline">
+                  <button type="button" disabled={!knowsMeal(s, id) || portions >= 20 || !affordable(s, recipe.cost)} onClick={() => send({ type: 'cook-dish', id })}>{t(['作る', 'Cook', 'つくる'])} · 1h</button>
+                  <button type="button" disabled={!portions || !canEat(s)} onClick={() => send({ type: 'eat-dish', id })}>{t(['食べる', 'Eat', 'たべる'])}</button>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </details>
+    </div>
+  );
 }
 
 export function LifePanel({ state: s, send, t, lesson }: PanelProps & { lesson: () => void }) {
@@ -565,6 +635,7 @@ export function LifePanel({ state: s, send, t, lesson }: PanelProps & { lesson: 
             <span>{t(['宿で温かい食事を取る', 'Get a hot meal at the inn', 'やどで あたたかい しょくじを とる'])}</span><small>{INN_MEAL_PRICE} G · 1h</small>
           </button>
         </div>
+        <RegionalKitchen state={s} send={send} t={t} />
       </section>
       <section className="sa-panel">
         <h2>
@@ -621,7 +692,7 @@ export function LifePanel({ state: s, send, t, lesson }: PanelProps & { lesson: 
               <button
                 type="button"
                 disabled={
-                  home.level >= 3 ||
+                  home.level >= MAX_HOME_LEVEL ||
                   s.gold < home.level * 24 ||
                   s.goods.timber < home.level * 2 ||
                   !s.goods.ore
@@ -631,7 +702,7 @@ export function LifePanel({ state: s, send, t, lesson }: PanelProps & { lesson: 
                 <Hammer size={16} />
                 {t(['作業場を広げる', 'Upgrade workshop'])}
                 <small>
-                  {home.level < 3
+                  {home.level < MAX_HOME_LEVEL
                     ? home.level * 24 + ' G · ' + costList({ timber: home.level * 2, ore: 1 }, t)
                     : t(['最大', 'Max'])}
                 </small>
@@ -774,6 +845,10 @@ export function PeoplePanel({ state: s, send, t }: PanelProps) {
   const isFollower = s.followers.includes(subject.id);
   const routine = residentRoutine(subject, s.time);
   const present = isFollower || routine.present;
+  const memory = residentStory(s, subject);
+  const affiliation = residentFaction(s.location, subject);
+  const faction = FACTIONS[affiliation];
+  const influence = standing(s, affiliation);
   return (
     <div className="sa-town-grid sa-people">
       <section className="sa-panel">
@@ -855,6 +930,30 @@ export function PeoplePanel({ state: s, send, t }: PanelProps) {
             <small>{t(COMPANION_ROLES[subject.role].copy)}</small>
           </button>
         </div>
+        <section className="sa-affiliation">
+          <img src={art('expedition/faction-' + affiliation)} alt="" loading="lazy" />
+          <div>
+            <strong>{t(faction.name)} · {t(standingName(influence))}</strong>
+            <p className="sa-hint">{t(faction.line)}</p>
+            <button type="button" disabled={!present || influence >= 12 || !favorAvailable(s, affiliation) || !s.goods[faction.gift]}
+              onClick={() => send({ type: 'faction-favor', resident: subject.id })}>
+              {t(['組織に品物を届ける', 'Deliver faction supplies', 'そしきに しなものを とどける'])} · {t(GOODS[faction.gift].name)} ×1
+            </button>
+            <small>{t(faction.name)} +2 · {t(FACTIONS[faction.rival].name)} −1</small>
+          </div>
+        </section>
+        {memory && <section className="sa-memory">
+          <h3>{t(memory.title)} <small>{(friend?.memories ?? 0) + 1}/2</small></h3>
+          <p>{t(memory.ask)}</p>
+          <div className="sa-inline">
+            <button type="button" disabled={!present || friend?.bondDay === day} onClick={() => send({ type: 'bond', id: subject.id, approach: 'talk' })}>
+              {t(['話を聞く', 'Listen to their story', 'はなしを きく'])} · {t(STATS[memory.stat])}
+            </button>
+            <button type="button" disabled={!present || friend?.bondDay === day || !s.goods[memory.item]} onClick={() => send({ type: 'bond', id: subject.id, approach: 'give' })}>
+              {t(['品物を届ける', 'Bring what they need', 'しなものを とどける'])} · {t(GOODS[memory.item].name)}
+            </button>
+          </div>
+        </section>}
         <div className="sa-party">
           <h3>
             {t(['パーティ', 'Party', 'パーティ'])} {s.followers.length + 1}/{MAX_PARTY_SIZE}
@@ -865,7 +964,7 @@ export function PeoplePanel({ state: s, send, t }: PanelProps) {
               member && (
                 <div key={id} className="sa-section-row">
                   <span>
-                    {t(member.name)} · {t(COMPANION_ROLES[member.role].copy)}
+                    {t(member.name)} · {t(COMPANION_ROLES[member.role].copy)}{(s.friends[id].memories ?? 0) > 0 && ' · ' + t(['思い出', 'Memories', 'おもいで']) + ' ' + s.friends[id].memories + '/2'}
                   </span>
                   <button
                     type="button"
@@ -885,6 +984,7 @@ export function PeoplePanel({ state: s, send, t }: PanelProps) {
               ])}
             </p>
           )}
+          <FormationChoice s={s} t={t} send={send} />
         </div>
       </section>
     </div>

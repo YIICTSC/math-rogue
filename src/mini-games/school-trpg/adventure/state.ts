@@ -18,6 +18,11 @@ import {
   type Weapon,
 } from './content';
 import type { BadgeId } from './guild';
+import type { ExpeditionAction } from './expeditions';
+import { newFieldwork, type Fieldwork } from './fieldworkState';
+import { newJourney, relicPower, type Formation, type Journey } from './journeyState';
+import { mealEffect, type MealId } from './provisions';
+import type { RuinAction } from './ruinSystems';
 import type { Boon } from './tales';
 import {
   ACADEMY_WORLD,
@@ -28,8 +33,9 @@ import {
   type Resident,
 } from './world';
 
-export const ADVENTURE_VERSION = 2;
+export const ADVENTURE_VERSION = 4;
 export const MAX_PARTY_SIZE = 6;
+export const MAX_LIGHT = 24;
 export const MEAL_INTERVAL = 24;
 export const CREATION_POINTS = 5;
 export const START_STATS: Record<Stat, number> = { might: 2, finesse: 2, insight: 2, presence: 3 };
@@ -58,6 +64,7 @@ export type Gear = {
   rarity: Rarity;
   power: number;
   affix?: Affix;
+  masterwork?: import('./content').Masterwork;
   found: number;
 };
 export type Journal = {
@@ -81,7 +88,14 @@ export type Garden = {
   planted: number[];
   additions?: Partial<Record<import('./building').Improvement, number>>;
 };
-export type Friend = { resident: Resident; trust: number; visitedDay: number; offeredDay: number };
+export type Friend = {
+  resident: Resident;
+  trust: number;
+  visitedDay: number;
+  offeredDay: number;
+  memories?: number;
+  bondDay?: number;
+};
 export type DungeonRecord = { seen: number[]; cleared: number[]; inspected: number[] };
 export type Enemy = {
   template: number;
@@ -131,6 +145,8 @@ export type Adventure = {
   id: string;
   revision: number;
   character: Character;
+  journey: Journey;
+  fieldwork: Fieldwork;
   location: Address;
   homeGate: Address;
   gates: Record<string, Address>;
@@ -202,6 +218,11 @@ export type DungeonVerb =
   | 'descend'
   | 'ascend';
 export type Action =
+  | ExpeditionAction
+  | RuinAction
+  | { type: 'faction-favor'; resident: string }
+  | { type: 'cook-dish' | 'eat-dish'; id: MealId }
+  | { type: 'formation'; id: Formation }
   | { type: 'tale'; option: number }
   | { type: 'travel'; direction: number }
   | { type: 'gate'; world: string }
@@ -210,6 +231,7 @@ export type Action =
   | { type: 'rest'; rest: 'bench' | 'inn' | 'home'; hours?: number }
   | { type: 'trade'; good: Good; sell: boolean }
   | { type: 'social'; id: string; verb: SocialActivity }
+  | { type: 'bond'; id: string; approach: 'give' | 'talk' }
   | { type: 'build'; mode: 'buy' | 'raise' | 'upgrade' | 'plant' | 'harvest' }
   | { type: 'craft'; recipe: Good | Slot }
   | { type: 'equip' | 'salvage' | 'sell-gear'; id: string }
@@ -310,6 +332,8 @@ export function startAdventure(character: Character, id: string): Adventure | nu
     id,
     revision: 0,
     character: { ...character, name: character.name.trim(), world },
+    journey: newJourney(),
+    fieldwork: newFieldwork(),
     location,
     homeGate: location,
     gates: { [world]: location },
@@ -389,7 +413,8 @@ export const maxFocus = (s: Adventure) =>
   (s.character.calling === 'scholar' ? 3 : 0) +
   wears(s, 'focus') * 2 +
   (equipped(s, 'charm')?.power ?? 0);
-export const armor = (s: Adventure) => (equipped(s, 'coat')?.power ?? 0) + wears(s, 'sturdy');
+export const armor = (s: Adventure) =>
+  (equipped(s, 'coat')?.power ?? 0) + wears(s, 'sturdy') + relicPower(s, 'alpine') + mealEffect(s, 'armor');
 export const xpGoal = (level: number) => 18 + level * 8;
 export const missedMeals = (s: Adventure) =>
   Math.floor(Math.max(0, s.time - s.lastMealAt) / MEAL_INTERVAL);
@@ -417,7 +442,8 @@ export function advance(s: Adventure, hours: number) {
 export const recover = (s: Adventure, hp: number, focus: number) => {
   if (s.hp <= 0) return;
   const factor = missedMeals(s) >= 2 ? 0 : missedMeals(s) === 1 ? 0.35 : 1;
-  s.hp = Math.min(maxHp(s), s.hp + Math.floor(hp * factor));
+  const meal = hp > 0 ? mealEffect(s, 'recovery') : 0;
+  s.hp = Math.min(maxHp(s), s.hp + Math.floor((hp + meal) * factor));
   s.focus = Math.min(maxFocus(s), s.focus + Math.floor(focus * factor));
 };
 export function finishDefeat(s: Adventure) {
@@ -474,6 +500,8 @@ export function nextRandom(s: Adventure, max: number) {
 
 export const checkBonus = (s: Adventure, stat: Stat) =>
   scoreFor(s, stat) +
+  mealEffect(s, stat) +
+  (stat === 'insight' ? relicPower(s, 'academy') : 0) +
   (CALLINGS[s.character.calling].stat === stat ? 2 : 0) +
   Math.floor((s.level - 1) / 3) -
   Math.min(3, Math.floor(s.fatigue / 3)) -

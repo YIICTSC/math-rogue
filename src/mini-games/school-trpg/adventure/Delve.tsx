@@ -11,7 +11,7 @@ import {
   Sparkles,
   Swords,
 } from 'lucide-react';
-import { BIOMES, FOES, GOODS, INTENTS, type Text } from './content';
+import { BIOMES, FOES, GOODS, INTENTS, creatureArt, type Text } from './content';
 import {
   RUNES,
   damageNames,
@@ -20,9 +20,14 @@ import {
   recordFor,
   runeClue,
 } from './delve';
-import { enemyName } from './inventory';
+import { atSource } from './expeditions';
+import { ExpeditionProgress } from './JourneyPanel';
+import { RuinFixture } from './FieldworkPanel';
 import { canEat } from './life';
 import { formParty } from './party';
+import { MEAL_IDS, mealRecipe } from './provisions';
+import { ruinCondition } from './ruinConditions';
+import { MECHANISMS, circuitAt, historyTitle, ruinFloor, ruinLayout } from './ruinSystems';
 import DungeonCorridor from './DungeonCorridor';
 import {
   MAX_PARTY_SIZE,
@@ -39,13 +44,12 @@ import {
   FEATURES,
   SIDE,
   addressKey,
-  generateFloor,
   neighbor,
   townAt,
   type Feature,
   type Floor,
 } from './world';
-import { art, Portrait, ResidentPortrait, type Local, type Send } from './ui';
+import { art, FormationChoice, Portrait, ResidentPortrait, type Local, type Send } from './ui';
 
 const SYMBOLS: Record<Feature, string> = {
   pack: '!',
@@ -60,6 +64,7 @@ const SYMBOLS: Record<Feature, string> = {
 
 export function Supplies({ state: s, send, t }: { state: Adventure; send: Send; t: Local }) {
   const d = s.delve;
+  const dishes = MEAL_IDS.filter((id) => (s.journey.meals[id] ?? 0) > 0);
   return (
     <div className="sa-supplies">
       <button type="button" disabled={!s.goods.tonic || s.hp >= maxHp(s) || missedMeals(s) >= 2}
@@ -75,6 +80,14 @@ export function Supplies({ state: s, send, t }: { state: Adventure; send: Send; 
         onClick={() => send({ type: 'use', good: 'ration' })}>
         {t(['弁当を食べる', 'Eat a packed meal', 'べんとうを たべる'])} ×{s.goods.ration}
       </button>
+      {dishes.length > 0 && <details className="sa-trail-food">
+        <summary>{t(['携行中の郷土料理', 'Packed regional dishes', 'もちあるく りょうり'])} · {dishes.length}</summary>
+        <div className="sa-action-list">
+          {dishes.map((id) => <button key={id} type="button" disabled={!canEat(s)} onClick={() => send({ type: 'eat-dish', id })}>
+            <span>{t(mealRecipe(id).name)} ×{s.journey.meals[id]}</span><small>{t(mealRecipe(id).benefit)}</small>
+          </button>)}
+        </div>
+      </details>}
       {d && (
         <button type="button" disabled={!s.goods.lantern || d.light >= 14}
           onClick={() => send({ type: 'use', good: 'lantern' })}>
@@ -90,7 +103,7 @@ export function Supplies({ state: s, send, t }: { state: Adventure; send: Send; 
   );
 }
 
-function LabyrinthMap({ s, floor, t }: { s: Adventure; floor: Floor; t: Local }) {
+function LabyrinthMap({ s, floor, t, layout }: { s: Adventure; floor: Floor; t: Local; layout: ReturnType<typeof ruinLayout> }) {
   const d = s.delve!;
   const record = recordFor(s, d.floor);
   const seen = new Set(record.seen);
@@ -101,6 +114,7 @@ function LabyrinthMap({ s, floor, t }: { s: Adventure; floor: Floor; t: Local })
     ]),
   );
   const arrows = ['↑', '→', '↓', '←'];
+  const powered = circuitAt(s)?.mode === 'channel';
   return (
     <div className="sa-minimap">
       <div className="sa-section-row">
@@ -118,13 +132,15 @@ function LabyrinthMap({ s, floor, t }: { s: Adventure; floor: Floor; t: Local })
         {Array.from({ length: SIDE * SIDE }, (_, i) => {
           const feature = floor.features[i];
           const here = i === d.cell;
+          const fixture = i === layout.device ? '⚙' : i === layout.inscription ? '◈' : '';
+          const shortcut = powered && i === layout.shortcut;
           return (
             <span
               key={i}
               data-cell={
                 here
                   ? 'current'
-                  : seen.has(i)
+                  : seen.has(i) && floor.open.has(i)
                     ? 'seen'
                     : mapped.has(i)
                       ? floor.open.has(i)
@@ -135,11 +151,14 @@ function LabyrinthMap({ s, floor, t }: { s: Adventure; floor: Floor; t: Local })
               data-feature={
                 seen.has(i) && feature && !record.cleared.includes(i) ? feature : undefined
               }
+              data-fixture={mapped.has(i) && (fixture || shortcut) ? (shortcut ? 'shortcut' : fixture) : undefined}
             >
               {here
                 ? arrows[d.direction]
                 : seen.has(i) && feature && !record.cleared.includes(i)
                   ? SYMBOLS[feature]
+                  : mapped.has(i) && fixture
+                    ? fixture
                   : i === ENTRY_CELL
                     ? '↑'
                     : ''}
@@ -150,6 +169,7 @@ function LabyrinthMap({ s, floor, t }: { s: Adventure; floor: Floor; t: Local })
       <small>
         {t(['入口', 'Entrance'])} ↑ · {t(['守護者', 'Guardian'])} ♜ · {t(['階段', 'Stairs'])} ↓
       </small>
+      {mapped.has(layout.device) || mapped.has(layout.inscription) ? <small className="sa-map-fixture-key">⚙ {t(['仕掛け', 'Mechanism', 'しかけ'])} · ◈ {t(['刻印', 'Inscription', 'こくいん'])}</small> : null}
     </div>
   );
 }
@@ -251,12 +271,14 @@ function DungeonScene({
   t,
   target,
   select,
+  fixture,
 }: {
   s: Adventure;
   floor: Floor;
   t: Local;
   target: number;
   select: (id: number) => void;
+  fixture: 'device' | 'inscription' | null;
 }) {
   const d = s.delve!;
   const battle = d.encounter;
@@ -269,6 +291,7 @@ function DungeonScene({
       className="sa-dungeon-scene"
       data-combat={!!battle || undefined}
       data-dark={d.light <= 0 || undefined}
+      data-circuit={circuitAt(s)?.mode ?? undefined}
     >
       <DungeonCorridor floor={floor} cell={d.cell} direction={d.direction} biome={biome} />
       <div className="sa-scene-line">
@@ -286,6 +309,8 @@ function DungeonScene({
             {t(
               feature
                 ? FEATURES[feature]
+                : fixture === 'device' ? MECHANISMS[biome].name
+                : fixture === 'inscription' ? historyTitle(s.location)
                 : front
                   ? ['道が続く', 'Passage ahead']
                   : ['行き止まり', 'Wall ahead'],
@@ -297,8 +322,8 @@ function DungeonScene({
         <div className="sa-foes" role="group" aria-label={t(['攻撃対象', 'Combat targets'])}>
           {battle.enemies.map((enemy, index) => {
             if (enemy.hp <= 0) return null;
-            const name = t(enemyName(enemy.template, battle.guardian));
             const template = FOES[enemy.template];
+            const name = t(template.name);
             return (
               <button
                 key={index}
@@ -313,7 +338,7 @@ function DungeonScene({
                     : t(INTENTS[foeIntent(battle, enemy)])}
                 </span>
                 <img
-                  src={art(template.image === 12 ? 'foe-5' : 'bestiary-' + template.image)}
+                  src={art(creatureArt(template))}
                   alt=""
                 />
                 <span className="sa-foe-name">
@@ -333,6 +358,8 @@ function DungeonScene({
             );
           })}
         </div>
+      ) : fixture ? (
+        <img className="sa-scene-fixture" src={art('expedition/' + (fixture === 'device' ? 'mechanism-' : 'history-') + biome)} alt="" />
       ) : feature ? (
         <div className="sa-scene-marker" aria-hidden="true">
           {SYMBOLS[feature]}
@@ -357,7 +384,10 @@ export default function DelveView({
 }) {
   const d = s.delve!;
   const address = addressKey(s.location);
-  const floor = useMemo(() => generateFloor(s.location, d.floor), [address, d.floor]);
+  const setting = circuitAt(s)?.mode;
+  const floor = useMemo(() => ruinFloor(s.location, d.floor, setting), [address, d.floor, setting]);
+  const layout = useMemo(() => ruinLayout(s.location, d.floor), [address, d.floor]);
+  const fixture = d.cell === layout.device ? 'device' : d.cell === layout.inscription ? 'inscription' : null;
   const battle = d.encounter;
   const [picked, setPicked] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -408,6 +438,8 @@ export default function DelveView({
   }, [battle, modalOpen, send]);
   const town = townAt(s.location);
   const biome = BIOMES[town.biome];
+  const condition = ruinCondition(s.location, d.floor);
+  const expedition = s.journey.expedition;
   return (
     <div className="sa-delve">
       <div className="sa-section-row sa-delve-head">
@@ -428,10 +460,17 @@ export default function DelveView({
           </button>
         </div>
       </div>
+      {(d.floor > 1 || setting || (expedition && atSource(s, expedition) && expedition.stage === 'task')) && (
+        <div className="sa-delve-context">
+          {d.floor > 1 && <span><strong>{t(condition.name)}</strong><small>{t(condition.hint)}</small></span>}
+          {setting && <span><strong>{t(MECHANISMS[town.biome].name)}</strong><small>{t(MECHANISMS[town.biome][setting].name)}</small></span>}
+          {expedition && atSource(s, expedition) && expedition.stage === 'task' && <ExpeditionProgress s={s} e={expedition} t={t} />}
+        </div>
+      )}
       <div className="sa-delve-view">
-        <DungeonScene s={s} floor={floor} t={t} target={target} select={setPicked} />
+        <DungeonScene s={s} floor={floor} t={t} target={target} select={setPicked} fixture={fixture} />
         <aside className="sa-delve-side">
-          <LabyrinthMap s={s} floor={floor} t={t} />
+          <LabyrinthMap s={s} floor={floor} t={t} layout={layout} />
           {!battle && (
             <div
               className="sa-dpad"
@@ -505,6 +544,9 @@ export default function DelveView({
             })}
           </div>
           <div className="sa-inline">
+            <button type="button" onClick={() => send({ type: 'combat', move: 'parley', target })}>
+              {t(['交渉する', 'Parley', 'こうしょうする'])}
+            </button>
             <button type="button" onClick={() => send({ type: 'combat', move: 'retreat', target })}>
               {t(['退却を試みる', 'Try to retreat', 'たいきゃくを こころみる'])}
             </button>
@@ -512,10 +554,13 @@ export default function DelveView({
               <Sparkles size={16} />{t(['自由宣言', 'Declare', 'じゆうせんげん'])}
             </button>
           </div>
+          <FormationChoice s={s} t={t} send={send} />
           <span className="sa-hint">
             {t(['攻撃と援護は自動で進みます。狙う敵はタップで変更できます。', 'Attacks and support are automatic. Tap an enemy to change targets.', 'こうげきと えんごは じどうです。てきを タップして ねらいを かえられます。'])}
           </span>
         </section>
+      ) : fixture ? (
+        <RuinFixture s={s} t={t} send={send} fixture={fixture} shortcut={layout.shortcut >= 0} declare={declare} />
       ) : (
         <FeatureActions s={s} floor={floor} t={t} send={send} declare={declare} />
       )}

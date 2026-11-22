@@ -456,6 +456,16 @@ export const AFFIXES = {
 } satisfies Record<string, { name: Text; hint: Text; stat: Stat | null }>;
 export type Affix = keyof typeof AFFIXES;
 
+export const MASTERWORKS = {
+  archiveWand: { name: ['書庫の星杖', 'Archive wand', 'しょこの ほしづえ'], hint: ['術属性ダメージ＋2', '+2 arcane damage', 'じゅつの ダメージ＋2'], slot: 'weapon', art: 'masterwork-archive-wand' },
+  groveVest: { name: ['樹冠の外套', 'Canopy coat', 'じゅかんの がいとう'], hint: ['採集・釣り・食材探しの収量＋1', '+1 yield from gathering, fishing, or foraging', 'さいしゅうなどの しゅうりょう＋1'], slot: 'coat', art: 'masterwork-canopy-coat' },
+  lowTideCharm: { name: ['干潮のお守り', 'Low-tide charm', 'かんちょうの おまもり'], hint: ['戦闘中の交渉判定＋2', '+2 to combat parley checks', 'せんとうちゅうの こうしょう＋2'], slot: 'charm', art: 'masterwork-low-tide-charm' },
+  rimeCoat: { name: ['銀晶の鎧', 'Silverglass armor', 'ぎんしょうの よろい'], hint: ['大技で受けるダメージ−3', 'Take 3 less damage from heavy attacks', 'おおわざで うける ダメージ−3'], slot: 'coat', art: 'masterwork-silverglass-armor' },
+  kilnHammer: { name: ['炉番の大鎚', 'Kiln hammer', 'ろばんの おおづち'], hint: ['大技のダメージ＋3', '+3 damage with heavy attacks', 'おおわざの ダメージ＋3'], slot: 'weapon', art: 'masterwork-kiln-hammer' },
+  skyPike: { name: ['星渡りの槍', 'Starcross pike', 'ほしわたりの やり'], hint: ['防御の構えを取る敵にダメージ＋3', '+3 damage against bracing enemies', 'ぼうぎょする てきに ダメージ＋3'], slot: 'weapon', art: 'masterwork-starcross-pike' },
+} satisfies Record<string, { name: Text; hint: Text; slot: Slot; art: string }>;
+export type Masterwork = keyof typeof MASTERWORKS;
+
 export type EnemyTemplate = {
   name: Text;
   theme: Biome;
@@ -465,6 +475,9 @@ export type EnemyTemplate = {
   resist: DamageType;
   pattern: readonly Intent[];
   image: number;
+  artKey?: string;
+  harvest?: Good;
+  warden?: boolean;
 };
 export type Intent = 'strike' | 'heavy' | 'brace' | 'hex' | 'drain' | 'mend';
 export const INTENTS = {
@@ -475,6 +488,33 @@ export const INTENTS = {
   drain: ['灯りを奪う', 'Dousing your lamp'],
   mend: ['傷を癒やす', 'Mending'],
 } satisfies Record<Intent, Text>;
+function creature(
+  artKey: string, name: Text, theme: Biome, hp: number, attack: number,
+  weak: DamageType, resist: DamageType, pattern: Intent[], harvest: Good,
+): EnemyTemplate {
+  return { name, theme, hp, attack, weak, resist, pattern, image: 0, artKey, harvest };
+}
+
+function warden(artKey: string, name: Text, theme: Biome, hp: number, attack: number,
+    weak: DamageType, resist: DamageType, pattern: Intent[]): EnemyTemplate {
+  return { name, theme, hp, attack, weak, resist, pattern, image: 12, artKey, warden: true };
+}
+
+const REGIONAL_WARDENS = {
+  academy: warden('warden-hourglass-prefect', ['砂時計の監督生', 'Hourglass prefect', 'すなどけいの かんとくせい'], 'academy', 27, 5,
+    'arcane', 'steel', ['brace', 'heavy', 'hex', 'strike']),
+  grove: warden('warden-rootcrown', ['根冠の森王', 'Rootcrown elder', 'ねかんむりの もりおう'], 'grove', 35, 6,
+    'steel', 'arcane', ['mend', 'brace', 'strike', 'heavy']),
+  coast: warden('warden-tideglass', ['潮硝子の海竜', 'Tideglass dragon', 'しおガラスの かいりゅう'], 'coast', 32, 7,
+    'wind', 'steel', ['drain', 'hex', 'heavy', 'drain', 'strike']),
+  alpine: warden('warden-frostmirror', ['霜鏡の石像', 'Frostmirror gargoyle', 'しもかがみの せきぞう'], 'alpine', 39, 7,
+    'steel', 'wind', ['brace', 'strike', 'brace', 'heavy', 'mend']),
+  ember: warden('warden-furnace', ['金床炉の竜', 'Anvil-furnace dragon', 'かなとこ ろの りゅう'], 'ember', 40, 8,
+    'arcane', 'steel', ['heavy', 'strike', 'heavy', 'drain']),
+  sky: warden('warden-astral-griffin', ['星翼のグリフォン', 'Astral griffin', 'ほしつばさの グリフォン'], 'sky', 37, 8,
+    'wind', 'arcane', ['hex', 'mend', 'drain', 'heavy', 'strike']),
+} satisfies Record<Biome, EnemyTemplate>;
+
 export const FOES: EnemyTemplate[] = [
   {
     name: ['紙羽の小妖', 'Paperwing Sprite'],
@@ -605,8 +645,39 @@ export const FOES: EnemyTemplate[] = [
     resist: 'steel',
     pattern: ['brace', 'heavy', 'hex', 'strike'],
     image: 12,
+    warden: true,
   },
+  creature('vellum-wasp', ['羊皮紙バチ', 'Vellum wasp', 'ようひしバチ'], 'academy', 11, 4,
+    'steel', 'wind', ['hex', 'strike', 'drain', 'strike'], 'thread'),
+  creature('clock-sentinel', ['青鐘の番兵', 'Blue-clock sentinel', 'あおがねの ばんぺい'], 'academy', 24, 5,
+    'arcane', 'steel', ['brace', 'brace', 'heavy', 'strike'], 'ore'),
+  creature('bramble-hare', ['棘冠ウサギ', 'Bramble hare', 'とげかんむりウサギ'], 'grove', 13, 4,
+    'wind', 'arcane', ['strike', 'mend', 'heavy', 'strike'], 'herb'),
+  creature('moss-colossus', ['苔の巨守', 'Moss guardian', 'こけの きょしゅ'], 'grove', 25, 5,
+    'steel', 'wind', ['mend', 'heavy', 'brace', 'strike'], 'timber'),
+  creature('brine-eel', ['雷潮ウナギ', 'Brine eel', 'らいちょうウナギ'], 'coast', 15, 5,
+    'wind', 'arcane', ['hex', 'drain', 'strike', 'hex'], 'fish'),
+  creature('barnacle-knight', ['貝冠の騎士', 'Barnacle knight', 'かいかんむりの きし'], 'coast', 28, 6,
+    'arcane', 'steel', ['brace', 'heavy', 'mend', 'strike'], 'ore'),
+  creature('rime-lynx', ['霜尾ヤマネコ', 'Rime lynx', 'しもおヤマネコ'], 'alpine', 18, 6,
+    'steel', 'wind', ['strike', 'heavy', 'drain', 'strike'], 'meat'),
+  creature('shard-crawler', ['鉱晶ヤスデ', 'Shard crawler', 'こうしょうヤスデ'], 'alpine', 28, 5,
+    'arcane', 'steel', ['brace', 'hex', 'mend', 'heavy'], 'ore'),
+  creature('slag-salamander', ['熾火トカゲ', 'Slag salamander', 'おきびトカゲ'], 'ember', 20, 6,
+    'wind', 'steel', ['drain', 'heavy', 'mend', 'strike'], 'meat'),
+  creature('copper-mimic', ['銅釜の擬箱', 'Copper mimic', 'どうがまの ぎばこ'], 'ember', 26, 7,
+    'arcane', 'wind', ['brace', 'drain', 'heavy', 'hex'], 'relic'),
+  creature('cloud-ray', ['雲渡りエイ', 'Cloud ray', 'くもわたりエイ'], 'sky', 20, 6,
+    'steel', 'arcane', ['mend', 'hex', 'strike', 'drain'], 'thread'),
+  creature('star-kite', ['星衣の凧獣', 'Starlit kite', 'ほしごろもの たこじゅう'], 'sky', 25, 7,
+    'wind', 'arcane', ['drain', 'hex', 'heavy', 'strike'], 'relic'),
+  ...Object.values(REGIONAL_WARDENS),
 ];
+
+export const regionalWardenIndex = (biome: Biome) => FOES.indexOf(REGIONAL_WARDENS[biome]);
+
+export const creatureArt = (template: EnemyTemplate) =>
+  template.artKey ? 'expedition/' + template.artKey : template.image === 12 ? 'foe-5' : 'bestiary-' + template.image;
 
 export const DECLARATIONS = {
   might: {

@@ -8,15 +8,18 @@ import {
   FOES,
   GOOD_IDS,
   IDEALS,
+  MASTERWORKS,
   ORIGINS,
   RARITIES,
   STAT_IDS,
   WEAPONS,
 } from './content';
 import { SLOT_IDS } from './inventory';
-import { BUILDINGS } from './building';
-import { ADVENTURE_VERSION, DEATH_RULES, MAX_PARTY_SIZE, PORTRAIT_IDS, type Adventure } from './state';
-import { addressKey, hash, SIDE, type Address } from './world';
+import { BUILDINGS, MAX_HOME_LEVEL } from './building';
+import { newFieldwork, validFieldwork } from './fieldworkState';
+import { newJourney, validJourney } from './journeyState';
+import { ADVENTURE_VERSION, DEATH_RULES, MAX_LIGHT, MAX_PARTY_SIZE, PORTRAIT_IDS, type Adventure } from './state';
+import { addressKey, dayAt, hash, SIDE, type Address } from './world';
 
 export const ADVENTURE_SLOTS = 8;
 
@@ -71,6 +74,8 @@ function validSlot(slot: Adventure) {
       slot.rng,
     ].every((v) => integer(v)) ||
     !integer(slot.level, 1) ||
+    !validJourney(slot.journey, slot.time, validAddress) ||
+    !validFieldwork(slot.fieldwork, dayAt(slot.time), validAddress) ||
     !integer(slot.inspiration, 0, 5) ||
     !integer(slot.fatigue, 0, 9) ||
     !slot.goods ||
@@ -83,6 +88,7 @@ function validSlot(slot: Adventure) {
         Object.hasOwn(RARITIES, gear.rarity) &&
         integer(gear.power, 1) &&
         (!gear.affix || Object.hasOwn(AFFIXES, gear.affix)) &&
+        (!gear.masterwork || (Object.hasOwn(MASTERWORKS, gear.masterwork) && MASTERWORKS[gear.masterwork].slot === gear.slot)) &&
         (gear.slot !== 'weapon' || (gear.weapon && Object.hasOwn(WEAPONS, gear.weapon))),
     )
   )
@@ -94,11 +100,14 @@ function validSlot(slot: Adventure) {
     !slot.knownTowns[addressKey(slot.location)] ||
     !slot.floors ||
     !slot.workshop ||
-    !Object.values(slot.workshop).every((home) => home && integer(home.level, 1, 3) &&
+    !Object.values(slot.workshop).every((home) => home && integer(home.level, 1, MAX_HOME_LEVEL) &&
       Array.isArray(home.planted) && home.planted.every((time) => integer(time)) &&
       (!home.additions || Object.entries(home.additions).every(([key, time]) =>
         Object.hasOwn(BUILDINGS, key) && typeof time === 'number' && integer(time, 0, slot.time)))) ||
     !slot.friends ||
+    !Object.values(slot.friends).every((friend) => friend &&
+      (friend.memories === undefined || integer(friend.memories, 0, 2)) &&
+      (friend.bondDay === undefined || integer(friend.bondDay))) ||
     !slot.deepest ||
     !slot.equipment ||
     !slot.exploredLandmarks ||
@@ -122,7 +131,7 @@ function validSlot(slot: Adventure) {
     integer(d.floor, 1) &&
     integer(d.direction, 0, 3) &&
     integer(d.cell, 0, SIDE * SIDE - 1) &&
-    integer(d.light, 0, 18) &&
+    integer(d.light, 0, MAX_LIGHT) &&
     integer(d.threat) &&
     (e === null ||
       (integer(e.turn, 1) &&
@@ -142,10 +151,14 @@ function validSlot(slot: Adventure) {
 function migrateSlot(entry: unknown): Adventure | null {
   if (!entry || typeof entry !== 'object' || !('version' in entry)) return null;
   const slot = entry as Adventure;
+  if (entry.version === 3) return { ...slot, version: ADVENTURE_VERSION, fieldwork: newFieldwork() };
+  if (entry.version === 2) return { ...slot, version: ADVENTURE_VERSION, journey: newJourney(), fieldwork: newFieldwork() };
   if (entry.version !== 1) return slot;
   return {
     ...slot,
     version: ADVENTURE_VERSION,
+    journey: newJourney(),
+    fieldwork: newFieldwork(),
     character: { ...slot.character, deathRule: 'return-town' },
     lastMealAt: slot.time,
     fallenAt: null,

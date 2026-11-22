@@ -16,6 +16,14 @@ try {
       vite.ssrLoadModule(path + file + '.ts'),
     ),
   );
+  const [content, expeditions, journey, journeyContent, provisions, ruins] = await Promise.all(
+    ['content', 'expeditions', 'journeyState', 'journeyContent', 'provisions', 'ruinConditions'].map((file) =>
+      vite.ssrLoadModule(path + file + '.ts'),
+    ),
+  );
+  const [systems, factions, fieldwork] = await Promise.all(
+    ['ruinSystems', 'factions', 'fieldworkState'].map((file) => vite.ssrLoadModule(path + file + '.ts')),
+  );
   const { adventureTransition: transition } = engine;
   const { defaultCharacter, startAdventure, PORTRAIT_IDS, nextRandom } = state;
   const draft = { ...defaultCharacter(), name: 'Aoi', calling: 'envoy' };
@@ -47,6 +55,26 @@ try {
     assert.equal(image.readUInt32BE(16), 768);
     assert.equal(image.readUInt32BE(20), 512);
   }
+  const newArt = [
+    ...journeyContent.ROUTES.map((route) => 'route-' + route.id),
+    ...content.FOES.flatMap((foe) => (foe.artKey ? [foe.artKey] : [])),
+    ...Object.values(journeyContent.RELICS).map((relic) => relic.art),
+    ...Object.values(content.MASTERWORKS).map((item) => item.art),
+    ...provisions.MEAL_IDS,
+    ...content.BIOME_IDS.flatMap((id) => ['faction-', 'history-', 'mechanism-'].map((prefix) => prefix + id)),
+  ];
+  assert.equal(newArt.length, 84);
+  const newArtHashes = await Promise.all(newArt.map(async (name) => {
+    const image = await readFile('public/sprites/school-adventure/expedition/' + name + '.webp');
+    assert.equal(image.subarray(8, 12).toString(), 'WEBP', name);
+    assert(image.length > 2800, name);
+    return createHash('sha256').update(image).digest('hex');
+  }));
+  assert.equal(new Set(newArtHashes).size, newArt.length);
+  assert.equal(new Set(journeyContent.ROUTES.map((route) => route.objective)).size, 7);
+  for (const biome of content.BIOME_IDS) assert.equal(journeyContent.ROUTES.filter((route) => route.biome === biome).length, 4);
+  const wardens = content.BIOME_IDS.map((biome) => content.FOES[content.regionalWardenIndex(biome)]);
+  assert.equal(new Set(wardens.map((enemy) => enemy.pattern.join())).size, 6);
   assert.equal(startAdventure({ ...draft, stats: { ...draft.stats, might: 4 } }, 'invalid'), null);
   assert.equal(startAdventure({ ...draft, portrait: 'm999' }, 'invalid'), null);
   assert.deepEqual(newGame(), newGame(), 'A character and seed reproduce the same initial state');
@@ -78,6 +106,16 @@ try {
       assert.equal(floor.features[floor.stairs], 'stairs');
       assert.equal(floor.features[floor.seal], 'guardian');
       assert.equal(Object.keys(floor.features).length, 13);
+      const layout = systems.ruinLayout(location, depth, floor);
+      assert.notEqual(layout.device, layout.inscription);
+      assert([layout.device, layout.inscription].every((cell) => floor.open.has(cell) && !floor.features[cell] && cell !== world.ENTRY_CELL));
+      if (layout.shortcut >= 0) {
+        assert(!floor.open.has(layout.shortcut));
+        const open = systems.ruinFloor(location, depth, 'channel');
+        assert.equal(open.open.size, floor.open.size + 1);
+        assert(paths(open).has(layout.shortcut));
+        assert.deepEqual(systems.ruinFloor(location, depth, 'isolate'), floor);
+      }
       floors++;
     }
   }
@@ -283,6 +321,230 @@ try {
   assert.equal(builder.counters.combats, 1);
   assert(materialCount(builder) > materials && foodCount(builder) > food);
 
+  function adjacentTravel(s, destination) {
+    const direction = world.DIRECTIONS.findIndex((_, i) => world.sameAddress(world.atOffset(s.location, i), destination));
+    assert(direction >= 0);
+    return play(s, { type: 'travel', direction });
+  }
+  function expeditionGame(biome) {
+    const s = startAdventure({ ...draft, deathRule: 'return-town' }, 'expeditions-' + biome);
+    const location = Array.from({ length: 81 }, (_, i) => ({ world: s.location.world, x: i % 9 - 4, y: Math.floor(i / 9) - 4 }))
+      .find((address) => world.townAt(address).biome === biome);
+    assert(location, biome);
+    s.location = location;
+    s.knownTowns[world.addressKey(location)] = location;
+    Object.assign(s.goods, { grain: 35, ration: 35, timber: 50, ore: 50, relic: 15, thread: 12, meat: 15, herb: 15, seed: 12, lantern: 12 });
+    s.gold = 500;
+    return s;
+  }
+  function research(s, id, rank = 1) {
+    const route = journeyContent.ROUTE_BY_ID[id];
+    const scout = { type: 'expedition-scout', approach: 'supply' };
+    s = play(s, { type: 'expedition-start', id, rank });
+    const e = s.journey.expedition;
+    assert.equal(transition(s, scout), s, 'A clue can only be found at its marked destination');
+    assert.equal(transition(s, { type: 'expedition-finish' }), s);
+    s = adjacentTravel(s, e.station);
+    const material = s.goods[route.material];
+    s = play(s, scout);
+    assert.equal(s.goods[route.material], material - expeditions.scoutCost(e));
+    assert(s.journey.expedition.advantage);
+    assert.equal(transition(s, { type: 'expedition-finish' }), s, 'Report back in the original town');
+    return adjacentTravel(s, e.source);
+  }
+  let ranger = expeditionGame('grove');
+  assert.equal(transition(ranger, { type: 'expedition-start', id: 'academy-cistern', rank: 1 }), ranger);
+  for (let i = 0; i < 3; i++) {
+    ranger = research(ranger, 'grove-ford');
+    const cost = expeditions.objectiveCost(ranger.journey.expedition);
+    const timber = ranger.goods.timber;
+    ranger = play(ranger, { type: 'expedition-finish' });
+    assert.equal(ranger.goods.timber, timber - cost);
+  }
+  assert.equal(journey.maxExpeditionRank(ranger), 2);
+  assert.equal(journey.regionalMastery(ranger, 'grove'), 1, 'Repeating an expedition advances rank, not regional mastery');
+  assert.equal(ranger.journey.relic, 'grove');
+  ranger = research(ranger, 'grove-orchard', 2);
+  const e = ranger.journey.expedition;
+  let away = adjacentTravel(ranger, e.station);
+  away = play(away, { type: 'life', activity: 'forage' });
+  assert.equal(away.journey.expedition.progress, 0, 'Work in other towns does not count toward the expedition');
+  ranger = play(ranger, { type: 'life', activity: 'gather' });
+  assert(expeditions.canReportExpedition(ranger, ranger.journey.expedition));
+  ranger = play(ranger, { type: 'expedition-finish' });
+  assert.equal(journey.regionalMastery(ranger, 'grove'), 2);
+
+  ranger = research(ranger, 'grove-amber');
+  ranger = play(ranger, { type: 'formation', id: 'envoy' });
+  ranger = play(ranger, { type: 'enter' });
+  const pack = (s) => Number(Object.entries(world.generateFloor(s.location, s.delve.floor).features).find(([, type]) => type === 'pack')[0]);
+  ranger.delve.cell = pack(ranger);
+  ranger = play(ranger, { type: 'feature', verb: 'confront' });
+  ranger = play(ranger, { type: 'auto-combat', target: 0 });
+  assert(ranger.delve.encounter.enemies.every((enemy) => enemy.hp === enemy.max && enemy.known));
+  ranger.rng = seedFor((face) => face === 20);
+  ranger = play(ranger, { type: 'auto-combat', target: 0 });
+  assert(ranger.journey.expedition.progress >= 1 && ranger.counters.combats === 0);
+  assert(Object.values(ranger.journey.bestiary).some((record) => record.accords === 1));
+  ranger = play(ranger, { type: 'leave-delve' });
+  ranger = play(ranger, { type: 'expedition-finish' });
+  assert.equal(journey.relicPower(ranger, 'grove'), 2);
+  assert.equal(transition(ranger, { type: 'equip-relic', biome: 'academy' }), ranger);
+
+  let scholar = research(expeditionGame('academy'), 'academy-clocktower');
+  const recipe = provisions.mealRecipe('bell-bento');
+  scholar = play(scholar, { type: 'cook-dish', id: 'bell-bento' });
+  assert(expeditions.canReportExpedition(scholar, scholar.journey.expedition));
+  scholar = play(scholar, { type: 'expedition-finish' });
+  scholar.fatigue = 2;
+  const armor = state.armor(scholar);
+  scholar = play(scholar, { type: 'eat-dish', id: 'bell-bento' });
+  assert.equal(scholar.journey.meals['bell-bento'], 0);
+  assert.deepEqual(scholar.journey.tasted, ['bell-bento']);
+  assert.equal(scholar.journey.meal.until - scholar.time, recipe.hours);
+  assert.equal(state.armor(scholar), armor + 1);
+  scholar = research(scholar, 'academy-cistern');
+  scholar = play(scholar, { type: 'enter' });
+  const alternativeResearch = structuredClone(scholar);
+  alternativeResearch.delve.cell = systems.ruinLayout(scholar.location, 1).device;
+  const inspectedDevice = play(alternativeResearch, { type: 'inspect-circuit' });
+  assert.equal(inspectedDevice.journey.expedition.progress, 1, 'A new mechanism counts toward an investigation expedition');
+  assert.equal(transition(inspectedDevice, { type: 'inspect-circuit' }), inspectedDevice);
+  scholar.delve.cell = world.generateFloor(scholar.location, 1).seal;
+  scholar = play(scholar, { type: 'feature', verb: 'inspect' });
+  assert.equal(scholar.journey.expedition.progress, 1);
+  assert.equal(transition(scholar, { type: 'feature', verb: 'inspect' }), scholar);
+  scholar = play(scholar, { type: 'leave-delve' });
+  scholar = play(scholar, { type: 'expedition-finish' });
+  scholar = play(scholar, { type: 'build', mode: 'raise' });
+  const homeKey = world.addressKey(scholar.location);
+  assert.equal(transition(scholar, { type: 'build-improvement', improvement: 'masterForge' }), scholar);
+  for (let lv = 1; lv < 5; lv++) {
+    if (life.canEat(scholar)) scholar = play(scholar, { type: 'use', good: 'ration' });
+    scholar = play(scholar, { type: 'build', mode: 'upgrade' });
+  }
+  assert.equal(scholar.workshop[homeKey].level, 5);
+  assert.equal(transition(scholar, { type: 'build', mode: 'upgrade' }), scholar);
+  scholar = play(scholar, { type: 'build-improvement', improvement: 'masterForge' });
+  assert.equal(transition(scholar, { type: 'fabricate', recipe: 'skyPike' }), scholar);
+  scholar = play(scholar, { type: 'fabricate', recipe: 'archiveWand' });
+  assert.equal(scholar.gear[0].weapon, 'wand');
+  assert.equal(scholar.gear[0].affix, 'bright');
+  assert.equal(scholar.gear[0].masterwork, 'archiveWand');
+
+  const hostMemory = world.residentsAt(scholar.location).find((resident) => resident.role === 'host');
+  scholar.time = world.dayAt(scholar.time) * 24 + 9;
+  scholar.lastMealAt = scholar.time;
+  scholar.friends[hostMemory.id] = { resident: hostMemory, trust: 6, visitedDay: 0, offeredDay: 0 };
+  const memoryAction = { type: 'bond', id: hostMemory.id, approach: 'give' };
+  const firstMemory = life.residentStory(scholar, hostMemory);
+  scholar.goods[firstMemory.item]++;
+  scholar = play(scholar, memoryAction);
+  assert.equal(scholar.friends[hostMemory.id].memories, 1);
+  assert.equal(transition(scholar, memoryAction), scholar, 'Bond scenes take at least one day apart');
+  scholar.time += 24;
+  scholar.lastMealAt = scholar.time;
+  scholar.goods[life.residentStory(scholar, hostMemory).item]++;
+  scholar = play(scholar, memoryAction);
+  assert.equal(scholar.friends[hostMemory.id].memories, 2);
+  assert.equal(life.residentStory(scholar, hostMemory), undefined);
+
+  scholar = research(scholar, 'academy-archive');
+  const floorNumber = scholar.journey.expedition.floor;
+  scholar = play(scholar, { type: 'enter', floor: floorNumber });
+  scholar.delve.cell = world.generateFloor(scholar.location, floorNumber).seal;
+  scholar = play(scholar, { type: 'feature', verb: 'confront' });
+  assert.equal(scholar.delve.encounter.enemies[0].template, content.regionalWardenIndex('academy'));
+  scholar.rng = seedFor((face) => face === 20);
+  scholar = play(scholar, { type: 'combat', move: 'parley', target: 0 });
+  assert.equal(scholar.deepest[homeKey], floorNumber);
+  scholar = play(scholar, { type: 'leave-delve' });
+  scholar = play(scholar, { type: 'expedition-finish' });
+  const differentConditions = new Set(Array.from({ length: 160 }, (_, i) => ruins.ruinCondition(scholar.location, i + 2).name[1]));
+  assert.equal(differentConditions.size, 8);
+  let hunter = research(expeditionGame('academy'), 'academy-observatory');
+  hunter.level = 20;
+  hunter = play(hunter, { type: 'enter' });
+  hunter.delve.cell = pack(hunter);
+  hunter = play(hunter, { type: 'feature', verb: 'confront' });
+  const forcedHit = { type: 'auto-combat', target: 0 };
+  for (let i = 0; i < 6 && hunter.delve?.encounter; i++) {
+    hunter.rng = seedFor((face) => face === 20);
+    hunter = play(hunter, forcedHit);
+  }
+  assert.equal(hunter.journey.expedition.progress, 1, 'Defeating a pack advances a hunting contract');
+  assert(Object.values(hunter.journey.bestiary).some((record) => record.victories === 1));
+  hunter = play(hunter, { type: 'leave-delve' });
+  hunter = play(hunter, { type: 'expedition-finish' });
+  assert.equal(hunter.journey.expeditions['academy-observatory'].clears, 1);
+
+  let surveyor = expeditionGame('coast');
+  const guildkeeper = world.residentsAt(surveyor.location).find((resident) => resident.role === 'keeper');
+  assert.equal(factions.residentFaction(surveyor.location, guildkeeper), 'coast');
+  surveyor.time = 11;
+  surveyor.goods.fish = 8;
+  const offer = { type: 'faction-favor', resident: guildkeeper.id };
+  const neutralPrice = life.marketPrice(surveyor, 'lantern', false);
+  surveyor = play(surveyor, offer);
+  assert.equal(surveyor.fieldwork.standing.coast, 2);
+  assert.equal(surveyor.fieldwork.standing.sky, -1);
+  assert.equal(surveyor.goods.fish, 7);
+  assert.equal(transition(surveyor, offer), surveyor, 'A faction can only be helped once per day');
+  const friendly = structuredClone(surveyor);
+  friendly.fieldwork.standing.coast = 7;
+  assert(life.marketPrice(friendly, 'lantern', false) < neutralPrice);
+  assert(life.marketPrice(friendly, 'lantern', true) < life.marketPrice(friendly, 'lantern', false));
+
+  const surveyKey = world.addressKey(surveyor.location);
+  for (const depth of [1, 2, 3]) {
+    surveyor.deepest[surveyKey] = depth - 1;
+    surveyor = play(surveyor, { type: 'enter', floor: depth });
+    const layout = systems.ruinLayout(surveyor.location, depth);
+    assert.equal(transition(surveyor, { type: 'read-inscription' }), surveyor);
+    surveyor.delve.cell = layout.inscription;
+    surveyor = play(surveyor, { type: 'read-inscription' });
+    assert.equal(surveyor.fieldwork.histories[surveyKey].chapters, (1 << depth) - 1);
+    assert.equal(transition(surveyor, { type: 'read-inscription' }), surveyor, 'A repeated inscription grants nothing');
+    surveyor.delve.cell = layout.device;
+    surveyor = play(surveyor, { type: 'inspect-circuit' });
+    assert.equal(transition(surveyor, { type: 'set-circuit', mode: 'channel', method: 'alliance' }), surveyor);
+    const ore = surveyor.goods.ore;
+    if (depth === 1) {
+      const repaired = play(surveyor, { type: 'set-circuit', mode: 'channel', method: 'materials' });
+      assert.equal(repaired.goods.ore, ore - 1);
+      const withAllies = structuredClone(surveyor);
+      withAllies.fieldwork.standing.coast = 7;
+      assert.equal(play(withAllies, { type: 'set-circuit', mode: 'channel', method: 'alliance' }).goods.ore, ore);
+      const failed = play({ ...surveyor, rng: seedFor(face => face === 1) }, { type: 'set-circuit', mode: 'channel', method: 'check' });
+      assert.equal(systems.circuitAt(failed).mode, null);
+      assert.equal(failed.delve.light, surveyor.delve.light - 2);
+      const improvised = play({ ...failed, rng: seedFor(face => face === 20) }, { type: 'set-circuit', mode: 'channel', method: 'check' });
+      assert.equal(systems.circuitAt(improvised).mode, 'channel');
+    }
+    surveyor = play(surveyor, { type: 'set-circuit', mode: 'channel', method: 'history' });
+    assert.equal(surveyor.goods.ore, ore, 'Local records can replace a tool or material');
+    assert.equal(systems.circuitEffects(surveyor).shards, 2);
+    if (layout.shortcut >= 0) {
+      const floor = systems.ruinFloor(surveyor.location, depth, 'channel');
+      const direction = world.DIRECTIONS.findIndex((_, i) => floor.open.has(world.neighbor(layout.shortcut, (i + 2) % 4)));
+      const route = structuredClone(surveyor);
+      route.delve.cell = world.neighbor(layout.shortcut, (direction + 2) % 4);
+      route.delve.direction = direction;
+      route.floors[world.floorKey(route.location, depth)].cleared.push(route.delve.cell);
+      const next = play(route, { type: 'move', direction: 'forward' });
+      assert.equal(next.delve.cell, layout.shortcut, 'The powered passage is traversable in the gameplay engine');
+    }
+    surveyor = play(surveyor, { type: 'set-circuit', mode: 'isolate', method: 'check' });
+    assert.equal(systems.circuitEffects(surveyor).light, -1);
+    surveyor = play(surveyor, { type: 'leave-delve' });
+  }
+  const foundShards = surveyor.goods.relic;
+  surveyor = play(surveyor, { type: 'file-history', key: surveyKey, choice: 'return' });
+  assert.equal(surveyor.goods.relic, foundShards + 3);
+  assert.equal(surveyor.fieldwork.standing.coast, 5);
+  assert.equal(surveyor.fieldwork.standing.sky, -2);
+  assert.equal(transition(surveyor, { type: 'file-history', key: surveyKey, choice: 'publish' }), surveyor);
+
   const layouts = new Set();
   const worlds = new Set();
   const { corridorPlanes } = await vite.ssrLoadModule(path + 'corridor.ts');
@@ -326,6 +588,40 @@ try {
   assert.equal(migrated.lastMealAt, original.time);
   assert.equal(migrated.goods.meat, 0);
   assert(save.deleteAdventure(migrated.id));
+  const previous = structuredClone(original);
+  previous.version = 2;
+  delete previous.journey;
+  storage.set(originalStory.SCHOOL_ADVENTURE_SAVE_KEY,
+    JSON.stringify({ schema: 'school-adventure', serial: 1, checksum: world.hash(JSON.stringify([previous])), slots: [previous] }));
+  assert.deepEqual(save.loadAdventures(), [original], 'A v2 save retains all original state and receives a clean journey');
+  assert(save.deleteAdventure(original.id));
+  let savedBattle = play(newGame(), { type: 'enter' });
+  savedBattle.delve.cell = world.generateFloor(savedBattle.location, 1).seal;
+  savedBattle = play(savedBattle, { type: 'feature', verb: 'confront' });
+  savedBattle.delve.encounter.enemies[0].template = 12;
+  savedBattle.version = 2;
+  delete savedBattle.journey;
+  storage.set(originalStory.SCHOOL_ADVENTURE_SAVE_KEY,
+    JSON.stringify({ schema: 'school-adventure', serial: 1, checksum: world.hash(JSON.stringify([savedBattle])), slots: [savedBattle] }));
+  savedBattle = save.loadAdventures()[0];
+  assert.equal(savedBattle.delve.encounter.enemies[0].template, 12);
+  savedBattle.rng = seedFor((face) => face === 20);
+  savedBattle = play(savedBattle, { type: 'combat', move: 'parley', target: 0 });
+  assert.deepEqual(savedBattle.journey.bestiary[12], { encounters: 1, victories: 0, accords: 1 });
+  assert(save.deleteAdventure(savedBattle.id));
+  const previousJourney = structuredClone(scholar);
+  previousJourney.version = 3;
+  delete previousJourney.fieldwork;
+  storage.set(originalStory.SCHOOL_ADVENTURE_SAVE_KEY,
+    JSON.stringify({ schema: 'school-adventure', serial: 1, checksum: world.hash(JSON.stringify([previousJourney])), slots: [previousJourney] }));
+  assert.deepEqual(save.loadAdventures(), [{ ...scholar, fieldwork: fieldwork.newFieldwork() }]);
+  assert(save.deleteAdventure(previousJourney.id));
+  assert.equal(save.saveAdventure(surveyor, null), 'saved');
+  assert.deepEqual(save.loadAdventures(), [surveyor], 'Reputation, circuit settings and archived fragments survive reload');
+  assert(save.deleteAdventure(surveyor.id));
+  assert.equal(save.saveAdventure(scholar, null), 'saved');
+  assert.deepEqual(save.loadAdventures(), [scholar], 'Expedition records, meals, and NPC memories persist');
+  assert(save.deleteAdventure(scholar.id));
   assert.equal(save.saveAdventure(fallen, null), 'saved');
   assert.equal(save.loadAdventures()[0].fallenAt, fallen.fallenAt);
   assert(save.deleteAdventure(fallen.id));
@@ -344,7 +640,7 @@ try {
   assert.deepEqual(save.loadAdventures(), []);
   assert.equal(storage.get(originalStory.SCHOOL_TRPG_SAVE_KEY), 'existing-story');
   console.log(
-    `PASS 40 unique portraits, ${floors} seeded floors, procedural worlds, meals, permanent death, rescue, party combat, crafting, commissions, nonviolent passage and save migration.`,
+    `PASS 40 unique portraits, ${newArt.length} expedition assets, ${floors} seeded floors, expeditions, faction standings, traversable mechanisms, historical archives, crafting, and v1–v3 save migration.`,
   );
 } finally {
   await vite.close();

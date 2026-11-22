@@ -134,6 +134,43 @@ try {
   await view.getByRole('radio', { name: /^Return to town/ }).check();
   await click('Begin the adventure');
   const model = await vite.ssrLoadModule('/src/mini-games/school-trpg/adventure/world.ts');
+  const systems = await vite.ssrLoadModule('/src/mini-games/school-trpg/adventure/ruinSystems.ts');
+  async function walkInRuin(floor, destination) {
+    const { delve: current } = await slot();
+    const came = new Map([[current.cell, null]]);
+    const queue = [current.cell];
+    for (const cell of queue) {
+      for (let direction = 0; direction < 4; direction++) {
+        const next = model.neighbor(cell, direction);
+        if (!floor.open.has(next) || came.has(next)) continue;
+        came.set(next, { cell, direction });
+        queue.push(next);
+      }
+    }
+    assert(came.has(destination), 'Destination exists in the native ruin layout');
+    const directions = [];
+    for (let cell = destination; cell !== current.cell;) {
+      const path = came.get(cell);
+      directions.unshift(path.direction);
+      cell = path.cell;
+    }
+    for (const direction of directions) {
+      const state = await slot();
+      const { cell, light, floor: depth } = state.delve;
+      const record = state.floors[model.floorKey(state.location, depth)];
+      if (light < 5 && state.goods.lantern) await view.getByRole('button', { name: /^Lamp oil ×/ }).click();
+      if (!record.cleared.includes(cell)) {
+        if (floor.features[cell] === 'runes') {
+          const inspect = view.getByRole('button', { name: 'Inspect', exact: true });
+          if (!record.inspected.includes(cell)) await inspect.click();
+          await click(['Moon', 'Star', 'Flame'][floor.answer]);
+        } else if (floor.features[cell] === 'trap') await click('Disarm mechanism');
+      }
+      while ((await slot()).delve.direction !== direction) await click('Turn right');
+      await click('Step forward');
+    }
+    assert.equal((await slot()).delve.cell, destination);
+  }
   const startTown = await slot();
   await view.getByRole('heading', { name: model.townAt(startTown.location).name[1] }).waitFor();
   assert.match(startTown.location.world, /^road-/);
@@ -206,35 +243,7 @@ try {
   const initial = await slot();
   const floor = model.generateFloor(initial.location, 1);
   const target = Object.entries(floor.features).find(([, feature]) => feature === 'pack');
-  const wanted = Number(target[0]);
-  const start = initial.delve.cell,
-    came = new Map([[start, null]]);
-  const queue = [start];
-  for (const from of queue)
-    for (let direction = 0; direction < 4; direction++) {
-      const to = model.neighbor(from, direction);
-      if (floor.open.has(to) && !came.has(to)) {
-        came.set(to, { from, direction });
-        queue.push(to);
-      }
-    }
-  const moves = [];
-  for (let cell = wanted; cell !== start; ) {
-    const next = came.get(cell);
-    moves.unshift(next.direction);
-    cell = next.from;
-  }
-  for (const direction of moves) {
-    const state = await slot();
-    const feature = floor.features[state.delve.cell];
-    if (!state.delve.light && state.goods.lantern) await view.getByRole('button', { name: /^Lamp oil ×/ }).click();
-    if (feature === 'runes') {
-      await click('Inspect');
-      await click(['Moon', 'Star', 'Flame'][floor.answer]);
-    } else if (feature === 'trap') await click('Disarm mechanism');
-    while ((await slot()).delve.direction !== direction) await click('Turn right');
-    await click('Step forward');
-  }
+  await walkInRuin(floor, Number(target[0]));
   await click('Confront');
   await view.getByRole('group', { name: 'Combat targets' }).waitFor();
   await click('Pause');
@@ -271,6 +280,97 @@ try {
   await click('Continue');
   assert.equal((await slot()).character.name, 'Aoi of Bellwick');
   assert.equal((await slot()).counters.harvests, 1);
+
+  await view.setViewportSize({ width: 390, height: 844 });
+  await view.locator('.sa-town-expedition').click();
+  const cards = view.getByRole('group', { name: 'Local expeditions' }).getByRole('button');
+  assert.equal(await cards.count(), 4);
+  await view.waitForFunction(() => [...document.querySelectorAll('.sa-expedition-card img')].every((image) => image.complete && image.naturalWidth > 0));
+  await checkViewport();
+  await snap('expeditions-phone');
+  await view.setViewportSize({ width: 844, height: 390 });
+  await checkViewport();
+  await snap('expeditions-landscape');
+  await click(/^The silent graduation bell/);
+  await click('Accept expedition');
+  await click('Find it on the map');
+  await view.getByRole('button', { name: /^Travel here/ }).click();
+  const roadClue = (await slot()).journey.expedition;
+  assert.deepEqual((await slot()).location, roadClue.station);
+  await click('Journal');
+  await click(/^Investigate the clue/);
+  await click('Find it on the map');
+  await view.getByRole('button', { name: /^Travel here/ }).click();
+  const returning = await slot();
+  assert.deepEqual(returning.location, roadClue.source);
+  await click('Town life');
+  if (!returning.goods.grain) {
+    await view.locator('.sa-market > div').filter({ hasText: 'Grain' }).getByRole('button', { name: /^Buy/ }).click();
+  }
+  if (!returning.goods.meat) {
+    await view.locator('.sa-market > div').filter({ hasText: 'Beast meat' }).getByRole('button', { name: /^Buy/ }).click();
+  }
+  await view.locator('.sa-kitchen summary').click();
+  const dish = view.locator('.sa-dish').filter({ hasText: 'Bellkeeper’s bento' });
+  await dish.getByRole('button', { name: /^Cook/ }).click();
+  await dish.getByRole('button', { name: 'Eat', exact: true }).click();
+  assert.equal((await slot()).journey.meal.id, 'bell-bento');
+  await click('Journal');
+  await click('Report expedition');
+  await click('Collections');
+  const relic = view.locator('.sa-collection-card').filter({ hasText: 'Vellum medallion' });
+  await relic.getByRole('button', { name: 'Unequip', exact: true }).click();
+  assert.equal((await slot()).journey.relic, null);
+  await relic.getByRole('button', { name: 'Equip', exact: true }).click();
+  assert.equal((await slot()).journey.relic, 'academy');
+  await view.setViewportSize({ width: 320, height: 568 });
+  await checkViewport();
+  await snap('collection-small');
+  await click('People');
+  await view.getByLabel('Combat formation').selectOption('envoy');
+  assert.equal((await slot()).journey.formation, 'envoy');
+  await click('Title');
+  await view.reload();
+  await open();
+  await click('Continue');
+  assert.equal((await slot()).journey.expeditions['academy-clocktower'].clears, 1);
+  assert.equal((await slot()).journey.relic, 'academy');
+  assert.deepEqual((await slot()).journey.tasted, ['bell-bento']);
+
+  await view.setViewportSize({ width: 390, height: 844 });
+  await click('Town life');
+  const oil = view.locator('.sa-market > div').filter({ hasText: 'Lamp oil' });
+  if ((await slot()).goods.lantern < 2) await oil.getByRole('button', { name: /^Buy/ }).click();
+  await click('Explore');
+  await click(/^Enter the ruins/);
+  const survey = await slot();
+  const site = model.addressKey(survey.location);
+  const levelKey = model.floorKey(survey.location, 1);
+  const native = model.generateFloor(survey.location, 1);
+  const fixture = systems.ruinLayout(survey.location, 1);
+  await walkInRuin(native, fixture.inscription);
+  await click(/^Read inscription/);
+  assert.equal((await slot()).fieldwork.histories[site].chapters, 1);
+  await walkInRuin(native, fixture.device);
+  await click('Inspect connections');
+  await click('Use local history');
+  assert.equal((await slot()).fieldwork.circuits[levelKey].mode, 'channel');
+  assert.equal(await view.locator('.sa-maze [data-fixture="shortcut"]').count(), Number(fixture.shortcut >= 0));
+  await checkViewport();
+  await snap('mechanism-phone');
+  await view.setViewportSize({ width: 844, height: 390 });
+  await checkViewport();
+  await click('Silence the bells');
+  await click(/^Change setting/);
+  assert.equal((await slot()).fieldwork.circuits[levelKey].mode, 'isolate');
+  assert.equal(await view.locator('.sa-maze [data-fixture="shortcut"]').count(), 0);
+  await click('Return to town');
+  await click('Journal');
+  await click('Survey');
+  assert.equal(await view.locator('.sa-faction-card').count(), 6);
+  await view.getByText('The first bell warned of floods long before it announced classes.', { exact: true }).first().waitFor();
+  await checkViewport();
+  await snap('survey-landscape');
   assert.deepEqual(errors, []);
 
   const jp = await browser.newPage({ viewport: { width: 320, height: 568 } });
@@ -285,7 +385,7 @@ try {
   await jp.getByRole('button', { name: '物語を開く' }).click();
   await jp.locator('body').getByText('放課後スクールTRPG', { exact: false }).first().waitFor();
   console.log(
-    'PASS router, creator, rolls, meals, gardening, scheduled residents, realms, goals, textured corridors, paused/automatic combat, reload and legacy entry',
+    'PASS router, mobile portrait and landscape, expeditions, cooking, formations, automatic combat, ruin mechanisms and survey, save reload and legacy entry',
     out,
   );
 } finally {

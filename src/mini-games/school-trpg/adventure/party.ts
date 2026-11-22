@@ -5,12 +5,25 @@ export function formParty(s: Adventure): Ally[] {
   return s.followers.flatMap((id) => {
     const friend = s.friends[id];
     if (!friend) return [];
-    const max = 12 + s.level * 2 + friend.trust + (COMPANION_ROLES[friend.resident.role].ward ? 6 : 0);
+    const max = 12 + s.level * 2 + friend.trust + (friend.memories ?? 0) * 3 +
+      (COMPANION_ROLES[friend.resident.role].ward ? 6 : 0);
     return [{ id, hp: max, max }];
   });
 }
 export const battleParty = (s: Adventure, encounter: Encounter) =>
   (encounter.allies ??= formParty(s));
+
+export function envoySupport(s: Adventure, encounter: Encounter) {
+  const party = battleParty(s, encounter).filter((member) => member.hp > 0);
+  const roleOf = (member: Ally) => COMPANION_ROLES[s.friends[member.id].resident.role];
+  encounter.guard ||= party.some((member) => roleOf(member).ward);
+  if (!party.some((member) => roleOf(member).healer)) return;
+  if (s.hp < maxHp(s)) recover(s, 2, 0);
+  else {
+    const patient = party.find((member) => member.hp < member.max);
+    if (patient) patient.hp = Math.min(patient.max, patient.hp + 2);
+  }
+}
 
 export function companionTurn(s: Adventure, encounter: Encounter) {
   const party = battleParty(s, encounter);
@@ -24,7 +37,7 @@ export function companionTurn(s: Adventure, encounter: Encounter) {
     const healHero = s.hp * 2 <= maxHp(s);
     const healing = 3 + Math.floor((s.level + friend.trust) / 3);
     const name = friend.resident.name;
-    if (role.healer && encounter.turn % 2 === 0 && (healHero || patient)) {
+    if (role.healer && (s.journey.formation === 'shelter' || encounter.turn % 2 === 0) && (healHero || patient)) {
       if (healHero) recover(s, healing, 1);
       else if (patient) patient.hp = Math.min(patient.max, patient.hp + healing);
       note(s, [name[0] + 'が負傷者を手当てした。', name[1] + ' treats an injured ally.'], 'good');
