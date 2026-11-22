@@ -20,6 +20,10 @@ import {
 import type { BadgeId } from './guild';
 import type { ExpeditionAction } from './expeditions';
 import { newFieldwork, type Fieldwork } from './fieldworkState';
+import { ADDRESS_NAMES, DISCIPLINES, ENCOUNTER_RULES, type AddressName, type Discipline, type MealTrigger, type RunKind } from './frontierContent';
+import { fieldCheck, fieldCondition, fieldRecipe, mealTrigger, newFrontier, runSeed, thirst, validFieldRules, type Frontier, type FrontierRules } from './frontierState';
+import type { FieldOperation } from './frontierActions';
+import type { Tactics } from './fieldTactics';
 import { newJourney, relicPower, type Formation, type Journey } from './journeyState';
 import { mealEffect, type MealId } from './provisions';
 import type { RuinAction } from './ruinSystems';
@@ -33,7 +37,7 @@ import {
   type Resident,
 } from './world';
 
-export const ADVENTURE_VERSION = 4;
+export const ADVENTURE_VERSION = 5;
 export const MAX_PARTY_SIZE = 6;
 export const MAX_LIGHT = 24;
 export const MEAL_INTERVAL = 24;
@@ -56,6 +60,10 @@ export type Character = {
   stats: Record<Stat, number>;
   world: string;
   deathRule: DeathRule;
+  discipline?: Discipline;
+  runKind?: RunKind;
+  fieldRules?: FrontierRules;
+  addressedAs?: AddressName;
 };
 export type Gear = {
   id: string;
@@ -105,6 +113,7 @@ export type Enemy = {
   pattern: number;
   stagger: boolean;
   known: boolean;
+  epithets?: Text;
 };
 export type Ally = { id: string; hp: number; max: number };
 export type Encounter = {
@@ -117,6 +126,7 @@ export type Encounter = {
   combo: number;
   guard: boolean;
   surprise: boolean;
+  tactics?: Tactics;
 };
 export type Delve = {
   floor: number;
@@ -147,6 +157,7 @@ export type Adventure = {
   character: Character;
   journey: Journey;
   fieldwork: Fieldwork;
+  frontier: Frontier;
   location: Address;
   homeGate: Address;
   gates: Record<string, Address>;
@@ -204,6 +215,7 @@ export type CombatMove =
   | 'guard'
   | 'study'
   | 'parley'
+  | 'befriend'
   | 'retreat';
 export type DelveMove = 'forward' | 'backward' | 'left' | 'right';
 export type DungeonVerb =
@@ -220,6 +232,10 @@ export type DungeonVerb =
 export type Action =
   | ExpeditionAction
   | RuinAction
+  | { type: 'field'; operation: FieldOperation }
+  | { type: 'auto-walk'; target?: number }
+  | { type: 'tactical-step'; cell: number }
+  | { type: 'tactical-aim'; target: number }
   | { type: 'faction-favor'; resident: string }
   | { type: 'cook-dish' | 'eat-dish'; id: MealId }
   | { type: 'formation'; id: Formation }
@@ -292,6 +308,10 @@ export function validCharacter(c: Character) {
     typeof c.world === 'string' &&
     Boolean(worldCode(c.world)) &&
     DEATH_RULES.includes(c.deathRule) &&
+    (c.discipline === undefined || Object.hasOwn(DISCIPLINES, c.discipline)) &&
+    (c.runKind === undefined || Object.hasOwn(ENCOUNTER_RULES, c.runKind)) &&
+    (c.fieldRules === undefined || validFieldRules(c.fieldRules)) &&
+    (c.addressedAs === undefined || Object.hasOwn(ADDRESS_NAMES, c.addressedAs)) &&
     c.stats &&
     STAT_IDS.every((id) => Number.isInteger(c.stats[id]) && c.stats[id] >= 1 && c.stats[id] <= 4) &&
     STAT_IDS.reduce((sum, id) => sum + c.stats[id] - 1, 0) === CREATION_POINTS
@@ -302,8 +322,9 @@ export function startAdventure(character: Character, id: string): Adventure | nu
   if (!validCharacter(character)) return null;
   const origin = ORIGINS[character.origin];
   const calling = CALLINGS[character.calling];
-  const region = worldCode(character.world).slice(0, 14);
-  const world = 'road-' + hash(region + '/' + id).toString(36) + '-' + region;
+  const fixedSeed = runSeed(character.runKind ?? 'classic');
+  const region = fixedSeed ?? worldCode(character.world).slice(0, 14);
+  const world = 'road-' + hash(fixedSeed ?? (region + '/' + id)).toString(36) + '-' + region;
   const location = { world, x: origin.start[0], y: origin.start[1] };
   const goods = Object.fromEntries(GOOD_IDS.map((good) => [good, 0])) as Goods;
   goods.herb = 1;
@@ -331,9 +352,10 @@ export function startAdventure(character: Character, id: string): Adventure | nu
     version: ADVENTURE_VERSION,
     id,
     revision: 0,
-    character: { ...character, name: character.name.trim(), world },
+    character: { ...character, stats: { ...character.stats }, name: character.name.trim(), world, deathRule: character.runKind === 'wander' ? 'return-town' : character.deathRule },
     journey: newJourney(),
     fieldwork: newFieldwork(),
+    frontier: newFrontier(location, 8, character.discipline, character.runKind, character.fieldRules),
     location,
     homeGate: location,
     gates: { [world]: location },
@@ -382,7 +404,7 @@ export function startAdventure(character: Character, id: string): Adventure | nu
     badges: {},
     goals: [],
     journal: [],
-    rng: hash(world + '/' + id),
+    rng: hash(world + '/' + (fixedSeed ? character.origin : id)),
   };
   state.hp = maxHp(state);
   state.focus = maxFocus(state);
@@ -414,7 +436,7 @@ export const maxFocus = (s: Adventure) =>
   wears(s, 'focus') * 2 +
   (equipped(s, 'charm')?.power ?? 0);
 export const armor = (s: Adventure) =>
-  (equipped(s, 'coat')?.power ?? 0) + wears(s, 'sturdy') + relicPower(s, 'alpine') + mealEffect(s, 'armor');
+  (equipped(s, 'coat')?.power ?? 0) + wears(s, 'sturdy') + relicPower(s, 'alpine') + mealEffect(s, 'armor') + Number(fieldCondition(s, 'ward')) * 2;
 export const xpGoal = (level: number) => 18 + level * 8;
 export const missedMeals = (s: Adventure) =>
   Math.floor(Math.max(0, s.time - s.lastMealAt) / MEAL_INTERVAL);
@@ -425,7 +447,19 @@ export const hungerPenalty = (s: Adventure) =>
 
 export function advance(s: Adventure, hours: number) {
   const before = missedMeals(s);
+  const beforeThirst = Math.floor(thirst(s) / 12);
+  const infected = fieldCondition(s, 'spore');
+  const priorTime = s.time;
   s.time += hours;
+  const afterThirst = Math.floor(thirst(s) / 12);
+  if (s.hp > 0 && afterThirst >= 2 && beforeThirst < afterThirst) {
+    s.hp = Math.max(0, s.hp - (afterThirst - Math.max(1, beforeThirst)) * 2);
+    s.focus = Math.max(0, s.focus - 2);
+    note(s, ['水が足りず、体力と集中を失った。', 'Dehydration costs HP and Focus.'], 'risk');
+  }
+  if (s.hp > 0 && infected && Math.floor(priorTime / 8) < Math.floor(Math.min(s.time, s.frontier.conditions.spore ?? s.time) / 8)) {
+    s.focus = Math.max(0, s.focus - 1);
+  }
   const after = missedMeals(s);
   if (s.hp <= 0 || before >= after) return;
   for (let day = before + 1; day <= after && s.hp > 0; day++) {
@@ -446,6 +480,17 @@ export const recover = (s: Adventure, hp: number, focus: number) => {
   s.hp = Math.min(maxHp(s), s.hp + Math.floor((hp + meal) * factor));
   s.focus = Math.min(maxFocus(s), s.focus + Math.floor(focus * factor));
 };
+export function consumeFieldRecipe(s: Adventure, trigger: MealTrigger) {
+  const meal = fieldRecipe(s);
+  if (!meal || mealTrigger(meal) !== trigger) return false;
+  s.frontier.recipe = null;
+  if (meal.id === 'blend') {
+    if (meal.spice === 'seed') s.fatigue = Math.max(0, s.fatigue - 1);
+    else if (meal.spice === 'herb') recover(s, 5, 0);
+    else recover(s, 0, 3);
+  }
+  return true;
+}
 export function finishDefeat(s: Adventure) {
   if (s.hp > 0 || s.fallenAt !== null) return false;
   s.defeats++;
@@ -462,6 +507,10 @@ export function finishDefeat(s: Adventure) {
     s.gold -= fee;
     advance(s, 7);
     s.lastMealAt = s.time;
+    s.frontier.hydration = s.time;
+    if (s.frontier.checkpoint) s.location = { ...s.frontier.anchor };
+    s.frontier.injuries = {};
+    s.frontier.conditions = {};
     s.fatigue = 4;
     s.hp = Math.ceil(maxHp(s) * 0.6);
     s.focus = Math.ceil(maxFocus(s) * 0.5);
@@ -493,13 +542,14 @@ export function note(s: Adventure, copy: Text, tone: Journal['tone'] = 'story', 
   s.journal.unshift({ text: copy, dayHour: s.time, tone, ...(check ? { check } : {}) });
   if (s.journal.length > 36) s.journal.length = 36;
 }
-export function nextRandom(s: Adventure, max: number) {
+export function nextRandom(s: Pick<Adventure, 'rng'>, max: number) {
   s.rng = (Math.imul(1664525, s.rng) + 1013904223) >>> 0;
   return Math.floor((s.rng / 4294967296) * max);
 }
 
 export const checkBonus = (s: Adventure, stat: Stat) =>
   scoreFor(s, stat) +
+  fieldCheck(s, stat) +
   mealEffect(s, stat) +
   (stat === 'insight' ? relicPower(s, 'academy') : 0) +
   (CALLINGS[s.character.calling].stat === stat ? 2 : 0) +
@@ -525,6 +575,10 @@ export function rollCheck(
   if (inspiration) s.inspiration--;
   const faces = [1 + nextRandom(s, 20)];
   if (inspiration) faces.push(1 + nextRandom(s, 20));
+  if (fieldCondition(s, 'foresight')) {
+    faces.push(1 + nextRandom(s, 20));
+    delete s.frontier.conditions.foresight;
+  }
   const natural = Math.max(...faces);
   const bonus = checkBonus(s, stat) + mod;
   const total = natural + bonus;

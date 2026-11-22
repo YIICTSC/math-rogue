@@ -51,10 +51,12 @@ import {
 import { BLUEPRINT_IDS, BUILDINGS, HOUSE_MATERIALS, IMPROVEMENTS, MAX_HOME_LEVEL, blueprint, hasImprovement } from './building';
 import { FACTIONS, favorAvailable, residentFaction, standing, standingName } from './factions';
 import { ExpeditionProgress } from './JourneyPanel';
+import type { FieldView } from './FrontierPanel';
+import { FOLLOWER_ORDERS, type FollowerOrder } from './frontierContent';
 import { ROUTE_BY_ID, seasonAt } from './journeyContent';
 import { regionalMastery } from './journeyState';
 import { MEAL_IDS, mealRecipe } from './provisions';
-import { SLOT_IDS } from './inventory';
+import { gearName, SLOT_IDS } from './inventory';
 import { MAX_PARTY_SIZE, affordable, freshWorldCode, hungerPenalty, worldCode, type Adventure, type LifeActivity } from './state';
 import {
   DIRECTIONS,
@@ -188,7 +190,8 @@ export function TownOverview({
   declare,
   showMap,
   showRoutes,
-}: PanelProps & { declare: () => void; showMap: () => void; showRoutes: () => void }) {
+  showField,
+}: PanelProps & { declare: () => void; showMap: () => void; showRoutes: () => void; showField: (view: FieldView) => void }) {
   const town = townAt(s.location),
     biome = BIOMES[town.biome];
   const deep = s.deepest[addressKey(s.location)] ?? 0;
@@ -258,6 +261,11 @@ export function TownOverview({
           </div>
           <ArrowRight size={19} aria-hidden="true" />
         </button>
+        <button type="button" className="sa-town-field" onClick={() => showField('sites')}>
+          <BookOpen size={22} aria-hidden="true" />
+          <div><strong>{t(['史跡へ行く', 'Explore historic sites', 'しせきへ いく'])}</strong><small>{t(['紀行誌を読み、次の探索先を見つける。', 'Read travel books and discover more places to explore.', 'きこうしを よんで、つぎの いきさきを みつける。'])}</small></div>
+          <ArrowRight size={19} aria-hidden="true" />
+        </button>
         <section className="sa-panel sa-landmark">
           <div>
             <span className="sa-hint">{t(['町の名所', 'Local landmark'])}</span>
@@ -314,6 +322,7 @@ export function TownOverview({
 export function WorldMap({ state: s, send, t }: PanelProps) {
   const [code, setCode] = useState('');
   const [detail, setDetail] = useState<Address | null>(null);
+  const [mark, setMark] = useState('');
   const location = s.location;
   const expedition = s.journey.expedition;
   const target = expedition && (expedition.stage === 'scout' ? expedition.station : expedition.source);
@@ -325,6 +334,10 @@ export function WorldMap({ state: s, send, t }: PanelProps) {
   }));
   const selected = detail?.world === location.world ? detail : targetNearby ? target : location;
   const town = townAt(selected);
+  const selectedKey = addressKey(selected);
+  const rumor = s.frontier.rumors[selectedKey];
+  const observed = s.knownTowns[selectedKey];
+  const rumors = Object.values(s.frontier.rumors).filter((place) => place.world === location.world);
   const direction = DIRECTIONS.findIndex((_, index) =>
     sameAddress(atOffset(location, index), selected),
   );
@@ -350,7 +363,8 @@ export function WorldMap({ state: s, send, t }: PanelProps) {
             {cells.map((cell) => {
               const key = addressKey(cell);
               const here = sameAddress(cell, location);
-              const known = here || Boolean(s.knownTowns[key]);
+              const rumored = Boolean(s.frontier.rumors[key]);
+              const known = here || Boolean(s.knownTowns[key]) || rumored;
               const near = Math.abs(cell.x - location.x) + Math.abs(cell.y - location.y) === 1;
               const place = townAt(cell);
               const marked = target && sameAddress(target, cell) && (known || near);
@@ -368,15 +382,16 @@ export function WorldMap({ state: s, send, t }: PanelProps) {
                   data-here={here || undefined}
                   data-expedition={marked || undefined}
                   data-surveyed={researched || undefined}
+                  data-rumored={rumored || undefined}
                   aria-pressed={sameAddress(selected, cell)}
                   disabled={!known && !near}
                   aria-label={known || near ? label : t(['未踏', 'Uncharted'])}
-                  onClick={() => setDetail(cell)}
+                  onClick={() => { setDetail(cell); setMark(s.frontier.marks[key]?.label ?? ''); }}
                 >
                   {here ? (
                     <MapPin size={18} />
                   ) : known || near ? (
-                    <span>{marked ? <Compass size={12} aria-hidden="true" /> : researched ? <BookOpen size={12} aria-hidden="true" /> : null}{t(place.name)}</span>
+                    <span>{marked ? <Compass size={12} aria-hidden="true" /> : s.frontier.marks[key] ? <MapPin size={12} aria-hidden="true" /> : researched || rumored ? <BookOpen size={12} aria-hidden="true" /> : null}{t(place.name)}</span>
                   ) : (
                     <span aria-hidden="true">·</span>
                   )}
@@ -393,6 +408,7 @@ export function WorldMap({ state: s, send, t }: PanelProps) {
             <div className="sa-atlas-visit">
               <strong>{t(town.name)} · {selected.x}, {selected.y}</strong>
               <small>{t(FACTIONS[town.biome].name)} · {t(standingName(standing(s, town.biome)))}</small>
+              {s.frontier.marks[selectedKey] && <small>{s.frontier.marks[selectedKey].label}</small>}
             </div>
             {direction >= 0 ? (
               <button
@@ -412,6 +428,23 @@ export function WorldMap({ state: s, send, t }: PanelProps) {
               </span>
             )}
           </div>
+          {(observed || rumor) && <form className="sa-inline sa-map-mark" onSubmit={(event) => {
+            event.preventDefault();
+            send({ type: 'field', operation: { kind: 'mark', place: selected, label: mark } });
+          }}>
+            <label className="sa-field"><span>{t(['地図にメモ', 'Map note', 'ちずに メモ'])}</span><input value={mark} maxLength={42} onChange={(event) => setMark(event.target.value)} /></label>
+            <button type="submit" disabled={!mark.trim() && !s.frontier.marks[selectedKey]}>{t(['記録する', 'Save map note', 'きろくする'])}</button>
+          </form>}
+          {rumors.length > 0 && <label className="sa-field sa-rumor-list"><span>{t(['聞き取った史跡', 'Historic site leads', 'きいた しせき'])}</span>
+            <select value={rumor ? selectedKey : ''} onChange={(event) => {
+              const next = s.frontier.rumors[event.target.value];
+              setDetail(next ?? null);
+              setMark(next ? s.frontier.marks[addressKey(next)]?.label ?? '' : '');
+            }}>
+              <option value="">{t(['行き先を選ぶ', 'Choose a destination', 'いきさきを えらぶ'])}</option>
+              {rumors.map((place) => <option key={addressKey(place)} value={addressKey(place)}>{t(townAt(place).name)} · {place.x}, {place.y}</option>)}
+            </select>
+          </label>}
           <div className="sa-road-list">
             {directionIcons.map((Icon, index) => {
               const destination = atOffset(location, index);
@@ -940,6 +973,8 @@ export function PeoplePanel({ state: s, send, t }: PanelProps) {
               {t(['組織に品物を届ける', 'Deliver faction supplies', 'そしきに しなものを とどける'])} · {t(GOODS[faction.gift].name)} ×1
             </button>
             <small>{t(faction.name)} +2 · {t(FACTIONS[faction.rival].name)} −1</small>
+            <button type="button" disabled={!present || influence <= -3 || Boolean(s.frontier.pacts[subject.id]) || s.frontier.liquids.water < 2}
+              onClick={() => send({ type: 'field', operation: { kind: 'pact', id: subject.id } })}>{s.frontier.pacts[subject.id] ? t(['盟約済み', 'Water pact sworn', 'めいやくずみ']) : t(['水を分けて盟約を結ぶ', 'Share water and make a pact', 'みずを わけて めいやくを むすぶ']) + ' · ×2'}</button>
           </div>
         </section>
         {memory && <section className="sa-memory">
@@ -962,7 +997,8 @@ export function PeoplePanel({ state: s, send, t }: PanelProps) {
             const member = s.friends[id]?.resident;
             return (
               member && (
-                <div key={id} className="sa-section-row">
+                <div key={id} className="sa-companion-order">
+                  <div className="sa-section-row">
                   <span>
                     {t(member.name)} · {t(COMPANION_ROLES[member.role].copy)}{(s.friends[id].memories ?? 0) > 0 && ' · ' + t(['思い出', 'Memories', 'おもいで']) + ' ' + s.friends[id].memories + '/2'}
                   </span>
@@ -972,6 +1008,21 @@ export function PeoplePanel({ state: s, send, t }: PanelProps) {
                   >
                     {t(['別行動', 'Dismiss'])}
                   </button>
+                  </div>
+                  <div className="sa-inline">
+                    <label className="sa-field"><span>{t(['仲間の役割', 'Companion order', 'なかまの やくわり'])}</span>
+                      <select value={s.frontier.orders[id] ?? ''} onChange={(event) => send({ type: 'field', operation: { kind: 'order', id, order: event.target.value ? event.target.value as FollowerOrder : null } })}>
+                        <option value="">{t(['自動', 'Automatic', 'じどう'])}</option>
+                        {Object.entries(FOLLOWER_ORDERS).map(([key, label]) => <option key={key} value={key}>{t(label)}</option>)}
+                      </select>
+                    </label>
+                    <label className="sa-field"><span>{t(['持たせる装備', 'Loaned equipment', 'もたせる そうび'])}</span>
+                      <select value={s.frontier.lent[id] ?? ''} onChange={(event) => send({ type: 'field', operation: { kind: 'lend', id, gear: event.target.value || null } })}>
+                        <option value="">{t(['装備なし', 'No loan', 'そうびなし'])}</option>
+                        {s.gear.filter((gear) => gear.id === s.frontier.lent[id] || (gear.id !== s.frontier.offhand && !Object.values(s.equipment).includes(gear.id) && !Object.values(s.frontier.lent).includes(gear.id))).map((gear) => <option key={gear.id} value={gear.id}>{t(gearName(gear))} +{gear.power}</option>)}
+                      </select>
+                    </label>
+                  </div>
                 </div>
               )
             );

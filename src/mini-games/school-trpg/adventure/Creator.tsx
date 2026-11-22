@@ -20,6 +20,8 @@ import {
   type Character,
 } from './state';
 import { Portrait, type Local } from './ui';
+import { ADDRESS_NAMES, DISCIPLINES, ENCOUNTER_RULES, type AddressName, type Discipline, type RunKind } from './frontierContent';
+import { FRONTIER_RULES, RULE_LABELS, standardRules } from './frontierState';
 import { ACADEMY_WORLD, realmName } from './world';
 
 export default function Creator({
@@ -68,6 +70,9 @@ export default function Creator({
     }));
   }
   const calling = CALLINGS[draft.calling];
+  const discipline = draft.discipline ?? 'explorer';
+  const run = draft.runKind ?? 'classic';
+  const rules = draft.fieldRules ?? standardRules();
   return (
     <>
       <header className="sa-top sa-top-simple">
@@ -204,6 +209,24 @@ export default function Creator({
               ))}
             </div>
             <p className="sa-hint">{t(calling.hint)}</p>
+            <details className="sa-field-detail">
+              <summary>{t(['流派と旅の設定', 'Discipline and journey rules', 'りゅうはと たびの せってい'])}</summary>
+              <div className="sa-fields-grid">
+                <label className="sa-field"><span>{t(['流派', 'Discipline', 'りゅうは'])}</span>
+                  <select value={discipline} onChange={(e) => choose('discipline', e.target.value as Discipline)}>{Object.entries(DISCIPLINES).map(([id, spec]) => <option key={id} value={id}>{t(spec.name)}</option>)}</select>
+                  <small>{t(DISCIPLINES[discipline].hint)}</small>
+                </label>
+                <label className="sa-field"><span>{t(['冒険の種類', 'Journey type', 'ぼうけんの しゅるい'])}</span>
+                  <select value={run} onChange={(e) => choose('runKind', e.target.value as RunKind)}>{Object.entries(ENCOUNTER_RULES).map(([id, spec]) => <option key={id} value={id}>{t(spec.name)}</option>)}</select>
+                  <small>{t(ENCOUNTER_RULES[run].hint)}</small>
+                </label>
+                <label className="sa-field"><span>{t(['呼ばれ方', 'How to address you', 'よばれかた'])}</span>
+                  <select value={draft.addressedAs ?? 'name'} onChange={(e) => choose('addressedAs', e.target.value as AddressName)}>{Object.entries(ADDRESS_NAMES).map(([id, name]) => <option key={id} value={id}>{t(name)}</option>)}</select>
+                </label>
+              </div>
+              {FRONTIER_RULES.map((id) => <label key={id} className="sa-checkbox"><input type="checkbox" checked={rules[id]}
+                onChange={(e) => choose('fieldRules', { ...rules, [id]: e.target.checked })} />{t(RULE_LABELS[id])}</label>)}
+            </details>
           </section>
           <section className="sa-panel">
             <div className="sa-section-row">

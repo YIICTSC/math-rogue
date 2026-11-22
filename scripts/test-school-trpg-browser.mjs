@@ -371,6 +371,74 @@ try {
   await view.getByText('The first bell warned of floods long before it announced classes.', { exact: true }).first().waitFor();
   await checkViewport();
   await snap('survey-landscape');
+
+  await view.setViewportSize({ width: 390, height: 844 });
+  await click('Explore');
+  await click(/^Explore historic sites/);
+  await view.waitForFunction(() => {
+    const image = document.querySelector('.sa-site-photo');
+    return image?.complete && image.naturalWidth > 0;
+  });
+  await click(/^Visit historic site/);
+  await click('Read travel book');
+  assert.equal((await slot()).frontier.sites[site].read, true);
+  await click('Use the book or local goodwill');
+  assert.equal((await slot()).frontier.sites[site].resolved, true);
+  await click('Donate to the archive');
+  assert.equal((await slot()).frontier.sites[site].donated, true);
+  await click('Map');
+  assert(await view.getByLabel('Historic site leads').locator('option').count() >= 2);
+  await checkViewport();
+  await click('Town life');
+  for (const [id, name] of [['grain', 'Grain'], ['herb', 'Herbs']]) {
+    if (!(await slot()).goods[id]) await view.locator('.sa-market > div').filter({ hasText: name }).first().getByRole('button', { name: /^Buy/ }).click();
+  }
+  await click('Journal');
+  await click('Field guide');
+  await click('Camp and rules');
+  await view.getByLabel('Manual tactical combat').check();
+  assert.equal((await slot()).frontier.rules.tactical, true);
+  await view.getByText('Cook a combination meal', { exact: true }).click();
+  await view.getByLabel('Main ingredient').selectOption('grain');
+  await view.getByLabel('Seasoning').selectOption('herb');
+  await click('Cook your blend');
+  assert.equal((await slot()).frontier.recipe.base, 'grain');
+  await snap('field-guide-phone');
+  await click('Town life');
+  if ((await slot()).goods.lantern < 2) await oil.getByRole('button', { name: /^Buy/ }).click();
+  await click('Explore');
+  await click(/^Enter the ruins/);
+  const remaining = (await slot()).floors[levelKey].cleared;
+  const nextPack = Object.keys(native.features).map(Number).find((cell) => native.features[cell] === 'pack' && !remaining.includes(cell));
+  assert(Number.isInteger(nextPack), 'The playtest ruin offers an unbeaten pack');
+  await walkInRuin(native, nextPack);
+  await click('Confront');
+  const board = view.getByRole('group', { name: 'Combat positions' });
+  await board.waitFor();
+  const turn = (await slot()).delve.encounter.turn;
+  await view.waitForTimeout(1100);
+  assert.equal((await slot()).delve.encounter.turn, turn, 'Manual battles wait for the player');
+  const step = board.locator('button[data-step]').first();
+  const tile = Number(await step.getAttribute('data-tile'));
+  await step.tap();
+  assert.equal((await slot()).delve.cell, tile);
+  assert.equal((await slot()).delve.encounter.turn, turn + 1);
+  await checkViewport();
+  const strike = await view.locator('.sa-tactical-moves button').first().boundingBox();
+  const feed = await view.locator('.sa-feed').boundingBox();
+  assert(strike.y + strike.height <= feed.y, 'Primary battle actions fit above the travel log on phones');
+  await snap('tactics-phone');
+  await view.setViewportSize({ width: 844, height: 390 });
+  await checkViewport();
+  await board.scrollIntoViewIfNeeded();
+  await snap('tactics-landscape');
+  await click('Title');
+  await view.reload();
+  await open();
+  await click('Continue');
+  await board.waitFor();
+  assert.equal((await slot()).delve.cell, tile);
+  assert.equal((await slot()).delve.encounter.turn, turn + 1);
   assert.deepEqual(errors, []);
 
   const jp = await browser.newPage({ viewport: { width: 320, height: 568 } });
@@ -385,7 +453,7 @@ try {
   await jp.getByRole('button', { name: '物語を開く' }).click();
   await jp.locator('body').getByText('放課後スクールTRPG', { exact: false }).first().waitFor();
   console.log(
-    'PASS router, mobile portrait and landscape, expeditions, cooking, formations, automatic combat, ruin mechanisms and survey, save reload and legacy entry',
+    'PASS router, mobile portrait and landscape, expeditions, automatic and tactical battles, historic sites, field guide, save reload and legacy entry',
     out,
   );
 } finally {

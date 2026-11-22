@@ -24,6 +24,9 @@ try {
   const [systems, factions, fieldwork] = await Promise.all(
     ['ruinSystems', 'factions', 'fieldworkState'].map((file) => vite.ssrLoadModule(path + file + '.ts')),
   );
+  const [field, frontier, fieldWorld, fieldActions, tactics] = await Promise.all(
+    ['frontierContent', 'frontierState', 'frontierWorld', 'frontierActions', 'fieldTactics'].map((file) => vite.ssrLoadModule(path + file + '.ts')),
+  );
   const { adventureTransition: transition } = engine;
   const { defaultCharacter, startAdventure, PORTRAIT_IDS, nextRandom } = state;
   const draft = { ...defaultCharacter(), name: 'Aoi', calling: 'envoy' };
@@ -71,6 +74,16 @@ try {
     return createHash('sha256').update(image).digest('hex');
   }));
   assert.equal(new Set(newArtHashes).size, newArt.length);
+  const fieldArt = [
+    ...Object.values(field.DEVICES).map((device) => device.art),
+    ...content.BIOME_IDS.map((biome) => 'site-' + biome),
+  ];
+  const fieldArtHashes = await Promise.all(fieldArt.map(async (name) => {
+    const image = await readFile('public/sprites/school-adventure/frontier/' + name + '.webp');
+    assert.equal(image.subarray(8, 12).toString(), 'WEBP', name);
+    return createHash('sha256').update(image).digest('hex');
+  }));
+  assert.equal(new Set(fieldArtHashes).size, 14);
   assert.equal(new Set(journeyContent.ROUTES.map((route) => route.objective)).size, 7);
   for (const biome of content.BIOME_IDS) assert.equal(journeyContent.ROUTES.filter((route) => route.biome === biome).length, 4);
   const wardens = content.BIOME_IDS.map((biome) => content.FOES[content.regionalWardenIndex(biome)]);
@@ -78,6 +91,25 @@ try {
   assert.equal(startAdventure({ ...draft, stats: { ...draft.stats, might: 4 } }, 'invalid'), null);
   assert.equal(startAdventure({ ...draft, portrait: 'm999' }, 'invalid'), null);
   assert.deepEqual(newGame(), newGame(), 'A character and seed reproduce the same initial state');
+  const openedJourneys = ['classic', 'daily', 'weekly'].map((runKind) => {
+    const a = startAdventure({ ...draft, runKind }, 'a');
+    const b = startAdventure({ ...draft, runKind }, 'b');
+    assert.notEqual(a.id, b.id);
+    if (runKind === 'classic') assert.notEqual(a.location.world, b.location.world);
+    else {
+      assert.deepEqual(a.location, b.location, runKind);
+      assert.equal(a.rng, b.rng, runKind);
+    }
+    return a.location.world;
+  });
+  assert.equal(new Set(openedJourneys).size, 3);
+  assert.equal(startAdventure({ ...draft, runKind: 'wander' }, 'wander').character.deathRule, 'return-town');
+  assert.deepEqual(frontier.decodeFieldRules('BELL-111'), { weather: true, tactical: true, safeWalk: true });
+  assert.equal(frontier.decodeFieldRules('bell-777'), null);
+  const closedCorner = { open: new Set([0, world.SIDE + 1]), features: {} };
+  assert(!fieldWorld.glancingSight(closedCorner, 0, world.SIDE + 1, 3));
+  closedCorner.open.add(1);
+  assert(fieldWorld.glancingSight(closedCorner, 0, world.SIDE + 1, 3));
 
   function paths(floor, start = world.ENTRY_CELL) {
     const seen = new Map([[start, null]]);
@@ -570,8 +602,206 @@ try {
   };
   const originalStory = await vite.ssrLoadModule('/src/mini-games/school-trpg/schoolTrpgSave.ts');
   storage.set(originalStory.SCHOOL_TRPG_SAVE_KEY, 'existing-story');
+  const operate = (s, operation) => play(s, { type: 'field', operation });
+  const reject = (s, operation) => assert.equal(transition(s, { type: 'field', operation }), s);
+  let historian = newGame();
+  const historianKey = world.addressKey(historian.location);
+  const clue = fieldWorld.surveySite(historian.location);
+  historian = operate(historian, { kind: 'survey' });
+  reject(historian, { kind: 'survey' });
+  reject(historian, { kind: 'site', method: 'lore' });
+  historian = operate(historian, { kind: 'book', key: historianKey, verb: 'read' });
+  assert.deepEqual(historian.frontier.rumors[world.addressKey(clue.sequel)], clue.sequel);
+  historian = operate(historian, { kind: 'mark', place: clue.sequel, label: 'Follow the old waterway' });
+  historian = operate(historian, { kind: 'site', method: 'lore' });
+  assert(historian.frontier.chapters[clue.biome]);
+  historian = operate(historian, { kind: 'book', key: historianKey, verb: 'donate' });
+  reject(historian, { kind: 'book', key: historianKey, verb: 'donate' });
+  const local = world.residentsAt(historian.location).find((resident) => world.residentPresent(resident, historian.time));
+  const faction = factions.residentFaction(historian.location, local);
+  const rival = factions.FACTIONS[faction].rival;
+  const rivalBefore = factions.standing(historian, rival);
+  historian = operate(historian, { kind: 'pact', id: local.id });
+  assert.equal(historian.frontier.liquids.water, 3);
+  assert.equal(factions.standing(historian, rival), rivalBefore - 1);
+  reject(historian, { kind: 'pact', id: local.id });
+  for (const biome of content.BIOME_IDS) {
+    if (historian.frontier.chapters[biome]) continue;
+    const place = Array.from({ length: 400 }, (_, index) => ({ world: historian.location.world, x: index % 20 - 10, y: Math.floor(index / 20) - 10 }))
+      .find((where) => world.townAt(where).biome === biome);
+    assert(place, biome);
+    historian.location = place;
+    historian.knownTowns[world.addressKey(place)] = place;
+    historian.lastMealAt = historian.time;
+    historian = operate(historian, { kind: 'survey' });
+    historian = operate(historian, { kind: 'book', key: world.addressKey(place), verb: 'read' });
+    historian = operate(historian, { kind: 'site', method: 'lore' });
+  }
+  assert.equal(fieldActions.fieldChapterCount(historian), 6);
+  historian = operate(historian, { kind: 'construct' });
+  historian = operate(historian, { kind: 'resolve', choice: 'signal' });
+  assert.equal(historian.frontier.ending, 'signal');
+  assert(historian.followers.includes(fieldActions.PAPER_SENTINEL));
+  reject(historian, { kind: 'resolve', choice: 'shelter' });
+  assert.equal(save.saveAdventure(historian, null), 'saved');
+  assert.deepEqual(save.loadAdventures(), [historian]);
+  assert(save.deleteAdventure(historian.id));
+
+  let artificer = startAdventure({ ...draft, discipline: 'artificer', deathRule: 'return-town' }, 'workshop-test');
+  artificer.frontier.parts = 20;
+  artificer.goods.ore = 5;
+  artificer.talent = 2;
+  artificer.level = 4;
+  artificer.character.stats.finesse = 3;
+  artificer = operate(artificer, { kind: 'skill', id: 'salvage' });
+  artificer = operate(artificer, { kind: 'checkpoint' });
+  assert(fieldActions.addDevice(artificer, 'auger'));
+  reject(artificer, { kind: 'device', serial: 2, verb: 'fit' });
+  artificer = operate(artificer, { kind: 'device', serial: 2, verb: 'identify' });
+  artificer = operate(artificer, { kind: 'device', serial: 2, verb: 'fit', socket: 'support' });
+  artificer = operate(artificer, { kind: 'device', serial: 2, verb: 'recharge' });
+  artificer = operate(artificer, { kind: 'modify', serial: 2, mod: 'reservoir' });
+  assert.equal(frontier.deviceCapacity(artificer.frontier.devices[1]), 5);
+  artificer = operate(artificer, { kind: 'design', id: 'auger' });
+  reject(artificer, { kind: 'device', serial: 2, verb: 'dismantle' });
+  artificer = operate(artificer, { kind: 'device', serial: 3, verb: 'dismantle' });
+  assert.equal(artificer.frontier.sockets.support, 2);
+  artificer.gear.push({ id: 'test-knife', slot: 'weapon', weapon: 'knife', rarity: 'common', power: 2, found: 1 });
+  artificer = operate(artificer, { kind: 'offhand', id: 'test-knife' });
+  assert.equal(transition(artificer, { type: 'sell-gear', id: 'test-knife' }), artificer);
+  artificer = operate(artificer, { kind: 'offhand', id: null });
+  const hostId = world.residentsAt(artificer.location).find(({ role }) => role === 'host').id;
+  for (const verb of ['talk', 'gift', 'recruit']) artificer = play(artificer, { type: 'social', id: hostId, verb });
+  artificer = operate(artificer, { kind: 'order', id: hostId, order: 'hold' });
+  artificer = operate(artificer, { kind: 'order', id: hostId, order: null });
+  artificer = operate(artificer, { kind: 'lend', id: hostId, gear: 'test-knife' });
+  reject(artificer, { kind: 'offhand', id: 'test-knife' });
+  artificer = operate(artificer, { kind: 'lend', id: hostId, gear: null });
+
+  let wanderer = startAdventure({ ...draft, runKind: 'wander' }, 'recovery-test');
+  const recoveryTown = { ...wanderer.location };
+  wanderer = operate(wanderer, { kind: 'checkpoint' });
+  wanderer = play(wanderer, { type: 'travel', direction: 0 });
+  assert.notDeepEqual(wanderer.location, recoveryTown);
+  wanderer.hp = 0;
+  assert(state.finishDefeat(wanderer));
+  assert.deepEqual(wanderer.location, recoveryTown);
+
+  let liquidKit = operate(newGame(), { kind: 'import', code: 'bell-101' });
+  state.advance(liquidKit, 24);
+  assert.equal(frontier.thirst(liquidKit), 24);
+  assert(frontier.fieldCheck(liquidKit, 'insight') < 0);
+  liquidKit = operate(liquidKit, { kind: 'drink', id: 'water' });
+  assert.equal(frontier.thirst(liquidKit), 0);
+  liquidKit = operate(liquidKit, { kind: 'fill', id: 'oil' });
+  liquidKit = operate(liquidKit, { kind: 'fill', id: 'chalk' });
+  liquidKit = operate(liquidKit, { kind: 'fill', id: 'sap' });
+  liquidKit = operate(liquidKit, { kind: 'mix', a: 'chalk', b: 'sap' });
+  assert.equal(liquidKit.frontier.liquids.resin, 2);
+  liquidKit.goods.fish = 1;
+  liquidKit = operate(liquidKit, { kind: 'cook', id: 'broth' });
+  liquidKit = play(liquidKit, { type: 'enter' });
+  const liquidFloor = fieldWorld.fieldFloor(liquidKit);
+  const waterKey = world.floorKey(liquidKit.location, 1);
+  const currentCell = liquidKit.delve.cell;
+  const neighboringCell = fieldWorld.neighbors(currentCell).find((cell) => liquidFloor.open.has(cell));
+  liquidKit.frontier.alterations[waterKey] = { dug: [], patches: {
+    [currentCell]: { terrain: 'heat', until: null }, [neighboringCell]: { terrain: 'oil', until: null },
+  } };
+  liquidKit = operate(liquidKit, { kind: 'pour', id: 'oil', cell: currentCell });
+  assert.equal(fieldWorld.terrainAt(liquidKit, currentCell, 1), 'fire');
+  assert.equal(fieldWorld.terrainAt(liquidKit, neighboringCell, 1), 'fire');
+  assert(fieldWorld.fieldHazard(liquidKit, currentCell, 1)[1].includes('meal'));
+  assert.equal(liquidKit.frontier.recipe, null);
+  liquidKit = operate(liquidKit, { kind: 'pour', id: 'water', cell: currentCell });
+  assert.equal(fieldWorld.terrainAt(liquidKit, currentCell, 1), 'steam');
+  liquidKit.frontier.liquids.brine = 1;
+  liquidKit.frontier.alterations[waterKey].patches[neighboringCell] = { terrain: 'wire', until: null };
+  liquidKit = operate(liquidKit, { kind: 'pour', id: 'brine', cell: currentCell });
+  assert.equal(fieldWorld.terrainAt(liquidKit, currentCell, 1), 'wire');
+
+  let cook = newGame();
+  cook.goods.grain = 1;
+  cook.frontier.liquids.sap = 1;
+  cook = operate(cook, { kind: 'blend', base: 'grain', spice: 'sap' });
+  assert.equal(cook.goods.grain, 0);
+  assert.equal(cook.frontier.liquids.sap, 0);
+  cook.focus = 0;
+  assert.equal(save.saveAdventure(cook, null), 'saved');
+  cook = save.loadAdventures()[0];
+  assert.equal(cook.frontier.recipe.spice, 'sap');
+  cook = play(cook, { type: 'travel', direction: 0 });
+  assert.equal(cook.frontier.recipe, null);
+  assert.equal(cook.focus, 3);
+  assert(save.deleteAdventure(cook.id));
+
+  artificer = play(artificer, { type: 'enter' });
+  const realFloor = fieldWorld.fieldFloor(artificer);
+  const [start, direction, wall] = [...realFloor.open].flatMap((cell) => [0, 1, 2, 3].map((dir) => [cell, dir, world.neighbor(cell, dir)]))
+    .find(([cell, dir, tile]) => {
+      const beyond = world.neighbor(tile, dir);
+      return tile >= 0 && !realFloor.open.has(tile) && realFloor.open.has(beyond) && !realFloor.features[beyond] && !realFloor.features[cell];
+    });
+  artificer.delve.cell = start;
+  artificer.delve.direction = direction;
+  const resonant = structuredClone(artificer);
+  resonant.frontier.gifts.phase = 1;
+  const crossed = operate(resonant, { kind: 'invoke', id: 'phase' });
+  assert.equal(crossed.delve.cell, world.neighbor(wall, direction));
+  assert(!fieldWorld.fieldFloor(crossed).open.has(wall), 'Phasing crosses a wall without destroying it');
+  artificer = operate(artificer, { kind: 'device', serial: 2, verb: 'use' });
+  assert(fieldWorld.fieldFloor(artificer).open.has(wall));
+  assert.equal(artificer.frontier.devices[1].charge, 1);
+  artificer = play(artificer, { type: 'move', direction: 'forward' });
+  assert.equal(artificer.delve.cell, wall);
+  assert.equal(save.saveAdventure(artificer, null), 'saved');
+  assert.deepEqual(save.loadAdventures(), [artificer]);
+  assert(save.deleteAdventure(artificer.id));
+
+  let exploring = play(newGame(), { type: 'enter' });
+  const planned = fieldWorld.plannedWalk(exploring);
+  assert(planned.length > 0);
+  exploring = play(exploring, { type: 'auto-walk' });
+  assert.equal(exploring.delve.cell, planned.at(-1));
+  exploring = play(exploring, { type: 'auto-walk', target: world.ENTRY_CELL });
+  assert.equal(exploring.delve.cell, world.ENTRY_CELL);
+
+  let manual = operate(newGame(), { kind: 'import', code: 'bell-011' });
+  manual = play(manual, { type: 'enter' });
+  const manualFloor = fieldWorld.fieldFloor(manual);
+  const packCell = Number(Object.keys(manualFloor.features).find((cell) => manualFloor.features[cell] === 'pack'));
+  manual.delve.cell = packCell;
+  manual = play(manual, { type: 'feature', verb: 'confront' });
+  assert.equal(transition(manual, { type: 'auto-combat', target: 0 }), manual);
+  assert.equal(manual.delve.encounter.tactics.cells.length, manual.delve.encounter.enemies.length);
+  const step = fieldWorld.neighbors(packCell).find((cell) => tactics.canTacticalStep(manual, cell));
+  assert(Number.isInteger(step));
+  manual = play(manual, { type: 'tactical-step', cell: step });
+  assert.equal(manual.delve.cell, step);
+  const withinSight = manual.delve.encounter.tactics.cells.findIndex((cell, index) => manual.delve.encounter.enemies[index].hp > 0 && fieldWorld.glancingSight(manualFloor, step, cell, 4));
+  if (withinSight >= 0) {
+    manual = play(manual, { type: 'tactical-aim', target: withinSight });
+    assert.equal(manual.delve.encounter.tactics.aim, withinSight);
+  }
+  const guideTarget = manual.delve.encounter.tactics.cells.findIndex((cell, index) => manual.delve.encounter.enemies[index].hp > 0 && fieldWorld.glancingSight(manualFloor, step, cell, 4));
+  assert(guideTarget >= 0, 'The deterministic test fight exposes a creature in sight');
+  manual.frontier.gifts.guide = 1;
+  manual = operate(manual, { kind: 'invoke', id: 'guide', target: guideTarget });
+  assert.equal(tactics.borrowedCreature(manual.delve.encounter), guideTarget);
+  const otherStep = fieldWorld.neighbors(tactics.actionPosition(manual)).find((cell) => tactics.canTacticalStep(manual, cell));
+  assert(Number.isInteger(otherStep));
+  manual = play(manual, { type: 'tactical-step', cell: otherStep });
+  assert.equal(tactics.actionPosition(manual), otherStep);
+  assert.equal(manual.delve.cell, step, 'Moving a linked creature leaves the hero in place');
+  assert.equal(save.saveAdventure(manual, null), 'saved');
+  assert.deepEqual(save.loadAdventures(), [manual]);
+  assert(save.deleteAdventure(manual.id));
+
   const legacy = structuredClone(original);
   legacy.version = 1;
+  delete legacy.journey;
+  delete legacy.fieldwork;
+  delete legacy.frontier;
   delete legacy.character.deathRule;
   delete legacy.lastMealAt;
   delete legacy.fallenAt;
@@ -591,6 +821,8 @@ try {
   const previous = structuredClone(original);
   previous.version = 2;
   delete previous.journey;
+  delete previous.fieldwork;
+  delete previous.frontier;
   storage.set(originalStory.SCHOOL_ADVENTURE_SAVE_KEY,
     JSON.stringify({ schema: 'school-adventure', serial: 1, checksum: world.hash(JSON.stringify([previous])), slots: [previous] }));
   assert.deepEqual(save.loadAdventures(), [original], 'A v2 save retains all original state and receives a clean journey');
@@ -601,6 +833,8 @@ try {
   savedBattle.delve.encounter.enemies[0].template = 12;
   savedBattle.version = 2;
   delete savedBattle.journey;
+  delete savedBattle.fieldwork;
+  delete savedBattle.frontier;
   storage.set(originalStory.SCHOOL_ADVENTURE_SAVE_KEY,
     JSON.stringify({ schema: 'school-adventure', serial: 1, checksum: world.hash(JSON.stringify([savedBattle])), slots: [savedBattle] }));
   savedBattle = save.loadAdventures()[0];
@@ -612,10 +846,17 @@ try {
   const previousJourney = structuredClone(scholar);
   previousJourney.version = 3;
   delete previousJourney.fieldwork;
+  delete previousJourney.frontier;
   storage.set(originalStory.SCHOOL_ADVENTURE_SAVE_KEY,
     JSON.stringify({ schema: 'school-adventure', serial: 1, checksum: world.hash(JSON.stringify([previousJourney])), slots: [previousJourney] }));
-  assert.deepEqual(save.loadAdventures(), [{ ...scholar, fieldwork: fieldwork.newFieldwork() }]);
+  assert.deepEqual(save.loadAdventures(), [{ ...scholar, fieldwork: fieldwork.newFieldwork(), frontier: frontier.newFrontier(scholar.location, scholar.time) }]);
   assert(save.deleteAdventure(previousJourney.id));
+  const previousFieldwork = { ...surveyor, version: 4 };
+  delete previousFieldwork.frontier;
+  storage.set(originalStory.SCHOOL_ADVENTURE_SAVE_KEY,
+    JSON.stringify({ schema: 'school-adventure', serial: 1, checksum: world.hash(JSON.stringify([previousFieldwork])), slots: [previousFieldwork] }));
+  assert.deepEqual(save.loadAdventures(), [{ ...surveyor, frontier: frontier.newFrontier(surveyor.location, surveyor.time) }]);
+  assert(save.deleteAdventure(previousFieldwork.id));
   assert.equal(save.saveAdventure(surveyor, null), 'saved');
   assert.deepEqual(save.loadAdventures(), [surveyor], 'Reputation, circuit settings and archived fragments survive reload');
   assert(save.deleteAdventure(surveyor.id));
@@ -640,7 +881,7 @@ try {
   assert.deepEqual(save.loadAdventures(), []);
   assert.equal(storage.get(originalStory.SCHOOL_TRPG_SAVE_KEY), 'existing-story');
   console.log(
-    `PASS 40 unique portraits, ${newArt.length} expedition assets, ${floors} seeded floors, expeditions, faction standings, traversable mechanisms, historical archives, crafting, and v1–v3 save migration.`,
+    `PASS 40 unique portraits, ${newArt.length + fieldArt.length} adventure assets, ${floors} seeded floors, expeditions, tactical movement, field devices and reactions, six historic records, and v1–v4 save migration.`,
   );
 } finally {
   await vite.close();

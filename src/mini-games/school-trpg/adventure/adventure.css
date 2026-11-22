@@ -1804,6 +1804,89 @@
 .sa-formation > small { max-width: 26em; }
 .sa-delve-context { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 0; }
 .sa-delve-context > span { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 7px; }
+.sa-app .sa-town-field {
+  width: 100%;
+  margin-top: 6px;
+  padding: 9px 12px;
+  justify-content: space-between;
+  text-align: start;
+  gap: 10px;
+  background: linear-gradient(120deg, #2b4145, #202f33);
+}
+.sa-town-field > div { display: grid; flex: 1 1 auto; }
+.sa-town-field > svg, .sa-town-field strong { color: #b9ded3; }
+.sa-journal-tabs-main { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.sa-journal-tabs-main button { padding-inline: 4px; font-size: .91em; }
+.sa-expkit, .sa-companion-order, .sa-auto-walk { display: grid; gap: 8px; min-width: 0; align-content: start; }
+.sa-expkit .sa-field { min-width: 0; }
+.sa-expkit > button, .sa-expkit > details > button { justify-self: start; }
+.sa-expkit-list, .sa-exp-training { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 245px), 1fr)); }
+.sa-expkit-card, .sa-exp-training > article, .sa-companion-order { border: 1px solid var(--sa-line); border-radius: 8px; padding: 8px; background: #152727; }
+.sa-expkit-card { display: grid; grid-template-columns: 62px minmax(0, 1fr); align-items: start; gap: 7px; }
+.sa-expkit-card > :is(img, .sa-expkit-unknown) { width: 62px; height: 62px; border-radius: 6px; background: #102025; object-fit: contain; }
+.sa-expkit-unknown { display: grid; place-items: center; color: var(--sa-gold); font-size: 24px; }
+.sa-expkit-card > div:first-of-type { display: grid; overflow-wrap: anywhere; min-width: 0; }
+.sa-expkit-card > .sa-inline { grid-column: 1 / -1; }
+.sa-expkit-card small { color: var(--sa-muted); }
+.sa-exp-training > article { display: grid; gap: 5px; }
+.sa-exp-training > article button { justify-self: start; }
+.sa-site-photo { width: 100%; max-height: clamp(136px, 25vw, 240px); aspect-ratio: 1.8; object-fit: cover; border-radius: 8px; }
+.sa-field-chapters ul { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 5px 11px; color: var(--sa-muted); }
+.sa-field-chapters li[data-found] { color: var(--sa-gold); }
+.sa-field-detail { border-top: 1px solid var(--sa-line); padding-top: 5px; margin-top: 6px; }
+.sa-field-detail summary { cursor: pointer; padding: 4px 0; min-height: 35px; color: var(--sa-gold); font-weight: 650; }
+.sa-field-detail > .sa-expkit { margin: 4px 0 6px; }
+.sa-field-status { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.sa-main > .sa-field-status { width: min(100%, 1200px); margin: 0 auto 5px; }
+.sa-field-status span { display: inline-flex; align-items: center; gap: 4px; padding: 1px 6px; background: #142b32; border: 1px solid #3d666b; border-radius: 4px; color: #b8d8db; font-size: .84em; }
+.sa-field-status .sa-field-wound { color: var(--sa-red); border-color: #946956; }
+.sa-map-mark { margin-bottom: 7px; }
+.sa-rumor-list { margin-block: 7px; }
+.sa-app .sa-map-tile[data-rumored] { outline: 1px solid #cbb78f; outline-offset: -3px; }
+.sa-auto-walk { gap: 3px; }
+.sa-auto-walk button { min-height: 32px; padding: 4px 6px; line-height: 1.2; font-size: .8em; }
+.sa-expkit-supplies { display: grid; align-content: start; gap: 6px; }
+.sa-expkit-supplies > details { min-width: 0; }
+.sa-delve-view[data-manual] { grid-template-columns: minmax(0, 1fr); }
+.sa-tactical { display: grid; gap: 6px; align-content: start; }
+.sa-tactical-grid { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); width: min(100%, 390px); gap: 2px; justify-self: center; }
+.sa-app .sa-tactical-grid button {
+  min-height: 0;
+  aspect-ratio: 1;
+  width: 100%;
+  padding: 0;
+  border-radius: 4px;
+  background: var(--terrain, #142021);
+  overflow: hidden;
+  font-size: clamp(10px, 3vw, 18px);
+  line-height: 1;
+}
+.sa-app .sa-tactical-grid button:disabled { opacity: 1; color: #bdd0ca; }
+.sa-app .sa-tactical-grid button[data-step] { border-color: #8eab92; color: #fff3ca; }
+.sa-app .sa-tactical-grid button[data-hero] { border: 2px solid #b6eceb; background: #247c82; color: #eaffff; }
+.sa-tactical-grid button[data-hero] .sa-portrait { width: 100%; height: 100%; object-fit: cover; object-position: center 18%; }
+.sa-app .sa-tactical-grid button[data-foe] { background: #74504e; color: #fff1dc; }
+.sa-app .sa-tactical-grid button[data-foe][aria-pressed='true'] { border: 2px solid var(--sa-gold); background: #9a523b; }
+.sa-app .sa-tactical-grid button[data-borrowed] { border: 2px solid #d0a4e3; background: #624275; color: #fff; }
+.sa-tactical-target { display: grid; grid-template-columns: 45px minmax(0, 1fr) auto; align-items: center; gap: 6px; }
+.sa-tactical-target img { width: 45px; height: 45px; object-fit: contain; }
+.sa-tactical-target > span { display: grid; line-height: 1.25; }
+.sa-tactical-moves { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; margin-bottom: 5px; }
+.sa-tactical-moves button > span { display: grid; text-align: start; }
+.sa-tactical-moves small { color: var(--sa-muted); }
+@media (orientation: portrait) and (max-width: 580px) {
+  .sa-delve[data-tactical] { gap: 5px; }
+  .sa-delve[data-tactical] .sa-delve-head h1 { font-size: clamp(16px, 4.6vw, 23px); }
+  .sa-delve[data-tactical] .sa-delve-context { font-size: .79em; padding-block: 3px; }
+  .sa-tactical { padding: 6px 8px; }
+  .sa-tactical-grid { width: min(100%, 38dvh, 390px); }
+  .sa-tactical-moves { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .sa-app .sa-tactical-moves button { min-height: 42px; padding: 3px 5px; font-size: .86em; }
+}
+@media (orientation: landscape) and (max-height: 520px) {
+  .sa-tactical-grid { width: min(100%, 242px); }
+  .sa-tactical-moves button { min-height: 33px; padding: 4px 6px; }
+}
 .sa-scene-fixture {
   display: block;
   z-index: 1;

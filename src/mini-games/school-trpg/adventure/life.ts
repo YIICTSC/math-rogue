@@ -5,6 +5,8 @@ import { seasonAt } from './journeyContent';
 import { FOOD_GOODS, MEALS, mealEffect, mealRecipe, type MealId } from './provisions';
 import { BOND_STORIES } from './bondStories';
 import { alliesWith, changeStanding, standing } from './factions';
+import { fieldCondition, fieldRecipeBonus, fieldSkill, travelLoad, twoHanded } from './frontierState';
+import { surveySite } from './frontierWorld';
 import {
   BIOMES,
   GOODS,
@@ -24,6 +26,7 @@ import {
   missedMeals,
   awardExperience,
   awardInspiration,
+  consumeFieldRecipe,
   equipped,
   maxFocus,
   maxHp,
@@ -115,7 +118,8 @@ export function travelHours(s: Adventure, to: Address) {
     relicPower(s, 'coast') - mealEffect(s, 'travel') +
     Number(weatherIndexAt(to, s.time) === 1) -
     Number(localBoon(s) === 'roads') -
-    Number(hasImprovement(s, 'watchtower')) - Number(alliesWith(s, townAt(s.location).biome))));
+    Number(hasImprovement(s, 'watchtower')) - Number(alliesWith(s, townAt(s.location).biome)) + travelLoad(s) -
+    Number(fieldSkill(s, 'wayfinding')) - Number(fieldCondition(s, 'wing')) - Number(fieldRecipeBonus(s, 'road')) * 2 + Number(fieldCondition(s, 'lost')) * 2));
 }
 
 function arrive(s: Adventure, to: Address, time: number, material?: Good) {
@@ -183,6 +187,7 @@ function life(s: Adventure, activity: LifeActivity) {
       hash(addressKey(s.location) + '/supply/' + dayAt(s.time)) % 2 ? 'timber' : 'ore' : undefined;
     if (extra) s.goods[extra] += 1 + Number(success);
     if (s.character.calling === 'naturalist') s.goods.herb++;
+    if (activity === 'forage' && fieldSkill(s, 'herbalism')) s.goods.herb++;
     s.lastGather = { location: addressKey(s.location), time: s.time };
     note(
       s,
@@ -198,6 +203,10 @@ function life(s: Adventure, activity: LifeActivity) {
     if (success) {
       s.exploredLandmarks[addressKey(s.location)] = true;
       s.counters.landmarks++;
+      if (fieldSkill(s, 'wayfinding')) {
+        const next = surveySite(s.location).sequel;
+        s.frontier.rumors[addressKey(next)] = next;
+      }
       s.goods.relic += 1 + Number(excellent);
       awardInspiration(s);
       note(
@@ -303,6 +312,8 @@ function interact(s: Adventure, action: Extract<Action, { type: 'social' }>) {
   if (action.verb === 'dismiss') {
     if (!s.followers.includes(id)) return false;
     s.followers = s.followers.filter((member) => member !== id);
+    delete s.frontier.orders[id];
+    delete s.frontier.lent[id];
     note(s, ['仲間は町で待つことになった。', 'Your companion will wait in town.']);
     return true;
   }
@@ -652,7 +663,14 @@ export function applyTownAction(s: Adventure, action: Action): boolean {
         return false;
       const to = atOffset(s.location, action.direction);
       if (!Number.isSafeInteger(to.x) || !Number.isSafeInteger(to.y)) return false;
-      arrive(s, to, travelHours(s, to), roadBetween(s.location, to).material);
+      const time = travelHours(s, to);
+      consumeFieldRecipe(s, 'road');
+      const poorVisibility = s.frontier.rules.weather && isNight(s.time) && weatherIndexAt(to, s.time) === 1 && !fieldSkill(s, 'wayfinding');
+      arrive(s, to, time, roadBetween(s.location, to).material);
+      if (poorVisibility && s.hp > 0) {
+        s.frontier.conditions.lost = s.time + 6;
+        note(s, ['夜の雨で目印を見失った。方角を確かめられる。', 'The rain hides the landmarks. You can reorient yourself.'], 'risk');
+      }
       return true;
     }
     case 'gate': {
@@ -694,6 +712,9 @@ export function applyTownAction(s: Adventure, action: Action): boolean {
       if (rest === 'inn') s.gold -= 7;
       if (rest !== 'bench') {
         advance(s, 8);
+        s.frontier.hydration = s.time;
+        s.frontier.injuries = {};
+        delete s.frontier.conditions.spore;
         s.fatigue = 0;
         recover(s, maxHp(s), maxFocus(s));
         if ((rest === 'home' && hasImprovement(s, 'shrine')) || (s.character.calling === 'bard' && s.followers.length > 0)) awardInspiration(s);
@@ -736,12 +757,13 @@ export function applyTownAction(s: Adventure, action: Action): boolean {
     case 'salvage':
     case 'sell-gear': {
       const gear = s.gear.find((item) => item.id === action.id);
-      if (!gear) return false;
+      if (!gear || Object.values(s.frontier.lent).includes(gear.id)) return false;
       if (action.type === 'equip') {
+        if (gear.slot === 'weapon' && (s.frontier.offhand === gear.id || twoHanded(gear.weapon))) s.frontier.offhand = null;
         s.equipment[gear.slot] = gear.id;
         adjustGearCaps(s);
       } else {
-        if (s.equipment[gear.slot] === gear.id) return false;
+        if (s.equipment[gear.slot] === gear.id || s.frontier.offhand === gear.id) return false;
         s.gear = s.gear.filter((item) => item.id !== gear.id);
         if (action.type === 'salvage') s.goods.ore += Math.ceil(gear.power / 2);
         else s.gold += gearValue(gear);

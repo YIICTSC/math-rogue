@@ -40,6 +40,9 @@ import {
 import DelveView, { Supplies } from './Delve';
 import { declarationDifficulty } from './delve';
 import { FieldNotes } from './FieldworkPanel';
+import { ADDRESS_NAMES } from './frontierContent';
+import { FieldStatus, FrontierPanel, type FieldView } from './FrontierPanel';
+import { twoHanded } from './frontierState';
 import { BADGES, badgeProgress, type BadgeId } from './guild';
 import { gearName, gearType, gearValue, SLOT_IDS } from './inventory';
 import { ExpeditionBoard, JourneyCollection } from './JourneyPanel';
@@ -78,6 +81,7 @@ const JOURNAL_VIEWS = {
   routes: ['遠征', 'Expeditions', 'えんせい'],
   collection: ['図鑑', 'Collections', 'ずかん'],
   survey: ['調査録', 'Survey', 'ちょうさろく'],
+  frontier: ['野外手帳', 'Field guide', 'やがい てちょう'],
 } satisfies Record<string, Text>;
 type JournalView = keyof typeof JOURNAL_VIEWS;
 
@@ -112,6 +116,7 @@ function CharacterStatus({ s, t, back }: { s: Adventure; t: Local; back: () => v
           <strong>{s.character.name}</strong>
           <small>
             Lv. {s.level} · {t(CALLINGS[s.character.calling].name)}
+            {s.character.addressedAs && s.character.addressedAs !== 'name' && ' · ' + t(ADDRESS_NAMES[s.character.addressedAs])}
           </small>
         </span>
       </div>
@@ -155,6 +160,8 @@ function CharacterStatus({ s, t, back }: { s: Adventure; t: Local; back: () => v
 
 function GearPanel({ s, send, t }: { s: Adventure; send: Send; t: Local }) {
   const [filter, setFilter] = useState<'all' | 'weapon' | 'coat' | 'charm'>('all');
+  const offhand = s.gear.find((gear) => gear.id === s.frontier.offhand);
+  const canPair = !twoHanded(equipped(s, 'weapon')?.weapon);
   return (
     <div className="sa-town-grid">
       <div className="sa-stack">
@@ -170,6 +177,10 @@ function GearPanel({ s, send, t }: { s: Adventure; send: Send; t: Local }) {
                 </div>
               );
             })}
+            <div>
+              <dt>{t(['逆手', 'Off hand', 'ぎゃくて'])}</dt>
+              <dd>{offhand ? t(gearName(offhand)) + ' +' + offhand.power : '–'}</dd>
+            </div>
           </dl>
         </section>
         <section className="sa-panel">
@@ -244,6 +255,8 @@ function GearPanel({ s, send, t }: { s: Adventure; send: Send; t: Local }) {
             .filter((gear) => filter === 'all' || filter === gear.slot)
             .map((gear) => {
               const worn = s.equipment[gear.slot] === gear.id;
+              const loaned = Object.values(s.frontier.lent).includes(gear.id);
+              const paired = gear.id === s.frontier.offhand;
               const masterwork = gear.masterwork && MASTERWORKS[gear.masterwork];
               return (
                 <div className="sa-gear" key={gear.id} data-rarity={gear.rarity}>
@@ -255,13 +268,18 @@ function GearPanel({ s, send, t }: { s: Adventure; send: Send; t: Local }) {
                       {masterwork && <small className="sa-gold">{t(masterwork.hint)}</small>}
                     </span>
                   </div>
-                  {worn ? (
+                  {loaned ? <small>{t(['仲間が装備中', 'Loaned to a companion', 'なかまに かしだしちゅう'])}</small> : paired ? (
+                    <button type="button" onClick={() => send({ type: 'field', operation: { kind: 'offhand', id: null } })}>{t(['逆手から外す', 'Remove from off hand', 'ぎゃくてから はずす'])}</button>
+                  ) : worn ? (
                     <small>{t(['装備中', 'Equipped'])}</small>
                   ) : (
                     <div className="sa-inline">
                       <button type="button" onClick={() => send({ type: 'equip', id: gear.id })}>
                         {t(['装備', 'Equip'])}
                       </button>
+                      {gear.slot === 'weapon' && canPair && !twoHanded(gear.weapon) && <button type="button" onClick={() => send({ type: 'field', operation: { kind: 'offhand', id: gear.id } })}>
+                        {t(['逆手に持つ', 'Equip in off hand', 'ぎゃくてに もつ'])}
+                      </button>}
                       <button type="button" onClick={() => send({ type: 'salvage', id: gear.id })}>
                         {t(['分解', 'Salvage'])}
                       </button>
@@ -540,6 +558,7 @@ export default function AdventurePlay(props: PlayProps) {
   } = props;
   const [tab, setTab] = useState<Tab>('town');
   const [journalView, setJournalView] = useState<JournalView>('journal');
+  const [fieldView, setFieldView] = useState<FieldView>('sites');
   const [declare, setDeclare] = useState(false);
   const [lesson, setLesson] = useState(false);
   const fallen = s.fallenAt !== null;
@@ -556,6 +575,11 @@ export default function AdventurePlay(props: PlayProps) {
   const showMap = () => setTab('map');
   const showRoutes = () => {
     setJournalView('routes');
+    setTab('journal');
+  };
+  const showField = (view: FieldView = 'sites') => {
+    setFieldView(view);
+    setJournalView('frontier');
     setTab('journal');
   };
   return (
@@ -575,6 +599,7 @@ export default function AdventurePlay(props: PlayProps) {
         </nav>
       )}
       <div className="sa-main" ref={main}>
+        {!fallen && !lesson && !delving && <FieldStatus s={s} t={t} />}
         {saveResult !== 'saved' && (
           <div className="sa-save-error" role="alert">
             <span>{t(SAVE_COPY[saveResult])}</span>
@@ -618,6 +643,7 @@ export default function AdventurePlay(props: PlayProps) {
             declare={openDeclaration}
             showMap={showMap}
             showRoutes={showRoutes}
+            showField={showField}
           />
         ) : tab === 'map' ? (
           <WorldMap state={s} t={t} send={send} />
@@ -629,7 +655,7 @@ export default function AdventurePlay(props: PlayProps) {
           <GearPanel s={s} t={t} send={send} />
         ) : (
           <div className="sa-stack">
-            <nav className="sa-journal-tabs" aria-label={t(['旅の記録の種類', 'Journey views', 'たびの きろくの しゅるい'])}>
+            <nav className="sa-journal-tabs sa-journal-tabs-main" aria-label={t(['旅の記録の種類', 'Journey views', 'たびの きろくの しゅるい'])}>
               {(Object.keys(JOURNAL_VIEWS) as JournalView[]).map((view) => (
                 <button key={view} type="button" aria-pressed={journalView === view} onClick={() => setJournalView(view)}>{t(JOURNAL_VIEWS[view])}</button>
               ))}
@@ -637,6 +663,7 @@ export default function AdventurePlay(props: PlayProps) {
             {journalView === 'routes' ? <ExpeditionBoard s={s} t={t} send={send} showMap={showMap} showLife={() => setTab('life')} /> :
               journalView === 'collection' ? <JourneyCollection s={s} t={t} send={send} /> :
               journalView === 'survey' ? <FieldNotes s={s} t={t} send={send} /> :
+              journalView === 'frontier' ? <FrontierPanel s={s} t={t} send={send} view={fieldView} changeView={setFieldView} /> :
               <TravelJournal s={s} t={t} send={send} />}
           </div>
         )}

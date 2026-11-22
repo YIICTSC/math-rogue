@@ -4,6 +4,7 @@ import { claimBadge } from './guild';
 import { STAT_IDS } from './content';
 import { applyExpeditionAction, observeExpedition } from './expeditions';
 import { pledgeHelp } from './factions';
+import { applyField } from './frontierActions';
 import { FORMATIONS } from './journeyState';
 import { fileHistory } from './ruinSystems';
 import { finishDefeat, note, type Action, type Adventure } from './state';
@@ -13,6 +14,9 @@ export function adventureTransition(state: Adventure, action: Action) {
   const next = structuredClone(state);
   let changed: boolean;
   switch (action.type) {
+    case 'field':
+      changed = next.delve ? applyDelveAction(next, action) : applyField(next, action.operation);
+      break;
     case 'file-history':
       changed = fileHistory(next, action.key, action.choice);
       break;

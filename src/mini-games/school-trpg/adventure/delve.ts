@@ -16,18 +16,25 @@ import { eatDish, useSupply } from './life';
 import { companionTurn, envoySupport, formParty, targetOfEnemy } from './party';
 import { expeditionThreat } from './expeditions';
 import { changeStanding, standing } from './factions';
+import { applyField, findDevice } from './frontierActions';
+import type { BodyZone } from './frontierContent';
+import { alertLevel, fieldCondition, fieldSkill } from './frontierState';
+import { fieldFloor, fieldHazard, plannedWalk, surveySite, terrainAt } from './frontierWorld';
+import { borrowedCreature, canTacticalStep, coverBonus, enemyInRange, startTactics, tacticalTarget } from './fieldTactics';
 import { bestiaryRecord, relicPower } from './journeyState';
 import { mealEffect } from './provisions';
 import { ruinCondition } from './ruinConditions';
-import { applyRuinAction, circuitAt, circuitEffects, ruinFloor } from './ruinSystems';
+import { applyRuinAction, circuitEffects } from './ruinSystems';
 import {
   advance,
   armor,
+  consumeFieldRecipe,
   awardExperience,
   awardInspiration,
   equipped,
   finishDefeat,
   MAX_LIGHT,
+  MAX_PARTY_SIZE,
   maxHp,
   missedMeals,
   nextRandom,
@@ -49,6 +56,7 @@ import {
   ENTRY_CELL,
   addressKey,
   floorKey,
+  hash,
   neighbor,
   townAt,
   type Feature,
@@ -117,6 +125,11 @@ export const COMBAT_MOVES = {
     ],
     cost: 0,
   },
+  befriend: {
+    name: ['水を分けて勧誘', 'Offer water and recruit', 'みずを わけて さそう'],
+    hint: ['名のある魔物に澄み水を2つ渡し、仲間になるよう提案する。', 'Offer two units of clear water to invite a named creature.'],
+    cost: 0,
+  },
   retreat: {
     name: ['入口へ退く', 'Retreat to entrance'],
     hint: [
@@ -140,7 +153,7 @@ export const foeIntent = (encounter: Encounter, enemy: Enemy): Intent => {
 export function recordFor(s: Adventure, depth: number): DungeonRecord {
   return s.floors[floorKey(s.location, depth)] ?? { seen: [], cleared: [], inspected: [] };
 }
-const currentFloor = (s: Adventure) => ruinFloor(s.location, s.delve!.floor, circuitAt(s)?.mode);
+const currentFloor = (s: Adventure) => fieldFloor(s);
 const currentRecord = (s: Adventure) => recordFor(s, s.delve!.floor);
 export const runeClue = (floor: Floor) => RUNE_CLUES[floor.answer];
 function mapCell(s: Adventure) {
@@ -201,15 +214,17 @@ function startEncounter(s: Adventure, guardian: boolean, bound: boolean) {
   const risk = BIOMES[biome].risk;
   const threat = expeditionThreat(s);
   const patrol = ruinCondition(s.location, d.floor).patrol + (circuitEffects(s).patrol ?? 0);
+  const resonance = alertLevel(s);
   const baseCount = bound && (d.floor >= 3 || s.followers.length >= 3)
     ? 1 + nextRandom(s, d.floor >= 9 || s.followers.length >= 4 ? 3 : 2)
     : 1;
-  const count = guardian ? 1 : Math.max(1, Math.min(4, baseCount + patrol + Number(threat >= 4)));
+  const count = guardian ? 1 : Math.max(1, Math.min(4, baseCount + patrol + Number(threat >= 4) + Number(resonance >= 8)));
   const enemies = Array.from({ length: count }, (_, i): Enemy => {
     const template = guardian ? regionalWardenIndex(biome) : options[nextRandom(s, options.length)];
     const base = FOES[template];
     const scale = tier * (guardian ? 8 : 5) + threat * 2;
     const hp = base.hp + scale + risk * (guardian ? 3 : 2);
+    const named = !guardian && i === 0 && (resonance >= 8 || (d.floor >= 2 && hash(floorKey(s.location, d.floor) + '/' + d.cell) % 4 === 0));
     bestiaryRecord(s, template).encounters++;
     return {
       template,
@@ -219,6 +234,7 @@ function startEncounter(s: Adventure, guardian: boolean, bound: boolean) {
       pattern: guardian ? 0 : (i + nextRandom(s, base.pattern.length)) % base.pattern.length,
       stagger: false,
       known: (s.journey.bestiary[template]?.victories ?? 0) + (s.journey.bestiary[template]?.accords ?? 0) >= 3,
+      ...(named ? { epithets: [`${base.name[0]}・灯影の導き手`, `${base.name[1]}, guide of the dim light`] as Text } : {}),
     };
   });
   d.encounter = {
@@ -231,6 +247,7 @@ function startEncounter(s: Adventure, guardian: boolean, bound: boolean) {
     combo: 0,
     guard: false,
     surprise: !bound,
+    ...(s.frontier.rules.tactical ? { tactics: startTactics(s, enemies.length) } : {}),
   };
   note(
     s,
@@ -271,13 +288,15 @@ function step(s: Adventure, d: Delve, direction: Extract<Action, { type: 'move' 
     const oil = Math.max(0, 1 + ruinCondition(s.location, d.floor).light + (effects.light ?? 0));
     d.light = Math.max(0, d.light - oil);
   }
+  const exposure = fieldHazard(s, next, d.floor, floor);
+  if (exposure) note(s, exposure, 'risk');
   if (d.threat % (missedMeals(s) >= 2 ? 2 : 3) === 0) advance(s, 1);
   if (finishDefeat(s)) return true;
   if (d.threat % 7 === 0) s.fatigue = Math.min(9, s.fatigue + 1);
   const feature = floor.features[next];
   if (
-    d.light === 0 &&
-    d.threat % (9 - (effects.patrol ?? 0) * 2) === 0 &&
+    (alertLevel(s) >= 8 || (d.light === 0 && s.frontier.run !== 'wander')) &&
+    d.threat % (alertLevel(s) >= 8 ? 6 : 9 - (effects.patrol ?? 0) * 2) === 0 &&
     next !== ENTRY_CELL &&
     (!feature || secured(s, next))
   ) {
@@ -293,6 +312,7 @@ function findTreasure(s: Adventure, d: Delve, check?: Check) {
   const shards = Math.max(0, 1 + ruinCondition(s.location, d.floor).caches + (circuitEffects(s).shards ?? 0));
   s.gold += coins;
   s.goods.relic += shards;
+  findDevice(s, floorKey(s.location, d.floor) + '/chest/' + d.cell, 45);
   if (nextRandom(s, 100) < 80 || check?.outcome === 'critical')
     forgeGear(s, d.floor, check?.outcome === 'critical' ? 2 : 0);
   else s.goods.lantern++;
@@ -483,6 +503,14 @@ function completeEncounter(s: Adventure, method: 'fight' | 'parley' | 'bypass', 
     ];
   }
   if (method === 'parley') s.counters.pacified++;
+  if (battle.enemies.some((enemy) => enemy.epithets) && method !== 'bypass') {
+    const group = townAt(s.location).biome;
+    changeStanding(s, group, method === 'parley' ? 1 : -1);
+    if (method === 'parley') {
+      const next = surveySite(s.location).sequel;
+      s.frontier.rumors[addressKey(next)] = next;
+    }
+  }
   if (method !== 'bypass') for (const enemy of battle.enemies) {
     const record = bestiaryRecord(s, enemy.template);
     if (method === 'fight') record.victories++;
@@ -539,8 +567,20 @@ function enemyRound(s: Adventure, d: Delve, battle: Encounter) {
   let damageTaken = 0;
   let allyDamage = 0;
   let counterDamage = 0;
-  for (const enemy of battle.enemies) {
+  const floor = battle.tactics ? currentFloor(s) : null;
+  const linked = borrowedCreature(battle);
+  for (const [index, enemy] of battle.enemies.entries()) {
     if (enemy.hp <= 0) continue;
+    if (floor && battle.tactics) {
+      const terrain = terrainAt(s, battle.tactics.cells[index], d.floor, floor);
+      const hazard = terrain === 'fire' ? 5 : terrain === 'wire' ? 3 : terrain === 'heat' ? 2 : 0;
+      if (hazard) {
+        enemy.hp = Math.max(0, enemy.hp - hazard);
+        note(s, ['足元の危険で魔物に' + hazard + 'ダメージ。', 'A terrain hazard deals ' + hazard + ' damage to the creature.'], 'good');
+      }
+      if (terrain === 'wire' && battle.turn % 2 === 1) enemy.stagger = true;
+    }
+    if (enemy.hp <= 0 || linked === index) continue;
     if (enemy.stagger) {
       enemy.stagger = false;
       continue;
@@ -551,7 +591,12 @@ function enemyRound(s: Adventure, d: Delve, battle: Encounter) {
       continue;
     }
     if (intent === 'brace') continue;
+    if (floor && !enemyInRange(s, battle, index, intent, floor)) continue;
     const ally = targetOfEnemy(s, battle);
+    if (floor && !ally && nextRandom(s, 20) + Math.floor(enemy.power / 3) < 2 + coverBonus(s, floor)) {
+      note(s, ['物陰で攻撃をかわした。', 'Cover helps you evade the attack.']);
+      continue;
+    }
     if (!ally && intent === 'hex' && !battle.guard) s.focus = Math.max(0, s.focus - 2);
     if (intent === 'drain') d.light = Math.max(0, d.light - (battle.guard ? 1 : 3));
     const frostguard = !ally && intent === 'heavy' && equipped(s, 'coat')?.masterwork === 'rimeCoat';
@@ -572,6 +617,10 @@ function enemyRound(s: Adventure, d: Delve, battle: Encounter) {
     } else {
       takeHit(s, damage);
       damageTaken += damage;
+      if (floor && !battle.guard && damage >= 4 && (intent === 'heavy' || intent === 'hex')) {
+        const zone: BodyZone = intent === 'hex' ? 'head' : (battle.turn + index) % 2 ? 'grip' : 'feet';
+        s.frontier.injuries[zone] = Math.max(s.frontier.injuries[zone] ?? 0, s.time + 8);
+      }
     }
     if (intent === 'heavy' && battle.guard && s.journey.formation !== 'envoy') {
       const strength = 2 + scoreFor(s, 'might') + (s.character.calling === 'vanguard' ? 3 : 0);
@@ -580,6 +629,7 @@ function enemyRound(s: Adventure, d: Delve, battle: Encounter) {
     }
     if (s.hp <= 0) break;
   }
+  if (damageTaken > 0 && consumeFieldRecipe(s, 'hit')) recover(s, 7, 2);
   if (damageTaken || allyDamage) {
     const counter = counterDamage
       ? [` 反撃 ${counterDamage}。`, ` Countered for ${counterDamage}.`]
@@ -622,19 +672,26 @@ function attack(
   const template = FOES[enemy.template];
   const intent = foeIntent(battle, enemy);
   const darkness = s.delve!.light <= 0 ? -2 : 0;
+  const aimed = battle.tactics?.aim === battle.enemies.indexOf(enemy) ? 3 : 0;
+  if (battle.tactics) battle.tactics.aim = null;
   const check = rollCheck(
     s,
     stat,
     8 + Math.min(8, squareRootTier(s.delve!.floor)),
     false,
-    darkness,
+    darkness + aimed + (tool === WEAPONS.bow && fieldSkill(s, 'marksman') ? 2 : 0),
   );
+  if (battle.tactics && (check.natural === 1 || (check.outcome === 'fail' && check.total <= check.target - 4))) {
+    note(s, ['狙いが外れた。', 'Your attack misses.'], 'risk', check);
+    return;
+  }
   const weakness = template.weak === damageType;
   const resistance = template.resist === damageType;
   const base = (weapon?.power ?? 0) + scoreFor(s, stat) + Math.floor(s.level / 3);
   const factor = succeeded(check) ? 1 : check.outcome === 'partial' ? 0.65 : 0.38;
   const edge =
     Number(tool.effect === 'edge' && move === 'strike' && check.outcome === 'critical') * 3;
+  const offhand = move === 'strike' && check.natural >= 13 ? s.gear.find((item) => item.id === s.frontier.offhand) : undefined;
   const masteryDamage =
     (weapon?.masterwork === 'archiveWand' && damageType === 'arcane' ? 2 : 0) +
     (weapon?.masterwork === 'kilnHammer' && move === 'heavy' ? 3 : 0) +
@@ -642,12 +699,13 @@ function attack(
   const raw =
     base +
     relicPower(s, 'ember') + mealEffect(s, 'damage') + (s.journey.formation === 'rush' ? 3 : 0) +
-    edge + masteryDamage +
+    edge + masteryDamage + (offhand ? Math.min(4, offhand.power) : 0) +
     (move === 'heavy' ? 4 + battle.combo * 2 : move === 'spark' ? 3 : 1) +
     (check.outcome === 'critical' ? 4 : 0);
+  const penetrations = battle.tactics ? Math.min(2, Math.floor(Math.max(0, check.total - check.target) / 5)) : 0;
   const damage = Math.max(
     1,
-    Math.round(raw * factor * (weakness ? 1.55 : resistance ? 0.65 : 1)) -
+    Math.round(raw * factor * (weakness ? 1.55 : resistance ? 0.65 : 1) * (1 + penetrations * .24)) -
       (intent === 'brace' && move !== 'heavy' && move !== 'spark' ? 3 : 0),
   );
   enemy.hp = Math.max(0, enemy.hp - damage);
@@ -665,7 +723,7 @@ function attack(
             Number(weakness || move === 'quick' || (move === 'strike' && tool.effect === 'quick')),
         );
   if (tool.effect === 'spark' && move === 'strike' && weakness) recover(s, 0, 1);
-  const label = template.name;
+  const label = enemy.epithets ?? template.name;
   note(
     s,
     [
@@ -681,6 +739,7 @@ function combat(s: Adventure, action: Extract<Action, { type: 'combat' }>) {
     battle = d.encounter!;
   const move = action.move;
   if (!Object.hasOwn(COMBAT_MOVES, move) || s.focus < COMBAT_MOVES[move].cost) return false;
+  if (!tacticalTarget(s, move, action.target)) return false;
   s.focus -= COMBAT_MOVES[move].cost;
   if (move === 'guard') {
     battle.guard = true;
@@ -688,8 +747,9 @@ function combat(s: Adventure, action: Extract<Action, { type: 'combat' }>) {
     recover(s, 0, 2);
     note(s, ['構えを固め、敵を待った。', 'You brace for the incoming attack.']);
   } else if (move === 'study') {
-    battle.enemies.forEach((enemy) => {
-      enemy.known = true;
+    const floor = battle.tactics ? currentFloor(s) : undefined;
+    battle.enemies.forEach((enemy, index) => {
+      if (tacticalTarget(s, 'study', index, floor)) enemy.known = true;
     });
     battle.guard = true;
     note(s, [
@@ -704,7 +764,12 @@ function combat(s: Adventure, action: Extract<Action, { type: 'combat' }>) {
     }
     battle.guard = true;
     note(s, ['退路を阻まれた。', 'The retreat is cut off.'], 'risk', check);
-  } else if (move === 'parley') {
+  } else if (move === 'parley' || move === 'befriend') {
+    const guest = move === 'befriend' ? battle.enemies[action.target] : null;
+    if (move === 'befriend' && (!guest || battle.guardian || (!guest.epithets && !fieldSkill(s, 'diplomacy')) || guest.hp <= 0 || s.followers.length >= MAX_PARTY_SIZE - 1 || s.frontier.liquids.water < 2)) return false;
+    const pactId = floorKey(s.location, d.floor) + '/guest/' + battle.cell;
+    if (guest && s.followers.includes(pactId)) return false;
+    if (guest) s.frontier.liquids.water -= 2;
     const known = battle.enemies.every((enemy) => enemy.hp <= 0 || enemy.known);
     const favor = battle.guardian ? standing(s, townAt(s.location).biome) : 0;
     const check = rollCheck(
@@ -713,9 +778,13 @@ function combat(s: Adventure, action: Extract<Action, { type: 'combat' }>) {
       (battle.guardian ? 17 : 13) + Math.min(7, squareRootTier(d.floor)),
       false,
       (known ? 3 : 0) + (equipped(s, 'charm')?.masterwork === 'lowTideCharm' ? 2 : 0) +
-      (favor >= 7 ? 3 : favor >= 3 ? 1 : favor <= -3 ? -2 : 0),
+      (favor >= 7 ? 3 : favor >= 3 ? 1 : favor <= -3 ? -2 : 0) + Number(consumeFieldRecipe(s, 'talk')) * 4 + Number(Boolean(guest)) * 2,
     );
     if (succeeded(check)) {
+      if (guest) {
+        s.friends[pactId] = { resident: { id: pactId, name: guest.epithets ?? FOES[guest.template].name, role: 'keeper', art: 0, site: ['遺跡', 'Ruins'], shift: 'all' }, trust: 6, visitedDay: 0, offeredDay: 0 };
+        s.followers.push(pactId);
+      }
       completeEncounter(s, 'parley', check);
       return true;
     }
@@ -726,8 +795,11 @@ function combat(s: Adventure, action: Extract<Action, { type: 'combat' }>) {
     if (!enemy || enemy.hp <= 0) return false;
     attack(s, battle, enemy, move);
   }
-  if (s.journey.formation === 'envoy' && (move === 'parley' || move === 'study')) envoySupport(s, battle);
+  if (s.journey.formation === 'envoy' && (move === 'parley' || move === 'befriend' || move === 'study')) envoySupport(s, battle);
   else companionTurn(s, battle);
+  if (fieldCondition(s, 'chorus') && ['strike', 'quick', 'spark', 'heavy'].includes(move) && battle.enemies[action.target]?.hp > 0) {
+    battle.enemies[action.target].hp = Math.max(0, battle.enemies[action.target].hp - 2 - (s.frontier.gifts.chorus ?? 1));
+  }
   if (battle.enemies.every((enemy) => enemy.hp <= 0)) completeEncounter(s, 'fight');
   else enemyRound(s, d, battle);
   return true;
@@ -735,6 +807,7 @@ function combat(s: Adventure, action: Extract<Action, { type: 'combat' }>) {
 
 function autoCombat(s: Adventure, requested: number) {
   const battle = s.delve!.encounter!;
+  if (battle.tactics) return false;
   const target = battle.enemies[requested]?.hp > 0
     ? requested
     : battle.enemies.findIndex((foe) => foe.hp > 0);
@@ -870,6 +943,11 @@ export function applyDelveAction(s: Adventure, action: Action): boolean {
   if (action.type === 'enter') return enter(s, action.floor);
   const d = s.delve;
   if (!d) return false;
+  if (action.type === 'field') {
+    if (!applyField(s, action.operation)) return false;
+    if (d.encounter) enemyRound(s, d, d.encounter);
+    return true;
+  }
   if (action.type === 'declare') return declareInDelve(s, action);
   if (action.type === 'use' || action.type === 'eat-dish') {
     if (!(action.type === 'use' ? useSupply(s, action.good) : eatDish(s, action.id))) return false;
@@ -877,8 +955,49 @@ export function applyDelveAction(s: Adventure, action: Action): boolean {
     return true;
   }
   if (d.encounter) {
+    if (action.type === 'tactical-step' && canTacticalStep(s, action.cell)) {
+      const linked = borrowedCreature(d.encounter);
+      if (linked >= 0) {
+        d.encounter.tactics!.cells[linked] = action.cell;
+        d.encounter.tactics!.aim = null;
+        enemyRound(s, d, d.encounter);
+        return true;
+      }
+      const floor = currentFloor(s);
+      d.previous = d.cell;
+      d.direction = [0, 1, 2, 3].find((direction) => neighbor(d.cell, direction) === action.cell) ?? d.direction;
+      d.cell = action.cell;
+      d.encounter.tactics!.aim = null;
+      mapCell(s);
+      const hazard = fieldHazard(s, d.cell, d.floor, floor);
+      if (hazard) note(s, hazard, 'risk');
+      if (!finishDefeat(s)) enemyRound(s, d, d.encounter);
+      return true;
+    }
+    if (action.type === 'tactical-aim' && d.encounter.tactics && tacticalTarget(s, 'spark', action.target)) {
+      if (d.encounter.tactics.aim === action.target) return false;
+      d.encounter.tactics.aim = action.target;
+      note(s, ['次の攻撃に向けて狙いを定めた。', 'You steady your aim for the next attack.']);
+      enemyRound(s, d, d.encounter);
+      return true;
+    }
     if (action.type === 'auto-combat') return autoCombat(s, action.target);
     return action.type === 'combat' && combat(s, action);
+  }
+  if (action.type === 'auto-walk') {
+    const path = plannedWalk(s, action.target);
+    if (!path.length) return false;
+    let moved = false;
+    for (const cell of path) {
+      const direction = [0, 1, 2, 3].find((dir) => neighbor(d.cell, dir) === cell);
+      if (direction === undefined) break;
+      d.direction = direction;
+      const previousHp = s.hp;
+      if (!step(s, d, 'forward')) break;
+      moved = true;
+      if (!s.delve || d.encounter || s.hp < previousHp) break;
+    }
+    return moved;
   }
   if (action.type === 'inspect-circuit' || action.type === 'set-circuit' || action.type === 'read-inscription')
     return applyRuinAction(s, action);

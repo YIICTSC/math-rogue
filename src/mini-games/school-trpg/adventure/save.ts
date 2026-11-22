@@ -17,6 +17,8 @@ import {
 import { SLOT_IDS } from './inventory';
 import { BUILDINGS, MAX_HOME_LEVEL } from './building';
 import { newFieldwork, validFieldwork } from './fieldworkState';
+import { ADDRESS_NAMES } from './frontierContent';
+import { newFrontier, twoHanded, validFrontier } from './frontierState';
 import { newJourney, validJourney } from './journeyState';
 import { ADVENTURE_VERSION, DEATH_RULES, MAX_LIGHT, MAX_PARTY_SIZE, PORTRAIT_IDS, type Adventure } from './state';
 import { addressKey, dayAt, hash, SIDE, type Address } from './world';
@@ -52,6 +54,7 @@ function validSlot(slot: Adventure) {
     !integer(slot.defeats) ||
     !c ||
     typeof c.name !== 'string' ||
+    (c.addressedAs !== undefined && !Object.hasOwn(ADDRESS_NAMES, c.addressedAs)) ||
     !PORTRAIT_IDS.includes(c.portrait) ||
     !DEATH_RULES.includes(c.deathRule) ||
     (slot.fallenAt === null ? slot.hp <= 0 : c.deathRule !== 'permadeath' || !integer(slot.fallenAt, 0, slot.time) || slot.hp !== 0 || slot.delve !== null) ||
@@ -124,6 +127,12 @@ function validSlot(slot: Adventure) {
     !Array.isArray(slot.journal)
   )
     return false;
+  if (!validFrontier(slot.frontier, slot.time, validAddress, slot.gear.map((gear) => gear.id), slot.followers)) return false;
+  if (slot.frontier.offhand !== null) {
+    const paired = slot.gear.find((gear) => gear.id === slot.frontier.offhand);
+    const main = slot.gear.find((gear) => gear.id === slot.equipment.weapon);
+    if (paired?.slot !== 'weapon' || main?.id === paired.id || twoHanded(paired.weapon) || twoHanded(main?.weapon)) return false;
+  }
   const d = slot.delve;
   if (!d) return d === null;
   const e = d.encounter;
@@ -141,6 +150,10 @@ function validSlot(slot: Adventure) {
             e.allies.every((ally) => ally && slot.followers.includes(ally.id) && integer(ally.max, 1) && integer(ally.hp, 0, ally.max)))) &&
         Array.isArray(e.enemies) &&
         e.enemies.length >= 1 &&
+        (e.tactics === undefined || (e.tactics && Array.isArray(e.tactics.cells) && e.tactics.cells.length === e.enemies.length &&
+          e.tactics.cells.every((cell) => integer(cell, 0, SIDE * SIDE - 1)) &&
+          (e.tactics.aim === null || integer(e.tactics.aim, 0, e.enemies.length - 1)) &&
+          (e.tactics.linked === undefined || (e.tactics.linked && integer(e.tactics.linked.foe, 0, e.enemies.length - 1) && integer(e.tactics.linked.until))))) &&
         e.enemies.every(
           (foe) =>
             integer(foe.template, 0, FOES.length - 1) && integer(foe.hp) && integer(foe.max, 1),
@@ -151,14 +164,16 @@ function validSlot(slot: Adventure) {
 function migrateSlot(entry: unknown): Adventure | null {
   if (!entry || typeof entry !== 'object' || !('version' in entry)) return null;
   const slot = entry as Adventure;
-  if (entry.version === 3) return { ...slot, version: ADVENTURE_VERSION, fieldwork: newFieldwork() };
-  if (entry.version === 2) return { ...slot, version: ADVENTURE_VERSION, journey: newJourney(), fieldwork: newFieldwork() };
+  if (entry.version === 4) return { ...slot, version: ADVENTURE_VERSION, frontier: newFrontier(slot.location, slot.time) };
+  if (entry.version === 3) return { ...slot, version: ADVENTURE_VERSION, frontier: newFrontier(slot.location, slot.time), fieldwork: newFieldwork() };
+  if (entry.version === 2) return { ...slot, version: ADVENTURE_VERSION, frontier: newFrontier(slot.location, slot.time), journey: newJourney(), fieldwork: newFieldwork() };
   if (entry.version !== 1) return slot;
   return {
     ...slot,
     version: ADVENTURE_VERSION,
     journey: newJourney(),
     fieldwork: newFieldwork(),
+    frontier: newFrontier(slot.location, slot.time),
     character: { ...slot.character, deathRule: 'return-town' },
     lastMealAt: slot.time,
     fallenAt: null,
