@@ -2695,7 +2695,7 @@ class AudioService {
       const name=`card-club-voice-${heroId}-${event}`;
       const generation=(this.sfxPlaybackGenerations.get(name)??0)+1;
       this.sfxPlaybackGenerations.set(name,generation);
-      return this.playVoiceFile(name,[versionBgmPath(assetUrl(clip.path))],clip.maxDurationMs,false,generation);
+      return this.playVoiceFile(name,[versionBgmPath(assetUrl(clip.path))],clip.maxDurationMs,false,generation,true);
   }
 
   public playCardClubScoreVoice(heroId:string) {

@@ -1,3 +1,4 @@
+import type { TableDeclaration } from '../shared/tableDeclarations';
 import { CARD_CLUB_VOICE_HEROES } from '../../data/cardClubVoices';
 
 export const CLASSIC_DOMINO_GAMES = [
@@ -185,6 +186,7 @@ export type TableBase = {
   winners: number[];
   revision: number;
   event: TableEvent | null;
+  declarations?: TableDeclaration[];
   hands: number[][];
   rng: number;
 };
@@ -204,6 +206,7 @@ export function baseFor(game: TableGame, players: TableMember[], seed: number): 
     winners: [],
     revision: 0,
     event: null,
+    declarations: [],
     hands: players.map(() => []),
     rng: seed >>> 0,
   };

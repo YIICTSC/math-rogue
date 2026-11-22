@@ -13,7 +13,8 @@ import React,{useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {audioService} from './src/services/audioService';
 import {TableBoard} from './src/mini-games/traditional-games/Boards';
-import {createTable,tableViewFor} from './src/mini-games/traditional-games/engine';
+import {applyTableAction,createTable,tableViewFor} from './src/mini-games/traditional-games/engine';
+import {useTableVoice} from './src/mini-games/shared/useTableVoice';
 import {CARD_CLUB_VOICE_HEROES} from './src/data/cardClubVoices';
 import {resolveShot} from './src/mini-games/traditional-games/crokinole';
 import './src/mini-games/traditional-games/traditionalGames.css';
@@ -27,12 +28,25 @@ const play=HTMLMediaElement.prototype.play;
 HTMLMediaElement.prototype.play=function(){test.native.push({src:this.src,volume:this.volume});return play.call(this)};
 const players=CARD_CLUB_VOICE_HEROES.slice(0,4).map((hero,i)=>({hero,id:String(i),name:'Player '+i,cpu:true}));
 let revision=0;
+let peeper=null;
 function App(){const [ready,setReady]=useState(false),[view,setView]=useState<any>(null);
+const current=view?.game==='peeper'?view:null;
+useTableVoice(current?{...current,hero:current.players[current.self].hero,start:'table-start'}:null);
 return <main className="traditional-tables">
 <button onClick={()=>{audio.init();if(audio.isMuted)audio.toggleMute();audio.setSfxVolume(.6);Promise.all([audio.preloadTraditionalSounds(),audio.unlockAudio()]).then(()=>setReady(true))}}>Enable sound</button>
 <output>{ready?'ready':'loading'}</output>
 <button disabled={!ready} onClick={()=>{const s=createTable('goita',players,1);s.revision=++revision;s.event={key:'attack',seat:0};setView(tableViewFor(s,0))}}>Bamboo pair</button>
 <button disabled={!ready} onClick={()=>{const s=createTable('crokinole',players.slice(0,2),1);const shot={type:'shot',angle:0,aim:0,power:.56};s.revision=++revision;s.turn=0;s.lastShot={before:[{id:90,seat:1,x:0,y:.5}],shot,seat:0,discId:s.revision};s.discs=resolveShot(s.lastShot.before,0,2,shot,s.revision).board;setView(tableViewFor(s,0))}}>Colliding shot</button>
+<button disabled={!ready} onClick={()=>{
+  peeper=createTable('peeper',players,1);peeper.turn=0;peeper.hands=[[0,34],[1,2,35],[3,36],[60]];
+  setView(tableViewFor(peeper,0));
+}}>Open Peeper</button>
+<button disabled={!peeper} onClick={()=>{
+  applyTableAction(peeper,0,{type:'tiles',tiles:[0]});
+  applyTableAction(peeper,1,{type:'mine'});
+  applyTableAction(peeper,2,{type:'return'});
+  setView(tableViewFor(peeper,0));
+}}>Show interrupt chain</button>
 <button onClick={()=>setView(null)}>Leave table</button>
 <button disabled={!ready} onClick={()=>{for(const key of Object.keys(audio.sfxBuffers))if(key.startsWith('traditional-table/wood-'))delete audio.sfxBuffers[key];audio.playTraditionalSound('wood',.2)}}>Native soft hit</button>
 {view && <TableBoard view={view} language="ENGLISH" send={()=>{}}/>}</main>}
@@ -158,6 +172,21 @@ try {
     native.every((c) => c.volume > 0 && c.volume < 0.3),
     'HTML fallback preserves soft-contact gain',
   );
+  await page.getByRole('button', { name: 'Open Peeper' }).click();
+  await page.getByRole('button', { name: 'Show interrupt chain' }).click();
+  await page.waitForFunction(() =>
+    window.native.some((x) => x.src.includes('/table-declarations/high-school-assassin/return.mp3')),
+  );
+  const spoken = await page.evaluate(() =>
+    window.native
+      .map((x) => new URL(x.src).pathname)
+      .filter((path) => path.includes('/table-declarations/')),
+  );
+  assert.deepEqual(spoken, [
+    '/sfx/table-declarations/high-school-caretaker/mine.mp3',
+    '/sfx/table-declarations/high-school-assassin/return.mp3',
+  ]);
+  await page.getByRole('button', { name: 'Leave table' }).click();
   assert.deepEqual(errors, []);
   console.log(
     'PASS 24 decoded samples, two bamboo taps under StrictMode, collision-timed wood audio, exit cancellation, mute, and HTMLAudio gain.',

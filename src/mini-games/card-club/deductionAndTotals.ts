@@ -1,3 +1,4 @@
+import { declare } from '../shared/tableDeclarations';
 import { high,rank,suit } from './cards';
 import type { Action,ClubState,ClubView } from './model';
 import type { RuleExtension } from './extensionModel';
@@ -7,7 +8,7 @@ function guessStart(s:ClubState){const c=initClassic(s);resetClassicDeck(s);c.hi
 function guessActions(s:ClubState):Action[]{return Array.from({length:13},(_,i)=>i+1).flatMap(value=>[...s.extra.classic!.shown[0].includes(value)?[]:[{type:'ask' as const,value}],{type:'name' as const,value}]);}
 function guessApply(s:ClubState,a:Action){
  const c=s.extra.classic!,i=s.turn,value=a.value!;
- if(a.type==='ask'){const other=1-i,has=s.players[other].hand.some(card=>rank(card)===value);c.shown[0].push(value);c.notes.push({player:other,label:has?'answerYes':'answerNo',points:value});record(s,has?'answerYes':'answerNo',other,value);s.turn=other;return;}
+ if(a.type==='ask'){const other=1-i,has=s.players[other].hand.some(card=>rank(card)===value);c.shown[0].push(value);c.notes.push({player:other,label:has?'answerYes':'answerNo',points:value});record(s,has?'answerYes':'answerNo',other,value);declare(s,other,has?'yes':'no');s.turn=other;return;}
  const correct=rank(c.hidden[0][0])===value,winner=correct?i:1-i;s.players[winner].score=1;c.reveals.push({player:i,card:c.hidden[0][0]});finish(s,[winner]);
 }
 function guessCpu(v:ClubView):Action|undefined{

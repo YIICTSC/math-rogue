@@ -1,3 +1,4 @@
+import { declare } from '../shared/tableDeclarations';
 import { rank,sorted } from './cards';
 import type { Action,ClubState,ClubView } from './model';
 import type { RuleExtension } from './extensionModel';
@@ -50,6 +51,7 @@ function actions(s:ClubState):Action[]{
 function settle(s:ClubState,i:number){
  const c=s.extra.classic!,a=ginHand(s.players[i].hand),other=1-i,b=a.points?ginDefense(s.players[other].hand,a.melds):ginHand(s.players[other].hand).points;
  const winner=a.points===0||a.points<b?i:other,points=a.points===0?b+25:winner===i?b-a.points:a.points-b+25;
+ declare(s,i,a.points===0?'gin':'knock');
  record(s,a.points===0?'gin':'knock',i,a.points);
  award(s,winner,points,a.points===0?'gin':winner===i?'knock':'undercut');s.players[winner].bags++;c.nextDealer=1-winner;
  c.notes.push({player:i,label:'deadwood',points:a.points},{player:other,label:'deadwood',points:b});

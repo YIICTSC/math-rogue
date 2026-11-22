@@ -1,3 +1,4 @@
+import { declare, spokenNumber } from '../shared/tableDeclarations';
 import { combinations,rank,suit } from './cards';
 import type { Action,ClubState,ClubView } from './model';
 import type { RuleExtension } from './extensionModel';
@@ -49,11 +50,12 @@ function apply(s:ClubState,a:Action){
   c.countIndex++;if(c.countIndex===3)roundOver(s);else s.turn=s.dealer;return;
  }
  if(a.type==='pass'){
+  declare(s,i,'go');
   c.go[i]=true;record(s,'go',i);
   const other=1-i,can=s.players[other].hand.some(card=>s.total+value(card)<=31);
   if(can)s.turn=other;else finishRun(s,false);return;
  }
- const card=a.cards![0];removeCards(s,i,[card]);s.table.push(card);c.owners.push(i);s.total+=value(card);c.last=i;record(s,'total',i,s.total,card);
+ const card=a.cards![0];removeCards(s,i,[card]);s.table.push(card);c.owners.push(i);s.total+=value(card);c.last=i;record(s,'total',i,s.total,card);declare(s,i,...spokenNumber(s.total));
  if(add(s,i,cribPeg(s.table,s.total),'pegging'))return;
  if(s.total===31){finishRun(s,true);return;}
  if(s.players.every(p=>!p.hand.length)){finishRun(s,false);return;}

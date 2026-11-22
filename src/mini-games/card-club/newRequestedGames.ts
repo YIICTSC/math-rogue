@@ -1,3 +1,4 @@
+import { declare, spokenRank, spokenSuit } from '../shared/tableDeclarations';
 import {pack,rank,high,suit,shuffled,combinations} from './cards';
 import type {Action,ClubState,ClubView} from './model';
 import type {RuleExtension} from './extensionModel';
@@ -22,6 +23,12 @@ export const yanivRules:RuleExtension={start:s=>{initClassic(s);s.stock=shuffled
  const c=s.extra.classic!,i=s.turn,p=s.players[i];
  if(a.type==='knock'){
   const points=s.players.map(q=>q.out?Infinity:handPoints(q.hand)),caught=points.some((n,j)=>j!==i&&n<=points[i]);
+  declare(s,i,'yaniv');
+  if(caught){
+   const rival=Array.from({length:s.players.length-1},(_,offset)=>(i+offset+1)%s.players.length)
+    .filter(seat=>points[seat]<=points[i]).sort((a,b)=>points[a]-points[b])[0];
+   declare(s,rival,'assaf');
+  }
   s.players.forEach((q,j)=>{if(q.out)return;let penalty=j===i?(caught?points[j]+30:0):points[j];let total=-q.score+penalty;if(total===100||total===200)total/=2;q.score=-total;q.out=total>200;});
   const least=Math.min(...points),leader=Array.from({length:s.players.length},(_,k)=>(i+k+1)%s.players.length).find(j=>points[j]===least)!;c.nextDealer=(leader+s.players.length-1)%s.players.length;record(s,caught?'challenge':'knock',i);const alive=s.players.flatMap((q,j)=>q.out?[]:[j]);if(alive.length<=1)finish(s,alive.length?alive:undefined);else roundOver(s);return;
  }
@@ -62,7 +69,15 @@ export const bullLabel=(index:number,en=false)=>{const c=BULL_CLAIMS[index],r=(n
 export const pokerBullRules:RuleExtension={start:s=>{initClassic(s);s.claim=-1;s.players.forEach(p=>{if(s.round===0)p.lives=5;if(!p.out)for(let i=0;i<1+5-p.lives;i++)p.hand.push(s.stock.pop()!);});s.turn=nextSeat(s,s.dealer);s.extra.claimant=-1;},actions:s=>{
  const remaining=BULL_CLAIMS.map((c,value)=>({c,value})).filter(({value,c})=>s.claim<0||c.type>BULL_CLAIMS[s.claim].type||c.type===BULL_CLAIMS[s.claim].type&&(c.rank>BULL_CLAIMS[s.claim].rank||c.rank===BULL_CLAIMS[s.claim].rank&&(c.second||0)>(BULL_CLAIMS[s.claim].second||0)));
  return [...s.claim>=0?[{type:'challenge' as const}]:[],...remaining.map(({value})=>({type:'bid' as const,value}))];
- },apply:(s,a)=>{if(a.type==='bid'){s.claim=a.value!;s.extra.claimant=s.turn;record(s,'bid',s.turn,s.claim);s.turn=nextSeat(s);return;}
+ },apply:(s,a)=>{if(a.type==='bid'){
+  const claim=BULL_CLAIMS[a.value!];
+  const roles=['single','pair','two-pairs','three-kind','full-house','four-kind','straight-flush'] as const;
+  const bullRank=(value:number)=>spokenRank(value===14?1:value);
+  declare(
+   s,s.turn,...spokenSuit(claim.suit),roles[claim.type],...bullRank(claim.rank),
+   ...(claim.second===undefined?[]:bullRank(claim.second)),
+  );
+  s.claim=a.value!;s.extra.claimant=s.turn;record(s,'bid',s.turn,s.claim);s.turn=nextSeat(s);return;}
  const loser=bullClaimHolds(s.players.flatMap(p=>p.hand),BULL_CLAIMS[s.claim])?s.turn:s.extra.claimant;s.players[loser].lives--;s.players[loser].score--;s.players[loser].out=s.players[loser].lives<=0;s.extra.classic!.nextDealer=loser;record(s,'challenge',loser);
  const alive=s.players.flatMap((p,i)=>p.out?[]:[i]);if(alive.length===1)finish(s,alive);else roundOver(s);
  },nextDealer:s=>s.extra.classic?.nextDealer??-1,cpu:v=>{

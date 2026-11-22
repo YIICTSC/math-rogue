@@ -1,3 +1,5 @@
+import { declare } from '../shared/tableDeclarations';
+import { recordCardDeclaration } from './declarations';
 import {ladderOptions,type LadderOptions} from './ladderOptions';
 import { classicHideOwnHand,classicHideTable } from './classicPrivacy';
 import { definition, type GameId } from './catalog';
@@ -163,6 +165,7 @@ export function applyAction(s:ClubState,player:number,action:Action):boolean {
     const nextStock=extensionFor(s.game)?.nextStock?.(s);
     s.round++;s.dealer=extensionFor(s.game)?.nextDealer?.(s)??(s.game==='blackjack'?Math.floor(s.round/5)%s.players.length:s.game==='99add'?next(s,s.dealer,1):(s.dealer+1)%s.players.length);startRound(s,nextStock);return true;
   }
+  recordCardDeclaration(s,player,action);
   const extension=extensionFor(s.game);if(extension){extension.apply(s,action);return true;}
   if(action.type==='bid'){
     p.bid=action.value!;event(s,'bid',player,p.bid);s.turn=next(s);if(s.players.every(p=>p.bid!==null)){s.phase='play';s.turn=next(s,s.dealer);}return true;
@@ -219,7 +222,7 @@ export function applyAction(s:ClubState,player:number,action:Action):boolean {
   if(s.game==='gofish'||s.game==='authors'){
     if(action.type==='draw'){p.hand.push(s.stock.pop()!);books(s,player);}else if(action.type==='ask'){
       const other=s.players[action.target!],cards=other.hand.filter(c=>rank(c)===action.value&&(action.suit===undefined||suit(c)===action.suit));other.hand=other.hand.filter(c=>!cards.includes(c));p.hand.push(...cards);event(s,'ask',player,action.value);
-      let again=cards.length>0;if(!again&&s.game==='gofish'&&s.stock.length){const c=s.stock.pop()!;p.hand.push(c);again=rank(c)===action.value;event(s,'draw',player);}books(s,player);
+      let again=cards.length>0;if(!again&&s.game==='gofish')declare(s,action.target!,'go-fish');if(!again&&s.game==='gofish'&&s.stock.length){const c=s.stock.pop()!;p.hand.push(c);again=rank(c)===action.value;event(s,'draw',player);}books(s,player);
       if(!p.hand.length&&s.game==='gofish'&&s.stock.length)p.hand.push(s.stock.pop()!);if(!again)s.turn=next(s);
     }else s.turn=next(s);
     if(s.players.reduce((v,p)=>v+p.books.length,0)===13){end(s,highest(s));return true;}

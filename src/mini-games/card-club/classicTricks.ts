@@ -1,3 +1,4 @@
+import { declare } from '../shared/tableDeclarations';
 import { high,rank,shuffled,sorted,suit } from './cards';
 import type { Action,ClubState,ClubView } from './model';
 import type { RuleExtension } from './extensionModel';
@@ -126,6 +127,7 @@ function apply(s:ClubState,a:Action){
   e.selections[i]=a.cards!;s.turn=(i+1)%n;
   if(e.selections.every(cs=>cs.length)){
    let firstBlack=-1;for(let k=1;k<=n;k++){const j=(s.dealer+k)%n,card=e.selections[j][0];c.bids[j]=card;if([0,3].includes(suit(card))){firstBlack=j;break;}}
+   declare(s,firstBlack>=0?firstBlack:s.dealer,firstBlack>=0?'high':'low');
    c.contract=firstBlack>=0?1:0;c.caller=firstBlack;s.turn=firstBlack>=0?(firstBlack+n-1)%n:nextSeat(s,s.dealer);e.step='play';
   }return;
  }

@@ -25,7 +25,7 @@ export interface GoitaState extends TableBase {
   award: { seat: number; tiles: number[] } | null;
 }
 
-const partner = (seat: number) => (seat + 2) % 4;
+export const partner = (seat: number) => (seat + 2) % 4;
 const followingSeat = (seat: number) => (seat + 1) % 4;
 const pawns = (hand: number[]) => hand.filter((tile) => goitaKind(tile) === 0).length;
 

@@ -52,6 +52,7 @@
     "test:card-club:hand-order": "node scripts/test-card-club-hand-order.mjs && node scripts/test-card-club-browser.mjs --hand-sort",
     "test:card-club:browser": "node scripts/test-card-club-browser.mjs",
     "test:card-club:voices": "node scripts/test-card-club-browser.mjs --voices",
+    "test:table-declarations": "node scripts/test-table-declarations.mjs",
     "test:card-club:effects": "node scripts/test-card-club-browser.mjs --effects",
     "test:card-club:landscape": "node scripts/test-card-club-browser.mjs --landscape",
     "test:card-club:responsive": "node scripts/test-card-club-browser.mjs --responsive",

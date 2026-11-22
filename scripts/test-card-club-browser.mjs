@@ -129,13 +129,31 @@ try{
   await host.getByRole('button',{name:'Start this table',exact:true}).click();
   await guest.locator('[data-club-game=yaniv]').waitFor();
   assert.equal(await guest.evaluate(()=>window.__club.room().last.view.players.find(p=>p.name==='Guest B').hero),'magic-akari');
+  await host.evaluate(()=>{
+   const room=window.__club.room();
+   clearInterval(room.cpuTimer);
+   const state=room.session.state;
+   state.turn=1;
+   state.players.forEach((player,seat)=>{player.hand=[seat===0?0:seat===1?13:seat+8];});
+   state.revision++;
+   room.session.publish();
+  });
+  await guest.getByRole('button',{name:'Yaniv!',exact:true}).click();
+  for(const tab of tabs){
+   await tab.waitForFunction(()=>window.turnVoices.some(call=>call.event==='assaf'));
+   assert.deepEqual(await tab.evaluate(()=>window.turnVoices.filter(call=>['yaniv','assaf'].includes(call.event))),[
+    {hero:'magic-akari',event:'yaniv'}, {hero:'high-school-dodgeball',event:'assaf'},
+   ]);
+  }
+  await host.getByRole('button',{name:'Next deal',exact:true}).click();
+  await third.waitForFunction(()=>window.__club.room().last.view.phase==='play');
   await third.getByRole('button',{name:'Leave room',exact:true}).click();
   await host.waitForFunction(()=>window.__club.room().last.view.players.find(p=>p.name.startsWith('Guest C'))?.cpu);
   assert.deepEqual(errors,[]);
-  console.log('PASS: 3-browser WebRTC, host-first selection, copied URL, direct link entry, full-width code, seats and recommendations, start voice and quiet turns, and switching games in the same room.');
+  console.log('PASS: 3-browser WebRTC, host-first selection, copied URL, direct link entry, full-width code, seats and recommendations, start voice and quiet turns, confirmed declarations, and switching games in the same room.');
   process.exitCode=0;
  }else{
- await page.goto('http://127.0.0.1:5243/__club'+(process.argv.includes('--voices')?'?voiceTest=1':''));await page.locator('.cc-title-copy').waitFor();
+ await page.goto('http://127.0.0.1:5243/__club'+((process.argv.includes('--voices')||process.argv.includes('--declaration-voices'))?'?voiceTest=1':''));await page.locator('.cc-title-copy').waitFor();
  for(const [width,height] of [[1280,900],[390,844],[844,390]]) {
   await page.setViewportSize({width,height});
   await page.locator('.cc-title-art').evaluate(img=>img.decode());
@@ -153,7 +171,35 @@ try{
  const load=async(game,n)=>{await page.evaluate(({game,n})=>window.__club.load(game,n||window.definition(game).defaultPlayers),{game,n});await page.waitForFunction(g=>document.querySelector('[data-club-game]')?.getAttribute('data-club-game')===g,game);};
  const snapshot=async(path)=>{await page.waitForFunction(()=>!document.querySelector('.cc-flight-layer'));await page.screenshot({path});};
  const mutate=async(fn,arg)=>{await page.evaluate(({fn,arg})=>{const session=window.__club.room().session;new Function('s','arg',fn)(session.state,arg);session.publish();},{fn:fn.toString().replace(/^.*?\{([\s\S]*)\}$/,'$1'),arg});await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>resolve())));};
- if(process.argv.includes('--declarations')){
+ if(process.argv.includes('--declaration-voices')){
+  const statuses=[];
+  page.on('response',r=>{
+   if(r.url().includes('/sfx/table-declarations/'))statuses.push([new URL(r.url()).pathname,r.status()]);
+  });
+  await page.evaluate(()=>{
+   window.declarationVoices=[];
+   window.audioService.setSfxVolume(0);window.audioService.setVoiceVolume(.5);
+   const play=window.audioService.playCardClubVoice.bind(window.audioService);
+   window.audioService.playCardClubVoice=async(hero,event)=>{
+    const played=await play(hero,event);window.declarationVoices.push({hero,event,played});return played;
+   };
+  });
+  await load('yaniv',3);
+  await mutate(s=>{s.turn=0;s.players.forEach((p,i)=>{p.hand=[[0],[13],[10]][i];});});
+  const heroes=await page.evaluate(()=>window.__club.room().session.state.players.slice(0,2).map(p=>p.hero));
+  await page.getByRole('button',{name:'ヤニブ！',exact:true}).click();
+  await page.waitForFunction(()=>window.declarationVoices.some(v=>v.event==='assaf'));
+  const declarations=()=>page.evaluate(()=>window.declarationVoices.filter(v=>v.event==='yaniv'||v.event==='assaf'));
+  assert.deepEqual(await declarations(),[
+   {hero:heroes[0],event:'yaniv',played:true},{hero:heroes[1],event:'assaf',played:true},
+  ]);
+  await page.evaluate(()=>window.__club.room().session.publish());
+  assert.equal((await declarations()).length,2);
+  for(const [index,line] of ['yaniv','assaf'].entries()){
+   assert(statuses.some(([path,status])=>path.endsWith('/'+heroes[index]+'/'+line+'.mp3')&&(status===206||status===200)),line);
+  }
+  console.log('PASS browser replays Yaniv and Assaf once, from both participants');
+ }else if(process.argv.includes('--declarations')){
   await load('pokerbull',3);
   await mutate(s=>{
    s.players.forEach((p,i)=>p.hand=[[9,10],[11,12],[0,14]][i]);

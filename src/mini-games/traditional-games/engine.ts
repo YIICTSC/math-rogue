@@ -1,3 +1,5 @@
+import { declare } from '../shared/tableDeclarations';
+import { recordTableEvent, tableActionLines } from './declarations';
 import { gridApply, gridCpu, gridDeal, gridMoves, isGridGame, type GridState } from './dominoGrid';
 import {
   isLaneGame,
@@ -258,6 +260,7 @@ export function createTable(game: TableGame, players: TableMember[], seed: numbe
       };
   }
   dealRound(state);
+  recordTableEvent(state, null);
   return state;
 }
 
@@ -352,6 +355,9 @@ export function tableViewFor(s: TableState, self: number): TableView {
 export function applyTableAction(s: TableState, seat: number, action: TableAction) {
   if (s.phase !== 'play' || !s.players[seat] || !action || typeof action.type !== 'string')
     return false;
+  const previousEvent = s.event;
+  const previousForced = s.kind === 'domino' ? s.forced.length : 0;
+  const spoken = tableActionLines(s, action);
   let ok = false;
   switch (s.kind) {
     case 'domino-lanes':
@@ -382,7 +388,11 @@ export function applyTableAction(s: TableState, seat: number, action: TableActio
       ok = applyCrokinole(s, seat, action);
       break;
   }
-  if (ok) s.revision++;
+  if (ok) {
+    s.revision++;
+    declare(s, seat, ...spoken);
+    recordTableEvent(s, previousEvent, previousForced);
+  }
   return ok;
 }
 
@@ -397,13 +407,16 @@ export function nextTableRound(s: TableState) {
   s.roundStartScores = [...s.scores];
   s.revision++;
   dealRound(s);
+  recordTableEvent(s, null);
   return true;
 }
 
 export function playTableCpu(s: TableState) {
   if (s.phase !== 'play') return false;
+  const previousEvent = s.event;
   if (s.kind === 'domino-lanes' && laneTick(s, Date.now())) {
     s.revision++;
+    recordTableEvent(s, previousEvent);
     return true;
   }
   if (s.kind === 'peeper' && s.pile) {

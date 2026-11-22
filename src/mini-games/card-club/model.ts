@@ -1,3 +1,4 @@
+import type { TableDeclaration } from '../shared/tableDeclarations';
 import type {LadderOptions} from './ladderOptions';
 import type { GameId } from './catalog';
 import type { LadderState } from './ladder';
@@ -7,6 +8,7 @@ export type ClubPlayer=PlayerInput&{hand:number[];taken:number[];score:number;tr
 export type Action={type:'play'|'draw'|'pass'|'ask'|'pick'|'bid'|'challenge'|'accept'|'reveal'|'bust'|'hit'|'stand'|'double'|'next'|'trump'|'exchange'|'discard'|'meld'|'layoff'|'continue'|'move'|'knock'|'transfer'|'swap'|'close'|'build'|'buy'|'name'|'order'|'defend'|'take';cards?:number[];target?:number;value?:number;suit?:number;index?:number;form?:'set'|'run';revolution?:boolean;double?:boolean;alone?:boolean};
 export type ClubEvent={key:string;player?:number;value?:number;card?:number};
 export interface ClubState {
+  declarations?: TableDeclaration[];
   version:1; game:GameId;seed:number;revision:number;phase:'bid'|'play'|'reaction'|'round'|'result';
   players:ClubPlayer[];turn:number;dealer:number;round:number;stock:number[];discard:number[];
   table:number[];trick:{player:number;card:number}[];lastTrick:{player:number;card:number}[];

@@ -1,3 +1,4 @@
+import { declare } from '../shared/tableDeclarations';
 import { combinations,rank,suit } from './cards';
 import type { Action,ClubState,ClubView } from './model';
 import type { RuleExtension } from './extensionModel';
@@ -21,7 +22,7 @@ function score(s:ClubState){
  alive.forEach((i,j)=>{c.notes.push({player:i,label:'petrangolaValue',points:points[j]});if(points[j]===worst)s.players[i].lives--;s.players[i].out=s.players[i].lives<=0;s.players[i].score=s.players[i].lives;});
  const survivors=alive.filter(i=>!s.players[i].out);if(survivors.length<=1)finish(s,survivors.length?survivors:alive,survivors.length?'survivor':'draw');else {c.nextDealer=nextSeat(s,s.dealer);roundOver(s);}
 }
-function knock(s:ClubState){const c=s.extra.classic!;if(c.closedBy<0){c.closedBy=s.turn;c.remaining=s.players.flatMap((p,i)=>!p.out&&i!==s.turn?[i]:[]);record(s,'knock',s.turn);}}
+function knock(s:ClubState){const c=s.extra.classic!;if(c.closedBy<0){c.closedBy=s.turn;c.remaining=s.players.flatMap((p,i)=>!p.out&&i!==s.turn?[i]:[]);declare(s,s.turn,'knock');record(s,'knock',s.turn);}}
 function next(s:ClubState){const c=s.extra.classic!;if(c.closedBy>=0){c.remaining=c.remaining.filter(i=>i!==s.turn);if(!c.remaining.length){score(s);return;}}s.turn=nextSeat(s);s.extra.step='petrTurn';}
 function apply(s:ClubState,a:Action){
  const c=s.extra.classic!,p=s.players[s.turn];

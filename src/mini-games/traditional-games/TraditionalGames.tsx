@@ -13,7 +13,6 @@ import {
 import { Capacitor } from '@capacitor/core';
 import type { MiniGameComponentProps } from '../../components/MiniGameRouter';
 import type { LanguageMode } from '../../types';
-import type { CardClubVoiceEvent } from '../../data/cardClubVoices';
 import { CARD_CLUB_VOICE_HEROES } from '../../data/cardClubVoices';
 import { OFFLINE_DISTRIBUTABLE } from '../../config/runtime';
 import { audioService } from '../../services/audioService';
@@ -22,6 +21,7 @@ import { ClubHeroes, ClubOnlineEntry, Face } from '../card-club/ClubSetup';
 import '../card-club/cardClub.css';
 import { copyInviteUrl } from '../shared/copyInviteUrl';
 import { tableRoomCode, tableInviteUrl } from '../shared/tableInvite';
+import { classicTableCall } from './declarations';
 import { useTableVoice } from '../shared/useTableVoice';
 import { TableBoard } from './Boards';
 import { RulesText, Tutorial } from './Tutorial';
@@ -76,12 +76,6 @@ const familyEntries: Array<{
   },
 ];
 
-const effects: Partial<Record<NonNullable<TableView['event']>['key'], CardClubVoiceEvent>> = {
-  domino: 'domino',
-  bomb: 'bomb',
-  'five-shi': 'five-shi',
-  twenty: 'twenty',
-};
 const eventCopy: Partial<Record<NonNullable<TableView['event']>['key'], Copy>> = {
   place: ['置いた', 'Placed', 'おいた'],
   pass: ['パス', 'Pass', 'パス'],
@@ -228,17 +222,19 @@ export default function TraditionalGames({
   const family = familyEntries.find((entry) => entry.id === familyFor(activeGame))!;
   const entry = TABLE_GAMES[activeGame];
   const event = current?.event;
-  const cue = event && effects[event.key];
+  const classicCall = !current?.declarations && classicTableCall(event);
   useTableVoice(
     current
       ? {
           ...current,
           hero: current.players[current.self].hero,
           start: 'table-start',
+          declarations: current.declarations ?? (event && classicCall
+            ? [{ revision: current.revision, seat: event.seat, lines: [classicCall] }]
+            : undefined),
           silentResult: current.winners.length > (current.teams ? 2 : 1),
         }
       : null,
-    current && event && cue ? { hero: current.players[event.seat].hero, event: cue } : undefined,
   );
 
   useEffect(() => () => room.current?.close(), []);
