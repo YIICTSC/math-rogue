@@ -16,9 +16,11 @@ import {
   MoveUpRight,
   Sparkles,
   Sun,
+  Utensils,
 } from 'lucide-react';
 import {
   BIOMES,
+  COMPANION_ROLES,
   GOODS,
   GOOD_IDS,
   RECIPES,
@@ -29,7 +31,10 @@ import {
 } from './content';
 import {
   ACTIVITIES,
+  INN_MEAL_PRICE,
+  activityHours,
   canActivity,
+  canEat,
   canClaimMission,
   equipmentCost,
   homePrice,
@@ -37,9 +42,11 @@ import {
   missionProgress,
   nextHarvest,
   ownDwelling,
+  travelHours,
 } from './life';
+import { BLUEPRINT_IDS, BUILDINGS, HOUSE_MATERIALS, IMPROVEMENTS, blueprint, hasImprovement } from './building';
 import { SLOT_IDS } from './inventory';
-import { affordable, freshWorldCode, worldCode, type Adventure, type LifeActivity } from './state';
+import { MAX_PARTY_SIZE, affordable, freshWorldCode, hungerPenalty, worldCode, type Adventure, type LifeActivity } from './state';
 import {
   DIRECTIONS,
   addressKey,
@@ -48,8 +55,9 @@ import {
   isNight,
   missionsAt,
   realmName,
-  residentPresent,
+  residentRoutine,
   residentsAt,
+  roadBetween,
   sameAddress,
   townArt,
   townAt,
@@ -57,7 +65,7 @@ import {
   type Mission,
 } from './world';
 import { BOONS, TALES } from './tales';
-import { art, Portrait, type Local, type Send } from './ui';
+import { art, ResidentPortrait, type Local, type Send } from './ui';
 
 type PanelProps = { state: Adventure; send: Send; t: Local };
 const directionIcons = [ArrowUp, ArrowRight, ArrowDown, ArrowLeft];
@@ -362,7 +370,7 @@ export function WorldMap({ state: s, send, t }: PanelProps) {
                   if (send({ type: 'travel', direction })) setDetail(null);
                 }}
               >
-                {t(['ここへ向かう', 'Travel here'])}
+                {t(['ここへ向かう', 'Travel here'])} · {travelHours(s, selected)}h
               </button>
             ) : (
               <span>
@@ -374,7 +382,8 @@ export function WorldMap({ state: s, send, t }: PanelProps) {
           </div>
           <div className="sa-road-list">
             {directionIcons.map((Icon, index) => {
-              const next = townAt(atOffset(location, index));
+              const destination = atOffset(location, index);
+              const next = townAt(destination), road = roadBetween(location, destination);
               return (
                 <button
                   type="button"
@@ -386,6 +395,7 @@ export function WorldMap({ state: s, send, t }: PanelProps) {
                   <Icon size={16} />
                   <span>
                     {t(DIRECTIONS[index])} · {t(next.name)}
+                    <small>{t(road.name)} · {travelHours(s, destination)}h</small>
                   </span>
                 </button>
               );
@@ -476,6 +486,36 @@ const costList = (cost: Partial<Goods>, t: Local) =>
     ' · ',
   );
 
+function WorkshopBlueprints({ state: s, send, t }: PanelProps) {
+  const categories = [
+    ['weapon', ['武器の製作', 'Weapons', 'ぶきの せいさく']],
+    ['coat', ['防具の製作', 'Armor', 'ぼうぐの せいさく']],
+    ['charm', ['護符の製作', 'Charms', 'ごふの せいさく']],
+    ['supply', ['料理と道具', 'Meals and supplies', 'りょうりと どうぐ']],
+  ] as const;
+  return <div className="sa-blueprints">
+    {categories.map(([category, label]) => (
+      <details key={category} open={category === 'supply' || undefined}>
+        <summary>{t(label)}</summary>
+        <div className="sa-action-list">
+          {BLUEPRINT_IDS.filter((id) => {
+            const output = blueprint(id).output;
+            return ('slot' in output ? output.slot : 'supply') === category;
+          }).map((id) => {
+            const plan = blueprint(id);
+            const missing = plan.requires && !hasImprovement(s, plan.requires) ? plan.requires : null;
+            return <button type="button" key={id} disabled={Boolean(missing) || !affordable(s, plan.cost)}
+              onClick={() => send({ type: 'fabricate', recipe: id })}>
+              <span>{t(plan.name)}{missing && <small>{t(BUILDINGS[missing].name)}</small>}</span>
+              <small>{costList(plan.cost, t)} · {plan.hours}h</small>
+            </button>;
+          })}
+        </div>
+      </details>
+    ))}
+  </div>;
+}
+
 export function LifePanel({ state: s, send, t, lesson }: PanelProps & { lesson: () => void }) {
   const home = ownDwelling(s);
   const harvest = nextHarvest(s);
@@ -500,7 +540,7 @@ export function LifePanel({ state: s, send, t, lesson }: PanelProps & { lesson: 
               >
                 <Icon size={16} />
                 <span>{t(name)}</span>
-                <small>{hours}h</small>
+                <small>{activityHours(s, hours)}h</small>
               </button>
             );
           })}
@@ -508,6 +548,21 @@ export function LifePanel({ state: s, send, t, lesson }: PanelProps & { lesson: 
             <BookOpen size={16} />
             <span>{t(['学園の復習', 'Review a lesson', 'がくえんの ふくしゅう'])}</span>
             <small>{t(['任意', 'Optional'])}</small>
+          </button>
+        </div>
+      </section>
+      <section className="sa-panel">
+        <h2><Utensils size={19} /> {t(['食事', 'Meals', 'しょくじ'])}</h2>
+        <p className="sa-hint">{t(['一日に一食。空腹が続くと体力と集中が減り、移動や判定に響きます。', 'Eat once per day. Ongoing hunger drains HP and Focus, slows travel and makes checks harder.', 'いちにち いっしょく。くうふくが つづくと たいりょくと しゅうちゅうが へります。'])}</p>
+        {hungerPenalty(s) > 0 && <p className="sa-hunger" data-hungry="true">
+          {t(['空腹が解消するまで回復しづらい状態です。', 'Recovery is weaker until you eat.', 'たべるまで かいふくしづらい じょうたいです。'])}
+        </p>}
+        <div className="sa-action-list">
+          <button type="button" disabled={!s.goods.ration || !canEat(s)} onClick={() => send({ type: 'use', good: 'ration' })}>
+            <span>{t(['携行する弁当を食べる', 'Eat a packed meal', 'おべんとうを たべる'])}</span><small>×{s.goods.ration}</small>
+          </button>
+          <button type="button" disabled={s.gold < INN_MEAL_PRICE || !canEat(s)} onClick={() => send({ type: 'inn-meal' })}>
+            <span>{t(['宿で温かい食事を取る', 'Get a hot meal at the inn', 'やどで あたたかい しょくじを とる'])}</span><small>{INN_MEAL_PRICE} G · 1h</small>
           </button>
         </div>
       </section>
@@ -582,16 +637,39 @@ export function LifePanel({ state: s, send, t, lesson }: PanelProps & { lesson: 
                 </small>
               </button>
             </div>
+            <details className="sa-blueprints" open>
+              <summary>{t(['拠点に設備を建てる', 'Build base facilities', 'きょてんに せつびを たてる'])}</summary>
+              <div className="sa-action-list">
+                {IMPROVEMENTS.map((id) => {
+                  const plan = BUILDINGS[id], built = hasImprovement(s, id);
+                  return <button type="button" key={id}
+                    disabled={built || home.level < plan.level || !affordable(s, plan.cost)}
+                    onClick={() => send({ type: 'build-improvement', improvement: id })}>
+                    <span><strong>{t(plan.name)}</strong><small>{t(plan.benefit)}</small></span>
+                    <small>{built
+                      ? t(['設置済み', 'Built', 'せっちずみ'])
+                      : (home.level < plan.level ? 'Lv. ' + plan.level + ' · ' : '') + costList(plan.cost, t)}</small>
+                  </button>;
+                })}
+              </div>
+            </details>
           </>
         ) : (
-          <button
-            type="button"
-            disabled={s.gold < homePrice(s)}
-            onClick={() => send({ type: 'build', mode: 'buy' })}
-          >
-            <Home size={16} />
-            {t(['庭付きの家を買う', 'Buy a house with a garden'])} · {homePrice(s)} G
-          </button>
+          <div className="sa-action-list">
+            <button type="button" disabled={!affordable(s, HOUSE_MATERIALS)}
+              onClick={() => send({ type: 'build', mode: 'raise' })}>
+              <span>{t(['素材で家を建てる', 'Build a house from materials', 'そざいで いえを たてる'])}</span>
+              <small>{costList(HOUSE_MATERIALS, t)} · 5h</small>
+            </button>
+            <button
+              type="button"
+              disabled={s.gold < homePrice(s)}
+              onClick={() => send({ type: 'build', mode: 'buy' })}
+            >
+              <Home size={16} />
+              {t(['庭付きの家を買う', 'Buy a house with a garden'])} · {homePrice(s)} G
+            </button>
+          </div>
         )}
         <div className="sa-section-row">
           <button type="button" onClick={() => send({ type: 'rest', rest: 'bench' })}>
@@ -673,25 +751,17 @@ export function LifePanel({ state: s, send, t, lesson }: PanelProps & { lesson: 
               onClick={() => send({ type: 'craft', recipe: slot })}
             >
               <span>
-                {t(SLOT_NAMES[slot])} · {t(['製作', 'Forge'])}
+                {t(SLOT_NAMES[slot])} · {t(['おまかせ製作', 'Forge a random design', 'おまかせ せいさく'])}
               </span>
               <small>{costList(equipmentCost(s, slot), t)}</small>
             </button>
           ))}
         </div>
+        <WorkshopBlueprints state={s} send={send} t={t} />
       </section>
     </div>
   );
 }
-
-const SUPPORT = {
-  host: ['戦闘中に仲間を回復', 'Heals during combat'],
-  broker: ['交渉を支援', 'Aids Presence checks'],
-  smith: ['攻撃を受け止める', 'Reduces damage'],
-  keeper: ['攻撃を受け止める', 'Reduces damage'],
-  reader: ['調査を支援', 'Aids Insight checks'],
-  grower: ['戦闘中に仲間を回復', 'Heals during combat'],
-} satisfies Record<keyof typeof RESIDENT_ROLES, Text>;
 
 export function PeoplePanel({ state: s, send, t }: PanelProps) {
   const people = residentsAt(s.location);
@@ -700,9 +770,10 @@ export function PeoplePanel({ state: s, send, t }: PanelProps) {
   const friend = s.friends[subject.id];
   const role = RESIDENT_ROLES[subject.role];
   const trust = friend?.trust ?? 0;
-  const day = dayAt(s.time),
-    present = residentPresent(subject, s.time);
+  const day = dayAt(s.time);
   const isFollower = s.followers.includes(subject.id);
+  const routine = residentRoutine(subject, s.time);
+  const present = isFollower || routine.present;
   return (
     <div className="sa-town-grid sa-people">
       <section className="sa-panel">
@@ -711,33 +782,36 @@ export function PeoplePanel({ state: s, send, t }: PanelProps) {
           {t(['町の人々', 'Town residents', 'まちの ひとびと'])}
         </h2>
         <div className="sa-people-list">
-          {people.map((person) => (
+          {people.map((person) => {
+            const schedule = residentRoutine(person, s.time);
+            const traveling = s.followers.includes(person.id);
+            return (
             <button
               type="button"
               key={person.id}
               aria-pressed={subject.id === person.id}
               onClick={() => setPicked(person.id)}
             >
-              <Portrait id={'resident-' + person.art} lazy />
+              <ResidentPortrait role={person.role} />
               <span>
                 <strong>{t(person.name)}</strong>
                 <small>{t(RESIDENT_ROLES[person.role].job)}</small>
-                <small>{t(person.site)}</small>
+                <small>{t(traveling ? ['同行中', 'Traveling with you', 'どうこうちゅう'] : schedule.activity)}</small>
               </span>
               <small>
-                {residentPresent(person, s.time) ? t(['在席', 'Here']) : t(['不在', 'Away'])}
+                {traveling || schedule.present ? t(['話せる', 'Available', 'はなせる']) : t(['不在', 'Away', 'ふざい'])}
               </small>
             </button>
-          ))}
+          );})}
         </div>
       </section>
       <section className="sa-panel">
         <div className="sa-npc-head">
-          <Portrait id={'resident-' + subject.art} />
+          <ResidentPortrait role={subject.role} />
           <div>
             <h2>{t(subject.name)}</h2>
             <p>{t(role.job)}</p>
-            <p>{t(subject.site)}</p>
+            <p>{isFollower ? t(['同行中', 'Traveling with you', 'どうこうちゅう']) : t(routine.activity) + ' · ' + String(routine.until).padStart(2, '0') + ':00 ' + t(['まで', 'change', 'まで'])}</p>
             <b className="sa-gold">
               {t(['親しさ', 'Trust'])} {trust}/8
             </b>
@@ -746,11 +820,7 @@ export function PeoplePanel({ state: s, send, t }: PanelProps) {
         <blockquote>
           {present
             ? t(role.lines[Math.min(2, Math.floor(trust / 3))])
-            : t(
-                subject.shift === 'night'
-                  ? ['夜に会えます。', 'Come back at night.']
-                  : ['昼に会えます。', 'Come back during the day.'],
-              )}
+            : t(['起きる時間を待つと会えます。', 'Come back after they wake up.', 'おきる じかんまで まつと あえます。'])}
         </blockquote>
         <div className="sa-action-list">
           <button
@@ -778,16 +848,16 @@ export function PeoplePanel({ state: s, send, t }: PanelProps) {
           <button
             className="sa-primary"
             type="button"
-            disabled={!present || trust < 4 || isFollower || s.followers.length >= 2}
+            disabled={!present || trust < 4 || isFollower || s.followers.length >= MAX_PARTY_SIZE - 1}
             onClick={() => send({ type: 'social', id: subject.id, verb: 'recruit' })}
           >
             {isFollower ? t(['旅の仲間', 'In your party']) : t(['旅に誘う', 'Invite to travel'])}
-            <small>{t(SUPPORT[subject.role])}</small>
+            <small>{t(COMPANION_ROLES[subject.role].copy)}</small>
           </button>
         </div>
         <div className="sa-party">
           <h3>
-            {t(['旅の仲間', 'Travel companions'])} {s.followers.length}/2
+            {t(['パーティ', 'Party', 'パーティ'])} {s.followers.length + 1}/{MAX_PARTY_SIZE}
           </h3>
           {s.followers.map((id) => {
             const member = s.friends[id]?.resident;
@@ -795,7 +865,7 @@ export function PeoplePanel({ state: s, send, t }: PanelProps) {
               member && (
                 <div key={id} className="sa-section-row">
                   <span>
-                    {t(member.name)} · {t(SUPPORT[member.role])}
+                    {t(member.name)} · {t(COMPANION_ROLES[member.role].copy)}
                   </span>
                   <button
                     type="button"

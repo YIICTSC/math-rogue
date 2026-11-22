@@ -1,4 +1,5 @@
 import { TALES, type Boon } from './tales';
+import { HOUSE_MATERIALS, buildImprovement, fabricate, hasImprovement } from './building';
 import {
   BIOMES,
   GOODS,
@@ -13,6 +14,8 @@ import {
 import { adjustGearCaps, forgeGear, gearName, gearValue, SLOT_IDS } from './inventory';
 import {
   advance,
+  MAX_PARTY_SIZE,
+  missedMeals,
   awardExperience,
   awardInspiration,
   maxFocus,
@@ -39,6 +42,7 @@ import {
   missionsAt,
   residentPresent,
   residentsAt,
+  roadBetween,
   sameAddress,
   townAt,
   weatherIndexAt,
@@ -73,6 +77,8 @@ export const ACTIVITIES: Record<LifeActivity, { name: Text; stat: Stat; hours: n
 };
 export const localBoon = (s: Adventure): Boon | undefined =>
   s.townTales[addressKey(s.location)]?.boon;
+export const INN_MEAL_PRICE = 5;
+export const activityHours = (s: Adventure, base: number) => base + Math.min(2, missedMeals(s));
 export const ownDwelling = (s: Adventure) => s.workshop[addressKey(s.location)];
 export const homePrice = (s: Adventure) => 45 + BIOMES[townAt(s.location).biome].risk * 7;
 export const nextHarvest = (s: Adventure) =>
@@ -91,9 +97,22 @@ export function marketPrice(s: Adventure, good: Good, sell: boolean) {
     : Math.max(2, base - discount - (localBoon(s) === 'trade' ? 2 : 0));
 }
 
-function arrive(s: Adventure, to: Address, time: number) {
+export function travelHours(s: Adventure, to: Address) {
+  const road = roadBetween(s.location, to);
+  return Math.max(1, activityHours(s,
+    2 + road.hours + Number(isNight(s.time)) +
+    Number(weatherIndexAt(to, s.time) === 1) -
+    Number(localBoon(s) === 'roads') -
+    Number(hasImprovement(s, 'watchtower'))));
+}
+
+function arrive(s: Adventure, to: Address, time: number, material?: Good) {
   const key = addressKey(to);
   const visited = Object.hasOwn(s.knownTowns, key);
+  if (!visited && material) {
+    s.goods[material]++;
+    note(s, ['街道で' + GOODS[material].name[0] + 'を拾った。', 'You find ' + GOODS[material].name[1] + ' along the road.'], 'good');
+  }
   s.location = to;
   s.knownTowns[key] = to;
   advance(s, time);
@@ -132,7 +151,7 @@ function life(s: Adventure, activity: LifeActivity) {
   const success = succeeded(check);
   const excellent = check.outcome === 'critical';
   const tone = success ? 'good' : 'risk';
-  advance(s, hours);
+  advance(s, activityHours(s, hours));
   s.fatigue = Math.min(9, s.fatigue + (activity === 'work' ? 2 : 1));
   if (activity === 'gather' || activity === 'fish' || activity === 'forage') {
     const good =
@@ -145,13 +164,16 @@ function life(s: Adventure, activity: LifeActivity) {
           : biome.local;
     const amount = 1 + Number(success) + Number(excellent) + Number(localBoon(s) === 'garden');
     s.goods[good] += amount;
+    const extra = activity === 'gather' ? good === 'ore' ? 'timber' :
+      hash(addressKey(s.location) + '/supply/' + dayAt(s.time)) % 2 ? 'timber' : 'ore' : undefined;
+    if (extra) s.goods[extra] += 1 + Number(success);
     if (s.character.calling === 'naturalist') s.goods.herb++;
     s.lastGather = { location: addressKey(s.location), time: s.time };
     note(
       s,
       [
-        `${GOODS[good].name[0]}を${amount}手に入れた。`,
-        `Collected ${amount} × ${GOODS[good].name[1]}.`,
+        `${GOODS[good].name[0]}を${amount}手に入れた。${extra ? ' ' + GOODS[extra].name[0] + ' ×' + (1 + Number(success)) : ''}`,
+        `Collected ${amount} × ${GOODS[good].name[1]}.${extra ? ' ' + GOODS[extra].name[1] + ' ×' + (1 + Number(success)) : ''}`,
       ],
       tone,
       check,
@@ -239,12 +261,12 @@ function interact(s: Adventure, action: Extract<Action, { type: 'social' }>) {
     return true;
   }
   const resident = residentsAt(s.location).find((person) => person.id === id);
-  if (!resident || !residentPresent(resident, s.time)) return false;
+  if (!resident || (!s.followers.includes(id) && !residentPresent(resident, s.time))) return false;
   const role = RESIDENT_ROLES[resident.role],
     day = dayAt(s.time),
     friend = s.friends[id];
   if (action.verb === 'recruit') {
-    if ((friend?.trust ?? 0) < 4 || s.followers.includes(id) || s.followers.length >= 2)
+    if ((friend?.trust ?? 0) < 4 || s.followers.includes(id) || s.followers.length >= MAX_PARTY_SIZE - 1)
       return false;
     s.followers.push(id);
     note(
@@ -340,16 +362,22 @@ export function claimMission(s: Adventure) {
 
 function build(s: Adventure, mode: Extract<Action, { type: 'build' }>['mode']) {
   const home = ownDwelling(s);
-  if (mode === 'buy') {
-    const price = homePrice(s);
-    if (home || s.gold < price) return false;
-    s.gold -= price;
+  if (mode === 'buy' || mode === 'raise') {
+    if (home) return false;
+    if (mode === 'buy') {
+      const price = homePrice(s);
+      if (s.gold < price) return false;
+      s.gold -= price;
+    } else {
+      if (!spendGoods(s, HOUSE_MATERIALS)) return false;
+      advance(s, 5);
+    }
     s.workshop[addressKey(s.location)] = { level: 1, planted: [] };
     note(
       s,
       [
-        '庭付きの住まいを手に入れた。ゆっくり休める場所ができた。',
-        'You buy a home with a garden. You have somewhere to settle and rest.',
+        '庭付きの住まいができた。道具を備え、旅の拠点にしよう。',
+        'You have a home with a garden. Equip it with useful facilities for your travels.',
       ],
       'good',
     );
@@ -368,14 +396,14 @@ function build(s: Adventure, mode: Extract<Action, { type: 'build' }>['mode']) {
       note(s, ['作業場と庭を広げた。', 'You expand your garden and workshop.'], 'good');
     } else if (mode === 'plant') {
       if (home.planted.length >= home.level * 2 || !spendGoods(s, { seed: 1 })) return false;
-      home.planted.push(s.time + 20);
+      home.planted.push(s.time + (hasImprovement(s, 'greenhouse') ? 13 : 20));
       advance(s, 1);
       note(s, ['種をまいた。旅の間にも育つ。', 'You plant a seed. It grows while you travel.']);
     } else {
       const amount = nextHarvest(s);
       if (!amount) return false;
       home.planted = home.planted.filter((time) => time > s.time);
-      s.goods.grain += amount * (home.level + 1 + Number(localBoon(s) === 'garden'));
+      s.goods.grain += amount * (home.level + 1 + Number(localBoon(s) === 'garden') + Number(hasImprovement(s, 'greenhouse')));
       s.goods.herb += amount;
       s.goods.seed += amount;
       s.counters.harvests += amount;
@@ -410,7 +438,7 @@ function craft(s: Adventure, recipe: Good | Slot) {
     if (!Object.hasOwn(RECIPES, recipe)) return false;
     const entry = RECIPES[recipe as keyof typeof RECIPES];
     if (!spendGoods(s, entry.cost)) return false;
-    s.goods[entry.good]++;
+    s.goods[entry.good] += 1 + Number(entry.good === 'ration' && hasImprovement(s, 'larder'));
     advance(s, 1);
     note(
       s,
@@ -423,20 +451,40 @@ function craft(s: Adventure, recipe: Good | Slot) {
   return true;
 }
 
-export function useSupply(s: Adventure, good: 'tonic' | 'lantern' | 'ration') {
+export const canEat = (s: Adventure) =>
+  s.time - s.lastMealAt >= 8 || s.fatigue > 0 || s.hp < maxHp(s) || s.focus < maxFocus(s);
+
+function eatMeal(s: Adventure, inn: boolean) {
+  s.lastMealAt = s.time;
+  s.fatigue = Math.max(0, s.fatigue - (inn ? 5 : 3));
+  recover(s, inn ? 10 : 5, inn ? 6 : 4);
+  note(s, inn
+    ? ['宿で温かい食事を取った。', 'You eat a hot meal at the inn.', 'やどで あたたかい しょくじを とった。']
+    : ['弁当を食べた。', 'You eat a packed meal.', 'べんとうを たべた。'], 'good');
+}
+
+export function useSupply(s: Adventure, good: Extract<Action, { type: 'use' }>['good']) {
   if (!(s.goods[good] > 0)) return false;
   const delve = s.delve;
-  if (good === 'tonic') {
-    if (s.hp >= maxHp(s)) return false;
-    recover(s, 14 + s.level, 0);
+  if (good === 'ration') {
+    if (!canEat(s)) return false;
+    s.goods.ration--;
+    eatMeal(s, false);
+    return true;
+  }
+  if (good === 'tonic' || good === 'strongTonic') {
+    if (missedMeals(s) >= 2 || (s.hp >= maxHp(s) && (good === 'tonic' || s.focus >= maxFocus(s)))) return false;
+    recover(s, (good === 'tonic' ? 14 : 24) + s.level, good === 'tonic' ? 0 : 5);
   } else if (good === 'lantern') {
     if (!delve || delve.light >= 14) return false;
     delve.light = Math.min(18, delve.light + 12);
-  } else {
-    if (s.fatigue === 0 && s.focus === maxFocus(s) && s.hp === maxHp(s)) return false;
+  } else if (good === 'fieldKit') {
+    if (!delve || delve.encounter || missedMeals(s) >= 2) return false;
+    advance(s, 1);
+    delve.light = Math.min(18, delve.light + 3);
+    recover(s, 10, 5);
     s.fatigue = Math.max(0, s.fatigue - 3);
-    recover(s, 5, 4);
-  }
+  } else return false;
   s.goods[good]--;
   note(s, [`${GOODS[good].name[0]}を使った。`, `Used ${GOODS[good].name[1]}.`], 'good');
   return true;
@@ -526,13 +574,7 @@ export function applyTownAction(s: Adventure, action: Action): boolean {
         return false;
       const to = atOffset(s.location, action.direction);
       if (!Number.isSafeInteger(to.x) || !Number.isSafeInteger(to.y)) return false;
-      const travel =
-        2 +
-        Number(isNight(s.time)) +
-        Math.floor(BIOMES[townAt(to).biome].risk / 2) +
-        Number(weatherIndexAt(to, s.time) === 1) -
-        Number(localBoon(s) === 'roads');
-      arrive(s, to, travel);
+      arrive(s, to, travelHours(s, to), roadBetween(s.location, to).material);
       return true;
     }
     case 'gate': {
@@ -562,6 +604,12 @@ export function applyTownAction(s: Adventure, action: Action): boolean {
     }
     case 'life':
       return life(s, action.activity);
+    case 'inn-meal':
+      if (s.gold < INN_MEAL_PRICE || !canEat(s)) return false;
+      s.gold -= INN_MEAL_PRICE;
+      eatMeal(s, true);
+      advance(s, 1);
+      return true;
     case 'rest': {
       const rest = action.rest;
       if ((rest === 'home' && !ownDwelling(s)) || (rest === 'inn' && s.gold < 7)) return false;
@@ -570,7 +618,7 @@ export function applyTownAction(s: Adventure, action: Action): boolean {
         advance(s, 8);
         s.fatigue = 0;
         recover(s, maxHp(s), maxFocus(s));
-        if (s.character.calling === 'bard' && s.followers.length > 0) awardInspiration(s);
+        if ((rest === 'home' && hasImprovement(s, 'shrine')) || (s.character.calling === 'bard' && s.followers.length > 0)) awardInspiration(s);
       } else {
         const hours = [2, 4, 8].includes(action.hours ?? 2) ? (action.hours ?? 2) : 2;
         advance(s, hours);
@@ -600,6 +648,10 @@ export function applyTownAction(s: Adventure, action: Action): boolean {
       return build(s, action.mode);
     case 'craft':
       return craft(s, action.recipe);
+    case 'fabricate':
+      return fabricate(s, action.recipe);
+    case 'build-improvement':
+      return buildImprovement(s, action.improvement);
     case 'equip':
     case 'salvage':
     case 'sell-gear': {

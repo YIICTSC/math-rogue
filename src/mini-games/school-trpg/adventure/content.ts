@@ -23,10 +23,13 @@ export const GOODS = {
   timber: { name: ['木材', 'Timber'], price: 6 },
   ore: { name: ['鉱石', 'Ore'], price: 8 },
   fish: { name: ['魚', 'Fish'], price: 5 },
-  grain: { name: ['穀物', 'Grain'], price: 4 },
+  grain: { name: ['穀物', 'Grain', 'こくもつ'], price: 4 },
+  meat: { name: ['魔獣の肉', 'Beast meat', 'まじゅうの にく'], price: 7 },
   thread: { name: ['魔糸', 'Moonthread'], price: 9 },
   seed: { name: ['野菜の種', 'Seeds'], price: 3 },
   tonic: { name: ['回復薬', 'Tonic'], price: 12 },
+  strongTonic: { name: ['濃い回復薬', 'Greater tonic', 'こい かいふくやく'], price: 25 },
+  fieldKit: { name: ['野営道具', 'Camp kit', 'やえいどうぐ'], price: 15 },
   lantern: { name: ['灯油', 'Lamp oil'], price: 9 },
   ration: { name: ['温かな弁当', 'Hot meal'], price: 10 },
   relic: { name: ['遺物片', 'Relic shard'], price: 21 },
@@ -415,9 +418,21 @@ export const WEAPONS = {
     effect: 'spark',
   },
   hammer: { name: ['工匠の鎚', 'Artisan Hammer'], style: 'steel', stat: 'might', effect: 'break' },
+  spear: { name: ['風渡りの槍', 'Gale Pike', 'かぜわたりの やり'], style: 'wind', stat: 'might', effect: 'break' },
+  bow: { name: ['木霊の弓', 'Echo Bow', 'こだまの ゆみ'], style: 'wind', stat: 'finesse', effect: 'quick' },
+  staff: { name: ['月読の杖', 'Moonreader Staff', 'つきよみの つえ'], style: 'arcane', stat: 'insight', effect: 'spark' },
 } satisfies Record<string, { name: Text; style: DamageType; stat: Stat; effect: string }>;
 export type Weapon = keyof typeof WEAPONS;
 export type DamageType = 'steel' | 'arcane' | 'wind';
+export const COMPANION_ROLES = {
+  host: { style: 'arcane', healer: true, ward: false, copy: ['負傷者へ手当て', 'Treats injured allies', 'けがを てあて'] },
+  broker: { style: 'wind', healer: false, ward: false, copy: ['風属性のけん制', 'Wind attacks and bargaining', 'かぜぞくせいの けんせい'] },
+  smith: { style: 'steel', healer: false, ward: true, copy: ['前衛で攻撃を受ける', 'Takes hits on the front line', 'ぜんえいで うける'] },
+  keeper: { style: 'steel', healer: false, ward: true, copy: ['前衛で攻撃を受ける', 'Takes hits on the front line', 'ぜんえいで うける'] },
+  reader: { style: 'arcane', healer: false, ward: false, copy: ['術属性で攻撃', 'Attacks with arcane magic', 'じゅつぞくせいで こうげき'] },
+  grower: { style: 'wind', healer: true, ward: false, copy: ['薬草で手当て', 'Heals with herbs', 'やくそうで てあて'] },
+} satisfies Record<ResidentRole, { style: DamageType; healer: boolean; ward: boolean; copy: Text }>;
+
 export type Slot = 'weapon' | 'coat' | 'charm';
 export const SLOT_NAMES = {
   weapon: ['武器', 'Weapon'],

@@ -35,7 +35,13 @@ export function gearType(gear: Gear): Text {
 export function gearValue(gear: Gear) {
   return 5 + gear.power * 3 + RARITY_IDS.indexOf(gear.rarity) * 5;
 }
-export function forgeGear(s: Adventure, depth: number, minimum: number, forcedSlot?: Slot) {
+export function forgeGear(
+  s: Adventure,
+  depth: number,
+  minimum: number,
+  forcedSlot?: Slot,
+  specification?: { weapon?: Weapon; affix?: Affix },
+) {
   const roll = nextRandom(s, 100);
   const rarity = Math.max(minimum, roll < 3 ? 3 : roll < 14 ? 2 : roll < 43 ? 1 : 0);
   const slot = forcedSlot ?? SLOT_IDS[nextRandom(s, SLOT_IDS.length)];
@@ -46,8 +52,8 @@ export function forgeGear(s: Adventure, depth: number, minimum: number, forcedSl
     rarity: RARITY_IDS[rarity],
     power: (slot === 'weapon' ? 2 : 1) + rarity + tier,
     found: dayAt(s.time),
-    ...(slot === 'weapon' ? { weapon: WEAPON_IDS[nextRandom(s, WEAPON_IDS.length)] } : {}),
-    ...(rarity > 0 ? { affix: AFFIX_IDS[nextRandom(s, AFFIX_IDS.length)] } : {}),
+    ...(slot === 'weapon' ? { weapon: specification?.weapon ?? WEAPON_IDS[nextRandom(s, WEAPON_IDS.length)] } : {}),
+    ...(rarity > 0 ? { affix: specification?.affix ?? AFFIX_IDS[nextRandom(s, AFFIX_IDS.length)] } : {}),
   };
   if (s.gear.length >= 120) {
     s.goods.ore += 1 + rarity;

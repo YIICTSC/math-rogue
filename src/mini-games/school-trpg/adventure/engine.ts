@@ -2,9 +2,10 @@ import { applyDelveAction } from './delve';
 import { applyTownAction, declareInTown } from './life';
 import { claimBadge } from './guild';
 import { STAT_IDS } from './content';
-import { note, type Action, type Adventure } from './state';
+import { finishDefeat, note, type Action, type Adventure } from './state';
 
 export function adventureTransition(state: Adventure, action: Action) {
+  if (state.fallenAt !== null) return state;
   const next = structuredClone(state);
   let changed: boolean;
   switch (action.type) {
@@ -40,6 +41,7 @@ export function adventureTransition(state: Adventure, action: Action) {
           : applyTownAction(next, action);
   }
   if (!changed) return state;
+  finishDefeat(next);
   next.revision++;
   return next;
 }

@@ -212,12 +212,27 @@ const FRONTIER: Record<Biome, Text[]> = {
   ],
 };
 
+export const ROADS = {
+  paved: { name: ['石畳の街道', 'Paved road', 'いしだたみの かいどう'], hours: 0, material: 'grain' },
+  woods: { name: ['木立の小径', 'Woodland trail', 'こだちの こみち'], hours: 1, material: 'timber' },
+  stream: { name: ['川沿いの道', 'Riverside path', 'かわぞいの みち'], hours: 1, material: 'fish' },
+  ridge: { name: ['峠越え', 'Mountain pass', 'とうげごえ'], hours: 2, material: 'ore' },
+  heath: { name: ['薬草の野道', 'Herb trail', 'やくそうの のみち'], hours: 1, material: 'herb' },
+} as const;
+type Road = keyof typeof ROADS;
+const roadIds = Object.keys(ROADS) as Road[];
+export function roadBetween(from: Address, to: Address) {
+  return ROADS[choice(roadIds, [addressKey(from), addressKey(to)].sort().join('/route/'))];
+}
+
 export type Town = { biome: Biome; name: Text; lead: Text; landmark: Text };
 export function townAt(address: Address): Town {
   const key = addressKey(address);
   const core = address.world === ACADEMY_WORLD ? CORE[pointKey(address)] : undefined;
   if (core) return core;
-  const biome = choice(BIOME_IDS, key + '/biome');
+  const startingRing = address.world.startsWith('road-') && Math.abs(address.x) + Math.abs(address.y) <= 1;
+  const eligible: readonly Biome[] = startingRing ? ['academy', 'grove', 'coast'] : BIOME_IDS;
+  const biome = choice(eligible, key + '/biome');
   const prefix = choice(PLACE_PREFIX, key + '/prefix');
   const suffix = choice(PLACE_SUFFIX, key + '/suffix');
   return {
@@ -292,8 +307,8 @@ export function residentsAt(address: Address): Resident[] {
     id: key + '/' + role,
     name: NAMES[roster?.[i] ?? (start + i * 7) % NAMES.length],
     role,
-    art: [0, 0, 1, 3, 2, 3][i],
-    site: biome.sites[i % biome.sites.length],
+    art: i,
+    site: biome.sites[(i + (roster ? 0 : hash(key + '/districts'))) % biome.sites.length],
     shift: i === 0 || i === 3 ? 'all' : i === 4 ? 'night' : 'day',
   }));
 }
@@ -302,8 +317,42 @@ export const HOURS_PER_DAY = 24;
 export const dayAt = (time: number) => Math.floor(time / HOURS_PER_DAY) + 1;
 export const hourAt = (time: number) => time % HOURS_PER_DAY;
 export const isNight = (time: number) => hourAt(time) >= 19 || hourAt(time) < 6;
+const RESIDENT_HOURS: Record<ResidentRole, { start: number; end: number; wake: number; bed: number }> = {
+  host: { start: 6, end: 20, wake: 5, bed: 22 },
+  broker: { start: 7, end: 16, wake: 6, bed: 21 },
+  smith: { start: 8, end: 17, wake: 6, bed: 22 },
+  keeper: { start: 6, end: 18, wake: 5, bed: 23 },
+  reader: { start: 16, end: 1, wake: 9, bed: 2 },
+  grower: { start: 6, end: 15, wake: 5, bed: 20 },
+};
+const inShift = (hour: number, start: number, end: number) =>
+  start < end ? hour >= start && hour < end : hour >= start || hour < end;
+export function residentRoutine(resident: Resident, time: number) {
+  const hour = hourAt(time);
+  const { start, end, wake, bed } = RESIDENT_HOURS[resident.role];
+  if (!inShift(hour, wake, bed)) return {
+    present: false,
+    activity: ['自宅で就寝中', 'Sleeping at home', 'じたくで ねています'] as Text,
+    until: wake,
+  };
+  if (hour === 12 || (resident.role === 'reader' && hour === 19)) return {
+    present: true,
+    activity: ['食堂で食事中', 'Eating in the dining hall', 'しょくどうで しょくじちゅう'] as Text,
+    until: hour + 1,
+  };
+  if (inShift(hour, start, end)) return {
+    present: true,
+    activity: resident.site,
+    until: hour < 12 && resident.role !== 'reader' ? Math.min(12, end) : end,
+  };
+  return {
+    present: true,
+    activity: ['広場で休憩中', 'Taking a break in the square', 'ひろばで きゅうけいちゅう'] as Text,
+    until: inShift(hour, wake, start) ? start : bed,
+  };
+}
 export const residentPresent = (resident: Resident, time: number) =>
-  resident.shift === 'all' || (resident.shift === 'night') === isNight(time);
+  residentRoutine(resident, time).present;
 export const weatherIndexAt = (address: Address, time: number) =>
   hash(addressKey(address) + '/weather/' + dayAt(time)) % 3;
 export const weatherAt = (address: Address, time: number) =>
@@ -428,6 +477,20 @@ export function generateFloor(address: Address, depth: number): Floor {
     open.add(next);
     route.push(next);
   }
+  const generated = address.world.startsWith('road-');
+  const layout = generated ? hash(seed + '/layout') % 3 : 0;
+  if (generated && layout !== 0) {
+    const anchors = [...open].filter((cell) => {
+      const { x, y } = cellPoint(cell);
+      return x >= 2 && x <= SIDE - 3 && y >= 2 && y <= SIDE - 3 && cell !== ENTRY_CELL;
+    });
+    anchors.sort((a, b) => hash(seed + '/hall/' + a) - hash(seed + '/hall/' + b));
+    for (const anchor of anchors.slice(0, layout)) {
+      const { x, y } = cellPoint(anchor);
+      for (let dy = -1; dy <= 1; dy++)
+        for (let dx = -1; dx <= 1; dx++) open.add((y + dy) * SIDE + x + dx);
+    }
+  }
   const walls = Array.from({ length: SIDE * SIDE }, (_, i) => i).filter((i) => {
     const { x, y } = cellPoint(i);
     return (
@@ -440,7 +503,7 @@ export function generateFloor(address: Address, depth: number): Floor {
     );
   });
   walls.sort((a, b) => hash(seed + '/cross/' + a) - hash(seed + '/cross/' + b));
-  walls.slice(0, 2 + (depth % 2)).forEach((cell) => open.add(cell));
+  walls.slice(0, generated ? 2 + hash(seed + '/loops') % 5 : 2 + (depth % 2)).forEach((cell) => open.add(cell));
   const distance = new Map([[ENTRY_CELL, 0]]);
   const queue = [ENTRY_CELL];
   for (const cell of queue)

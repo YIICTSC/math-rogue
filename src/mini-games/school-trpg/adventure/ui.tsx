@@ -2,7 +2,7 @@ import React from 'react';
 import { Dice5 } from 'lucide-react';
 import type { LanguageMode } from '../../../types';
 import { assetUrl } from '../../../utils/assetPaths';
-import { STATS, text, type Text } from './content';
+import { RESIDENT_ROLE_IDS, STATS, text, type ResidentRole, type Text } from './content';
 import type { Action, Check } from './state';
 
 export type Local = (copy: Text) => string;
@@ -12,6 +12,14 @@ export const copyFor =
     text(language, copy);
 export type Send = (action: Action) => boolean;
 export const art = (asset: string) => assetUrl('sprites/school-adventure/' + asset + '.webp');
+export const atlasUrl = (asset: string) => assetUrl('sprites/school-adventure/' + asset + '-atlas.png');
+export const atlasPosition = (index: number) => (index % 3) * 50 + '% ' + Math.floor(index / 3) * 100 + '%';
+export function ResidentPortrait({ role }: { role: ResidentRole }) {
+  return <span className="sa-portrait sa-resident-portrait" aria-hidden="true" style={{
+    backgroundImage: 'url("' + atlasUrl('residents') + '")',
+    backgroundPosition: atlasPosition(RESIDENT_ROLE_IDS.indexOf(role)),
+  }} />;
+}
 
 const OUTCOMES = {
   critical: ['大成功', 'Critical success', 'だいせいこう'],

@@ -28,13 +28,18 @@ import {
   type Resident,
 } from './world';
 
-export const ADVENTURE_VERSION = 1;
+export const ADVENTURE_VERSION = 2;
+export const MAX_PARTY_SIZE = 6;
+export const MEAL_INTERVAL = 24;
 export const CREATION_POINTS = 5;
 export const START_STATS: Record<Stat, number> = { might: 2, finesse: 2, insight: 2, presence: 3 };
 export const PORTRAIT_IDS = [
   ...Array.from({ length: 20 }, (_, i) => 'f' + (i + 1)),
   ...Array.from({ length: 20 }, (_, i) => 'm' + (i + 1)),
 ];
+
+export const DEATH_RULES = ['permadeath', 'return-town'] as const;
+export type DeathRule = (typeof DEATH_RULES)[number];
 
 export type Character = {
   name: string;
@@ -44,6 +49,7 @@ export type Character = {
   ideal: Ideal;
   stats: Record<Stat, number>;
   world: string;
+  deathRule: DeathRule;
 };
 export type Gear = {
   id: string;
@@ -70,7 +76,11 @@ export type Check = {
   outcome: 'critical' | 'success' | 'partial' | 'fail';
   inspiration: boolean;
 };
-export type Garden = { level: number; planted: number[] };
+export type Garden = {
+  level: number;
+  planted: number[];
+  additions?: Partial<Record<import('./building').Improvement, number>>;
+};
 export type Friend = { resident: Resident; trust: number; visitedDay: number; offeredDay: number };
 export type DungeonRecord = { seen: number[]; cleared: number[]; inspected: number[] };
 export type Enemy = {
@@ -82,12 +92,14 @@ export type Enemy = {
   stagger: boolean;
   known: boolean;
 };
+export type Ally = { id: string; hp: number; max: number };
 export type Encounter = {
   cell: number;
   guardian: boolean;
   bound: boolean;
   turn: number;
   enemies: Enemy[];
+  allies?: Ally[];
   combo: number;
   guard: boolean;
   surprise: boolean;
@@ -126,6 +138,9 @@ export type Adventure = {
   exploredLandmarks: Record<string, boolean>;
   townTales: Record<string, { boon?: Boon; day: number }>;
   time: number;
+  lastMealAt: number;
+  fallenAt: number | null;
+  defeats: number;
   level: number;
   xp: number;
   talent: number;
@@ -195,10 +210,13 @@ export type Action =
   | { type: 'rest'; rest: 'bench' | 'inn' | 'home'; hours?: number }
   | { type: 'trade'; good: Good; sell: boolean }
   | { type: 'social'; id: string; verb: SocialActivity }
-  | { type: 'build'; mode: 'buy' | 'upgrade' | 'plant' | 'harvest' }
+  | { type: 'build'; mode: 'buy' | 'raise' | 'upgrade' | 'plant' | 'harvest' }
   | { type: 'craft'; recipe: Good | Slot }
   | { type: 'equip' | 'salvage' | 'sell-gear'; id: string }
-  | { type: 'use'; good: 'tonic' | 'lantern' | 'ration' }
+  | { type: 'use'; good: 'tonic' | 'lantern' | 'ration' | 'fieldKit' | 'strongTonic' }
+  | { type: 'inn-meal' }
+  | { type: 'fabricate'; recipe: import('./building').BlueprintId }
+  | { type: 'build-improvement'; improvement: import('./building').Improvement }
   | { type: 'train'; stat: Stat }
   | { type: 'lesson'; correct: number }
   | { type: 'mission'; id: string }
@@ -211,7 +229,8 @@ export type Action =
   | { type: 'leave-delve' }
   | { type: 'move'; direction: DelveMove }
   | { type: 'feature'; verb: DungeonVerb; symbol?: number }
-  | { type: 'combat'; move: CombatMove; target: number };
+  | { type: 'combat'; move: CombatMove; target: number }
+  | { type: 'auto-combat'; target: number };
 
 export function worldCode(input: string) {
   return input
@@ -236,6 +255,7 @@ export const defaultCharacter = (): Character => ({
   ideal: 'discovery',
   stats: { ...START_STATS },
   world: ACADEMY_WORLD,
+  deathRule: 'permadeath',
 });
 export function validCharacter(c: Character) {
   return (
@@ -249,6 +269,7 @@ export function validCharacter(c: Character) {
     Object.hasOwn(IDEALS, c.ideal) &&
     typeof c.world === 'string' &&
     Boolean(worldCode(c.world)) &&
+    DEATH_RULES.includes(c.deathRule) &&
     c.stats &&
     STAT_IDS.every((id) => Number.isInteger(c.stats[id]) && c.stats[id] >= 1 && c.stats[id] <= 4) &&
     STAT_IDS.reduce((sum, id) => sum + c.stats[id] - 1, 0) === CREATION_POINTS
@@ -259,13 +280,15 @@ export function startAdventure(character: Character, id: string): Adventure | nu
   if (!validCharacter(character)) return null;
   const origin = ORIGINS[character.origin];
   const calling = CALLINGS[character.calling];
-  const world = worldCode(character.world);
+  const region = worldCode(character.world).slice(0, 14);
+  const world = 'road-' + hash(region + '/' + id).toString(36) + '-' + region;
   const location = { world, x: origin.start[0], y: origin.start[1] };
   const goods = Object.fromEntries(GOOD_IDS.map((good) => [good, 0])) as Goods;
   goods.herb = 1;
   goods.tonic = 2;
   goods.lantern = 2;
-  goods.ration = 1;
+  goods.ration = 2;
+  goods.timber = 1;
   goods[origin.good] += 2;
   goods[calling.good] += 2;
   const weapon: Gear = {
@@ -294,6 +317,9 @@ export function startAdventure(character: Character, id: string): Adventure | nu
     exploredLandmarks: {},
     townTales: {},
     time: 8,
+    lastMealAt: 8,
+    fallenAt: null,
+    defeats: 0,
     level: 1,
     xp: 0,
     talent: 0,
@@ -365,13 +391,61 @@ export const maxFocus = (s: Adventure) =>
   (equipped(s, 'charm')?.power ?? 0);
 export const armor = (s: Adventure) => (equipped(s, 'coat')?.power ?? 0) + wears(s, 'sturdy');
 export const xpGoal = (level: number) => 18 + level * 8;
-export const advance = (s: Adventure, hours: number) => {
+export const missedMeals = (s: Adventure) =>
+  Math.floor(Math.max(0, s.time - s.lastMealAt) / MEAL_INTERVAL);
+export const hoursUntilMeal = (s: Adventure) =>
+  Math.max(0, MEAL_INTERVAL - (s.time - s.lastMealAt));
+export const hungerPenalty = (s: Adventure) =>
+  missedMeals(s) ? Math.min(9, 1 + 2 * missedMeals(s)) : 0;
+
+export function advance(s: Adventure, hours: number) {
+  const before = missedMeals(s);
   s.time += hours;
-};
+  const after = missedMeals(s);
+  if (s.hp <= 0 || before >= after) return;
+  for (let day = before + 1; day <= after && s.hp > 0; day++) {
+    s.hp = Math.max(0, s.hp - Math.ceil(maxHp(s) * Math.min(0.56, 0.15 + day * 0.08)));
+    s.focus = Math.max(0, s.focus - Math.ceil(maxFocus(s) * Math.min(1, 0.25 * day)));
+    s.fatigue = Math.min(9, s.fatigue + 3);
+  }
+  note(s, [
+    '食事を抜いた。体力と集中が落ち、判定が不利になった。',
+    'You missed a meal. HP and Focus fell, and checks are harder.',
+    'しょくじを ぬいた。たいりょくと しゅうちゅうが おち、はんていが ふりに なった。',
+  ], 'risk');
+}
 export const recover = (s: Adventure, hp: number, focus: number) => {
-  s.hp = Math.min(maxHp(s), s.hp + hp);
-  s.focus = Math.min(maxFocus(s), s.focus + focus);
+  if (s.hp <= 0) return;
+  const factor = missedMeals(s) >= 2 ? 0 : missedMeals(s) === 1 ? 0.35 : 1;
+  s.hp = Math.min(maxHp(s), s.hp + Math.floor(hp * factor));
+  s.focus = Math.min(maxFocus(s), s.focus + Math.floor(focus * factor));
 };
+export function finishDefeat(s: Adventure) {
+  if (s.hp > 0 || s.fallenAt !== null) return false;
+  s.defeats++;
+  s.delve = null;
+  if (s.character.deathRule === 'permadeath') {
+    s.fallenAt = s.time;
+    note(s, [
+      'ここで旅が終わった。足跡は旅日誌に残る。',
+      'Your adventure ends here. Your travels remain in the journal.',
+      'ここで たびが おわった。あしあとは たびにっしに のこる。',
+    ], 'risk');
+  } else {
+    const fee = Math.min(s.gold, 4 + Math.ceil(s.gold * 0.17));
+    s.gold -= fee;
+    advance(s, 7);
+    s.lastMealAt = s.time;
+    s.fatigue = 4;
+    s.hp = Math.ceil(maxHp(s) * 0.6);
+    s.focus = Math.ceil(maxFocus(s) * 0.5);
+    note(s, [
+      '町に運ばれ、食事と手当てを受けた。救助費 ' + fee + ' G。',
+      'You were taken to town, fed and treated. Rescue cost ' + fee + ' G.',
+    ], 'risk');
+  }
+  return true;
+}
 export function awardExperience(s: Adventure, xp: number) {
   s.xp += xp;
   while (s.xp >= xpGoal(s.level)) {
@@ -402,7 +476,8 @@ export const checkBonus = (s: Adventure, stat: Stat) =>
   scoreFor(s, stat) +
   (CALLINGS[s.character.calling].stat === stat ? 2 : 0) +
   Math.floor((s.level - 1) / 3) -
-  Math.min(3, Math.floor(s.fatigue / 3)) +
+  Math.min(3, Math.floor(s.fatigue / 3)) -
+  hungerPenalty(s) +
   (s.followers.some(
     (id) =>
       s.friends[id]?.resident.role &&
