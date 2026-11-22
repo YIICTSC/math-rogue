@@ -1,7 +1,7 @@
 import { rank,shuffled,suit } from './cards';
 import type { Action,ClubState } from './model';
 import type { RuleExtension } from './extensionModel';
-import { dealCards,finish,nextSeat,record,removeCards,roundOver } from './ruleHelpers';
+import { dealCards,finish,nextSeat,record,recordPilePlay,removeCards,roundOver } from './ruleHelpers';
 
 const pitypat:RuleExtension={
   start:s=>{dealCards(s,5);s.table.push(s.stock.pop()!);s.turn=nextSeat(s,s.dealer);},
@@ -19,7 +19,7 @@ const pitypat:RuleExtension={
       if(!p.hand.some(c=>rank(c)===rank(s.table.at(-1)!))){s.turn=nextSeat(s);e.step='play';}return;
     }
     if(a.type==='pass'){s.turn=nextSeat(s);e.step='play';return;}
-    removeCards(s,i,a.cards!);s.table.push(...a.cards!);record(s,'play',i,undefined,a.cards![0]);
+    removeCards(s,i,a.cards!);s.table.push(...a.cards!);recordPilePlay(s,i,a.cards!);record(s,'play',i,undefined,a.cards![0]);
     const paired=p.hand.length%2===0&&[...new Set(p.hand.map(rank))].every(r=>p.hand.filter(c=>rank(c)===r).length%2===0);
     if(!p.hand.length||paired){s.players.forEach((q,j)=>q.score=j===i?s.players.length-1:-1);finish(s,[i]);return;}
     if(e.step==='discard'){s.turn=nextSeat(s);e.step='play';}else e.step='discard';
@@ -37,6 +37,7 @@ const snip:RuleExtension={
     if(a.type==='pass'){e.firstTrick=false;s.turn=nextSeat(s);record(s,'pass',i);return;}
     const c=a.cards![0];removeCards(s,i,[c]);
     if(e.obligation&&e.firstTrick){s.players[e.claimant].score-=e.obligation;s.pool+=e.obligation;record(s,'snipped',e.claimant,e.obligation);}
+    recordPilePlay(s,i,[c],e.obligation===0);
     s.table.push(c);e.obligation++;e.claimant=i;e.firstTrick=true;record(s,'play',i,undefined,c);
     if(!s.players[i].hand.length){let amount=s.pool;s.players.forEach((p,j)=>{if(j!==i){p.score-=p.hand.length;amount+=p.hand.length;}});s.players[i].score+=amount;finish(s,[i]);return;}
     if(e.obligation===4)e.obligation=0;else s.turn=nextSeat(s);

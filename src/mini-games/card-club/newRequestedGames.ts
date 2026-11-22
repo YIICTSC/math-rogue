@@ -2,7 +2,7 @@ import { declare, spokenRank, spokenSuit } from '../shared/tableDeclarations';
 import {pack,rank,high,suit,shuffled,combinations} from './cards';
 import type {Action,ClubState,ClubView} from './model';
 import type {RuleExtension} from './extensionModel';
-import {dealCards,nextSeat,record,removeCards,roundOver,finish} from './ruleHelpers';
+import {dealCards,nextSeat,record,recordPilePlay,removeCards,roundOver,finish} from './ruleHelpers';
 import {initClassic,fixedDeals} from './classicCommon';
 export const yanivValue=(c:number)=>c>=52?0:Math.min(10,rank(c));
 export function yanivDiscard(cards:number[]){
@@ -32,7 +32,7 @@ export const yanivRules:RuleExtension={start:s=>{initClassic(s);s.stock=shuffled
   s.players.forEach((q,j)=>{if(q.out)return;let penalty=j===i?(caught?points[j]+30:0):points[j];let total=-q.score+penalty;if(total===100||total===200)total/=2;q.score=-total;q.out=total>200;});
   const least=Math.min(...points),leader=Array.from({length:s.players.length},(_,k)=>(i+k+1)%s.players.length).find(j=>points[j]===least)!;c.nextDealer=(leader+s.players.length-1)%s.players.length;record(s,caught?'challenge':'knock',i);const alive=s.players.flatMap((q,j)=>q.out?[]:[j]);if(alive.length<=1)finish(s,alive.length?alive:undefined);else roundOver(s);return;
  }
- if(a.type==='discard'){const previous=[...s.table];c.shown[i]=previous.length?[previous[0],previous.at(-1)!].filter((v,k,a)=>a.indexOf(v)===k):[];s.discard.push(...s.table);removeCards(s,i,a.cards!);s.table=[...a.cards!];s.extra.step='yanivDraw';record(s,'discard',i,a.cards!.length);return;}
+ if(a.type==='discard'){const previous=[...s.table];c.shown[i]=previous.length?[previous[0],previous.at(-1)!].filter((v,k,a)=>a.indexOf(v)===k):[];s.discard.push(...s.table);removeCards(s,i,a.cards!);s.table=[...a.cards!];recordPilePlay(s,i,a.cards!);s.extra.step='yanivDraw';record(s,'discard',i,a.cards!.length);return;}
  if(a.type==='pick'){s.discard=s.discard.filter(x=>x!==a.index);p.hand.push(a.index!);}else{if(!s.stock.length){s.stock=shuffled(s.discard,s.seed+s.revision);s.discard=[];}if(s.stock.length)p.hand.push(s.stock.pop()!);}
  c.shown[i]=[];s.turn=nextSeat(s);s.extra.step='yanivDiscard';
  },nextDealer:s=>s.extra.classic?.nextDealer??s.dealer,cpu:v=>{if(v.extra.step==='yanivDraw'){const picks=v.actions.filter(a=>a.type==='pick').sort((a,b)=>yanivValue(a.index!)-yanivValue(b.index!));const pick=picks[0];return pick&&(v.table.length>1||yanivValue(pick.index!)<Math.min(...v.table.map(yanivValue)))?pick:v.actions[0];}return v.actions.find(a=>a.type==='knock')||[...v.actions].sort((a,b)=>(b.cards?.length||0)*20+handPoints(b.cards||[])-(a.cards?.length||0)*20-handPoints(a.cards||[]))[0];}};

@@ -1,5 +1,10 @@
 // Card Club readings, kept local so card terminology does not alter other mini-games.
 export const CARD_CLUB_HIRAGANA:Record<string,string>={
+  "場札": "ばふだ",
+  "出した札": "だしたふだ",
+  "前のトリック": "まえのトリック",
+  "場が流れました": "ばがながれました",
+  "指定スート": "していスート",
   "招待に参加する": "しょうたいにさんかする",
   "部屋を作ったら、招待URLか6桁のコードを友達に送れます。": "へやをつくったら、しょうたいURLか6けたのコードをともだちにおくれます。",
   "参加名と招待コードを確認して、部屋に入ります。": "さんかなまえとしょうたいコードをかくにんして、へやにはいります。",

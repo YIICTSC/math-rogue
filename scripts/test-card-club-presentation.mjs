@@ -4,6 +4,7 @@ const server=await createServer({optimizeDeps:{noDiscovery:true},server:{middlew
 try{
  const {createClubGame,viewFor,applyAction,legalActions}=await server.ssrLoadModule('/src/mini-games/card-club/engine.ts');
  const {presentationDelta,presentationSnapshot}=await server.ssrLoadModule('/src/mini-games/card-club/presentation.ts');
+ const {seatedTablePlays}=await server.ssrLoadModule('/src/mini-games/card-club/seatedTable.ts');
  const players=Array.from({length:4},(_,i)=>({id:`p${i}`,name:`P${i}`,hero:'high-school-warrior',cpu:false}));
  let checks=0;const check=(name,fn)=>{try{fn();checks++;}catch(error){throw new Error(name,{cause:error});}};
  check('A duplicated publication cannot replay sounds or redeal',()=>{const v=viewFor(createClubGame('rollingstone',players,42),0),before=presentationSnapshot(v);assert.equal(presentationDelta(null,v).cue,'shuffle');assert.equal(presentationDelta(before,v).cue,null);});
@@ -13,5 +14,31 @@ try{
  check('Turn and selection changes do not invent a card action; a new deal shuffles',()=>{const v=viewFor(createClubGame('rollingstone',players,42),0),before=presentationSnapshot(v);v.turn=0;v.revision++;assert.equal(presentationDelta(before,v).cue,null);v.round++;assert.equal(presentationDelta(before,v).cue,'shuffle');});
  check('Old Maid drawing an immediate pair still has a draw cue when both hand counts fall',()=>{const s=createClubGame('oldmaid',players.slice(0,3),42);s.players.forEach(p=>p.out=false);s.players[0].hand=[0,1];s.players[1].hand=[2,3];s.players[2].hand=[13,5];s.turn=0;const before=presentationSnapshot(viewFor(s,0));assert(applyAction(s,0,{type:'pick',target:2,index:0}));assert.equal(s.players[0].hand.length,1);assert.equal(presentationDelta(before,viewFor(s,0)).cue,'draw');});
  check('War flips a newly public card from the blind queue even without a reveal log event',()=>{const s=createClubGame('war',players.slice(0,2),42),before=presentationSnapshot(viewFor(s,0));assert(applyAction(s,s.turn,{type:'reveal'}));assert.equal(presentationDelta(before,viewFor(s,0)).cue,'flip');});
+ check('An eight-cut appears at the correct seat and a new lead replaces the previous pile history',()=>{
+  const s=createClubGame('daihinmin',players,42,{eightCut:true,rounds:2});
+  s.turn=0;s.players[0].hand=[33,2,6];
+  assert(applyAction(s,0,legalActions(s).find(a=>a.cards?.[0]===33)));
+  const visible=viewFor(s,2);
+  assert.deepEqual(visible.players[0].hand,[]);
+  assert.deepEqual(seatedTablePlays(visible),{kind:'cleared-pile',plays:[{seat:0,cards:[33]}],activeSeat:undefined,centerCards:undefined});
+  assert(applyAction(s,0,legalActions(s).find(a=>a.cards?.[0]===2)));
+  assert.deepEqual(seatedTablePlays(viewFor(s,2)).plays,[{seat:0,cards:[2]}]);
+  s.phase='round';s.turn=0;
+  assert(applyAction(s,0,{type:'next'}));
+  assert.equal(seatedTablePlays(viewFor(s,2)).plays.length,0);
+ });
+ check('A card revealed from stock remains neutral, and no bluff hand enters the seat history',()=>{
+  const s=createClubGame('pitypat',players,42);s.turn=0;s.players[0].hand=[0,2,3];s.players[1].hand=[6,7,8];s.table=[13];s.stock=[10];
+  assert(applyAction(s,0,{type:'play',cards:[0]}));
+  assert(applyAction(s,0,{type:'play',cards:[2]}));
+  assert(applyAction(s,1,{type:'reveal'}));
+  const placement=seatedTablePlays(viewFor(s,2));
+  assert.equal(placement.activeSeat,undefined);
+  assert.deepEqual(placement.centerCards,[10]);
+  const blind=createClubGame('doubt',players,42);
+  assert(applyAction(blind,blind.turn,legalActions(blind)[0]));
+  assert(!viewFor(blind,2).pilePlays);
+  assert(viewFor(blind,2).table.every(card=>card===-1));
+ });
  console.log(JSON.stringify({presentationChecks:checks,immutableBaseline:true,publicCountsOnly:true}));
 }finally{await server.close();}

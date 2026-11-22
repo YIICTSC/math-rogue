@@ -8,6 +8,7 @@ import { actionKey, type Action, type ClubState, type ClubView, type PlayerInput
 import { ladderActions, playLadder } from './ladder';
 import { emptyExtension } from './extensionModel';
 import { extensionFor,extensionCPU,publicExtension } from './extensions';
+import { recordPilePlay } from './ruleHelpers';
 
 export const event=(s:ClubState,key:string,player?:number,value?:number,card?:number)=>{s.log.push({key,player,value,card});s.log=s.log.slice(-24);};
 const trickGames=new Set<GameId>(['whist','spades','ohhell']);
@@ -22,6 +23,7 @@ function books(s:ClubState,index:number){const p=s.players[index];for(let r=1;r<
 function replenish(s:ClubState){if(!s.stock.length&&s.discard.length){s.stock=shuffled(s.discard,s.seed+s.revision);s.discard=[];}}
 function startRound(s:ClubState,nextStock?:number[]){
   if(s.game==='whist'&&s.players.some(p=>p.score>=5))s.players.forEach(p=>p.score=0);
+  s.pilePlays=undefined;
   s.stock=nextStock??shuffled(pack(),s.seed+s.round*1009);s.discard=[];s.table=[];s.trick=[];s.lastTrick=[];s.trump=-1;s.activeSuit=-1;s.broken=false;s.total=0;s.direction=1;s.pool=0;s.claim=1;s.pending=null;s.capturesBy=-1;s.phase='play';s.ladder=null;
   s.players.forEach(p=>{p.hand=[];p.taken=[];p.tricks=0;p.bid=null;p.books=[];p.stake=1;p.out=(s.game==='99add'||s.game==='pokerbull')&&p.lives<=0||s.game==='yaniv'&&p.score < -200;});
   const n=s.players.length;s.extra=emptyExtension(n);
@@ -216,7 +218,7 @@ export function applyAction(s:ClubState,player:number,action:Action):boolean {
   if(s.game==='crazyeight'){
     if(action.type==='draw'){p.hand=sorted([...p.hand,s.stock.pop()!]);event(s,'draw',player);return true;}
     if(action.type==='pass'){event(s,'pass',player);s.pool++;if(s.pool>=s.players.length){s.players.forEach(p=>p.score=-p.hand.reduce((v,c)=>v+(rank(c)===8?50:Math.min(rank(c),10)),0));end(s,highest(s),'blocked');return true;}}
-    else {const c=action.cards![0];take(s,player,[c]);s.table.push(c);s.activeSuit=action.suit??suit(c);s.pool=0;event(s,'play',player,undefined,c);if(!p.hand.length){let total=0;s.players.forEach((q,i)=>{if(i!==player){const debt=q.hand.reduce((v,c)=>v+(rank(c)===8?50:Math.min(rank(c),10)),0);q.score-=debt;total+=debt;}});p.score+=total;end(s,[player],'empty');return true;}}
+    else {const c=action.cards![0];take(s,player,[c]);s.table.push(c);recordPilePlay(s,player,[c]);s.activeSuit=action.suit??suit(c);s.pool=0;event(s,'play',player,undefined,c);if(!p.hand.length){let total=0;s.players.forEach((q,i)=>{if(i!==player){const debt=q.hand.reduce((v,c)=>v+(rank(c)===8?50:Math.min(rank(c),10)),0);q.score-=debt;total+=debt;}});p.score+=total;end(s,[player],'empty');return true;}}
     s.turn=next(s);return true;
   }
   if(s.game==='gofish'||s.game==='authors'){

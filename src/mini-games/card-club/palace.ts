@@ -1,7 +1,7 @@
 import { combinations,high,rank,sorted } from './cards';
 import type { Action,ClubState,ClubView } from './model';
 import type { RuleExtension } from './extensionModel';
-import { dealCards,finish,nextSeat,record,removeCards } from './ruleHelpers';
+import { dealCards,finish,nextSeat,record,recordPilePlay,removeCards } from './ruleHelpers';
 import { initClassic } from './classicCommon';
 import { worldCycle } from './worldShedding';
 export const palacePlayable=(card:number,top:number)=>top<0||rank(card)===2||rank(card)===10||rank(top)===2||high(card)>=high(top);
@@ -42,6 +42,7 @@ function apply(s:ClubState,a:Action){
  }else{
   cards=a.cards!;if(p.hand.length)removeCards(s,i,cards);else c.rows[i]=c.rows[i].filter(card=>!cards.includes(card));
  }
+ recordPilePlay(s,i,cards,s.table.length===0);
  s.table.push(...cards);record(s,'play',i,cards.length,cards[0]);refill(s,i);
  const top=rank(cards[0]),four=s.table.length>=4&&s.table.slice(-4).every(card=>rank(card)===top),burn=top===10||four;
  if(burn){s.discard.push(...s.table);s.table=[];record(s,'burn',i);}advance(s,burn);

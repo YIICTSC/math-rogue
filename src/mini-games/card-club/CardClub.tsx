@@ -1,4 +1,3 @@
-import { SeatHandCount } from '../shared/SeatHandCount';
 import {ScoreFeedback} from './ScoreFeedback';
 import {useStackedCards} from './useStackedCards';
 import {bullLabel,BULL_CLAIMS} from './newRequestedGames';
@@ -22,17 +21,16 @@ import { cardLabel, rank, SUITS } from './cards';
 import { actionKey, type Action, type ClubEvent, type ClubView } from './model';
 import { CardClubRoom } from './network';
 import './cardClub.css';
+import './seatedTable.css';
 import { GameChooser } from './GameChooser';
 import { CardFace } from './CardFace';
 import { GameTableExtras } from './GameTableExtras';
 import { ClassicTable } from './ClassicTable';
 import { casinoCaptureValid,casinoBuildValid,casinoValues } from './cassino';
-import { TRADITIONAL_TRICKS } from './traditionalGames';
-import { WORLD_TRICKS } from './worldGames';
-import { CLASSIC_TRICKS } from './classicTricks';
-import { EXTENDED_TRICKS } from './extendedTricks';
 import { TableStock } from './TableStock';
 import { useCardPresentation } from './useCardPresentation';
+import { ClubSeats, SeatedTable } from './SeatedTable';
+import { usesSeatedTable } from './seatedTable';
 
 const DEFAULT_HERO='high-school-warrior';
 
@@ -207,6 +205,21 @@ export default function CardClub({onBack,languageMode='JAPANESE'}:MiniGameCompon
   const captureValid=!!current&&(['cassino','royalcassino'].includes(current.game))&&current.turn===current.self&&casinoCaptureValid(current,captureSelection);
 
   const rulesGame=current?.game??(packet?.phase==='lobby'?packet.game:game);
+  const seated = !!current && usesSeatedTable(current.game);
+  const countUnit = languageMode === 'ENGLISH' ? '' : languageMode === 'HIRAGANA' ? 'まい' : '枚';
+  const turnLabel = current && <p className="cc-turn-label">
+    {current.phase==='result'?l('対戦終了','Match finished'):current.phase==='round'?l('配札の結果','Deal results'):`${current.players[current.turn]?.name} · ${current.turn===current.self?l('あなたの番','Your turn'):l('の番です','to act')}`}
+  </p>;
+  const playLog = current && (
+    <details className="cc-log">
+      <summary>{l('プレイ記録', 'Play log')}</summary>
+      <div className="cc-log-entries">{current.log.map((event, index) => <p key={index}>{eventLabel(event, current)}</p>)}</div>
+    </details>
+  );
+  const boardInfo = current && <>
+    <GameTableExtras view={current} l={l} send={send}/>
+    <ClassicTable view={current} l={l} send={send} selected={selected} select={selectCard}/>
+  </>;
   return <main ref={tableRoot} className={`card-club cc-page-${current?'table':packet?'lobby':page}`} style={{'--cc-title':`url("${assetUrl('sprites/card-club/title.webp')}")`,'--cc-table':`url("${assetUrl('sprites/card-club/table.webp')}")`} as React.CSSProperties} data-gamepad-navigation-root data-mini-game-scope="card-club" data-club-game={current?.game}>
     <ScoreFeedback view={current} l={l}/>
     {!packet&&page==='title'&&<ResponsiveTitleArt game="card-club" className="cc-title-art" style={{objectPosition:'var(--cc-title-focus, center)'}}/>}
@@ -248,16 +261,36 @@ export default function CardClub({onBack,languageMode='JAPANESE'}:MiniGameCompon
     {packet?.phase==='lobby'&&<ClubLobbyPanel packet={packet} host={host} english={languageMode==='ENGLISH'} l={l} title={title}
       onConfigure={(id,seats,options)=>room.current?.configure(id,seats,options)}
       onStart={()=>{void audioService.unlockAudio();room.current?.start();}}/>}
-    {current&&<section className="cc-match"><div className="cc-player-ring">{current.players.map((p,i)=><article key={p.id} data-club-seat={i} title={p.name} className={`${current.turn===i?'cc-turn':''} ${current.winners.includes(i)?'cc-winner':''}`}><Face hero={p.hero}/><div><strong>{p.name}{p.id===packet?.selfId?' ★':''}</strong>{current.game==='trumpcrew'?<span className="cc-crew-bid">
-        {p.bid===null?l('未宣言','No bid yet'):`${l('宣言','Bid')} ${p.bid}`} · {l('獲得','Won')} {p.tricks}
-      </span>:<span>{l('得点','Score')} {current.game==='golf'?-p.score:p.score}{['99add','schwimmen','rantergo','petrangola'].includes(current.game)?` · ♥${p.lives}`:''}{(['whist','spades','ohhell'].includes(current.game)||EXTENDED_TRICKS.has(current.game)||CLASSIC_TRICKS.has(current.game)||WORLD_TRICKS.has(current.game)||TRADITIONAL_TRICKS.has(current.game))?` · ${p.tricks}/${p.bid??'—'}`:''}</span>}</div><SeatHandCount count={p.handCount} label={l('手札','Cards')} unit={languageMode==='ENGLISH'?'':languageMode==='HIRAGANA'?'まい':'枚'}/></article>)}</div>
+    {current&&<section className={`cc-match${seated ? ' cc-seated-match' : ''}`}>
+      {!seated && <ClubSeats view={current} l={l} unit={countUnit} />}
       <div className="cc-playfield">
-      <p className="cc-turn-label">{current.phase==='result'?l('対戦終了','Match finished'):current.phase==='round'?l('配札の結果','Deal results'):`${current.players[current.turn]?.name} · ${current.turn===current.self?l('あなたの番','Your turn'):l('の番です','to act')}`}</p><div className="cc-board-content"><div className="cc-table-area">{current.game==='99add'&&<strong className="cc-total">{current.total} / 99</strong>}{current.phase==='reaction'&&current.pending&&<div className="cc-claim">{current.players[current.pending.player].name}: {current.pending.rank} × {current.pending.count}<p>{l('ダウトするか、見送るかを選んでください。','Challenge the claim or accept it.')}</p></div>}
-      {current.game==='daihinmin'&&<p>{l('ラウンド','Round')} {current.round+1}/{current.ladderOptions?.rounds??1} · {l('累計得点','Total score')}{current.ladder?.reversed?' · '+l('革命','Revolution'):''}{current.ladder?.jackBack?' · '+l('11バック','Jack back'):''}{current.ladder?.lock?' · '+l('しばり','Suit lock'):''}</p>}<div className="cc-table-cards">{current.trick.length?current.trick.map(t=><figure key={t.player}><CardFace card={t.card}/><figcaption>{current.players[t.player].name}</figcaption></figure>):current.game==='fantan'?[0,1,2,3].map(st=><div className="cc-fantan-row" key={st}>{current.table.filter(c=>Math.floor(c/13)===st).sort((a,b)=>rank(a)-rank(b)).map(c=><div className="cc-fantan-slot" key={c} style={{gridColumn:rank(c)}}><CardFace card={c}/></div>)}</div>):(current.game==='shithead2'?current.table.slice(-4):current.table).map((c,i)=><CardFace key={`${c}:${i}`} card={c} selected={(['cassino','royalcassino'].includes(current.game))&&selected.includes(c)} onClick={(['cassino','royalcassino'].includes(current.game))&&current.turn===current.self&&current.phase==='play'?()=>selectCard(c):undefined}/>)}{!current.table.length&&!current.trick.length&&current.lastTrick.map(t=><figure key={t.player}><CardFace card={t.card}/><figcaption>{current.players[t.player].name}</figcaption></figure>)}</div>{current.game!=='memory'&&<TableStock aces={current.game==='mitch'?current.extra.classic?.passes:undefined} count={current.stock} discard={current.discard} pile={['doubt','shithead2'].includes(current.game)?current.table.length:undefined} l={l}/>}</div>
-      <GameTableExtras view={current} l={l} send={send}/>
-      <ClassicTable view={current} l={l} send={send} selected={selected} select={selectCard}/>
-      <details className="cc-log"><summary>{l('プレイ記録','Play log')}</summary>{current.log.map((e,i)=><p key={i}>{eventLabel(e,current)}</p>)}</details>
-      </div>
+        {seated ? <div className="cc-table-hud">{turnLabel}{playLog}</div> : turnLabel}
+        <div className={`cc-board-content${seated ? ' cc-seated-board' : ''}`}>
+          {seated ? <>
+            <SeatedTable view={current} l={l} unit={countUnit} />
+            <aside className="cc-seat-notes">
+              {current.game==='daihinmin'&&
+                <p className="cc-ladder-state">
+                  {l('ラウンド','Round')} {current.round+1}/{current.ladderOptions?.rounds??1}
+                  {current.ladder?.reversed&&` · ${l('革命','Revolution')}`}
+                  {current.ladder?.jackBack&&` · ${l('11バック','Jack back')}`}
+                  {current.ladder?.lock&&` · ${l('しばり','Suit lock')}`}
+                </p>}
+              {boardInfo}
+            </aside>
+          </> : <>
+            <div className="cc-table-area">
+              {current.phase==='reaction'&&current.pending&&<div className="cc-claim">{current.players[current.pending.player].name}: {current.pending.rank} × {current.pending.count}<p>{l('ダウトするか、見送るかを選んでください。','Challenge the claim or accept it.')}</p></div>}
+              <div className="cc-table-cards">
+                {current.table.map((card,index)=><CardFace key={`${card}:${index}`} card={card} selected={(['cassino','royalcassino'].includes(current.game))&&selected.includes(card)} onClick={(['cassino','royalcassino'].includes(current.game))&&current.turn===current.self&&current.phase==='play'?()=>selectCard(card):undefined}/>)}
+                {!current.table.length&&current.lastTrick.map(({player,card})=><figure key={player}><CardFace card={card}/><figcaption>{current.players[player].name}</figcaption></figure>)}
+              </div>
+              {current.game!=='memory'&&<TableStock aces={current.game==='mitch'?current.extra.classic?.passes:undefined} count={current.stock} discard={current.discard} pile={current.game==='doubt'?current.table.length:undefined} l={l}/>}
+            </div>
+            {boardInfo}
+            {playLog}
+          </>}
+        </div>
       </div>
       {current.game!=='memory'&&current.phase!=='result'&&current.phase!=='round'&&(displayedHand.length>0||visibleActions.length>0||current.game==='pokerbull')&&<div className="cc-hand-area">{!isRummy&&displayedHand.length>0&&handToolbar}{isRummy?<RummyHand key={`${current.game}:${current.round}`} sorting={handToolbar} hand={displayedHand} selected={selected} select={selectCard} clearSelection={()=>setSelected([])} l={l}/>:<div className="cc-hand">{displayedHand.map(c=><CardFace key={c} card={c} selected={selected.includes(c)} onClick={()=>selectCard(c)}/>)}</div>}{current.turn===current.self&&<p className="cc-hand-hint">{l('カードを選ぶと、そのカードでできる操作を表示します。','Select a card to filter the actions you can take with it.')}</p>}{current.game==='pokerbull'&&<label>{l('宣言する役','Claim category')}<select value={bullType} onChange={e=>setBullType(Number(e.target.value))}><option value={-1}>{l('すべて','All')}</option>{[0,1,2,3,4,5,6].map(type=><option key={type} value={type}>{bullLabel(BULL_CLAIMS.findIndex(c=>c.type===type),languageMode==='ENGLISH').split(' ')[0]}</option>)}</select></label>}<div className="cc-actions">{(['cassino','royalcassino'].includes(current.game))&&current.turn===current.self&&captureValid&&(captureSelection.cards?.length??0)>1&&<button className="cc-primary" disabled={!captureValid} onClick={()=>send(captureSelection)}>{l('選んだ場札を獲得','Capture selection')}</button>}{(['cassino','royalcassino'].includes(current.game))&&current.turn===current.self&&[...new Set(current.players[current.self].hand.flatMap(card=>casinoValues(current,card)))].map(value=>({type:'build' as const,cards:captureSelection.cards,value})).filter(a=>casinoBuildValid(current,a)).map(a=><button key={`custom-build-${a.value}`} onClick={()=>send(a)}>{l('選択札でビルド','Build selection')} → {a.value}</button>)}{current.game==='doubt'&&current.phase==='play'&&current.turn===current.self&&selected.length>0?<button className="cc-primary" onClick={()=>send({type:'play',cards:selected})}>{l('このカードで宣言','Play these cards')} {current.claim} × {selected.length}</button>:visibleActions.filter(a=>current.game!=='pokerbull'||a.type!=='bid'||bullType<0||BULL_CLAIMS[a.value!].type===bullType).slice(0,current.game==='pokerbull'?400:180).map(a=><button key={actionKey(a)} onClick={()=>send(a)}>{actionLabel(a,current)}</button>)}</div></div>}
       {(current.phase==='result'||current.phase==='round')&&<section className="cc-result"><h2>{current.resultReason==='draw'?l('引き分け','Draw'):current.resultReason==='repetition'?l('同じ状態が繰り返されたため引き分け','Repeated position: draw'):current.resultReason==='hostEnded'?l('ホストが対戦を終了しました','The host ended the match'):current.phase==='result'?current.winners.includes(current.self)?l('おめでとう！','Congratulations!'):l('対戦結果','Results'):l('今回の結果','Deal complete')}</h2><div className="cc-result-standings">{[...current.players].sort((a,b)=>b.score-a.score).map(p=><div key={p.id}><Face hero={p.hero}/><span>{p.name}</span><strong>{current.game==='golf'?-p.score:p.score}</strong></div>)}</div><div className="cc-result-actions">{host&&<button className="cc-primary" onClick={()=>current.phase==='round'?send({type:'next'}):room.current?.rematch()}>{current.phase==='round'?l('次の配札へ','Next deal'):l('別のゲームを選ぶ','Choose another game')}</button>}<button onClick={leave}>{packet?.code?l('部屋を出る','Leave room'):l('クラブに戻る','Return to club')}</button></div>{!host&&current.phase==='result'&&<p role="status">{l('ホストが次のゲームを選ぶとルームに戻ります。','When the host chooses another game, you will return to the room.')}</p>}</section>}

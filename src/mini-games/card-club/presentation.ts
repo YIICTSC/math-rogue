@@ -27,7 +27,7 @@ export function presentationDelta(previous:PresentationState|null,current:ClubVi
   const gained=current.players.some((p,i)=>p.takenCount>(previous.players[i]?.takenCount??0));
   let cue:CardClubCue|null=null;
   if(revealed||keys.some(k=>['flip','reveal'].includes(k)))cue='flip';
-  else if(keys.some(k=>['play','defend','transfer','discard','meld','layoff','build'].includes(k)))cue='play';
+  else if(keys.some(k=>['play','defend','transfer','discard','meld','layoff','build','total'].includes(k)))cue='play';
   else if(gained||keys.some(k=>['capture','take','trick','sweep','pair','book','burn'].includes(k)))cue='collect';
   else if(keys.some(k=>['pick','draw'].includes(k))||current.stock<previous.stock||current.players.some((p,i)=>p.handCount>(previous.players[i]?.handCount??0)))cue='draw';
   else if(keys.some(k=>['swap','exchange'].includes(k)))cue='deal';

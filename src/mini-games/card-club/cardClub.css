@@ -591,7 +591,7 @@
 @media (orientation: landscape) and (max-height: 480px) {
   .cc-page-table .cc-hand { max-height: min(105px, 30dvh); }
   .cc-page-table .cc-stock-stack { width: 20px; height: 25px; }
-  .cc-page-table .cc-match:has(.cc-hand-area):has(.cc-layouts, .cc-foundations) {
+  .cc-page-table .cc-match:not(.cc-seated-match):has(.cc-hand-area):has(.cc-layouts, .cc-foundations) {
     grid-template-columns: minmax(0, 1fr) minmax(185px, 35%);
   }
   .cc-page-table .cc-result-actions > button { min-height: 38px; }

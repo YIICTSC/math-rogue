@@ -1,6 +1,7 @@
 import {ladderOptions} from './ladderOptions';
 import { combinations, rank, suit } from './cards';
 import type { Action, ClubState } from './model';
+import { recordPilePlay } from './ruleHelpers';
 export type LadderState={count:number;form:'set'|'run';rank:number;last:number;passes:number;reversed:boolean;order:number[];jackBack?:boolean;lock?:string};
 const r=(c:number)=>c===52?100:rank(c)===1?14:rank(c)===2?15:rank(c);
 const strength=(value:number,count:number,form:'set'|'run',reversed:boolean)=>value===100?100:form==='set'?(reversed?18-value:value):(reversed?18-value:value+count-1);
@@ -40,6 +41,7 @@ export function playLadder(s:ClubState,action:Action){
  }else{
   const counter=opts.spadeThree&&s.table.length===1&&s.table[0]===52&&action.cards!.length===1&&action.cards![0]===41;
   if(opts.suitLock&&s.table.length&&s.table.every(c=>c!==52)&&action.cards!.every(c=>c!==52)&&s.table.map(suit).sort().join(',')===action.cards!.map(suit).sort().join(','))ladder.lock=action.cards!.map(suit).sort().join(',');
+  recordPilePlay(s,player,action.cards!,s.table.length===0);
   p.hand=p.hand.filter(c=>!action.cards!.includes(c));s.discard.push(...s.table);s.table=[...action.cards!];ladder.count=action.cards!.length;ladder.form=action.form!;ladder.rank=action.value!;ladder.last=player;ladder.passes=0;
   if(action.revolution)ladder.reversed=!ladder.reversed;
   if(opts.jackBack&&action.cards!.some(c=>c!==52&&rank(c)===11))ladder.jackBack=!ladder.jackBack;

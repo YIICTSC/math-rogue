@@ -1,5 +1,15 @@
 import type { ClubState } from './model';
 export const record=(s:ClubState,key:string,player?:number,value?:number,card?:number)=>{s.log.push({key,player,value,card});s.log=s.log.slice(-24);};
+
+/** Keep each seat's latest face-up play, in play order. Only call for public cards. */
+export function recordPilePlay(s: ClubState, seat: number, cards: number[], fresh = false) {
+  const earlier = fresh ? [] : s.pilePlays ?? [];
+  // Recycled cards can be played again. Keep each physical card in just one group.
+  s.pilePlays = [
+    ...earlier.filter((play) => play.seat !== seat && !play.cards.some((card) => cards.includes(card))),
+    { seat, cards: [...cards] },
+  ];
+}
 export function finish(s:ClubState,winners?:number[],reason='score'){
   const best=Math.max(...s.players.map(p=>p.score));s.phase='result';s.winners=winners||s.players.flatMap((p,i)=>p.score===best?[i]:[]);s.resultReason=reason;record(s,'finish');
 }
