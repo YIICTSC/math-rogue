@@ -1,12 +1,13 @@
 import React from 'react';
-import { Compass, Crosshair, Shield, Sparkles, Swords } from 'lucide-react';
+import { BookOpen, Compass, Crosshair, Shield, Sparkles, Swords } from 'lucide-react';
 import { CALLINGS, FOES, WEAPONS, type Text } from './content';
 import { COMBAT_MOVES, canCombatMove } from './delve';
-import { loadoutTechniques, techniqueFor } from './battleTechniques';
+import { loadoutTechniques, techniqueFor, type TechniqueId } from './battleTechniques';
+import { techniqueImage } from './CharacterParameters';
 import { moveRange, tacticalTarget } from './fieldTactics';
 import ScreenDialog from './ScreenDialog';
 import { equipped, type Adventure, type CombatMove } from './state';
-import { art, type Local, type Send } from './ui';
+import type { Local, Send } from './ui';
 import type { Floor } from './world';
 
 const COMBAT_INTRO_KEY = 'learning_rogue_school_frontier_combat_intro_v1';
@@ -148,6 +149,8 @@ export function BattleTechniqueMenu({
   send,
   target,
   close,
+  busy,
+  showLearning,
 }: {
   s: Adventure;
   t: Local;
@@ -155,14 +158,21 @@ export function BattleTechniqueMenu({
   send: Send;
   target: number;
   close: () => void;
+  busy: boolean;
+  showLearning: () => void;
 }) {
   const weapon = equipped(s, 'weapon')?.weapon;
   const foe = s.delve?.encounter?.enemies[target];
   const name = t(
     foe ? (foe.epithets ?? FOES[foe.template].name) : ['周囲', 'Surroundings', 'まわり'],
   );
-  const personal: CombatMove[] = loadoutTechniques(s);
+  const personal: CombatMove[] = loadoutTechniques(s, true);
+  const learned = loadoutTechniques(s).filter((move) => techniqueFor(move)?.unlock);
   const sections = [
+    {
+      title: ['解放した技', 'Unlocked techniques', 'つかえる わざ'] as Text,
+      moves: learned,
+    },
     {
       title: [
         '武器・立ち回りの技',
@@ -172,7 +182,7 @@ export function BattleTechniqueMenu({
       moves: personal,
     },
     { title: ['基本の行動', 'Basic actions', 'きほんの こうどう'] as Text, moves: COMMON_MOVES },
-  ];
+  ].filter(({ moves }) => moves.length > 0);
   return (
     <div className="sa-techniques">
       <p className="sa-technique-loadout">
@@ -182,6 +192,10 @@ export function BattleTechniqueMenu({
           {t(['対象', 'Target', 'たいしょう'])} · {name}
         </small>
       </p>
+      <button className="sa-learn-link" type="button" onClick={showLearning}>
+        <BookOpen size={16} />
+        {t(['技の習得条件を見る', 'View unlock requirements', 'わざの おぼえかたを みる'])}
+      </button>
       {sections.map(({ title, moves }) => (
         <section key={title[0]}>
           <h3>{t(title)}</h3>
@@ -210,7 +224,7 @@ export function BattleTechniqueMenu({
                         ] as Text);
               return (
                 <article key={move}>
-                  {special && <img src={art('combat/' + special.art)} alt="" />}
+                  {special && <img src={techniqueImage(move as TechniqueId)} alt="" />}
                   <div>
                     <h4>{t(technique.name)}</h4>
                     <p>{t(technique.hint)}</p>
@@ -230,7 +244,7 @@ export function BattleTechniqueMenu({
                   </div>
                   <button
                     type="button"
-                    disabled={!enabled}
+                    disabled={busy || !enabled}
                     data-technique={move}
                     aria-label={t(['技を使う', 'Use', 'わざを つかう']) + ' · ' + t(technique.name)}
                     onClick={() => {

@@ -3,8 +3,8 @@ import { audioService } from '../../services/audioService';
 import type { MiniGameComponentProps } from '../../components/MiniGameRouter';
 import { loadSchoolTrpgCampaign } from './schoolTrpgSave';
 import FrontierTitleScreen from './FrontierTitleScreen';
-import { BATTLE_CUE_MS, useBattleSound } from './adventure/BattleEffects';
-import { finalBattleFrame, type BattleCue, type BattleEvent } from './adventure/battleFeedback';
+import { useBattleSound } from './adventure/BattleEffects';
+import { battleTiming, finalBattleFrame, type BattleCue, type BattleEvent } from './adventure/battleFeedback';
 import Creator from './adventure/Creator';
 import AdventurePlay from './adventure/Play';
 import { adventureTransition } from './adventure/engine';
@@ -14,6 +14,7 @@ import { copyFor } from './adventure/ui';
 import './adventure/adventure.css';
 import './adventure/frontierLayout.css';
 import './adventure/frontierCombat.css';
+import './adventure/frontierParameters.css';
 
 const LegacyCampaign = lazy(() => import('./SchoolTrpgGame'));
 
@@ -34,6 +35,7 @@ export default function SchoolTrpgEntry(props: MiniGameComponentProps) {
   const [battleCue, setBattleCue] = useState<BattleCue | null>(null);
   const [saveResult, setSaveResult] = useState<SaveResult>('saved');
   const current = useRef<Adventure | null>(null);
+  const actingUntil = useRef(0);
   const savedRevision = useRef<number | null>(null);
   const [hasStory, setHasStory] = useState(() => Boolean(loadSchoolTrpgCampaign()));
 
@@ -44,7 +46,7 @@ export default function SchoolTrpgEntry(props: MiniGameComponentProps) {
   useBattleSound(battleCue);
   useEffect(() => {
     if (!battleCue) return;
-    const timer = window.setTimeout(() => setBattleCue(null), BATTLE_CUE_MS);
+    const timer = window.setTimeout(() => setBattleCue(null), battleCue.duration);
     return () => window.clearTimeout(timer);
   }, [battleCue]);
 
@@ -57,16 +59,19 @@ export default function SchoolTrpgEntry(props: MiniGameComponentProps) {
   const send = useCallback(
     (action: Action) => {
       const prior = current.current;
-      if (!prior) return false;
+      if (!prior || actingUntil.current > performance.now()) return false;
       const events: BattleEvent[] = [];
       const next = adventureTransition(prior, action, events);
       if (next === prior) return false;
       current.current = next;
       persist(next);
       setCampaign(next);
+      const timing = battleTiming(events);
+      actingUntil.current = timing.alliesAct ? performance.now() + timing.duration : 0;
       setBattleCue(events.length ? {
         revision: next.revision,
         events,
+        ...timing,
         ending: prior.delve?.encounter && !next.delve?.encounter
           ? finalBattleFrame(prior, events) : undefined,
       } : null);
@@ -87,6 +92,7 @@ export default function SchoolTrpgEntry(props: MiniGameComponentProps) {
 
   function goToTitle() {
     current.current = null;
+    actingUntil.current = 0;
     setCampaign(null);
     setBattleCue(null);
     setSlots(loadAdventures());

@@ -1,6 +1,5 @@
 import {
   BIOMES,
-  COMPANION_ROLES,
   FOES,
   GOODS,
   WEAPONS,
@@ -14,17 +13,20 @@ import {
 } from './content';
 import { foePoint, heroPoint, hurtFoe, partyPoint, type BattleArt, type BattleEvent } from './battleFeedback';
 import { actingPoint, applyManeuvers } from './battleManeuvers';
-import { TECHNIQUES, techniqueFor, techniqueReady, type TechniqueId } from './battleTechniques';
+import { TECHNIQUES, techniqueFor, techniqueReady, trainWeapon, type TechniqueId } from './battleTechniques';
 import { forgeGear } from './inventory';
 import { eatDish, useSupply } from './life';
-import { companionTurn, envoySupport, formParty, targetOfEnemy } from './party';
+import { companionParameters, companionTurn, formParty, targetOfEnemy } from './party';
 import { expeditionThreat } from './expeditions';
 import { changeStanding, standing } from './factions';
 import { applyField, findDevice } from './frontierActions';
 import type { BodyZone } from './frontierContent';
 import { alertLevel, fieldCondition, fieldSkill } from './frontierState';
 import { fieldFloor, fieldHazard, plannedWalk, surveySite, terrainAt } from './frontierWorld';
-import { borrowedCreature, canTacticalStep, coverBonus, enemyInRange, startTactics, tacticalTarget } from './fieldTactics';
+import {
+  approachParty, borrowedCreature, canTacticalStep, coverBonus, enemyCanHit, partyAt,
+  partyPositions, startTactics, tacticalTarget,
+} from './fieldTactics';
 import { bestiaryRecord, relicPower } from './journeyState';
 import { mealEffect } from './provisions';
 import { ruinCondition } from './ruinConditions';
@@ -261,6 +263,7 @@ function startEncounter(s: Adventure, guardian: boolean, bound: boolean) {
     surprise: !bound,
     ...(s.frontier.rules.tactical ? { tactics: startTactics(s, enemies.length) } : {}),
   };
+  if (d.encounter.tactics) d.encounter.tactics.party = partyPositions(s, d.encounter);
   note(
     s,
     [
@@ -493,6 +496,8 @@ function completeEncounter(s: Adventure, method: 'fight' | 'parley' | 'bypass', 
   let loot: Text | undefined;
   if (method === 'fight') {
     s.counters.combats++;
+    const weapon = equipped(s, 'weapon')?.weapon;
+    if (weapon) trainWeapon(s, weapon, 2);
     const material = ({ academy: 'thread', grove: 'timber', coast: 'ore', alpine: 'ore', ember: 'ore', sky: 'thread' } as const)[townAt(s.location).biome];
     const food: Good = townAt(s.location).biome === 'coast' ? 'fish' : 'meat';
     const amount = battle.enemies.length;
@@ -606,19 +611,29 @@ function enemyRound(s: Adventure, d: Delve, battle: Encounter, events?: BattleEv
       continue;
     }
     if (intent === 'brace') continue;
-    if (floor && !enemyInRange(s, battle, index, intent, floor)) continue;
-    const ally = targetOfEnemy(s, battle);
+    const heroInReach = !floor || enemyCanHit(battle, index, intent, d.cell, floor);
+    const ally = targetOfEnemy(s, battle, (id) => {
+      const cell = battle.tactics?.party?.[id];
+      return !floor || (cell !== undefined && enemyCanHit(battle, index, intent, cell, floor));
+    }, heroInReach);
+    if (floor && !heroInReach && !ally) {
+      approachParty(s, battle, index, floor);
+      const to = foePoint(battle, index);
+      if (to.cell !== from.cell) events?.push({ art: 'wind', from, to, outcome: 'move' });
+      continue;
+    }
     if (floor && !ally && nextRandom(s, 20) + Math.floor(enemy.power / 3) < 2 + coverBonus(s, floor)) {
       note(s, ['物陰で攻撃をかわした。', 'Cover helps you evade the attack.']);
       events?.push({ art: INTENT_ART[intent], from, to: heroPoint(s), outcome: 'miss' });
       continue;
     }
-    if (!ally && intent === 'hex' && !battle.guard) s.focus = Math.max(0, s.focus - 2);
-    if (intent === 'drain') d.light = Math.max(0, d.light - (battle.guard ? 1 : 3));
+    const guarded = battle.guard || battle.tideWard || Boolean(ally?.braced);
+    if (!ally && intent === 'hex' && !guarded) s.focus = Math.max(0, s.focus - 2);
+    if (intent === 'drain') d.light = Math.max(0, d.light - (guarded ? 1 : 3));
     const frostguard = !ally && intent === 'heavy' && equipped(s, 'coat')?.masterwork === 'rimeCoat';
     const protection = (ally
-      ? (COMPANION_ROLES[s.friends[ally.id].resident.role].ward ? 3 : 1) + Math.floor(s.level / 4)
-      : armor(s)) + (battle.guard ? 3 : 0) + (frostguard ? 3 : 0);
+      ? companionParameters(s, ally.id, s.friends[ally.id].resident.role).defense
+      : armor(s)) + (battle.tideWard ? 5 : battle.guard ? 3 : 0) + (ally?.braced ? 2 : 0) + (frostguard ? 3 : 0);
     const attack =
       enemy.power +
       (intent === 'heavy' ? 4 : 0) -
@@ -628,8 +643,8 @@ function enemyRound(s: Adventure, d: Delve, battle: Encounter, events?: BattleEv
     const damage = Math.max(1, attack - protection + formation);
     const lost = Math.min(ally?.hp ?? s.hp, damage);
     events?.push({
-      art: INTENT_ART[intent], from, to: ally ? partyPoint(s) : heroPoint(s),
-      outcome: battle.guard ? 'block' : 'hit', hp: -lost,
+      art: INTENT_ART[intent], from, to: ally ? partyPoint(battle, ally.id) : heroPoint(s),
+      outcome: guarded ? 'block' : 'hit', hp: -lost,
     });
     if (ally) {
       ally.hp -= lost;
@@ -637,12 +652,15 @@ function enemyRound(s: Adventure, d: Delve, battle: Encounter, events?: BattleEv
     } else {
       takeHit(s, damage);
       damageTaken += lost;
-      if (floor && !battle.guard && damage >= 4 && (intent === 'heavy' || intent === 'hex')) {
+      if (floor && !guarded && damage >= 4 && (intent === 'heavy' || intent === 'hex')) {
         const zone: BodyZone = intent === 'hex' ? 'head' : (battle.turn + index) % 2 ? 'grip' : 'feet';
         s.frontier.injuries[zone] = Math.max(s.frontier.injuries[zone] ?? 0, s.time + 8);
       }
     }
-    if (intent === 'heavy' && battle.guard && s.journey.formation !== 'envoy') {
+    if (!ally && battle.riposte && s.hp > 0) {
+      battle.riposte = false;
+      counterDamage += hurtFoe(battle, index, 3 + scoreFor(s, 'finesse'), 'riposte', heroPoint(s), events);
+    } else if (intent === 'heavy' && battle.guard && s.journey.formation !== 'envoy') {
       const strength = 2 + scoreFor(s, 'might') + (s.character.calling === 'vanguard' ? 3 : 0);
       counterDamage += hurtFoe(battle, index, strength, 'crush', heroPoint(s), events);
     }
@@ -667,8 +685,17 @@ function enemyRound(s: Adventure, d: Delve, battle: Encounter, events?: BattleEv
   else {
     battle.turn++;
     battle.guard = false;
+    delete battle.riposte;
+    delete battle.tideWard;
+    for (const ally of battle.allies ?? []) delete ally.braced;
     advance(s, 1);
   }
+}
+
+function finishTurn(s: Adventure, d: Delve, battle: Encounter, events?: BattleEvent[], negotiate = false) {
+  companionTurn(s, battle, events, negotiate);
+  if (battle.enemies.every((foe) => foe.hp <= 0)) completeEncounter(s, 'fight');
+  else enemyRound(s, d, battle, events);
 }
 
 function attack(
@@ -684,7 +711,7 @@ function attack(
   const tool = WEAPONS[weaponId];
   const technique = techniqueFor(move);
   const template = FOES[enemy.template];
-  const damageType = move === 'scholarSeal' ? template.weak
+  const damageType = move === 'scholarSeal' || technique?.attack?.weaknessStyle ? template.weak
     : technique?.attack?.style ?? (move === 'spark' ? 'arcane' : move === 'quick' ? 'wind' : tool.style);
   const art = technique?.art ?? (
     move === 'spark' ? 'arcane' : move === 'quick' ? 'wind' : WEAPON_ART[weaponId]
@@ -737,9 +764,13 @@ function attack(
   const damage = Math.max(
     1,
     Math.round(raw * factor * (weakness ? 1.55 : resistance ? 0.65 : 1) * (1 + penetrations * .24)) -
-      (intent === 'brace' && move !== 'heavy' && move !== 'spark' ? 3 : 0),
+      (intent === 'brace' && move !== 'heavy' && move !== 'spark' && !technique?.attack?.ignoreBrace ? 3 : 0),
   ) + (marked ? 3 : 0);
   const lost = hurtFoe(battle, index, damage, art, from, events);
+  if (weapon?.weapon && lost > 0 && (
+    move === 'strike' || move === 'heavy' || technique?.weapon === weapon.weapon ||
+    (technique?.unlock?.kind === 'equipment' && weapon.masterwork === technique.unlock.item)
+  )) trainWeapon(s, weapon.weapon);
   enemy.known ||= weakness;
   enemy.stagger ||=
     (move === 'quick' && intent === 'heavy') ||
@@ -753,7 +784,7 @@ function attack(
           battle.combo +
             Number(weakness || move === 'quick' || (move === 'strike' && tool.effect === 'quick')),
         );
-  if (tool.effect === 'spark' && move === 'strike' && weakness) recover(s, 0, 1);
+  if (weakness && ((tool.effect === 'spark' && move === 'strike') || technique?.attack?.weaknessFocus)) recover(s, 0, 1);
   const label = enemy.epithets ?? template.name;
   note(
     s,
@@ -805,6 +836,8 @@ function combat(s: Adventure, action: Extract<Action, { type: 'combat' }>, event
       if (tacticalTarget(s, 'study', index, floor)) enemy.known = true;
     });
     battle.guard = true;
+    const point = heroPoint(s);
+    events?.push({ art: 'guard', from: point, to: point, outcome: 'power' });
     note(s, [
       '動きと弱点を見抜いた。交渉の手がかりも見つけた。',
       'You read their movements and weaknesses. You also find a lead for parley.',
@@ -833,7 +866,7 @@ function combat(s: Adventure, action: Extract<Action, { type: 'combat' }>, event
     );
     if (succeeded(check)) {
       if (guest) {
-        s.friends[pactId] = { resident: { id: pactId, name: guest.epithets ?? FOES[guest.template].name, role: 'keeper', art: 0, site: ['遺跡', 'Ruins'], shift: 'all' }, trust: 6, visitedDay: 0, offeredDay: 0 };
+        s.friends[pactId] = { resident: { id: pactId, name: guest.epithets ?? FOES[guest.template].name, role: 'keeper', art: 0, site: ['遺跡', 'Ruins'], shift: 'all' }, creature: guest.template, trust: 6, visitedDay: 0, offeredDay: 0 };
         s.followers.push(pactId);
       }
       completeEncounter(s, 'parley', check);
@@ -848,12 +881,10 @@ function combat(s: Adventure, action: Extract<Action, { type: 'combat' }>, event
     if (technique && (hit > 0 || !technique.attack || move === 'vanguardBash'))
       applyManeuvers(s, battle, index, move as TechniqueId, hit, Boolean(heavyWindup), floor, events);
   }
-  if (s.journey.formation === 'envoy' && (move === 'parley' || move === 'befriend' || move === 'study')) envoySupport(s, battle, events);
-  else companionTurn(s, battle, events);
   if (hit > 0 && fieldCondition(s, 'chorus') && battle.enemies[action.target]?.hp > 0)
     hurtFoe(battle, action.target, 2 + (s.frontier.gifts.chorus ?? 1), 'wind', actingPoint(s, battle), events);
-  if (battle.enemies.every((enemy) => enemy.hp <= 0)) completeEncounter(s, 'fight');
-  else enemyRound(s, d, battle, events);
+  const negotiate = s.journey.formation === 'envoy' && ['parley', 'befriend', 'study'].includes(move);
+  finishTurn(s, d, battle, events, negotiate);
   return true;
 }
 
@@ -946,7 +977,7 @@ function declareInDelve(s: Adventure, action: Extract<Action, { type: 'declare' 
     }
     if (check.outcome === 'partial') battle.guard = true;
     if (battle.enemies.every((enemy) => enemy.hp <= 0)) completeEncounter(s, 'fight', check);
-    else enemyRound(s, d, battle, events);
+    else finishTurn(s, d, battle, events);
     return true;
   }
   const live = type && !secured(s, d.cell);
@@ -995,6 +1026,7 @@ export function applyDelveAction(s: Adventure, action: Action, events?: BattleEv
   if (action.type === 'enter') return enter(s, action.floor);
   const d = s.delve;
   if (!d) return false;
+  if (d.encounter?.tactics) d.encounter.tactics.party ??= partyPositions(s, d.encounter);
   if (action.type === 'field') {
     const before = s.hp;
     if (!applyField(s, action.operation)) return false;
@@ -1003,7 +1035,7 @@ export function applyDelveAction(s: Adventure, action: Action, events?: BattleEv
         const point = heroPoint(s);
         events?.push({ art: 'heal', from: point, to: point, outcome: 'power', hp: s.hp - before });
       }
-      enemyRound(s, d, d.encounter, events);
+      finishTurn(s, d, d.encounter, events);
     }
     return true;
   }
@@ -1016,17 +1048,28 @@ export function applyDelveAction(s: Adventure, action: Action, events?: BattleEv
         const point = heroPoint(s);
         events?.push({ art: 'heal', from: point, to: point, outcome: 'power', hp: s.hp - before });
       }
-      enemyRound(s, d, d.encounter, events);
+      finishTurn(s, d, d.encounter, events);
     }
     return true;
   }
   if (d.encounter) {
     if (action.type === 'tactical-step' && canTacticalStep(s, action.cell)) {
-      const linked = borrowedCreature(d.encounter);
+      const battle = d.encounter;
+      const from = actingPoint(s, battle);
+      const positions = battle.tactics!.party!;
+      const swap = partyAt(battle, positions, action.cell);
+      const linked = borrowedCreature(battle);
+      const to = { ...from, cell: action.cell };
+      events?.push({ art: 'wind', from, to, outcome: 'move' });
+      if (swap && from.cell !== undefined) {
+        const allyFrom = partyPoint(battle, swap);
+        positions[swap] = from.cell;
+        events?.push({ art: 'wind', from: allyFrom, to: partyPoint(battle, swap), outcome: 'move', sharedStep: true });
+      }
       if (linked >= 0) {
         d.encounter.tactics!.cells[linked] = action.cell;
         d.encounter.tactics!.aim = null;
-        enemyRound(s, d, d.encounter, events);
+        finishTurn(s, d, d.encounter, events);
         return true;
       }
       const floor = currentFloor(s);
@@ -1043,14 +1086,16 @@ export function applyDelveAction(s: Adventure, action: Action, events?: BattleEv
         const art = terrainAt(s, d.cell, d.floor, floor) === 'wire' ? 'shock' : 'fire';
         events?.push({ art, from: point, to: point, outcome: 'hit', hp: s.hp - before });
       }
-      if (!finishDefeat(s)) enemyRound(s, d, d.encounter, events);
+      if (!finishDefeat(s)) finishTurn(s, d, d.encounter, events);
       return true;
     }
     if (action.type === 'tactical-aim' && d.encounter.tactics && tacticalTarget(s, 'spark', action.target)) {
       if (d.encounter.tactics.aim === action.target) return false;
       d.encounter.tactics.aim = action.target;
       note(s, ['次の攻撃に向けて狙いを定めた。', 'You steady your aim for the next attack.']);
-      enemyRound(s, d, d.encounter, events);
+      const point = heroPoint(s);
+      events?.push({ art: 'guard', from: point, to: point, outcome: 'power' });
+      finishTurn(s, d, d.encounter, events);
       return true;
     }
     if (action.type === 'auto-combat') return autoCombat(s, action.target, events);

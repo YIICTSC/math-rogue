@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   Backpack,
   BookOpen,
+  ChartNoAxesColumnIncreasing,
   Compass,
   Dice5,
   Heart,
@@ -39,6 +40,7 @@ import {
 } from './content';
 import DelveView, { Supplies } from './Delve';
 import type { BattleCue } from './battleFeedback';
+import { CharacterParameters, PARAMETERS_TITLE } from './CharacterParameters';
 import { declarationDifficulty } from './delve';
 import { FieldNotes } from './FieldworkPanel';
 import { ADDRESS_NAMES } from './frontierContent';
@@ -104,7 +106,7 @@ const SAVE_COPY: Record<Exclude<SaveResult, 'saved'>, Text> = {
   ],
 };
 
-function CharacterStatus({ s, t, back }: { s: Adventure; t: Local; back: () => void }) {
+function CharacterStatus({ s, t, back, showStats }: { s: Adventure; t: Local; back: () => void; showStats: () => void }) {
   const day = dayAt(s.time),
     hour = String(hourAt(s.time)).padStart(2, '0');
   const penalty = hungerPenalty(s);
@@ -114,7 +116,8 @@ function CharacterStatus({ s, t, back }: { s: Adventure; t: Local; back: () => v
         <ArrowLeft size={18} />
         {t(['タイトルへ', 'Title', 'タイトルへ'])}
       </button>
-      <div className="sa-hero-status">
+      <button className="sa-hero-status sa-hero-parameters" type="button" onClick={showStats}
+        aria-label={t(PARAMETERS_TITLE)} title={t(PARAMETERS_TITLE)}>
         <Portrait id={s.character.portrait} />
         <span title={s.character.name}>
           <strong>{s.character.name}</strong>
@@ -123,7 +126,8 @@ function CharacterStatus({ s, t, back }: { s: Adventure; t: Local; back: () => v
             {s.character.addressedAs && s.character.addressedAs !== 'name' && ' · ' + t(ADDRESS_NAMES[s.character.addressedAs])}
           </small>
         </span>
-      </div>
+        <ChartNoAxesColumnIncreasing size={15} aria-hidden="true" />
+      </button>
       <div className="sa-health" aria-label={t(['主人公の状態', 'Character status'])}>
         <span>
           <Heart size={15} />
@@ -620,6 +624,7 @@ export default function AdventurePlay(props: PlayProps) {
   const [declare, setDeclare] = useState(false);
   const [lesson, setLesson] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
+  const [stats, setStats] = useState<string | null>(null);
   const ending = battleCue?.ending;
   const fallen = s.fallenAt !== null && !ending;
   const delving = Boolean(s.delve || ending);
@@ -644,7 +649,7 @@ export default function AdventurePlay(props: PlayProps) {
   };
   return (
     <>
-      <CharacterStatus s={s} t={t} back={back} />
+      <CharacterStatus s={s} t={t} back={back} showStats={() => setStats('hero')} />
       {!fallen && !delving && !lesson && (
         <nav className="sa-nav" aria-label={t(['冒険メニュー', 'Adventure menu'])}>
           {(Object.keys(NAV) as Tab[]).map((id) => {
@@ -707,7 +712,8 @@ export default function AdventurePlay(props: PlayProps) {
             t={t}
             send={send}
             declare={openDeclaration}
-            modalOpen={declare || logOpen}
+            showStats={setStats}
+            modalOpen={declare || logOpen || stats !== null}
           />
         ) : tab === 'town' ? (
           <TownOverview
@@ -795,6 +801,7 @@ export default function AdventurePlay(props: PlayProps) {
           </ol>
         </ScreenDialog>
       )}
+      {stats !== null && <CharacterParameters s={s} initial={stats} t={t} close={() => setStats(null)} />}
       {!fallen && declare && (
         <Declaration s={s} t={t} send={send} close={() => setDeclare(false)} />
       )}

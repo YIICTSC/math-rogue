@@ -1,78 +1,234 @@
-import { COMPANION_ROLES, FOES } from './content';
-import { maxHp, nextRandom, note, recover, type Adventure, type Ally, type Encounter } from './state';
-import { fieldFloor, glancingSight } from './frontierWorld';
-import { foePoint, heroPoint, hurtFoe, partyPoint, type BattleEvent } from './battleFeedback';
-import { borrowedCreature } from './fieldTactics';
+import { COMPANION_ROLES, FOES, type ResidentRole } from './content';
+import {
+  maxHp,
+  nextRandom,
+  note,
+  recover,
+  type Adventure,
+  type Ally,
+  type Encounter,
+} from './state';
+import { fieldFloor, glancingSight, pathTo, pathsFrom, terrainAt } from './frontierWorld';
+import {
+  foePoint,
+  heroPoint,
+  hurtFoe,
+  partyPoint,
+  type BattleEvent,
+  type BattlePoint,
+} from './battleFeedback';
+import { borrowedCreature, occupied, partyAt, partyPositions } from './fieldTactics';
+import type { Floor } from './world';
 
-const loan = (s: Adventure, id: string) => s.gear.find((gear) => gear.id === s.frontier.lent[id]);
+export const companionLoan = (s: Adventure, id: string) =>
+  s.gear.find((gear) => gear.id === s.frontier.lent[id]);
+
+export function companionParameters(s: Adventure, id: string, role: ResidentRole) {
+  const friend = s.friends[id];
+  const trust = friend?.trust ?? 0;
+  const memories = friend?.memories ?? 0;
+  const spec = COMPANION_ROLES[role];
+  const gear = companionLoan(s, id);
+  return {
+    trust,
+    memories,
+    style: spec.style,
+    healer: spec.healer || s.frontier.orders[id] === 'support',
+    ward: spec.ward,
+    order: s.frontier.orders[id] ?? 'balance',
+    max:
+      12 +
+      s.level * 2 +
+      trust +
+      memories * 3 +
+      (spec.ward ? 6 : 0) +
+      (gear?.slot === 'coat' ? 5 : 0),
+    power:
+      1 +
+      Math.floor((s.level + trust) / 2) +
+      Number(s.frontier.orders[id] === 'strike') * 2 +
+      (gear?.slot === 'weapon' ? Math.min(4, gear.power) : 0),
+    defense:
+      (spec.ward ? 3 : 1) +
+      Math.floor(s.level / 4) +
+      (gear?.slot === 'coat' ? Math.min(3, gear.power) : 0),
+    healing: 3 + Math.floor((s.level + trust) / 3),
+    range: spec.style === 'steel' ? 2 : 4,
+  };
+}
 
 export function formParty(s: Adventure): Ally[] {
   return s.followers.flatMap((id) => {
     const friend = s.friends[id];
     if (!friend) return [];
-    const max = 12 + s.level * 2 + friend.trust + (friend.memories ?? 0) * 3 +
-      (COMPANION_ROLES[friend.resident.role].ward ? 6 : 0) + (loan(s, id)?.slot === 'coat' ? 5 : 0);
+    const { max } = companionParameters(s, id, friend.resident.role);
     return [{ id, hp: max, max }];
   });
 }
+
 export const battleParty = (s: Adventure, encounter: Encounter) =>
   (encounter.allies ??= formParty(s));
 
-export function envoySupport(s: Adventure, encounter: Encounter, events?: BattleEvent[]) {
-  const party = battleParty(s, encounter).filter((member) => member.hp > 0 && s.frontier.orders[member.id] !== 'hold');
-  const roleOf = (member: Ally) => COMPANION_ROLES[s.friends[member.id].resident.role];
-  encounter.guard ||= party.some((member) => roleOf(member).ward);
-  if (!party.some((member) => roleOf(member).healer || s.frontier.orders[member.id] === 'support')) return;
-  healParty(s, s.hp < maxHp(s), party.find((member) => member.hp < member.max), 2, 0, events);
+function heal(
+  s: Adventure,
+  battle: Encounter,
+  healer: Ally,
+  patient: Ally | undefined,
+  amount: number,
+  focus: number,
+  events?: BattleEvent[],
+) {
+  const before = patient?.hp ?? s.hp;
+  if (patient) patient.hp = Math.min(patient.max, patient.hp + amount);
+  else recover(s, amount, focus);
+  const restored = (patient?.hp ?? s.hp) - before;
+  const from = partyPoint(battle, healer.id);
+  const to = patient ? partyPoint(battle, patient.id) : heroPoint(s);
+  events?.push({ art: 'heal', from, to, outcome: 'power', hp: restored || undefined });
+  return restored;
 }
 
-function healParty(s: Adventure, hero: boolean, patient: Ally | undefined, hp: number, focus: number, events?: BattleEvent[]) {
-  const before = hero ? s.hp : patient?.hp ?? 0;
-  if (hero) recover(s, hp, focus);
-  else if (patient) patient.hp = Math.min(patient.max, patient.hp + hp);
-  const restored = (hero ? s.hp : patient?.hp ?? 0) - before;
-  if (restored > 0) events?.push({
-    art: 'heal', from: partyPoint(s), to: hero ? heroPoint(s) : partyPoint(s), outcome: 'power', hp: restored,
+function advanceCompanion(
+  s: Adventure,
+  battle: Encounter,
+  ally: Ally,
+  floor: Floor,
+  range: number,
+  targets: number[],
+  events?: BattleEvent[],
+) {
+  const positions = (battle.tactics!.party ??= partyPositions(s, battle, floor));
+  const hero = s.delve!.cell;
+  const from = partyPoint(battle, ally.id);
+  const start = positions[ally.id];
+  const walkable = (cell: number) =>
+    floor.open.has(cell) &&
+    cell !== hero &&
+    !occupied(battle, cell) &&
+    !partyAt(battle, positions, cell) &&
+    !['fire', 'heat', 'wire'].includes(terrainAt(s, cell, s.delve!.floor, floor));
+  const reached = pathsFrom(start ?? hero, walkable, start === undefined ? 1 : 7);
+  const candidates = [...reached.keys()].slice(1);
+  const destination =
+    candidates.find((cell) =>
+      targets.some((index) => glancingSight(floor, cell, battle.tactics!.cells[index], range)),
+    ) ?? (start === undefined ? candidates[0] : undefined);
+  if (destination === undefined) return false;
+  positions[ally.id] = pathTo(reached, start ?? hero, destination)[0];
+  const to = partyPoint(battle, ally.id);
+  events?.push({
+    art: 'wind',
+    from: start === undefined ? { side: 'party', id: ally.id, cell: hero } : from,
+    to,
+    outcome: 'move',
   });
+  return true;
 }
 
-export function companionTurn(s: Adventure, encounter: Encounter, events?: BattleEvent[]) {
-  const party = battleParty(s, encounter);
-  const floor = encounter.tactics ? fieldFloor(s) : null;
-  const linked = borrowedCreature(encounter);
+export function companionTurn(
+  s: Adventure,
+  battle: Encounter,
+  events?: BattleEvent[],
+  negotiate = false,
+) {
+  const party = battleParty(s, battle);
+  const floor = battle.tactics ? fieldFloor(s) : null;
+  if (battle.tactics && floor) battle.tactics.party ??= partyPositions(s, battle, floor);
+  const linked = borrowedCreature(battle);
   for (const ally of party) {
-    const order = s.frontier.orders[ally.id];
-    if (ally.hp <= 0 || order === 'hold') continue;
-    const friend = s.friends[ally.id];
-    const role = COMPANION_ROLES[friend.resident.role];
-    const patient = party.find((member) => member.hp > 0 && member.hp * 2 <= member.max);
-    const healHero = s.hp * 2 <= maxHp(s);
-    const healing = 3 + Math.floor((s.level + friend.trust) / 3);
-    const name = friend.resident.name;
-    if ((order === 'support' || (role.healer && (s.journey.formation === 'shelter' || encounter.turn % 2 === 0))) && (healHero || patient)) {
-      healParty(s, healHero, patient, healing, 1, events);
-      note(s, [name[0] + 'が負傷者を手当てした。', name[1] + ' treats an injured ally.'], 'good');
-    } else {
-      const index = encounter.enemies.findIndex((enemy, index) => enemy.hp > 0 && index !== linked && (!floor ||
-        glancingSight(floor, s.delve!.cell, encounter.tactics!.cells[index], role.style === 'steel' ? 2 : 4)));
-      if (index < 0) continue;
-      const target = encounter.enemies[index];
-      const template = FOES[target.template];
-      const modifier = template.weak === role.style ? 3 : template.resist === role.style ? -2 : 0;
-      const gear = loan(s, ally.id);
-      const damage = Math.max(1, 1 + Math.floor((s.level + friend.trust) / 2) + modifier + nextRandom(s, 3) +
-        Number(order === 'strike') * 2 + (gear?.slot === 'weapon' ? Math.min(4, gear.power) : 0));
-      const lost = hurtFoe(encounter, index, damage, role.style === 'steel' ? 'slash' : role.style === 'wind' ? 'wind' : 'arcane', partyPoint(s), events);
-      target.known ||= template.weak === role.style;
-      note(s, [name[0] + 'が' + lost + 'ダメージ。', name[1] + ' deals ' + lost + ' damage.'], 'good');
+    if (ally.hp <= 0 || s.frontier.orders[ally.id] === 'hold') continue;
+    const targets = battle.enemies.flatMap((foe, index) =>
+      foe.hp > 0 && index !== linked ? [index] : [],
+    );
+    if (!targets.length) break;
+    const { resident } = s.friends[ally.id];
+    const spec = companionParameters(s, ally.id, resident.role);
+    const from = partyPoint(battle, ally.id);
+    const inReach = (point: BattlePoint, range: number) =>
+      !floor ||
+      (from.cell !== undefined &&
+        point.cell !== undefined &&
+        glancingSight(floor, from.cell, point.cell, range));
+    const healing = negotiate ? 2 : spec.healing;
+    const patient = party.find(
+      (member) =>
+        member.hp > 0 &&
+        member.hp < member.max &&
+        (negotiate || member.hp * 2 <= member.max) &&
+        inReach(partyPoint(battle, member.id), 4),
+    );
+    const healHero =
+      (negotiate ? s.hp < maxHp(s) : s.hp * 2 <= maxHp(s)) && inReach(heroPoint(s), 4);
+    const treat =
+      spec.healer &&
+      (negotiate ||
+        spec.order === 'support' ||
+        s.journey.formation === 'shelter' ||
+        battle.turn % 2 === 0);
+    if (treat && (healHero || patient)) {
+      if (
+        heal(s, battle, ally, healHero ? undefined : patient, healing, negotiate ? 0 : 1, events) >
+        0
+      )
+        note(
+          s,
+          [
+            resident.name[0] + 'が負傷者を手当てした。',
+            resident.name[1] + ' treats an injured ally.',
+          ],
+          'good',
+        );
+      continue;
     }
+    const index = negotiate
+      ? undefined
+      : targets.find((target) => inReach(foePoint(battle, target), spec.range));
+    if (index !== undefined) {
+      const enemy = battle.enemies[index];
+      const template = FOES[enemy.template];
+      const modifier = template.weak === spec.style ? 3 : template.resist === spec.style ? -2 : 0;
+      const damage = Math.max(
+        1,
+        spec.power + modifier + nextRandom(s, 3) + (battle.coordinated ? 3 : 0),
+      );
+      const art = spec.style === 'steel' ? 'slash' : spec.style === 'wind' ? 'wind' : 'arcane';
+      const lost = hurtFoe(battle, index, damage, art, from, events);
+      enemy.known ||= template.weak === spec.style;
+      note(
+        s,
+        [
+          resident.name[0] + 'が' + lost + 'ダメージ。',
+          resident.name[1] + ' deals ' + lost + ' damage.',
+        ],
+        'good',
+      );
+      continue;
+    }
+    if (
+      !negotiate &&
+      floor &&
+      advanceCompanion(s, battle, ally, floor, spec.range, targets, events)
+    )
+      continue;
+    if (negotiate && spec.ward) battle.guard = true;
+    ally.braced = true;
+    events?.push({ art: 'guard', from, to: from, outcome: 'power' });
   }
+  delete battle.coordinated;
 }
 
-export function targetOfEnemy(s: Adventure, battle: Encounter) {
-  const conscious = battleParty(s, battle).filter((ally) => ally.hp > 0 && s.frontier.orders[ally.id] !== 'hold');
+export function targetOfEnemy(
+  s: Adventure,
+  battle: Encounter,
+  inReach: (id: string) => boolean,
+  heroInReach: boolean,
+) {
+  const conscious = battleParty(s, battle).filter(
+    (ally) =>
+      ally.hp > 0 && (!heroInReach || s.frontier.orders[ally.id] !== 'hold') && inReach(ally.id),
+  );
   const line = conscious.filter((ally) => COMPANION_ROLES[s.friends[ally.id].resident.role].ward);
   const targets = [...line, ...conscious];
   if (!targets.length) return undefined;
-  return targets[nextRandom(s, targets.length + 2)];
+  return targets[nextRandom(s, targets.length + (heroInReach ? 2 : 0))];
 }

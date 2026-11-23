@@ -15,6 +15,7 @@ import {
   WEAPONS,
 } from './content';
 import { SLOT_IDS } from './inventory';
+import { MAX_MASTERY_USES } from './battleTechniques';
 import { BUILDINGS, MAX_HOME_LEVEL } from './building';
 import { newFieldwork, validFieldwork } from './fieldworkState';
 import { ADDRESS_NAMES } from './frontierContent';
@@ -110,7 +111,12 @@ function validSlot(slot: Adventure) {
     !slot.friends ||
     !Object.values(slot.friends).every((friend) => friend &&
       (friend.memories === undefined || integer(friend.memories, 0, 2)) &&
-      (friend.bondDay === undefined || integer(friend.bondDay))) ||
+      (friend.bondDay === undefined || integer(friend.bondDay)) &&
+      (friend.creature === undefined || integer(friend.creature, 0, FOES.length - 1))) ||
+    (slot.weaponTraining !== undefined &&
+      (!slot.weaponTraining || Array.isArray(slot.weaponTraining) || typeof slot.weaponTraining !== 'object' ||
+        Object.entries(slot.weaponTraining).some(([weapon, uses]) =>
+          !Object.hasOwn(WEAPONS, weapon) || !integer(uses, 0, MAX_MASTERY_USES)))) ||
     !slot.deepest ||
     !slot.equipment ||
     !slot.exploredLandmarks ||
@@ -136,6 +142,18 @@ function validSlot(slot: Adventure) {
   const d = slot.delve;
   if (!d) return d === null;
   const e = d.encounter;
+  const positions = e?.tactics?.party;
+  if (positions !== undefined) {
+    if (!positions || Array.isArray(positions) || typeof positions !== 'object' ||
+      !Array.isArray(e?.tactics?.cells) || (e.allies !== undefined && !Array.isArray(e.allies))) return false;
+    const cells = new Set([d.cell, ...e.tactics.cells.filter((_, at) => (e.enemies?.[at]?.hp ?? 0) > 0)]);
+    for (const [id, cell] of Object.entries(positions)) {
+      if (!slot.followers.includes(id) || !integer(cell, 0, SIDE * SIDE - 1)) return false;
+      if (e?.allies?.some((ally) => ally?.id === id && ally.hp <= 0)) continue;
+      if (cells.has(cell)) return false;
+      cells.add(cell);
+    }
+  }
   return (
     integer(d.floor, 1) &&
     integer(d.direction, 0, 3) &&

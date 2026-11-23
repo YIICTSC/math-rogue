@@ -1,5 +1,14 @@
 import type { BattleArt } from './battleFeedback';
-import type { Calling, DamageType, Stat, Text, Weapon } from './content';
+import { ADVANCED_TECHNIQUES } from './advancedTechniques';
+import {
+  MASTERWORKS,
+  type Calling,
+  type DamageType,
+  type Masterwork,
+  type Stat,
+  type Text,
+  type Weapon,
+} from './content';
 import { equipped, maxHp, type Adventure } from './state';
 
 export type Maneuver =
@@ -14,8 +23,25 @@ export type Maneuver =
   | 'interrupt'
   | 'ignite'
   | 'heal'
-  | 'rally';
-type Technique = {
+  | 'rally'
+  | 'riposte'
+  | 'coordinate'
+  | 'stagger'
+  | 'secondWind'
+  | 'frostArea'
+  | 'blast'
+  | 'sweepHero'
+  | 'pierce'
+  | 'scatter'
+  | 'conductiveArea'
+  | 'igniteArea'
+  | 'tideWard';
+
+export type TechniqueUnlock =
+  | { kind: 'victories' | 'level' | 'mastery'; value: number }
+  | { kind: 'equipment'; item: Masterwork };
+
+export type Technique = {
   name: Text;
   short: Text;
   hint: Text;
@@ -24,12 +50,22 @@ type Technique = {
   art: BattleArt;
   weapon?: Weapon;
   calling?: Calling;
-  attack?: { stat: Stat; style: DamageType; power: number };
+  unlock?: TechniqueUnlock;
+  attack?: {
+    stat: Stat;
+    style: DamageType;
+    power: number;
+    ignoreBrace?: boolean;
+    weaknessStyle?: boolean;
+    weaknessFocus?: boolean;
+  };
   needsKnown?: boolean;
+  straight?: boolean;
+  marksmanship?: boolean;
   effects: readonly Maneuver[];
 };
 
-export const TECHNIQUES = {
+const STARTING_TECHNIQUES = {
   sabreSweep: {
     name: ['弧月の払い', 'Crescent sweep', 'こげつの はらい'],
     short: ['払い', 'Sweep', 'はらい'],
@@ -99,6 +135,7 @@ export const TECHNIQUES = {
       'まっすぐ 2マスまで つき、てきを 1マス おす。',
     ],
     weapon: 'spear',
+    straight: true,
     cost: 2,
     range: 2,
     art: 'thrust',
@@ -114,6 +151,7 @@ export const TECHNIQUES = {
       'やで てきの あしを 2ターン とめる。ねらいうちで とおくまで とどく。',
     ],
     weapon: 'bow',
+    marksmanship: true,
     cost: 2,
     range: 4,
     art: 'arrow',
@@ -254,17 +292,53 @@ export const TECHNIQUES = {
   },
 } satisfies Record<string, Technique>;
 
+export const TECHNIQUES = { ...STARTING_TECHNIQUES, ...ADVANCED_TECHNIQUES };
 export type TechniqueId = keyof typeof TECHNIQUES;
+export const TECHNIQUE_IDS = Object.keys(TECHNIQUES) as TechniqueId[];
+
+export const USES_PER_MASTERY_RANK = 6;
+export const MAX_MASTERY_USES = 30;
+export const weaponUses = (s: Adventure, weapon: Weapon) => s.weaponTraining?.[weapon] ?? 0;
+export const weaponRank = (s: Adventure, weapon: Weapon) =>
+  Math.floor(weaponUses(s, weapon) / USES_PER_MASTERY_RANK);
+
+export function trainWeapon(s: Adventure, weapon: Weapon, uses = 1) {
+  const training = (s.weaponTraining ??= {});
+  training[weapon] = Math.min(MAX_MASTERY_USES, weaponUses(s, weapon) + uses);
+}
 
 export function techniqueFor(move: string): Technique | undefined {
   return Object.hasOwn(TECHNIQUES, move) ? TECHNIQUES[move as TechniqueId] : undefined;
 }
 
-export function loadoutTechniques(s: Adventure) {
-  const weapon = equipped(s, 'weapon')?.weapon;
-  return (Object.keys(TECHNIQUES) as TechniqueId[]).filter((move) => {
+export function meetsTechniqueUnlock(s: Adventure, tech: Technique) {
+  const unlock = tech.unlock;
+  if (!unlock) return true;
+  switch (unlock.kind) {
+    case 'level':
+      return s.level >= unlock.value;
+    case 'victories':
+      return s.counters.combats >= unlock.value;
+    case 'mastery':
+      return Boolean(tech.weapon && weaponRank(s, tech.weapon) >= unlock.value);
+    case 'equipment':
+      return equipped(s, MASTERWORKS[unlock.item].slot)?.masterwork === unlock.item;
+  }
+}
+
+export function techniqueFits(s: Adventure, tech: Technique) {
+  return (
+    (!tech.weapon || tech.weapon === equipped(s, 'weapon')?.weapon) &&
+    (!tech.calling || tech.calling === s.character.calling)
+  );
+}
+
+export function loadoutTechniques(s: Adventure, startingOnly = false) {
+  return TECHNIQUE_IDS.filter((move) => {
     const tech: Technique = TECHNIQUES[move];
-    return tech.weapon ? tech.weapon === weapon : tech.calling === s.character.calling;
+    return (
+      (!startingOnly || !tech.unlock) && techniqueFits(s, tech) && meetsTechniqueUnlock(s, tech)
+    );
   });
 }
 
@@ -274,7 +348,12 @@ export function techniqueReady(s: Adventure, move: TechniqueId, target: number) 
   return Boolean(
     battle &&
       s.focus >= tech.cost &&
-      loadoutTechniques(s).includes(move) &&
+      techniqueFits(s, tech) &&
+      meetsTechniqueUnlock(s, tech) &&
+      (move !== 'command' ||
+        (battle.allies ?? s.followers.map((id) => ({ id, hp: 1 }))).some(
+          (member) => member.hp > 0 && s.frontier.orders[member.id] !== 'hold',
+        )) &&
       (!tech.needsKnown || battle.enemies[target]?.known) &&
       (move !== 'medicAid' ||
         s.hp < maxHp(s) ||

@@ -231,6 +231,15 @@ try {
   assert.equal(startTown.character.deathRule, 'return-town');
   assert.equal((await slot()).character.portrait, 'm20');
   assert.equal((await slot()).character.stats.presence, 4);
+  await click('Abilities and techniques');
+  const abilities = view.getByRole('dialog', { name: 'Abilities and techniques' });
+  await abilities.getByRole('rowheader', { name: 'Presence' }).waitFor();
+  await abilities.getByRole('button', { name: 'Learn techniques' }).tap();
+  const riposte = abilities.locator('[data-technique-entry="riposte"]');
+  assert.equal(await riposte.getAttribute('data-learned'), 'false');
+  assert.match(await riposte.textContent(), /Battle victories 0\/2/);
+  assert.equal(await abilities.locator('.sa-mastery > div').count(), 7);
+  await closePanel();
   await snap('town-desktop');
   for (const viewport of smallScreens) {
     await view.setViewportSize(viewport);
@@ -286,6 +295,9 @@ try {
     await view.getByRole('button', { name: /^Rest on a bench/ }).click();
   await click('People');
   await view.locator('.sa-npc-head .sa-resident-portrait').waitFor();
+  await click('View abilities');
+  await view.getByRole('dialog', { name: 'Resident abilities' }).getByText('Base attack', { exact: true }).waitFor();
+  await closePanel();
   await click('Talk');
   await view.getByRole('button', { name: /^Give a gift/ }).click();
   await view.getByRole('button', { name: /^Invite to travel/ }).click();
@@ -353,6 +365,8 @@ try {
   await closePanel();
   await snap('dungeon-phone');
   const initial = await slot();
+  const stairUp = view.locator('.sa-scene-encounter[data-encounter-art*="stairs-up-"]');
+  await stairUp.evaluate((image) => image.decode());
   const floor = model.generateFloor(initial.location, 1);
   const target = Object.entries(floor.features).find(([, feature]) => feature === 'pack');
   await walkInRuin(floor, Number(target[0]));
@@ -365,6 +379,10 @@ try {
   await tutorial.getByRole('button', { name: 'Continue to battle' }).tap();
   await view.getByRole('group', { name: 'Combat targets' }).waitFor();
   await click('Pause');
+  const allyPortrait = view.locator('.sa-battle-allies button').first();
+  await allyPortrait.tap();
+  await abilities.getByText('Attack range', { exact: true }).waitFor();
+  await closePanel();
   const pausedTurn = (await slot()).delve.encounter.turn;
   await view.waitForTimeout(1000);
   assert.equal((await slot()).delve.encounter.turn, pausedTurn);
@@ -395,8 +413,10 @@ try {
     await view.locator('.sa-scene-line').scrollIntoViewIfNeeded();
     const round = await view.locator('.sa-scene-line').boundingBox();
     const enemy = await view.locator('.sa-foe').first().boundingBox();
+    const portrait = await view.locator('.sa-foe img').first().boundingBox();
     await snap('battle-landscape-' + viewport.width);
     assert(round.y + round.height <= enemy.y, 'Turn and combo stay above the combat targets');
+    assert(portrait && portrait.height >= 20, 'The portrait stays visible alongside the companion strip');
   }
   await click('Resume combat');
   await view.waitForFunction(() =>
@@ -590,17 +610,23 @@ try {
   await click('Confront');
   const board = view.getByRole('group', { name: 'Combat positions' });
   await board.waitFor();
+  const allyTile = board.locator('button[data-tactical-ally]').first();
+  await allyTile.waitFor();
+  assert(await allyTile.locator('.sa-portrait').count(), 'The companion has a portrait on its own tile');
+  const allyId = await allyTile.getAttribute('data-tactical-ally');
+  assert.equal(Number(await allyTile.getAttribute('data-tile')), (await slot()).delve.encounter.tactics.party[allyId]);
   const turn = (await slot()).delve.encounter.turn;
   await view.waitForTimeout(1100);
   assert.equal((await slot()).delve.encounter.turn, turn, 'Manual battles wait for the player');
   const step = board.locator('button[data-step]').first();
   const tile = Number(await step.getAttribute('data-tile'));
-  const soundsBeforeStep = await view.evaluate(() => window.frontierBattleSounds.length);
   await step.tap();
   assert.equal((await slot()).delve.cell, tile);
   assert.equal((await slot()).delve.encounter.turn, turn + 1);
-  await view.waitForFunction((count) =>
-    window.frontierBattleSounds.slice(count).includes('impact'), soundsBeforeStep);
+  const allyAction = board.locator('[data-acting-ally]:not([data-outcome="move"])').first();
+  await board.locator('[data-acting-ally]').first().waitFor({ state: 'attached' });
+  if (await allyAction.count())
+    assert(await allyAction.evaluate((element) => parseFloat(element.style.getPropertyValue('--delay'))) > 0);
   await checkViewport();
   const strike = await view.locator('.sa-tactical-moves button').first().boundingBox();
   const feed = await view.locator('.sa-feed').boundingBox();
@@ -639,6 +665,8 @@ try {
   await firstFoe.tap();
   const foeCell = await firstFoe.getAttribute('data-tile');
   await click('Combat techniques');
+  const newMove = techniques.locator('button[data-technique="secondWind"]').locator('..');
+  assert.match(await newMove.locator('img').getAttribute('src'), /techniques\/secondWind\.webp/);
   const pulse = techniques.getByRole('button', { name: 'Use · Star-ash pulse', exact: true });
   assert(await pulse.isEnabled(), 'The selected tactical foe is within casting range');
   const priorSounds = await view.evaluate(() => window.frontierBattleSounds.length);
@@ -651,6 +679,38 @@ try {
   await view.waitForFunction((count) => window.frontierBattleSounds.slice(count).includes('flash'), priorSounds);
   await view.waitForTimeout(135);
   await snap('tactics-directed-impact');
+
+  async function resumeRuinsAt(cell) {
+    const fixture = await slot();
+    fixture.delve = { floor: 1, cell, light: 12, direction: 1, previous: null, threat: 0, encounter: null };
+    const record = fixture.floors[model.floorKey(fixture.location, 1)];
+    record.cleared = [...new Set([...record.cleared.filter((point) => point !== cell), native.seal])];
+    const slots = [fixture];
+    await click('Title');
+    await view.evaluate(({ slots, checksum }) => {
+      localStorage.setItem('learning_rogue_school_trpg_adventure_v1',
+        JSON.stringify({ schema: 'school-adventure', serial: 99999, slots, checksum }));
+    }, { slots, checksum: model.hash(JSON.stringify(slots)) });
+    await view.reload();
+    await open();
+    await click(/^Continue/);
+  }
+  const cache = Number(Object.keys(native.features).find((cell) => native.features[cell] === 'cache'));
+  assert(Number.isInteger(cache));
+  await resumeRuinsAt(cache);
+  await view.locator('.sa-scene-encounter[data-encounter-art*="cache-"]').evaluate((image) => image.decode());
+  await snap('dungeon-treasure');
+  await click('Open chest');
+  assert.equal(await view.locator('.sa-scene-encounter[data-encounter-art*="cache-"]:not([data-ahead])').count(), 0);
+  await resumeRuinsAt(native.stairs);
+  await view.locator('.sa-scene-encounter[data-encounter-art*="stairs-down-"]').evaluate((image) => image.decode());
+  await snap('dungeon-down');
+  await click('Descend');
+  assert.equal((await slot()).delve.floor, 2);
+  await view.locator('.sa-scene-encounter[data-encounter-art*="stairs-up-"]').evaluate((image) => image.decode());
+  await snap('dungeon-up');
+  await click('Ascend');
+  assert.equal((await slot()).delve.floor, 1);
   assert.deepEqual(errors, []);
 
   const jp = await browser.newPage({ viewport: { width: 320, height: 568 }, isMobile: true, hasTouch: true });
@@ -682,7 +742,7 @@ try {
   await jp.getByRole('button', { name: '探索メニュー', exact: true }).tap();
   await jp.getByRole('dialog').getByRole('button', { name: '自由宣言', exact: true }).waitFor();
   console.log(
-    'PASS Frontier title, campaign routing, JP/EN phone layouts, hydration, guide, first battle, directional combat art and sound, exploration, and save reload',
+    'PASS Frontier routing, JP/EN phone sizes, survival, character stats, technique progression, companion positions and actions, combat art, chest, stairs and save reload',
     out,
   );
 } finally {

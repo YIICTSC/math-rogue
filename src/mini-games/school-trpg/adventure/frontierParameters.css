@@ -1,0 +1,360 @@
+.sa-app .sa-status > .sa-hero-parameters {
+  justify-content: flex-start;
+  min-width: 0;
+  gap: 5px;
+  padding: 2px 4px;
+  border-color: #647b7366;
+  background: #243b366e;
+  text-align: start;
+  line-height: 1.18;
+  flex: 1 1 118px;
+}
+.sa-hero-parameters > svg {
+  flex: none;
+  align-self: center;
+  color: #b8dac5;
+}
+.sa-parameters,
+.sa-parameter-tabs {
+  display: grid;
+  gap: 8px;
+}
+.sa-parameter-tabs {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 9px;
+}
+.sa-app .sa-parameter-tabs button {
+  min-width: 0;
+  padding: 5px 4px;
+  line-height: 1.12;
+}
+.sa-parameter-tabs button[aria-pressed='true'] {
+  border-color: var(--sa-gold);
+  color: var(--sa-gold);
+}
+.sa-parameters-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sa-parameters-head .sa-portrait {
+  width: 44px;
+  height: 44px;
+  flex: none;
+}
+.sa-parameters-head p {
+  margin: 2px 0 0;
+  color: var(--sa-muted);
+}
+.sa-parameter-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  margin: 0;
+}
+.sa-parameter-grid > div {
+  min-width: 0;
+  margin: 0;
+  border: 1px solid var(--sa-line);
+  border-radius: 6px;
+  padding: 6px 7px;
+  background: #142326;
+}
+.sa-parameter-grid dt {
+  color: var(--sa-muted);
+  font-size: 0.84em;
+}
+.sa-parameter-grid dd {
+  margin: 2px 0 0;
+  color: #f5deaf;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.sa-parameter-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88em;
+  text-align: center;
+}
+.sa-parameter-table th,
+.sa-parameter-table td {
+  padding: 5px 3px;
+  border-bottom: 1px solid var(--sa-line);
+}
+.sa-parameter-table th:first-child {
+  text-align: start;
+}
+.sa-mastery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+}
+.sa-mastery > div {
+  color: var(--sa-muted);
+  background: #152527;
+  border: 1px solid var(--sa-line);
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 0.88em;
+}
+.sa-mastery > div[data-equipped] {
+  border-color: var(--sa-gold);
+}
+.sa-mastery b {
+  display: block;
+  color: var(--sa-gold);
+}
+.sa-learning-state {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 2px;
+  font-size: 0.72em;
+  line-height: 1.14;
+  min-width: 45px;
+  color: #e0c9a6;
+}
+.sa-learn-techniques article[data-learned='true'] {
+  border-color: #76ae91;
+}
+.sa-learn-techniques article[data-learned='true'] .sa-learning-state {
+  color: #c1f0cf;
+}
+.sa-app .sa-learn-link {
+  justify-self: start;
+  min-height: 35px;
+  padding: 4px 8px;
+}
+.sa-app .sa-resident-abilities {
+  min-height: 31px;
+  margin-inline-start: 7px;
+  padding: 3px 6px;
+}
+
+.sa-dungeon-scene:has(.sa-scene-encounter) {
+  container-type: size;
+}
+.sa-scene-encounter {
+  position: absolute;
+  left: 50%;
+  bottom: 11%;
+  width: min(58cqw, 74cqh, 300px);
+  height: min(69cqh, 260px);
+  object-fit: contain;
+  object-position: center bottom;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 8px 8px #000d);
+  pointer-events: none;
+}
+.sa-scene-encounter[data-ahead] {
+  bottom: 30%;
+  scale: 0.59;
+  transform: translateX(-85%);
+}
+.sa-dungeon-scene[data-dark] .sa-scene-encounter {
+  filter: brightness(0.74) drop-shadow(0 8px 8px #000d);
+}
+.sa-explore-art {
+  width: min(33%, 114px);
+  height: auto;
+  max-height: 90px;
+  object-fit: contain;
+  float: right;
+  margin-inline-start: 6px;
+}
+.sa-find {
+  display: flow-root;
+}
+
+.sa-dungeon-scene[data-combat]:has(.sa-battle-allies) {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+.sa-battle-allies {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 5px 4px;
+}
+.sa-app .sa-battle-allies > button {
+  display: grid;
+  gap: 1px;
+  border-color: #8ed4b1;
+  min-height: 0;
+  width: clamp(30px, 6.1vw, 45px);
+  padding: 2px 3px;
+  justify-content: stretch;
+  background: #173c36e6;
+  position: relative;
+}
+.sa-battle-allies .sa-portrait {
+  width: 100%;
+  height: clamp(21px, 6vh, 37px);
+}
+.sa-battle-allies > button[data-down] {
+  opacity: 0.48;
+}
+.sa-tactical .sa-battle-allies {
+  gap: 2px;
+  padding: 0;
+  margin-inline-start: auto;
+}
+.sa-app .sa-tactical .sa-battle-allies button {
+  width: 18px;
+  padding: 0;
+}
+.sa-tactical .sa-battle-allies .sa-portrait {
+  height: 17px;
+}
+.sa-tactical-unit[data-down] > .sa-resident-portrait {
+  animation: sa-fall-away 330ms var(--hit-delay, 150ms) both;
+}
+.sa-battle-allies progress {
+  width: 100%;
+  height: 3px;
+  accent-color: #8ee0af;
+}
+.sa-combat-party article button {
+  margin-inline-start: auto;
+  padding: 3px 6px;
+}
+.sa-creature-portrait {
+  object-fit: contain;
+}
+.sa-app .sa-tactical-grid button[data-tactical-ally] {
+  border: 2px solid #80c9a4;
+  background: radial-gradient(ellipse at 50% 72%, #38775b, #18473a 78%);
+}
+.sa-tactical-ally .sa-portrait {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  box-shadow: none;
+}
+.sa-tactical-ally progress {
+  color: #9cf4c0;
+  background: #173626;
+}
+.sa-tactical-ally progress::-webkit-progress-bar {
+  background: #173626;
+}
+.sa-tactical-ally progress::-webkit-progress-value {
+  background: #9cf4c0;
+}
+.sa-tactical-ally progress::-moz-progress-bar {
+  background: #9cf4c0;
+}
+.sa-tactical-grid [data-acting]::after,
+.sa-battle-allies [data-acting]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid #f9df9d;
+  border-radius: inherit;
+  pointer-events: none;
+  animation: sa-ally-acts 230ms var(--ally-delay) both;
+}
+@keyframes sa-ally-acts {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  26%,
+  65% {
+    opacity: 1;
+    box-shadow: inset 0 0 6px #ffcb88ed;
+  }
+}
+.sa-tactical-grid [data-motion] :is(.sa-tactical-unit, .sa-portrait) {
+  animation: sa-actor-arrives 180ms var(--movement-delay) both;
+}
+@keyframes sa-actor-arrives {
+  0%,
+  81% {
+    visibility: hidden;
+  }
+  100% {
+    visibility: visible;
+  }
+}
+.sa-strike-shoved > :is(img, .sa-portrait) {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sa-tactical-grid [data-motion] :is(.sa-tactical-unit, .sa-portrait) {
+    animation: none;
+  }
+}
+@media (max-width: 420px) {
+  .sa-app .sa-status > .sa-hero-parameters {
+    flex-basis: 0;
+  }
+  .sa-hero-parameters > svg {
+    width: 12px;
+  }
+}
+@media (orientation: landscape) and (max-height: 450px) {
+  .sa-dungeon-scene[data-combat]:has(.sa-battle-allies) {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .sa-dungeon-scene .sa-battle-allies {
+    position: absolute;
+    left: 4px;
+    bottom: 4px;
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    padding: 0;
+    gap: 2px;
+  }
+  .sa-app .sa-dungeon-scene .sa-battle-allies button {
+    width: 27px;
+    padding: 1px 2px;
+  }
+  .sa-dungeon-scene .sa-battle-allies .sa-portrait {
+    height: 21px;
+  }
+  .sa-dungeon-scene[data-combat]:has(.sa-battle-allies) .sa-foes {
+    padding-left: 91px;
+  }
+  .sa-dungeon-scene .sa-foes {
+    align-items: center;
+    min-height: 0;
+  }
+  .sa-app .sa-dungeon-scene .sa-foe {
+    display: grid;
+    grid-template: auto auto auto / 42% minmax(0, 1fr);
+    gap: 3px;
+    align-items: center;
+    padding: 4px;
+  }
+  .sa-dungeon-scene .sa-foe img {
+    grid-area: 1 / 1 / 4 / 2;
+    height: clamp(29px, 12vh, 47px);
+    min-width: 0;
+  }
+  .sa-dungeon-scene .sa-foe :is(.sa-intent, .sa-foe-name, progress) {
+    grid-column: 2;
+  }
+  .sa-dungeon-scene .sa-foe .sa-intent {
+    padding-block: 1px;
+    line-height: 1.08;
+  }
+  .sa-dungeon-scene .sa-foe-name {
+    display: grid;
+    gap: 0;
+    line-height: 1.12;
+  }
+  .sa-dungeon-scene .sa-foe-name strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .sa-dungeon-scene .sa-foe small {
+    display: none;
+  }
+}

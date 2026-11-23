@@ -104,6 +104,7 @@ export type Friend = {
   offeredDay: number;
   memories?: number;
   bondDay?: number;
+  creature?: number;
 };
 export type DungeonRecord = { seen: number[]; cleared: number[]; inspected: number[] };
 export type Enemy = {
@@ -118,7 +119,7 @@ export type Enemy = {
   pinnedUntil?: number;
   markedUntil?: number;
 };
-export type Ally = { id: string; hp: number; max: number };
+export type Ally = { id: string; hp: number; max: number; braced?: boolean };
 export type Encounter = {
   cell: number;
   guardian: boolean;
@@ -128,6 +129,9 @@ export type Encounter = {
   allies?: Ally[];
   combo: number;
   guard: boolean;
+  riposte?: boolean;
+  coordinated?: boolean;
+  tideWard?: boolean;
   surprise: boolean;
   tactics?: Tactics;
 };
@@ -182,6 +186,7 @@ export type Adventure = {
   goods: Goods;
   gear: Gear[];
   equipment: Partial<Record<Slot, string>>;
+  weaponTraining?: Partial<Record<Weapon, number>>;
   nextGear: number;
   workshop: Record<string, Garden>;
   friends: Record<string, Friend>;
@@ -381,6 +386,7 @@ export function startAdventure(character: Character, id: string): Adventure | nu
     goods,
     gear,
     equipment,
+    weaponTraining: {},
     nextGear: 1,
     workshop: {},
     friends: {},

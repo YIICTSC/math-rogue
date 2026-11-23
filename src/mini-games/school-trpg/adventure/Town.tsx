@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import ScreenDialog from './ScreenDialog';
 import PanelNavigation from './PanelNavigation';
 import { HYDRATION_MENU, SURVIVAL_GUIDE, SurvivalGuide, TownHydration } from './FrontierSurvival';
+import { CompanionStats } from './CharacterParameters';
 import {
   ArrowDown,
   ArrowLeft,
@@ -1104,6 +1105,7 @@ export function PeoplePanel({ state: s, send, t }: PanelProps) {
   const people = residentsAt(s.location);
   const [picked, setPicked] = useState(people[0].id);
   const [panel, setPanel] = useState<keyof typeof PEOPLE_PANELS>('residents');
+  const [showStats, setShowStats] = useState(false);
   const subject = people.find((person) => person.id === picked) ?? people[0];
   const friend = s.friends[subject.id];
   const role = RESIDENT_ROLES[subject.role];
@@ -1125,6 +1127,10 @@ export function PeoplePanel({ state: s, send, t }: PanelProps) {
         t={t}
         name={['交流の項目', 'People panels', 'こうりゅうの こうもく']}
       />
+      {showStats && <ScreenDialog title={t(['住民の能力', 'Resident abilities', 'じゅうみんの のうりょく'])}
+        t={t} close={() => setShowStats(false)}>
+        <CompanionStats s={s} resident={subject} t={t} />
+      </ScreenDialog>}
       <div className="sa-workspace-body" key={panel}>
         {panel === 'residents' ? (
           <section className="sa-panel">
@@ -1160,6 +1166,9 @@ export function PeoplePanel({ state: s, send, t }: PanelProps) {
                 <b className="sa-gold">
                   {t(['親しさ', 'Trust'])} {trust}/8
                 </b>
+                <button type="button" className="sa-resident-abilities" onClick={() => setShowStats(true)}>
+                  {t(['能力を見る', 'View abilities', 'のうりょくを みる'])}
+                </button>
               </div>
             </div>
             <blockquote>

@@ -27,8 +27,11 @@ try {
   const [field, frontier, fieldWorld, fieldActions, tactics] = await Promise.all(
     ['frontierContent', 'frontierState', 'frontierWorld', 'frontierActions', 'fieldTactics'].map((file) => vite.ssrLoadModule(path + file + '.ts')),
   );
-  const { BATTLE_ART } = await vite.ssrLoadModule(path + 'battleFeedback.ts');
-  const { TECHNIQUES, loadoutTechniques } = await vite.ssrLoadModule(path + 'battleTechniques.ts');
+  const { BATTLE_ART, battleTiming } = await vite.ssrLoadModule(path + 'battleFeedback.ts');
+  const { TECHNIQUES, loadoutTechniques, weaponRank, weaponUses } = await vite.ssrLoadModule(path + 'battleTechniques.ts');
+  const { ADVANCED_IDS } = await vite.ssrLoadModule(path + 'advancedTechniques.ts');
+  const { ILLUSTRATED_ENCOUNTERS, encounterImage, stairsImage, stairsName } = await vite.ssrLoadModule(path + 'encounterArt.ts');
+  const { companionParameters, formParty } = await vite.ssrLoadModule(path + 'party.ts');
   const { adventureTransition: transition } = engine;
   const { defaultCharacter, startAdventure, PORTRAIT_IDS, nextRandom } = state;
   const draft = { ...defaultCharacter(), name: 'Aoi', calling: 'envoy' };
@@ -805,14 +808,28 @@ try {
   assert.deepEqual(save.loadAdventures(), [manual]);
   assert(save.deleteAdventure(manual.id));
 
-  assert.equal(Object.keys(TECHNIQUES).length, 15);
+  assert.equal(Object.keys(TECHNIQUES).length, 31);
   const effectHashes = await Promise.all(BATTLE_ART.map(async (name) => {
     const image = await readFile('public/sprites/school-adventure/combat/' + name + '.webp');
     assert.equal(image.subarray(8, 12).toString(), 'WEBP', name);
     assert(image.length > 10000, name);
     return createHash('sha256').update(image).digest('hex');
   }));
-  assert.equal(new Set(effectHashes).size, 12);
+  assert.equal(new Set(effectHashes).size, 28);
+  const newIllustrations = [
+    ...ADVANCED_IDS.map((id) => 'techniques/' + id),
+    ...ILLUSTRATED_ENCOUNTERS.flatMap((kind) => content.BIOME_IDS.map((biome) => encounterImage(kind, biome))),
+    ...content.BIOME_IDS.flatMap((biome) => [stairsImage(biome, 'up'), encounterImage('stairs', biome)]),
+  ];
+  const illustrationHashes = await Promise.all(newIllustrations.map(async (id) => {
+    const image = await readFile('public/sprites/school-adventure/' + id + '.webp');
+    assert.equal(image.subarray(8, 12).toString(), 'WEBP', id);
+    assert(image.length > 1600, id);
+    return createHash('sha256').update(image).digest('hex');
+  }));
+  assert.equal(new Set(illustrationHashes).size, 58);
+  assert.equal(stairsName('coast', 'up')[0], '上りはしご');
+  assert.equal(stairsName('academy', 'down')[0], '下り階段');
 
   const lane = [0, 1, 2, 3, 4].map((x) => 4 * world.SIDE + x + 1);
   const testBattle = (weapon, calling, cells = [lane[1], lane[3]]) => {
@@ -825,6 +842,8 @@ try {
     fixture.lastMealAt = fixture.time;
     fixture.rng = seedFor((face) => face === 18);
     fixture.character.calling = calling;
+    fixture.weaponTraining = {};
+    fixture.counters.combats = 0;
     state.equipped(fixture, 'weapon').weapon = weapon;
     fixture.frontier.alterations[world.floorKey(fixture.location, fixture.delve.floor)] = {
       dug: lane,
@@ -906,6 +925,76 @@ try {
   const lightning = perform(conduit, 'staffChain');
   assert(lightning.events.some(({ art, from, to, hp }) =>
     art === 'shock' && from.cell === lane[1] && to.cell === lane[3] && hp < 0));
+
+  let duelist = testBattle('knife', 'scout', [lane[1]]);
+  const rematch = () => structuredClone(duelist.delve.encounter);
+  const encounter = rematch();
+  assert.equal(transition(duelist, { type: 'combat', move: 'riposte', target: 0 }), duelist);
+  for (let i = 0; i < 2; i++) {
+    duelist.delve.encounter = structuredClone(encounter);
+    duelist.delve.encounter.enemies[0].hp = 1;
+    duelist.rng = seedFor((face) => face === 18);
+    duelist = perform(duelist, 'strike').result;
+  }
+  assert.equal(duelist.counters.combats, 2);
+  assert.equal(weaponUses(duelist, 'knife'), 6, 'Two weapon hits and two victories train the equipped weapon');
+  assert(loadoutTechniques(duelist).includes('riposte'));
+  assert(duelist.journal.some((entry) => /You learned.*Riposte/.test(entry.text[1])));
+  assert(!loadoutTechniques(duelist).includes('shadowStrike'));
+  for (let i = 0; i < 6; i++) {
+    duelist.delve.encounter = structuredClone(encounter);
+    duelist.rng = seedFor((face) => face === 18);
+    duelist = perform(duelist, 'strike').result;
+  }
+  assert.equal(weaponRank(duelist, 'knife'), 2);
+  assert(loadoutTechniques(duelist).includes('shadowStrike'));
+  assert(perform(duelist, 'shadowStrike').events.some(({ art, hp }) => art === 'shadowStrike' && hp < 0));
+  const newScholar = testBattle('wand', 'scholar', [lane[3], lane[4]]);
+  newScholar.level = 5;
+  assert.equal(transition(newScholar, { type: 'combat', move: 'frostLattice', target: 0 }), newScholar);
+  state.awardExperience(newScholar, state.xpGoal(5));
+  assert(loadoutTechniques(newScholar).includes('frostLattice'));
+  const frozen = perform(newScholar, 'frostLattice');
+  assert(frozen.battle.enemies.every((enemy) => enemy.pinnedUntil >= frozen.battle.turn));
+  assert(frozen.events.some(({ art, to }) => art === 'frostLattice' && to.cell === lane[4]));
+  const smith = testBattle('hammer', 'artisan', [lane[1]]);
+  assert.equal(transition(smith, { type: 'combat', move: 'kilnBurst', target: 0 }), smith);
+  state.equipped(smith, 'weapon').masterwork = 'kilnHammer';
+  assert(loadoutTechniques(smith).includes('kilnBurst'));
+  assert(perform(smith, 'kilnBurst').events.some(({ art, hp }) => art === 'kilnBurst' && hp < 0));
+
+  const formation = testBattle('wand', 'scholar', [lane[3], lane[4]]);
+  const followers = world.residentsAt(formation.location).filter(({ role }) => ['reader', 'broker'].includes(role));
+  assert.equal(followers.length, 2);
+  for (const resident of followers)
+    formation.friends[resident.id] = { resident, trust: 5, visitedDay: 0, offeredDay: 0 };
+  formation.followers = followers.map(({ id }) => id);
+  formation.delve.encounter.allies = formParty(formation);
+  formation.delve.encounter.tactics.party = Object.fromEntries(formation.followers.map((id, i) => [id, lane[i + 1]]));
+  const ordered = perform(formation, 'spark');
+  const actors = ordered.events.map(({ from }) => from.side === 'party' ? from.id : from.side);
+  assert.deepEqual(actors.slice(0, 3), ['hero', ...formation.followers]);
+  assert(actors.slice(3).includes('foe'), 'Enemies act after the two companions');
+  assert(ordered.events.some(({ from, to, hp }) => from.side === 'foe' && to.side === 'party' &&
+    to.cell === lane[2] && hp < 0));
+  const timing = battleTiming(ordered.events);
+  assert(timing.alliesAct && timing.delays[0] < timing.delays[1] && timing.delays[1] < timing.delays[2]);
+  assert.equal(companionParameters(formation, followers[0].id, followers[0].role).max, formation.delve.encounter.allies[0].max);
+  assert.equal(save.saveAdventure(ordered.result, null), 'saved');
+  assert.deepEqual(save.loadAdventures(), [ordered.result]);
+  assert(save.deleteAdventure(ordered.result.id));
+  const oldFight = structuredClone(formation);
+  delete oldFight.delve.encounter.tactics.party;
+  delete oldFight.weaponTraining;
+  assert.equal(save.saveAdventure(oldFight, null), 'saved');
+  const restoredFight = save.loadAdventures()[0];
+  assert.deepEqual(restoredFight, oldFight);
+  assert.equal(Object.keys(perform(restoredFight, 'guard').battle.tactics.party).length, 2);
+  assert(save.deleteAdventure(restoredFight.id));
+  formation.frontier.orders[formation.followers[0]] = 'hold';
+  const swapped = play(formation, { type: 'tactical-step', cell: lane[1] });
+  assert.equal(swapped.delve.cell, lane[1]);
+  assert.equal(swapped.delve.encounter.tactics.party[formation.followers[0]], lane[0]);
 
   const legacy = structuredClone(original);
   legacy.version = 1;
@@ -991,7 +1080,7 @@ try {
   assert.deepEqual(save.loadAdventures(), []);
   assert.equal(storage.get(originalStory.SCHOOL_TRPG_SAVE_KEY), 'existing-story');
   console.log(
-    `PASS 40 unique portraits, ${newArt.length + fieldArt.length} adventure assets, ${BATTLE_ART.length} battle effects, ${Object.keys(TECHNIQUES).length} techniques, ${floors} seeded floors, expeditions, hydration, tactical reactions, six historic records, and v1–v4 save migration.`,
+    `PASS 40 portraits, ${newArt.length + fieldArt.length} adventure assets, 42 encounter images, 16 skill icons, ${BATTLE_ART.length} combat effects, ${Object.keys(TECHNIQUES).length} techniques, ${floors} seeded floors, sequential party turns, expeditions, hydration, and save migration.`,
   );
 } finally {
   await vite.close();

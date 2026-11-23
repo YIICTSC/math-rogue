@@ -16,7 +16,7 @@ import {
   Swords,
 } from 'lucide-react';
 import { BIOMES, FOES, GOODS, INTENTS, creatureArt, type Text } from './content';
-import { BattleEffects } from './BattleEffects';
+import { BattleCompanions, BattleEffects } from './BattleEffects';
 import { BATTLE_ART, battleCueDelay, type BattleCue } from './battleFeedback';
 import { BattleTechniqueMenu, BattleTutorial, TECHNIQUES_TITLE, readCombatIntro, rememberCombatIntro } from './BattleHelp';
 import {
@@ -43,6 +43,7 @@ import { MECHANISMS, circuitAt, historyTitle, ruinLayout } from './ruinSystems';
 import { TacticalMoves, TacticalTarget, TacticalView } from './TacticalView';
 import ScreenDialog from './ScreenDialog';
 import DungeonCorridor from './DungeonCorridor';
+import { encounterImage, stairsImage, stairsName } from './encounterArt';
 import {
   MAX_PARTY_SIZE,
   maxFocus,
@@ -63,7 +64,7 @@ import {
   type Feature,
   type Floor,
 } from './world';
-import { art, FormationChoice, Portrait, ResidentPortrait, type Local, type Send } from './ui';
+import { art, CompanionPortrait, FormationChoice, Portrait, type Local, type Send } from './ui';
 
 const SYMBOLS: Record<Feature, string> = {
   pack: '!',
@@ -268,6 +269,7 @@ function DungeonScene({
   select,
   fixture,
   cue,
+  showStats,
 }: {
   s: Adventure;
   floor: Floor;
@@ -276,14 +278,25 @@ function DungeonScene({
   select: (id: number) => void;
   fixture: 'device' | 'inscription' | null;
   cue?: BattleCue | null;
+  showStats: (id: string) => void;
 }) {
   const d = s.delve!;
   const battle = d.encounter;
   const biome = townAt(s.location).biome;
-  const front = floor.open.has(neighbor(d.cell, d.direction));
-  const ahead = front && fieldSkill(s, 'wayfinding') ? terrainAt(s, neighbor(d.cell, d.direction), d.floor, floor) : 'floor';
+  const aheadCell = neighbor(d.cell, d.direction);
+  const front = floor.open.has(aheadCell);
+  const ahead = front && fieldSkill(s, 'wayfinding') ? terrainAt(s, aheadCell, d.floor, floor) : 'floor';
   const record = recordFor(s, d.floor);
   const feature = record.cleared.includes(d.cell) ? undefined : floor.features[d.cell];
+  const aheadFeature = front && d.light > 0 && !record.cleared.includes(aheadCell)
+    ? floor.features[aheadCell] : undefined;
+  const preview = !feature && aheadFeature !== 'trap' ? encounterImage(aheadFeature, biome) : null;
+  const atEntrance = d.cell === ENTRY_CELL;
+  const illustration = atEntrance ? stairsImage(biome, 'up') : encounterImage(feature, biome) ?? preview;
+  const sceneFeature = feature ?? (preview ? aheadFeature : undefined);
+  const sceneName = atEntrance ? stairsName(biome, 'up')
+    : sceneFeature === 'stairs' ? stairsName(biome, 'down')
+      : sceneFeature ? FEATURES[sceneFeature] : undefined;
   const creatures = battle?.enemies.map((enemy) => art(creatureArt(FOES[enemy.template]))) ?? [];
   return (
     <section
@@ -306,8 +319,8 @@ function DungeonScene({
         ) : (
           <span>
             {t(
-              feature
-                ? FEATURES[feature]
+              sceneName
+                ? sceneName
                 : fixture === 'device' ? MECHANISMS[biome].name
                 : fixture === 'inscription' ? historyTitle(s.location)
                 : front
@@ -339,7 +352,7 @@ function DungeonScene({
                 data-down={down || undefined}
                 data-battle-foe={index}
                 data-hurt={hurt >= 0 ? cue?.revision : undefined}
-                style={{ '--hit-delay': battleCueDelay(hurt) + 110 + 'ms' } as React.CSSProperties}
+                style={{ '--hit-delay': battleCueDelay(cue, hurt) + 110 + 'ms' } as React.CSSProperties}
               >
                 <span className="sa-intent">
                   {enemy.stagger
@@ -370,12 +383,16 @@ function DungeonScene({
         </div>
       ) : fixture ? (
         <img className="sa-scene-fixture" src={art('expedition/' + (fixture === 'device' ? 'mechanism-' : 'history-') + biome)} alt="" />
+      ) : illustration ? (
+        <img key={illustration} className="sa-scene-encounter" src={art(illustration)} alt=""
+          data-encounter-art={illustration} data-ahead={(!atEntrance && Boolean(preview)) || undefined} decoding="async" />
       ) : feature ? (
         <div className="sa-scene-marker" aria-hidden="true">
           {SYMBOLS[feature]}
         </div>
       ) : null}
-      {battle && cue && <BattleEffects key={cue.revision} cue={cue} creatures={creatures} />}
+      {battle && <BattleCompanions s={s} cue={cue} t={t} showStats={showStats} allies={battle.allies ?? formParty(s)} />}
+      {battle && cue && <BattleEffects key={cue.revision} s={s} cue={cue} creatures={creatures} />}
     </section>
   );
 }
@@ -386,6 +403,7 @@ export default function DelveView({
   send,
   t,
   declare,
+  showStats,
   modalOpen,
 }: {
   state: Adventure;
@@ -393,6 +411,7 @@ export default function DelveView({
   send: Send;
   t: Local;
   declare: () => void;
+  showStats: (id: string) => void;
   modalOpen: boolean;
 }) {
   const d = s.delve!;
@@ -411,8 +430,9 @@ export default function DelveView({
   const [introSeen, setIntroSeen] = useState(readCombatIntro);
   const combatOpen = !!battle;
   const ending = Boolean(cue?.ending);
+  const animating = Boolean(cue?.alliesAct);
   const tutorial = combatOpen && (!introSeen || sheet === 'tutorial') && !ending && !modalOpen;
-  const blocked = modalOpen || sheet !== null || tutorial || (combatOpen && !introSeen) || ending;
+  const blocked = modalOpen || sheet !== null || tutorial || (combatOpen && !introSeen) || ending || animating;
   const validTarget = (index: number) => {
     if (!battle || (battle.enemies[index]?.hp ?? 0) <= 0) return false;
     return !battle.tactics || (index !== borrowedCreature(battle) &&
@@ -489,16 +509,23 @@ export default function DelveView({
       : fixture === 'inscription'
         ? historyTitle(s.location)
         : explore?.location;
+  const groundArt = battle ? null : d.cell === ENTRY_CELL ? stairsImage(town.biome, 'up')
+    : !recordFor(s, d.floor).cleared.includes(d.cell) ? encounterImage(floor.features[d.cell], town.biome) : null;
   const declareFromMenu = () => {
     setSheet(null);
     declare();
+  };
+  const statsFromMenu = (id: string) => {
+    setSheet(null);
+    showStats(id);
   };
   const move = (direction: DelveMove) => send({ type: 'move', direction });
   const interact = (option: NonNullable<typeof explore>['options'][number]) =>
     send({ type: 'feature', verb: option.verb, symbol: option.symbol });
 
   return (
-    <div className="sa-delve" data-mode={manual ? 'tactical' : battle ? 'battle' : 'explore'} inert={ending || undefined}>
+    <div className="sa-delve" data-mode={manual ? 'tactical' : battle ? 'battle' : 'explore'}
+      data-party-turn={animating || undefined} inert={ending || undefined}>
       <header className="sa-delve-head">
         <h1>
           {t(biome.ruin)} <strong>B{d.floor}</strong>
@@ -509,7 +536,7 @@ export default function DelveView({
             className="sa-lamp"
             aria-label={t(GOODS.lantern.name) + ' ×' + s.goods.lantern}
             title={t(['灯油を補充', 'Refill the lamp', 'あぶらを たす'])}
-            disabled={!s.goods.lantern || d.light >= 14}
+            disabled={animating || !s.goods.lantern || d.light >= 14}
             onClick={() => send({ type: 'use', good: 'lantern' })}
           >
             <Flame size={16} />
@@ -553,6 +580,8 @@ export default function DelveView({
             select={setPicked}
             send={send}
             modalOpen={blocked}
+            busy={animating}
+            showStats={showStats}
             cue={cue}
           />
         ) : (
@@ -564,6 +593,7 @@ export default function DelveView({
             select={setPicked}
             fixture={fixture}
             cue={cue}
+            showStats={showStats}
           />
         )}
         {!battle && (
@@ -628,8 +658,8 @@ export default function DelveView({
           <>
             {manual && (
               <>
-                <TacticalTarget s={s} t={t} target={target} floor={floor} send={send} />
-                <TacticalMoves s={s} t={t} target={target} floor={floor} send={send} />
+                <TacticalTarget s={s} t={t} target={target} floor={floor} send={send} busy={animating} />
+                <TacticalMoves s={s} t={t} target={target} floor={floor} send={send} busy={animating} />
               </>
             )}
             <div className="sa-delve-quick">
@@ -739,13 +769,13 @@ export default function DelveView({
             </div>
           ) : sheet === 'techniques' ? (
             <BattleTechniqueMenu s={s} t={t} floor={manual ? floor : undefined} send={send}
-              target={target} close={() => setSheet(null)} />
+              target={target} busy={animating} showLearning={() => statsFromMenu('techniques')} close={() => setSheet(null)} />
           ) : battle ? (
             <div className="sa-stack">
               <h3>
                 {t(['仲間', 'Party', 'なかま'])} · {s.followers.length + 1}/{MAX_PARTY_SIZE}
               </h3>
-              <CombatParty s={s} t={t} />
+              <CombatParty s={s} t={t} showStats={statsFromMenu} />
               <div className="sa-inline">
                 {!manual && (
                   <button
@@ -798,6 +828,7 @@ export default function DelveView({
                 />
               ) : (
                 <section className="sa-find">
+                  {groundArt && <img className="sa-explore-art" src={art(groundArt)} alt="" />}
                   <h3>{t(explore!.location)}</h3>
                   {explore!.hint && <p className="sa-hint">{t(explore!.hint)}</p>}
                   <div className="sa-inline">
@@ -838,7 +869,7 @@ export default function DelveView({
   );
 }
 
-function CombatParty({ s, t }: { s: Adventure; t: Local }) {
+function CombatParty({ s, t, showStats }: { s: Adventure; t: Local; showStats: (id: string) => void }) {
   const battle = s.delve!.encounter!;
   return (
     <div
@@ -856,11 +887,10 @@ function CombatParty({ s, t }: { s: Adventure; t: Local }) {
         </span>
       </article>
       {(battle.allies ?? formParty(s)).map((ally) => {
-        const { resident } = s.friends[ally.id];
-        const name = t(resident.name);
+        const name = t(s.friends[ally.id].resident.name);
         return (
           <article key={ally.id} data-down={ally.hp <= 0 || undefined}>
-            <ResidentPortrait role={resident.role} />
+            <CompanionPortrait s={s} id={ally.id} />
             <span>
               <strong>{name}</strong>
               <small>
@@ -870,6 +900,10 @@ function CombatParty({ s, t }: { s: Adventure; t: Local }) {
               </small>
               <progress value={ally.hp} max={ally.max} aria-label={name + ' HP'} />
             </span>
+            <button type="button" onClick={() => showStats(ally.id)}
+              aria-label={t(['能力を見る', 'View abilities', 'のうりょくを みる']) + ' · ' + name}>
+              {t(['能力', 'Abilities', 'のうりょく'])}
+            </button>
           </article>
         );
       })}

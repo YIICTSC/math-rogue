@@ -1,5 +1,7 @@
 import { applyDelveAction } from './delve';
 import type { BattleEvent } from './battleFeedback';
+import { ADVANCED_IDS } from './advancedTechniques';
+import { meetsTechniqueUnlock, techniqueFor } from './battleTechniques';
 import { applyTownAction, declareInTown } from './life';
 import { claimBadge } from './guild';
 import { STAT_IDS } from './content';
@@ -70,6 +72,14 @@ export function adventureTransition(state: Adventure, action: Action, events?: B
   if (!changed) return state;
   finishDefeat(next);
   observeExpedition(state, next, action);
+  const learned = ADVANCED_IDS.map((id) => techniqueFor(id)!).filter((tech) =>
+    tech.unlock?.kind !== 'equipment' && !meetsTechniqueUnlock(state, tech) && meetsTechniqueUnlock(next, tech),
+  );
+  if (learned.length) note(next, [
+    learned.map((tech) => tech.name[0]).join('、') + 'を習得した。',
+    'You learned ' + learned.map((tech) => tech.name[1]).join(', ') + '.',
+    learned.map((tech) => tech.name[2] ?? tech.name[0]).join('、') + 'を おぼえた。',
+  ], 'good');
   next.revision++;
   return next;
 }

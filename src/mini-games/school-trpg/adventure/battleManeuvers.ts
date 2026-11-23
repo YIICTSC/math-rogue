@@ -7,11 +7,11 @@ import {
   type BattleEvent,
   type BattlePoint,
 } from './battleFeedback';
-import { techniqueFor, type TechniqueId } from './battleTechniques';
+import { techniqueFor, type Maneuver, type TechniqueId } from './battleTechniques';
 import { borrowedCreature, shoveFoe } from './fieldTactics';
 import { glancingSight, igniteOilAt, neighbors, terrainAt } from './frontierWorld';
 import { note, recover, type Adventure, type Encounter } from './state';
-import type { Floor } from './world';
+import { cellPoint, type Floor } from './world';
 
 export function actingPoint(s: Adventure, battle: Encounter) {
   const linked = borrowedCreature(battle);
@@ -65,12 +65,15 @@ function splash(
   battle: Encounter,
   index: number,
   damage: number,
-  chain: boolean,
+  effect: Maneuver,
+  art: BattleArt,
   floor?: Floor,
   events?: BattleEvent[],
 ) {
-  const from = foePoint(battle, index);
+  const chain = effect === 'chain';
+  const from = effect === 'sweepHero' ? actingPoint(s, battle) : foePoint(battle, index);
   const cell = from.cell;
+  const origin = actingPoint(s, battle).cell;
   const conducts = (point: number) =>
     ['puddle', 'wire'].includes(terrainAt(s, point, s.delve!.floor, floor));
   if (chain && (!floor || cell === undefined || !conducts(cell))) return;
@@ -80,34 +83,46 @@ function splash(
     if (other === index || other === linked || foe.hp <= 0) continue;
     if (floor && battle.tactics && cell !== undefined) {
       const to = battle.tactics.cells[other];
-      const connects = chain
-        ? neighbors(cell).some(
-            (next) =>
-              floor.open.has(next) &&
-              conducts(next) &&
-              (next === to || neighbors(next).includes(to)),
-          ) || neighbors(cell).includes(to)
-        : glancingSight(floor, cell, to, 1);
+      const conductive =
+        (chain || effect === 'conductiveArea') &&
+        conducts(cell) &&
+        neighbors(cell).some(
+          (next) =>
+            floor.open.has(next) && conducts(next) && (next === to || neighbors(next).includes(to)),
+        );
+      const radius = ['blast', 'scatter', 'sweepHero', 'pierce'].includes(effect) ? 2 : 1;
+      let connects = conductive || glancingSight(floor, cell, to, radius);
+      if (connects && effect === 'pierce' && origin !== undefined) {
+        const a = cellPoint(origin),
+          b = cellPoint(cell),
+          c = cellPoint(to);
+        connects =
+          (a.x === b.x && b.x === c.x && (b.y - a.y) * (c.y - b.y) > 0) ||
+          (a.y === b.y && b.y === c.y && (b.x - a.x) * (c.x - b.x) > 0);
+      }
       if (!connects) continue;
-    } else if (Math.abs(other - index) !== 1) continue;
-    hurtFoe(
-      battle,
-      other,
-      Math.max(1, Math.round(damage / 2)),
-      chain ? 'shock' : 'slash',
-      from,
-      events,
-    );
-    if (++hits === 2) break;
+    } else if (
+      effect === 'pierce' ? other <= index : Math.abs(other - index) > (effect === 'blast' ? 2 : 1)
+    )
+      continue;
+    hurtFoe(battle, other, Math.max(1, Math.round(damage / 2)), art, from, events);
+    if (effect === 'frostArea' && foe.hp > 0) pinFoe(battle, other);
+    hits++;
+    if (hits === 2 && (effect === 'chain' || effect === 'scatter')) break;
   }
   if (hits)
     note(
       s,
       chain
         ? [`電撃が別の敵${hits}体に伝わった。`, `Lightning arcs to ${hits} more creatures.`]
-        : [`払いが別の敵${hits}体にも当たった。`, `The sweep hits ${hits} more creatures.`],
+        : [`技が別の敵${hits}体にも届いた。`, `The technique hits ${hits} more creatures.`],
       'good',
     );
+}
+
+function pinFoe(battle: Encounter, index: number) {
+  if (battle.tactics) battle.enemies[index].pinnedUntil = battle.turn + 1;
+  else battle.enemies[index].stagger = true;
 }
 
 function power(
@@ -138,7 +153,13 @@ export function applyManeuvers(
     switch (effect) {
       case 'sweep':
       case 'chain':
-        splash(s, battle, index, damage, effect === 'chain', floor, events);
+      case 'sweepHero':
+      case 'frostArea':
+      case 'blast':
+      case 'pierce':
+      case 'scatter':
+      case 'conductiveArea':
+        splash(s, battle, index, damage, effect, technique.art, floor, events);
         break;
       case 'guard':
         battle.guard = true;
@@ -154,7 +175,7 @@ export function applyManeuvers(
         if (patient) {
           const amount = Math.min(5, patient.max - patient.hp);
           patient.hp += amount;
-          power('heal', hero, partyPoint(s), events, amount);
+          power('heal', hero, partyPoint(battle, patient.id), events, amount);
         }
         note(s, ['傷の手当てをした。', 'You dress the wounds.'], 'good');
         break;
@@ -165,13 +186,56 @@ export function applyManeuvers(
         power('heal', hero, hero, events);
         note(s, ['集中と連携を整えた。', 'You restore Focus and build combo.'], 'good');
         break;
-      case 'ignite': {
-        const cell = battle.tactics?.cells[index];
-        if (floor && cell !== undefined && igniteOilAt(s, cell, floor)) {
-          const point = foePoint(battle, index);
-          power('fire', point, point, events);
-          note(s, ['足元の油膜に火がついた。', 'The oil slick catches fire.'], 'good');
+      case 'riposte':
+        battle.riposte = true;
+        power(technique.art, hero, hero, events);
+        note(s, [
+          '相手の動きを待ち、反撃の構えを取った。',
+          'You brace and watch for an opening to counter.',
+        ]);
+        break;
+      case 'coordinate':
+        battle.coordinated = true;
+        battle.combo = Math.min(4, battle.combo + 1);
+        power(technique.art, hero, hero, events);
+        note(
+          s,
+          ['合図を送り、仲間と攻める。', 'You signal the party to press the attack.'],
+          'good',
+        );
+        break;
+      case 'secondWind': {
+        const before = s.hp;
+        recover(s, 8, 3);
+        power(technique.art, hero, hero, events, s.hp - before);
+        note(s, ['息を整え、体勢を立て直した。', 'You catch your breath and regroup.'], 'good');
+        break;
+      }
+      case 'tideWard':
+        battle.tideWard = true;
+        power(technique.art, hero, hero, events);
+        for (const ally of battle.allies ?? []) {
+          if (ally.hp <= 0) continue;
+          const amount = Math.min(3, ally.max - ally.hp);
+          ally.hp += amount;
+          power(technique.art, hero, partyPoint(battle, ally.id), events, amount);
         }
+        note(s, ['引き潮の結界が味方を包んだ。', 'The ebb-tide ward shelters the party.'], 'good');
+        break;
+      case 'ignite':
+      case 'igniteArea': {
+        const cell = battle.tactics?.cells[index];
+        if (!floor || cell === undefined) break;
+        const area = effect === 'igniteArea' ? [cell, ...neighbors(cell)] : [cell];
+        const lit = area.filter((tile) => floor.open.has(tile) && igniteOilAt(s, tile, floor));
+        for (const tile of lit) {
+          const occupant = battle.tactics!.cells.findIndex(
+            (position, other) => position === tile && battle.enemies[other].hp > 0,
+          );
+          const point = occupant < 0 ? { ...actor, cell: tile } : foePoint(battle, occupant);
+          power('fire', { ...actor, cell: tile }, point, events);
+        }
+        if (lit.length) note(s, ['油膜に火がついた。', 'The oil slick catches fire.'], 'good');
         break;
       }
       default:
@@ -182,9 +246,13 @@ export function applyManeuvers(
             if (damage > 0) push(s, battle, index, effect === 'drive' ? 2 : 1, floor, events);
             break;
           case 'pin':
-            if (battle.tactics) foe.pinnedUntil = battle.turn + 1;
-            else foe.stagger = true;
-            power('snare', actor, foePoint(battle, index), events);
+            pinFoe(battle, index);
+            power(
+              technique.unlock ? technique.art : 'snare',
+              actor,
+              foePoint(battle, index),
+              events,
+            );
             note(s, ['敵を足止めした。', 'You pin the creature in place.'], 'good');
             break;
           case 'mark':
@@ -205,6 +273,9 @@ export function applyManeuvers(
             break;
           case 'interrupt':
             if (move === 'envoyDistract' || heavyWindup) foe.stagger = true;
+            break;
+          case 'stagger':
+            foe.stagger = true;
             break;
         }
     }

@@ -15,6 +15,7 @@ import { equipped, type Adventure, type CombatMove, type Encounter } from './sta
 export type Tactics = {
   cells: number[];
   aim: number | null;
+  party?: Record<string, number>;
   linked?: { foe: number; until: number };
 };
 
@@ -46,6 +47,25 @@ export const occupied = (battle: Encounter, cell: number, except = -1) =>
     (value, i) => i !== except && value === cell && battle.enemies[i].hp > 0,
   ) ?? false;
 
+export function partyPositions(s: Adventure, battle: Encounter, floor = fieldFloor(s)) {
+  if (!battle.tactics) return {};
+  if (battle.tactics.party) return battle.tactics.party;
+  const ids = battle.allies?.filter((ally) => ally.hp > 0).map((ally) => ally.id) ?? s.followers;
+  if (!ids.length) return {};
+  const origin = s.delve!.cell;
+  const reached = pathsFrom(origin, (cell) => floor.open.has(cell) && !occupied(battle, cell));
+  const open = [...reached.keys()].filter((cell) => cell !== origin);
+  const preferred = open.filter((cell) => !floor.features[cell]);
+  const cells = [...new Set([...preferred, ...open])];
+  return Object.fromEntries(ids.slice(0, cells.length).map((id, index) => [id, cells[index]]));
+}
+
+export function partyAt(battle: Encounter, positions: Record<string, number>, cell: number) {
+  return Object.keys(positions).find((id) =>
+    positions[id] === cell && (!battle.allies || battle.allies.some((ally) => ally.id === id && ally.hp > 0)),
+  );
+}
+
 const distance = (a: number, b: number) => {
   const x = cellPoint(a),
     y = cellPoint(b);
@@ -76,7 +96,7 @@ export function canTacticalStep(s: Adventure, cell: number, floor = fieldFloor(s
 
 export function moveRange(s: Adventure, move: CombatMove) {
   const technique = techniqueFor(move);
-  if (technique) return technique.range + Number(move === 'bowPin' && fieldSkill(s, 'marksman'));
+  if (technique) return technique.range + Number(Boolean(technique.marksmanship && fieldSkill(s, 'marksman')));
   if (move === 'spark') return 4;
   if (move === 'parley' || move === 'befriend' || move === 'study') return 4;
   if (move !== 'strike') return 1;
@@ -93,7 +113,7 @@ export function tacticalTarget(s: Adventure, move: CombatMove, index: number, fl
   if (!(battle.enemies[index]?.hp > 0) || borrowedCreature(battle) === index) return false;
   const from = actionPosition(s);
   const target = battle.tactics.cells[index];
-  if (move === 'pikeShove') {
+  if (techniqueFor(move)?.straight) {
     const a = cellPoint(from), b = cellPoint(target);
     if (a.x !== b.x && a.y !== b.y) return false;
   }
@@ -105,27 +125,31 @@ export function tacticalTarget(s: Adventure, move: CombatMove, index: number, fl
   );
 }
 
-export function enemyInRange(
+export function enemyCanHit(battle: Encounter, index: number, intent: Intent, target: number, floor: Floor) {
+  const range = intent === 'hex' || intent === 'drain' ? 3 : 1;
+  return !battle.tactics || glancingSight(floor, battle.tactics.cells[index], target, range);
+}
+
+export function approachParty(
   s: Adventure,
   battle: Encounter,
   index: number,
-  intent: Intent,
   floor: Floor,
 ) {
-  if (!battle.tactics) return true;
+  if (!battle.tactics || (battle.enemies[index].pinnedUntil ?? 0) >= battle.turn) return;
   const d = s.delve!;
   const point = battle.tactics.cells[index];
-  const range = intent === 'hex' || intent === 'drain' ? 3 : 1;
-  if (glancingSight(floor, point, d.cell, range)) return true;
-  if ((battle.enemies[index].pinnedUntil ?? 0) >= battle.turn) return false;
-  if (terrainAt(s, point, d.floor, floor) === 'resin' && battle.turn % 2 === 1) return false;
+  if (terrainAt(s, point, d.floor, floor) === 'resin' && battle.turn % 2 === 1) return;
+  const positions = partyPositions(s, battle, floor);
+  const party = new Set([d.cell, ...Object.values(positions).filter((cell) => partyAt(battle, positions, cell))]);
   const reached = pathsFrom(
     point,
-    (cell) => floor.open.has(cell) && (!occupied(battle, cell, index) || cell === d.cell),
+    (cell, from) => floor.open.has(cell) && !party.has(from) && !occupied(battle, cell, index),
   );
-  const path = pathTo(reached, point, d.cell);
+  const target = [...reached.keys()].find((cell) => party.has(cell));
+  if (target === undefined) return;
+  const path = pathTo(reached, point, target);
   if (path.length > 1) battle.tactics.cells[index] = path[0];
-  return false;
 }
 
 export function shoveFoe(s: Adventure, battle: Encounter, index: number, tiles: number, floor: Floor) {
@@ -143,6 +167,7 @@ export function shoveFoe(s: Adventure, battle: Encounter, index: number, tiles: 
       collision = 'wall';
       break;
     }
+    if (partyAt(battle, partyPositions(s, battle, floor), next)) break;
     const blockingFoe = board.cells.findIndex((point, other) => point === next && other !== index && battle.enemies[other].hp > 0);
     if (blockingFoe >= 0) {
       if (blockingFoe !== borrowedCreature(battle)) collision = blockingFoe;

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Anchor, Crosshair, Sparkles, Swords } from 'lucide-react';
 import { FOES, INTENTS, creatureArt, type Text } from './content';
 import { COMBAT_MOVES, canCombatMove, damageNames, foeIntent, recordFor } from './delve';
-import { BattleEffects } from './BattleEffects';
+import { allyAction, BattleCompanions, BattleEffects } from './BattleEffects';
 import { battleCueDelay, type BattleCue } from './battleFeedback';
 import { loadoutTechniques, techniqueFor } from './battleTechniques';
 import { TERRAIN } from './frontierContent';
@@ -12,12 +12,15 @@ import {
   canTacticalStep,
   distanceToTarget,
   moveRange,
+  partyAt,
+  partyPositions,
   tacticalTarget,
 } from './fieldTactics';
 import { glancingSight, terrainAt } from './frontierWorld';
 import { type Adventure, type CombatMove } from './state';
 import { neighbor, SIDE, type Floor } from './world';
-import { art, Portrait, type Local, type Send } from './ui';
+import { formParty } from './party';
+import { art, CompanionPortrait, Portrait, type Local, type Send } from './ui';
 
 type Props = {
   s: Adventure;
@@ -27,6 +30,8 @@ type Props = {
   send: Send;
   t: Local;
   modalOpen: boolean;
+  busy?: boolean;
+  showStats: (id: string) => void;
   cue?: BattleCue | null;
 };
 const ATTACKS: readonly CombatMove[] = ['strike', 'spark', 'guard', 'study'];
@@ -38,7 +43,18 @@ const MOVE_LABELS: Partial<Record<CombatMove, Text>> = {
   befriend: ['勧誘', 'Recruit', 'かんゆう'],
 };
 
-export function TacticalView({ s, floor, target, select, send, t, modalOpen, cue }: Props) {
+export function TacticalView({
+  s,
+  floor,
+  target,
+  select,
+  send,
+  t,
+  modalOpen,
+  busy,
+  cue,
+  showStats,
+}: Props) {
   const d = s.delve!;
   const battle = d.encounter!;
   const grid = battle.tactics!;
@@ -46,6 +62,9 @@ export function TacticalView({ s, floor, target, select, send, t, modalOpen, cue
   const hero = d.cell;
   const from = actionPosition(s);
   const linked = borrowedCreature(battle);
+  const allies = battle.allies ?? formParty(s);
+  const positions = partyPositions(s, battle, floor);
+  const reserve = allies.filter((member) => positions[member.id] === undefined || member.hp <= 0);
   const creatures = battle.enemies.map((enemy) => art(creatureArt(FOES[enemy.template])));
   const casualties = new Set(
     cue?.events.flatMap((event) =>
@@ -95,6 +114,9 @@ export function TacticalView({ s, floor, target, select, send, t, modalOpen, cue
           <Swords size={18} />
           {t(['戦術戦闘', 'Tactical combat', 'せんじゅつせんとう'])}
         </h2>
+        {reserve.length > 0 && (
+          <BattleCompanions s={s} t={t} cue={cue} showStats={showStats} allies={reserve} />
+        )}
         <b className="sa-gold">
           {t(['手番', 'Turn', 'てばん'])} {battle.turn}
         </b>
@@ -116,13 +138,29 @@ export function TacticalView({ s, floor, target, select, send, t, modalOpen, cue
           const unit = visible
             ? grid.cells.findIndex((value, index) => value === cell && battle.enemies[index].hp > 0)
             : -1;
+          const allyId = partyAt(battle, positions, cell);
+          const ally =
+            allies.find((member) => member.id === allyId) ??
+            (unit < 0 && cell !== hero
+              ? allies.find(
+                  (member) =>
+                    member.hp <= 0 &&
+                    positions[member.id] === cell &&
+                    cue?.events.some(
+                      (event) =>
+                        event.to.side === 'party' &&
+                        event.to.id === member.id &&
+                        (event.hp ?? 0) < 0,
+                    ),
+                )
+              : undefined);
           const down =
-            visible && cell !== hero && unit < 0
+            visible && cell !== hero && unit < 0 && !ally
               ? grid.cells.findIndex((value, index) => value === cell && casualties.has(index))
               : -1;
           const shown = unit >= 0 ? unit : down;
           const borrowed = unit >= 0 && unit === linked;
-          const step = canTacticalStep(s, cell, floor);
+          const step = !busy && canTacticalStep(s, cell, floor);
           const terrain =
             open && (visible || seen.has(cell)) ? terrainAt(s, cell, d.floor, floor) : null;
           const name =
@@ -131,15 +169,16 @@ export function TacticalView({ s, floor, target, select, send, t, modalOpen, cue
               : '';
           const pinned = unit >= 0 && (battle.enemies[unit].pinnedUntil ?? 0) >= battle.turn;
           const marked = unit >= 0 && (battle.enemies[unit].markedUntil ?? 0) >= battle.turn;
-          const moving =
-            unit >= 0 &&
-            cue?.events.some(
-              (event) =>
-                event.outcome === 'push' &&
-                event.to.side === 'foe' &&
-                event.to.index === unit &&
-                event.to.cell === cell,
-            );
+          const motion =
+            cue?.events.findIndex(
+              ({ outcome, to }) =>
+                (outcome === 'push' || outcome === 'move') &&
+                to.cell === cell &&
+                ((to.side === 'foe' && to.index === shown) ||
+                  (to.side === 'party' && to.id === ally?.id) ||
+                  (to.side === 'hero' && cell === hero)),
+            ) ?? -1;
+          const active = ally ? allyAction(cue, ally.id) : undefined;
           const hurt =
             cue?.events.findIndex(
               (event) =>
@@ -148,12 +187,16 @@ export function TacticalView({ s, floor, target, select, send, t, modalOpen, cue
           const mark =
             cell === hero ? (
               <Portrait id={s.character.portrait} />
-            ) : shown >= 0 ? (
+            ) : ally ? (
               <span
-                className="sa-tactical-unit"
-                data-down={down >= 0 || undefined}
-                data-shoved={moving || undefined}
+                className="sa-tactical-unit sa-tactical-ally"
+                data-down={ally.hp <= 0 || undefined}
               >
+                <CompanionPortrait s={s} id={ally.id} />
+                <progress max={ally.max} value={ally.hp} aria-hidden="true" />
+              </span>
+            ) : shown >= 0 ? (
+              <span className="sa-tactical-unit" data-down={down >= 0 || undefined}>
                 <img src={creatures[shown]} alt="" draggable={false} />
                 {unit >= 0 && (
                   <progress
@@ -178,49 +221,62 @@ export function TacticalView({ s, floor, target, select, send, t, modalOpen, cue
           const label =
             cell === hero
               ? t(['主人公', 'Hero', 'しゅじんこう'])
-              : unit >= 0
-                ? name
-                : step
-                  ? t(['移動先', 'Step to', 'いどうさき'])
-                  : terrain
-                    ? t(['通路', 'Passage', 'つうろ'])
-                    : t(['未確認', 'Unseen', 'みかくにん']);
+              : ally
+                ? t(s.friends[ally.id].resident.name) + ' · HP ' + ally.hp + '/' + ally.max
+                : unit >= 0
+                  ? name
+                  : step
+                    ? t(['移動先', 'Step to', 'いどうさき'])
+                    : terrain
+                      ? t(['通路', 'Passage', 'つうろ'])
+                      : t(['未確認', 'Unseen', 'みかくにん']);
           return (
             <button
               type="button"
               key={cell}
-              tabIndex={step || (unit >= 0 && !borrowed) ? 0 : -1}
-              disabled={!step && (unit < 0 || borrowed)}
+              tabIndex={step || ally || (unit >= 0 && !borrowed) ? 0 : -1}
+              disabled={!step && !ally && (unit < 0 || borrowed)}
               data-tile={cell}
               data-hero={cell === hero || undefined}
               data-foe={unit >= 0 || undefined}
+              data-tactical-ally={ally?.id}
+              data-acting={active !== undefined ? cue?.revision : undefined}
+              data-motion={motion >= 0 ? cue?.revision : undefined}
               data-borrowed={borrowed || undefined}
               data-fog={!terrain || undefined}
               data-step={step || undefined}
-              data-hurt={hurt >= 0 && (cell === hero || shown >= 0) ? cue?.revision : undefined}
+              data-hurt={
+                hurt >= 0 && (cell === hero || shown >= 0 || ally) ? cue?.revision : undefined
+              }
               aria-pressed={unit >= 0 ? unit === target : undefined}
               aria-label={label + ' ' + coords + (terrain ? ' · ' + t(TERRAIN[terrain].name) : '')}
               style={
                 {
                   '--terrain': terrain ? TERRAIN[terrain].color : undefined,
-                  '--hit-delay': battleCueDelay(hurt) + 110 + 'ms',
+                  '--hit-delay': battleCueDelay(cue, hurt) + 110 + 'ms',
+                  '--movement-delay': battleCueDelay(cue, motion) + 'ms',
+                  '--ally-delay': (active ?? 0) + 'ms',
                 } as React.CSSProperties
               }
-              onClick={() => (unit >= 0 ? select(unit) : send({ type: 'tactical-step', cell }))}
+              onClick={() => {
+                if (unit >= 0) select(unit);
+                else if (step) send({ type: 'tactical-step', cell });
+                else if (ally) showStats(ally.id);
+              }}
             >
               {mark}
             </button>
           );
         })}
-        {cue && <BattleEffects key={cue.revision} cue={cue} creatures={creatures} grid />}
+        {cue && <BattleEffects key={cue.revision} s={s} cue={cue} creatures={creatures} grid />}
       </div>
     </section>
   );
 }
 
-type ActionProps = Omit<Props, 'select' | 'modalOpen' | 'cue'>;
+type ActionProps = Omit<Props, 'select' | 'modalOpen' | 'cue' | 'showStats'>;
 
-export function TacticalTarget({ s, send, t, target, floor }: ActionProps) {
+export function TacticalTarget({ s, send, t, target, floor, busy }: ActionProps) {
   const battle = s.delve!.encounter!;
   const grid = battle.tactics!;
   const enemy = battle.enemies[target];
@@ -262,7 +318,7 @@ export function TacticalTarget({ s, send, t, target, floor }: ActionProps) {
       </span>
       <button
         type="button"
-        disabled={grid.aim === target || !tacticalTarget(s, 'spark', target, floor)}
+        disabled={busy || grid.aim === target || !tacticalTarget(s, 'spark', target, floor)}
         onClick={() => send({ type: 'tactical-aim', target })}
       >
         <Crosshair size={16} />
@@ -280,8 +336,8 @@ export function TacticalTarget({ s, send, t, target, floor }: ActionProps) {
   );
 }
 
-export function TacticalMoves({ s, send, t, target, floor }: ActionProps) {
-  const moves: CombatMove[] = [...ATTACKS, ...loadoutTechniques(s)];
+export function TacticalMoves({ s, send, t, target, floor, busy }: ActionProps) {
+  const moves: CombatMove[] = [...ATTACKS, ...loadoutTechniques(s, true)];
   return (
     <div className="sa-tactical-moves">
       {moves.map((move) => {
@@ -297,7 +353,7 @@ export function TacticalMoves({ s, send, t, target, floor }: ActionProps) {
             aria-label={t(technique.name)}
             title={t(technique.hint)}
             data-technique={special ? move : undefined}
-            disabled={!canCombatMove(s, move, target, floor)}
+            disabled={busy || !canCombatMove(s, move, target, floor)}
             onClick={() => send({ type: 'combat', move, target })}
           >
             <span>

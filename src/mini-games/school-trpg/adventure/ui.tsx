@@ -2,7 +2,7 @@ import React from 'react';
 import { Dice5 } from 'lucide-react';
 import type { LanguageMode } from '../../../types';
 import { assetUrl } from '../../../utils/assetPaths';
-import { RESIDENT_ROLE_IDS, STATS, text, type ResidentRole, type Text } from './content';
+import { FOES, RESIDENT_ROLE_IDS, STATS, creatureArt, text, type ResidentRole, type Text } from './content';
 import { FORMATION_IDS, FORMATIONS } from './journeyState';
 import type { Action, Adventure, Check } from './state';
 
@@ -33,6 +33,14 @@ export function ResidentPortrait({ role }: { role: ResidentRole }) {
     backgroundImage: 'url("' + atlasUrl('residents') + '")',
     backgroundPosition: atlasPosition(RESIDENT_ROLE_IDS.indexOf(role)),
   }} />;
+}
+
+export function CompanionPortrait({ s, id, role }: { s: Adventure; id: string; role?: ResidentRole }) {
+  const friend = s.friends[id];
+  const creature = friend?.creature === undefined ? undefined : FOES[friend.creature];
+  return creature
+    ? <img className="sa-portrait sa-creature-portrait" src={art(creatureArt(creature))} alt="" decoding="async" />
+    : <ResidentPortrait role={role ?? friend?.resident.role ?? 'keeper'} />;
 }
 
 const OUTCOMES = {
