@@ -354,7 +354,6 @@
 
 .cc-page-table .cc-seated-match .cc-hand-area {
   height: auto;
-  max-height: min(35dvh, 245px);
   border-color: #9980576e;
   background: #0a211ef5;
 }
@@ -362,8 +361,6 @@
 .cc-seated-match .cc-hand-toolbar h2 { color: var(--cc-table-brass); }
 .cc-seated-match .cc-hand-area .cc-hand-toolbar .cc-hand-sort button { background: #142c28; }
 .cc-seated-match .cc-hand-area .cc-hand-toolbar .cc-hand-sort button[aria-pressed=true] { background: #305345; }
-.cc-page-table .cc-seated-match .cc-actions { max-height: min(88px, 22dvh); }
-
 @container (max-width: 520px) {
   .cc-seat-table .cc-player-ring .cc-face { display: none; }
 }
@@ -401,12 +398,6 @@
   }
 }
 @media (orientation: portrait) and (max-height: 720px) {
-  .cc-page-table .cc-seated-match .cc-hand:not(.cc-rummy-hand) {
-    flex: 0 0 70px;
-    padding-block: 8px 4px;
-  }
-  .cc-page-table .cc-seated-match .cc-hand .cc-card { width: 40px; height: 56px; }
-  .cc-page-table .cc-seated-match .cc-hand-sort button { min-height: 32px; }
   .cc-seated-match .cc-table-hud .cc-turn-label { font-size: 13px; }
   .cc-page-table[data-club-game=trumpcrew] .cc-seat-notes {
     display: grid;
@@ -448,18 +439,18 @@
   .cc-page-table .cc-seated-match:has(.cc-result) {
     grid-template: 'board result' minmax(0, 1fr) / minmax(0, 1fr) minmax(156px, 29%);
   }
-  .cc-page-table .cc-seated-match .cc-hand-area:has(.cc-hand:not(:empty)) {
+  .cc-page-table .cc-seated-match .cc-hand-area:not(.cc-actions-only) {
     display: grid;
-    grid-template: 'sort sort' auto 'cards actions' minmax(44px, auto) / minmax(0, 1fr) minmax(110px, 25%);
+    grid-template: 'sort sort' auto 'cards actions' minmax(52px, auto) / minmax(0, 1fr) minmax(144px, 32%);
     gap: 3px 6px;
   }
   .cc-seated-match .cc-hand-toolbar { grid-area: sort; }
-  .cc-seated-match .cc-hand-area:has(.cc-hand:not(:empty)) .cc-hand { grid-area: cards; }
-  .cc-seated-match .cc-hand-area:has(.cc-hand:not(:empty)) .cc-actions { grid-area: actions; }
+  .cc-seated-match .cc-hand { grid-area: cards; }
+  .cc-seated-match .cc-actions { grid-area: actions; max-height: 110px; }
 }
 @media (orientation: landscape) and (max-height: 480px) and (min-width: 540px) {
-  .cc-page-table .cc-seated-match .cc-hand-area:has(.cc-hand:not(:empty)) {
-    grid-template: 'sort cards actions' minmax(64px, auto) / 82px minmax(0, 1fr) minmax(110px, 26%);
+  .cc-page-table .cc-seated-match .cc-hand-area:not(.cc-actions-only) {
+    grid-template: 'sort cards actions' var(--cc-hand-frame) / 82px minmax(0, 1fr) minmax(144px, 32%);
   }
   .cc-seated-match .cc-hand-area .cc-hand-toolbar {
     display: grid;
@@ -470,8 +461,7 @@
   }
   .cc-seated-match .cc-hand-sort { gap: 2px; flex-wrap: wrap; }
   .cc-seated-match .cc-hand-area .cc-hand-sort button { min-height: 25px; padding: 2px 4px; }
-  .cc-page-table .cc-seated-match .cc-hand { max-height: 74px; }
-  .cc-page-table .cc-seated-match .cc-actions { max-height: 72px; }
+  .cc-seated-match .cc-actions { max-height: var(--cc-hand-frame); }
   .cc-seated-match .cc-table-hud .cc-turn-label { font-size: 13px; }
   .cc-seat-table .cc-card-front > strong,
   .cc-card.cc-flying-card[data-seated] .cc-card-front > strong { flex-direction: row; }

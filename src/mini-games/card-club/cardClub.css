@@ -682,16 +682,61 @@
 }
 .cc-page-table[data-club-game=golf] .cc-classic > .cc-step { margin-bottom: 4px; }
 .cc-page-table .cc-classic:empty { display: none; }
-@media (orientation: portrait), (max-width: 500px) {
-  .cc-page-table .cc-hand-area:has(.cc-rummy-hand) { max-height: min(43dvh, 280px); }
+@media (orientation: portrait) {
+  .cc-page-table .cc-hand-area {
+    --cc-hand-frame: clamp(70px, 13dvh, 92px);
+    max-height: none;
+  }
+  .cc-page-table .cc-hand-area > .cc-hand {
+    display: flex;
+    flex: 0 0 var(--cc-hand-frame);
+    max-height: none;
+  }
+  .cc-page-table .cc-hand-area > .cc-hand.cc-rummy-hand {
+    flex-basis: calc(var(--cc-hand-frame) + 36px);
+  }
+  /* Keep the table and hand in place when the turn or selection changes the actions. */
+  .cc-page-table .cc-hand-area > .cc-actions {
+    display: flex;
+    flex: 0 0 54px;
+    max-height: none;
+  }
+}
+@media (orientation: portrait) and (max-height: 720px) {
+  .cc-page-table .cc-hand-area > .cc-hand:not(.cc-rummy-hand) { padding-block: 8px 4px; }
+  .cc-page-table .cc-hand .cc-card { width: 40px; height: 56px; }
+  .cc-page-table .cc-hand-sort button { min-height: 32px; }
+}
+@media (orientation: portrait) and (min-width: 601px) {
+  .cc-page-table .cc-hand-area { --cc-hand-frame: 112px; }
+}
+@media (orientation: landscape) {
+  .cc-page-table .cc-hand-area > .cc-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 94px), 1fr));
+    grid-auto-rows: max-content;
+    min-height: 52px;
+  }
+  .cc-page-table .cc-actions > button { padding-inline: 8px; }
 }
 @media (orientation: landscape) and (max-height: 480px) {
-  .cc-page-table .cc-hand .cc-card { height: 54px; width: 40px; }
-  .cc-page-table .cc-hand.cc-rummy-hand { flex: 0 0 auto; max-height: 105px; }
-  .cc-page-table .cc-actions:has(> button:nth-child(2)):not(:has(> button:nth-child(5))) {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .cc-page-table .cc-hand-area {
+    --cc-hand-card-height: clamp(60px, 17dvh, 72px);
+    --cc-hand-frame: calc(var(--cc-hand-card-height) + 16px);
+    max-height: none;
   }
-  .cc-page-table .cc-actions > button { padding-inline: 5px; overflow-wrap: anywhere; }
+  .cc-page-table .cc-hand-area > .cc-hand {
+    display: flex;
+    height: var(--cc-hand-frame);
+    flex: 0 0 var(--cc-hand-frame);
+    max-height: none;
+  }
+  .cc-page-table .cc-hand-area > .cc-hand.cc-rummy-hand {
+    flex-basis: calc(var(--cc-hand-frame) + 36px);
+  }
+  .cc-page-table .cc-hand .cc-card {
+    height: var(--cc-hand-card-height);
+    width: calc(var(--cc-hand-card-height) * .73);
+  }
   .cc-page-table .cc-compact-title h1 { font-size: 14px; }
 }

@@ -193,7 +193,80 @@ try{
  const load=async(game,n)=>{await page.evaluate(({game,n})=>window.__club.load(game,n||window.definition(game).defaultPlayers),{game,n});await page.waitForFunction(g=>document.querySelector('[data-club-game]')?.getAttribute('data-club-game')===g,game);};
  const snapshot=async(path)=>{await page.waitForFunction(()=>!document.querySelector('.cc-flight-layer'));await page.screenshot({path});};
  const mutate=async(fn,arg)=>{await page.evaluate(({fn,arg})=>{const session=window.__club.room().session;new Function('s','arg',fn)(session.state,arg);session.publish();},{fn:fn.toString().replace(/^.*?\{([\s\S]*)\}$/,'$1'),arg});await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>resolve())));};
- if(process.argv.includes('--seating')){
+ if(process.argv.includes('--hand-layout')){
+  await page.emulateMedia({reducedMotion:'reduce'});
+  const layout=()=>page.evaluate(()=>{
+   const box=(selector)=>{
+    const r=document.querySelector(selector)?.getBoundingClientRect();
+    return r&&[r.x,r.y,r.width,r.height].map(Math.round);
+   };
+   return {
+    table:box('.cc-playfield'),tray:box('.cc-hand-area'),cards:box('.cc-hand'),actions:box('.cc-actions'),
+   };
+  });
+  const passOnly=s=>{
+   s.players[0].hand=[44,48];
+   s.turn=0;s.table=[49];Object.assign(s.ladder,{count:1,form:'set',rank:11,last:1});
+   s.pilePlays=[{seat:1,cards:[49]}];s.revision++;
+  };
+  for(const [width,height] of [[320,568],[390,844],[768,1024]]){
+   await page.setViewportSize({width,height});
+   await load('daihinmin',5);await mutate(passOnly);
+   const pass=page.locator('.cc-actions').getByRole('button',{name:'パス',exact:true});
+   const playerTurn=await layout();
+   const card=await page.locator('.cc-hand .cc-card').first().boundingBox();
+   assert(card.y+card.height<=playerTurn.cards[1]+playerTurn.cards[3]+1,'The portrait tray fits the whole card');
+   await snapshot(`${dir}/hand-layout-pass-${width}x${height}.png`);
+   await pass.click();
+   assert.equal(await page.locator('.cc-actions button').count(),0);
+   assert.deepEqual(await layout(),playerTurn,'The table and hand stay fixed when Pass disappears');
+   await snapshot(`${dir}/hand-layout-wait-${width}x${height}.png`);
+   await mutate(s=>{
+    s.turn=0;s.ladder.count=0;s.table=[];s.pilePlays=[];
+    s.players[0].hand=Array.from({length:12},(_,i)=>i+1);
+    s.revision++;
+   });
+   const buttons=page.locator('.cc-actions button');
+   assert(await buttons.count()>8);
+   assert.deepEqual(await layout(),playerTurn,'Scrolling through multiple rows does not resize the table');
+   const firstCard=page.locator('.cc-hand [data-card="1"]');
+   await firstCard.click({position:{x:11,y:18}});
+   assert.equal(await firstCard.getAttribute('aria-pressed'),'true');
+   assert.deepEqual(await layout(),playerTurn,'Selecting a hand card preserves geometry while actions are filtered');
+   await mutate(s=>{s.turn=1;s.players[0].hand=[];s.revision++;});
+   assert.equal(await page.locator('.cc-hand .cc-card').count(),0);
+   assert.deepEqual(await layout(),playerTurn,'An empty hand retains its display area until the result');
+
+   await load('war',2);await mutate(s=>{s.turn=0;s.revision++;});
+   const noHand=await layout();
+   await page.locator('.cc-actions button').click();
+   assert.equal(await page.locator('.cc-actions button').count(),0);
+   assert.deepEqual(await layout(),noHand,'A face-down deck also keeps its action area while waiting');
+
+   await load('rummy',2);await mutate(s=>{s.turn=0;s.extra.step='draw';s.revision++;});
+   const rummyTurn=await layout();
+   await mutate(s=>{s.turn=1;s.revision++;});
+   assert.equal(await page.locator('.cc-actions button').count(),0);
+   assert.deepEqual(await layout(),rummyTurn,'Rummy preserves its grouping tray and action area');
+  }
+  for(const [width,height] of [[568,320],[667,375],[844,390]]){
+   await page.setViewportSize({width,height});await load('daihinmin',5);await mutate(passOnly);
+   const pass=await page.locator('.cc-actions button').boundingBox();
+   const hand=await page.locator('.cc-hand').boundingBox();
+   const card=await page.locator('.cc-hand .cc-card').first().boundingBox();
+   assert(pass.width>=120&&pass.height>=44,'Pass fills a wider touch target in landscape');
+   assert(hand.height>=76&&card.height>=60&&card.y+card.height<=hand.y+hand.height,'The landscape hand and card grow vertically');
+   assert(pass.y+pass.height<=height&&hand.y+hand.height<=height,'The hand and actions fit entirely in the viewport');
+   await snapshot(`${dir}/hand-layout-wide-${width}x${height}.png`);
+   await mutate(s=>{s.table=[];s.ladder.count=0;s.pilePlays=[];s.revision++;});
+   const play=page.locator('.cc-actions').getByRole('button',{name:'♠6',exact:true});
+   assert((await play.boundingBox()).width>=94,'Options remain wide when more than one action is shown');
+   await play.click();
+   await page.waitForFunction(()=>window.__club.room().session.state.table[0]===44);
+  }
+  assert.deepEqual(errors,[]);
+  console.log('PASS stable portrait layout when actions or cards appear/disappear, and larger clickable landscape cards and actions.');
+ }else if(process.argv.includes('--seating')){
   await page.emulateMedia({reducedMotion:'reduce'});
   const fixture=[33,46,20,41,28,29,31,27];
   for(const [width,height] of [[1280,900],[390,844],[844,390],[568,320],[320,568]]){
