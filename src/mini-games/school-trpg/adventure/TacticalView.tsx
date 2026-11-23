@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { Crosshair, Shield, Swords, Target } from 'lucide-react';
-import { FOES, INTENTS, creatureArt } from './content';
+import { Crosshair, Sparkles, Swords } from 'lucide-react';
+import { FOES, INTENTS, creatureArt, type Text } from './content';
 import { COMBAT_MOVES, damageNames, foeIntent, recordFor } from './delve';
 import { TERRAIN } from './frontierContent';
 import {
@@ -36,6 +36,13 @@ const ATTACKS: readonly CombatMove[] = [
   'study',
   'parley',
 ];
+const MOVE_LABELS: Partial<Record<CombatMove, Text>> = {
+  heavy: ['崩し', 'Break', 'くずし'],
+  spark: ['星灯', 'Spell', 'ほしあかり'],
+  guard: ['防御', 'Guard', 'ぼうぎょ'],
+  study: ['弱点', 'Study', 'じゃくてん'],
+  befriend: ['勧誘', 'Recruit', 'かんゆう'],
+};
 
 export function TacticalView({ s, floor, target, select, send, t, modalOpen }: Props) {
   const d = s.delve!;
@@ -45,9 +52,6 @@ export function TacticalView({ s, floor, target, select, send, t, modalOpen }: P
   const hero = d.cell;
   const from = actionPosition(s);
   const linked = borrowedCreature(battle);
-  const enemy = battle.enemies[target];
-  const targetCell = grid.cells[target];
-  const template = enemy && enemy.hp > 0 && FOES[enemy.template];
   const canSee = (cell: number) => glancingSight(floor, from, cell, 6);
   useEffect(() => {
     if (modalOpen) return;
@@ -172,46 +176,63 @@ export function TacticalView({ s, floor, target, select, send, t, modalOpen }: P
           );
         })}
       </div>
-      {template && enemy && canSee(targetCell) ? (
-        <div className="sa-tactical-target">
-          <img src={art(creatureArt(template))} alt="" />
-          <span>
-            <strong>
-              {t(enemy.epithets ?? template.name)} · {enemy.hp}/{enemy.max}
-            </strong>
-            <small>
-              {t(enemy.stagger ? ['ひるみ', 'Staggered'] : INTENTS[foeIntent(battle, enemy)])} ·{' '}
-              {t(['距離', 'Distance'])} {distanceToTarget(s, target)}
-            </small>
-            {enemy.known && (
-              <small>
-                {t(['弱点', 'Weakness'])} · {t(damageNames[template.weak])}
-              </small>
-            )}
-          </span>
-          <button
-            type="button"
-            disabled={grid.aim === target || !tacticalTarget(s, 'spark', target, floor)}
-            onClick={() => send({ type: 'tactical-aim', target })}
-          >
-            <Crosshair size={16} />
-            {t(['狙いを定める', 'Aim', 'ねらいを さだめる'])}
-          </button>
-        </div>
-      ) : (
-        <p className="sa-hint">
-          {t([
-            '射線に入ると相手を選べます。',
-            'Move into sight to select a foe.',
-            'みえる ばしょに いどうしよう。',
-          ])}
-        </p>
-      )}
     </section>
   );
 }
 
-export function TacticalMoves({ s, send, t, target, floor }: Omit<Props, 'select' | 'modalOpen'>) {
+type ActionProps = Omit<Props, 'select' | 'modalOpen'>;
+
+export function TacticalTarget({ s, send, t, target, floor }: ActionProps) {
+  const battle = s.delve!.encounter!;
+  const grid = battle.tactics!;
+  const enemy = battle.enemies[target];
+  const targetCell = grid.cells[target];
+  const template = enemy && enemy.hp > 0 && FOES[enemy.template];
+  return template && enemy && glancingSight(floor, actionPosition(s), targetCell, 6) ? (
+    <div className="sa-tactical-target">
+      <img src={art(creatureArt(template))} alt="" />
+      <span>
+        <span className="sa-tactical-vitals">
+          <strong title={t(enemy.epithets ?? template.name)}>
+            {t(enemy.epithets ?? template.name)}
+          </strong>
+          <b aria-label={'HP ' + enemy.hp + '/' + enemy.max}>
+            {enemy.hp}/{enemy.max}
+          </b>
+        </span>
+        <small>
+          {t(enemy.stagger ? ['ひるみ', 'Staggered'] : INTENTS[foeIntent(battle, enemy)])}{' '}
+          <span className="sa-tactical-distance">
+            · {t(['距離', 'Distance'])} {distanceToTarget(s, target)}
+          </span>
+        </small>
+        {enemy.known && (
+          <small>
+            {t(['弱点', 'Weakness'])} · {t(damageNames[template.weak])}
+          </small>
+        )}
+      </span>
+      <button
+        type="button"
+        disabled={grid.aim === target || !tacticalTarget(s, 'spark', target, floor)}
+        onClick={() => send({ type: 'tactical-aim', target })}
+      >
+        <Crosshair size={16} />
+        {t(['狙いを定める', 'Aim', 'ねらいを さだめる'])}
+      </button>
+    </div>
+  ) : (
+    <p className="sa-hint">
+      {t([
+        '射線に入ると相手を選べます。',
+        'Move into sight to select a foe.',
+        'みえる ばしょに いどうしよう。',
+      ])}
+    </p>
+  );
+}
+
+export function TacticalMoves({ s, send, t, target, floor }: ActionProps) {
   const foe = s.delve?.encounter?.enemies[target];
   const moves =
     !s.delve?.encounter?.guardian && (foe?.epithets || fieldSkill(s, 'diplomacy'))
@@ -219,35 +240,47 @@ export function TacticalMoves({ s, send, t, target, floor }: Omit<Props, 'select
       : ATTACKS;
   return (
     <div className="sa-tactical-moves">
-      {moves.map((move) => (
-        <button
-          key={move}
-          type="button"
-          disabled={
-            !tacticalTarget(s, move, target, floor) ||
-            s.focus < COMBAT_MOVES[move].cost ||
-            (move === 'befriend' && (s.frontier.liquids.water < 2 || s.followers.length >= 5))
-          }
-          onClick={() => send({ type: 'combat', move, target })}
-        >
-          {move === 'guard' ? (
-            <Shield size={15} />
-          ) : move === 'strike' ? (
-            <Target size={15} />
-          ) : null}
-          <span>
-            {t(COMBAT_MOVES[move].name)}
-            {['strike', 'heavy', 'quick', 'spark'].includes(move) && (
-              <small>
-                {t(['射程', 'Range', 'しゃてい'])} {moveRange(s, move)}
-                {COMBAT_MOVES[move].cost
-                  ? ' · ' + t(['集中', 'Focus']) + ' ' + COMBAT_MOVES[move].cost
-                  : ''}
-              </small>
-            )}
-          </span>
-        </button>
-      ))}
+      {moves.map((move) => {
+        const technique = COMBAT_MOVES[move];
+        const range = ['strike', 'heavy', 'quick', 'spark'].includes(move) ? moveRange(s, move) : 0;
+        const rangeLabel = t(['射程', 'Range', 'しゃてい']);
+        const focusLabel = t(['集中', 'Focus', 'しゅうちゅう']);
+        return (
+          <button
+            key={move}
+            type="button"
+            aria-label={t(technique.name)}
+            title={t(technique.hint)}
+            disabled={
+              !tacticalTarget(s, move, target, floor) ||
+              s.focus < technique.cost ||
+              (move === 'befriend' && (s.frontier.liquids.water < 2 || s.followers.length >= 5))
+            }
+            onClick={() => send({ type: 'combat', move, target })}
+          >
+            <span>
+              {t(MOVE_LABELS[move] ?? technique.name)}
+              {range > 0 && (
+                <small
+                  className="sa-tactical-range"
+                  aria-label={rangeLabel + ' ' + range + ' · ' + focusLabel + ' ' + technique.cost}
+                >
+                  <span title={rangeLabel}>
+                    <Crosshair size={11} aria-hidden="true" />
+                    {range}
+                  </span>
+                  {technique.cost > 0 && (
+                    <span title={focusLabel}>
+                      <Sparkles size={11} aria-hidden="true" />
+                      {technique.cost}
+                    </span>
+                  )}
+                </small>
+              )}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }

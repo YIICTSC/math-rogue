@@ -90,11 +90,13 @@ try {
       () => JSON.parse(localStorage.getItem('learning_rogue_school_trpg_adventure_v1')).slots[0],
     );
   async function open() {
-    await view
+    const card = view
       .locator('.mini-game-select-card')
-      .filter({ has: view.locator('[style*="badges/school-trpg.png"]') })
-      .click();
-    await click(/^(Start|はじめる)/);
+      .filter({ has: view.locator('[style*="badges/school-trpg.png"]') });
+    await card.getByLabel('Learning Rogue Frontier', { exact: true }).waitFor();
+    await card.click();
+    await view.getByRole('heading', { name: 'Learning Rogue Frontier', exact: true }).waitFor();
+    assert.equal(await view.locator('.illustrated-mini-entry').count(), 0, 'The game opens directly on the Frontier title');
   }
   async function checkViewport() {
     const overflows = await view.evaluate(() => {
@@ -108,29 +110,64 @@ try {
     });
     assert(!overflows, 'main play controls must not cause horizontal overflow');
   }
+  async function checkOnScreen(locator, label) {
+    assert(await locator.count(), label + ' is rendered');
+    const hidden = await locator.evaluateAll((elements) => elements
+      .map((element) => ({ label: element.getAttribute('aria-label') || element.textContent.trim(), box: element.getBoundingClientRect() }))
+      .filter(({ box }) => box.left < -1 || box.top < -1 || box.right > innerWidth + 1 || box.bottom > innerHeight + 1 || !box.width || !box.height)
+      .map((element) => element.label));
+    assert.deepEqual(hidden, [], label + ' must be on screen without scrolling');
+  }
+  const smallScreens = [{ width: 320, height: 568 }, { width: 568, height: 320 }];
+  async function openExploreOptions() {
+    if (!await view.getByRole('dialog').count()) await click('Explore options');
+  }
+  async function closePanel() {
+    if (await view.getByRole('dialog').count()) await click('Close');
+  }
   await view.addInitScript(() => {
     crypto.randomUUID = () => '8feb957a-c6f6-4b4b-87f2-1c47b85a7941';
   });
   await view.goto(url);
   await open();
-  await view.getByRole('heading', { name: 'Roads of Bellreach' }).waitFor();
+  for (const viewport of smallScreens) {
+    await view.setViewportSize(viewport);
+    await view.waitForFunction(() => {
+      const image = document.querySelector('.sa-frontier-art img');
+      const expected = innerWidth > innerHeight ? 'wide' : 'portrait';
+      return image?.naturalWidth > 0 && image.currentSrc.includes('frontier-title-' + expected);
+    });
+    await checkOnScreen(view.locator('.sa-frontier-title button'), 'Frontier title');
+    await snap('frontier-title-' + viewport.width);
+  }
+  await view.setViewportSize({ width: 390, height: 844 });
   await snap('title-phone');
   await click('New character');
   const portraits = view.getByRole('group', { name: 'Character portraits' }).getByRole('button');
   await portraits.first().waitFor();
-  assert.equal(await portraits.count(), 20);
+  assert.equal(await portraits.count(), 10);
   await click('Men');
   await view.getByRole('button', { name: 'Man portrait 1', exact: true }).waitFor();
-  assert.equal(await portraits.count(), 20);
+  assert.equal(await portraits.count(), 10);
+  await click('Next portraits');
   await click('Man portrait 20');
+  for (const viewport of smallScreens) {
+    await view.setViewportSize(viewport);
+    await checkOnScreen(view.getByRole('button', { name: 'Begin the adventure' }), 'Create action');
+    await checkOnScreen(portraits, 'Portrait choices');
+  }
+  await view.setViewportSize({ width: 390, height: 844 });
   await view.getByLabel('Name', { exact: true }).fill('Aoi of Bellwick');
+  await click('Background');
   await click('Lantern Envoy');
+  await click('Attributes');
   await click('Might −');
   await click('Presence ＋');
   await snap('creator-phone');
   await view.setViewportSize({ width: 1300, height: 850 });
   await view.locator('.sa-app').evaluate((element) => (element.scrollTop = 0));
   await snap('creator-desktop');
+  await click('Journey rules');
   await view.getByRole('radio', { name: /^Return to town/ }).check();
   await click('Begin the adventure');
   const model = await vite.ssrLoadModule('/src/mini-games/school-trpg/adventure/world.ts');
@@ -162,9 +199,18 @@ try {
       if (!record.cleared.includes(cell)) {
         if (floor.features[cell] === 'runes') {
           const inspect = view.getByRole('button', { name: 'Inspect', exact: true });
-          if (!record.inspected.includes(cell)) await inspect.click();
+          if (!record.inspected.includes(cell)) {
+            if (!await inspect.isVisible()) await openExploreOptions();
+            await inspect.click();
+          }
+          await openExploreOptions();
           await click(['Moon', 'Star', 'Flame'][floor.answer]);
-        } else if (floor.features[cell] === 'trap') await click('Disarm mechanism');
+          await closePanel();
+        } else if (floor.features[cell] === 'trap') {
+          await openExploreOptions();
+          await click('Disarm mechanism');
+          await closePanel();
+        }
       }
       while ((await slot()).delve.direction !== direction) await click('Turn right');
       await click('Step forward');
@@ -178,7 +224,16 @@ try {
   assert.equal((await slot()).character.portrait, 'm20');
   assert.equal((await slot()).character.stats.presence, 4);
   await snap('town-desktop');
-  await checkViewport();
+  for (const viewport of smallScreens) {
+    await view.setViewportSize(viewport);
+    await checkOnScreen(view.locator('.sa-town-hub-actions button'), 'Town activities');
+    await checkViewport();
+    await snap('frontier-town-' + viewport.width);
+  }
+  await view.setViewportSize({ width: 1300, height: 850 });
+  await click('Commissions');
+  await view.getByRole('dialog').waitFor();
+  await closePanel();
 
   await click(/^Declare an action/);
   await view.getByLabel('What will you try?').fill('Translate a message for the market');
@@ -191,22 +246,27 @@ try {
   await click('Town life');
   await view.getByRole('button', { name: /^Work a shift/ }).click();
   await view.getByRole('button', { name: /^Work a shift/ }).click();
+  await click('Home');
   await view.getByRole('button', { name: /^Buy a house/ }).click();
+  await click('Market');
   await view
     .getByRole('button', { name: /^Buy.* G$/ })
     .first()
     .waitFor();
   const seed = view.locator('.sa-market > div').filter({ hasText: 'Seeds' });
   await seed.getByRole('button', { name: /^Buy/ }).click();
+  await click('Home');
   await view.getByRole('button', { name: /^Plant seeds/ }).click();
   for (let i = 0; i < 3; i++) await click('Wait eight hours');
   await click('Harvest');
   assert.equal((await slot()).counters.harvests, 1);
   assert((await slot()).time - (await slot()).lastMealAt >= 24, 'Waiting creates hunger');
+  await click('Meals');
   await view.getByRole('button', { name: /^Get a hot meal/ }).click();
   const fed = await slot();
   assert(fed.time - fed.lastMealAt < 24);
   const innkeeper = model.residentsAt(fed.location).find((person) => person.role === 'host');
+  await click('Home');
   for (let i = 0; i < 5 && !model.residentPresent(innkeeper, (await slot()).time); i++)
     await view.getByRole('button', { name: /^Rest on a bench/ }).click();
   await click('People');
@@ -216,12 +276,22 @@ try {
   await view.getByRole('button', { name: /^Invite to travel/ }).click();
   assert.equal((await slot()).followers.length, 1);
   await click('Map');
+  for (const viewport of smallScreens) {
+    await view.setViewportSize(viewport);
+    await checkOnScreen(view.locator('.sa-map-tile'), 'Full world map');
+    await checkOnScreen(view.locator('.sa-travel-actions button'), 'Map actions');
+    await snap('frontier-map-' + viewport.width);
+  }
+  await view.setViewportSize({ width: 1300, height: 850 });
+  await click('Roads and notes');
   await view.getByRole('button', { name: /^East · / }).click();
+  await click('Cross into another realm');
   await view.getByLabel('World code', { exact: true }).fill('moon-tide');
   await click('Cross');
   assert.equal((await slot()).location.world, 'moon-tide');
   await view.getByRole('button', { name: /^Return to your home base/ }).click();
   assert.deepEqual((await slot()).location, startTown.location);
+  await closePanel();
   await click('Journal');
   await view.getByLabel('Personal goal').fill('Open a village kitchen');
   await click('Add goal');
@@ -239,6 +309,33 @@ try {
   assert.equal(await view.locator('.sa-dungeon-art').count(), 0);
   await view.setViewportSize({ width: 390, height: 844 });
   await checkViewport();
+  for (const viewport of [...smallScreens, { width: 844, height: 390 }]) {
+    await view.setViewportSize(viewport);
+    const dpad = view.locator('.sa-delve-movement');
+    const actions = view.locator('.sa-delve-actions');
+    await checkOnScreen(dpad.locator('button'), 'Exploration D-pad');
+    await checkOnScreen(actions.locator('button'), 'Exploration actions');
+    const [left, right, feed] = await Promise.all([dpad.boundingBox(), actions.boundingBox(), view.locator('.sa-feed').boundingBox()]);
+    assert(left.x + left.width <= right.x + 2, 'Movement is in the bottom-left and actions are in the bottom-right');
+    assert(Math.abs(left.y + left.height - (right.y + right.height)) < 12);
+    assert(left.y + left.height <= feed.y + 1 && right.y + right.height <= feed.y + 1);
+    await snap('frontier-dungeon-' + viewport.width);
+  }
+  await view.setViewportSize({ width: 390, height: 844 });
+  await click('Automap');
+  await view.getByRole('dialog').getByRole('img', { name: /^Mapped tiles/ }).waitFor();
+  const savedDir = (await slot()).delve.direction;
+  await view.keyboard.press('ArrowRight');
+  assert.equal((await slot()).delve.direction, savedDir, 'An open map blocks movement shortcuts');
+  await closePanel();
+  await view.getByRole('button', { name: 'Turn right', exact: true }).tap();
+  assert.equal((await slot()).delve.direction, (savedDir + 1) % 4);
+  await click('Supplies and powers');
+  await view.getByRole('dialog').getByText('Flasks and liquids', { exact: false }).waitFor();
+  await closePanel();
+  await click('Adventure log');
+  await view.getByRole('dialog').waitFor();
+  await closePanel();
   await snap('dungeon-phone');
   const initial = await slot();
   const floor = model.generateFloor(initial.location, 1);
@@ -250,7 +347,9 @@ try {
   const pausedTurn = (await slot()).delve.encounter.turn;
   await view.waitForTimeout(1000);
   assert.equal((await slot()).delve.encounter.turn, pausedTurn);
+  await click('Battle options');
   assert.equal(await view.locator('.sa-combat-party article').count(), 2);
+  await closePanel();
   await snap('battle-phone');
   for (const viewport of [
     { width: 844, height: 390 },
@@ -261,9 +360,10 @@ try {
       element.scrollTop = 0;
     });
     await checkViewport();
-    const retreat = view.getByRole('button', { name: 'Try to retreat', exact: true });
-    await retreat.scrollIntoViewIfNeeded();
-    assert(await retreat.isVisible(), 'Retreat remains accessible at width ' + viewport.width);
+    await checkOnScreen(view.locator('.sa-delve-quick button'), 'Automatic battle actions');
+    await click('Battle options');
+    await checkOnScreen(view.getByRole('button', { name: 'Try to retreat', exact: true }), 'Retreat');
+    await closePanel();
     await view.locator('.sa-scene-line').scrollIntoViewIfNeeded();
     const round = await view.locator('.sa-scene-line').boundingBox();
     const enemy = await view.locator('.sa-foe').first().boundingBox();
@@ -277,7 +377,14 @@ try {
   await click('Title');
   await view.reload();
   await open();
-  await click('Continue');
+  for (const viewport of smallScreens) {
+    await view.setViewportSize(viewport);
+    await checkOnScreen(view.locator('.sa-frontier-title button'), 'Saved-game title actions');
+  }
+  await click(/^Adventure saves/);
+  await view.getByRole('dialog').getByRole('button', { name: /^Aoi of Bellwick/ }).waitFor();
+  await closePanel();
+  await click(/^Continue/);
   assert.equal((await slot()).character.name, 'Aoi of Bellwick');
   assert.equal((await slot()).counters.harvests, 1);
 
@@ -304,12 +411,14 @@ try {
   const returning = await slot();
   assert.deepEqual(returning.location, roadClue.source);
   await click('Town life');
+  await click('Market');
   if (!returning.goods.grain) {
     await view.locator('.sa-market > div').filter({ hasText: 'Grain' }).getByRole('button', { name: /^Buy/ }).click();
   }
   if (!returning.goods.meat) {
     await view.locator('.sa-market > div').filter({ hasText: 'Beast meat' }).getByRole('button', { name: /^Buy/ }).click();
   }
+  await click('Meals');
   await view.locator('.sa-kitchen summary').click();
   const dish = view.locator('.sa-dish').filter({ hasText: 'Bellkeeper’s bento' });
   await dish.getByRole('button', { name: /^Cook/ }).click();
@@ -327,18 +436,20 @@ try {
   await checkViewport();
   await snap('collection-small');
   await click('People');
+  await click('Party and formation');
   await view.getByLabel('Combat formation').selectOption('envoy');
   assert.equal((await slot()).journey.formation, 'envoy');
   await click('Title');
   await view.reload();
   await open();
-  await click('Continue');
+  await click(/^Continue/);
   assert.equal((await slot()).journey.expeditions['academy-clocktower'].clears, 1);
   assert.equal((await slot()).journey.relic, 'academy');
   assert.deepEqual((await slot()).journey.tasted, ['bell-bento']);
 
   await view.setViewportSize({ width: 390, height: 844 });
   await click('Town life');
+  await click('Market');
   const oil = view.locator('.sa-market > div').filter({ hasText: 'Lamp oil' });
   if ((await slot()).goods.lantern < 2) await oil.getByRole('button', { name: /^Buy/ }).click();
   await click('Explore');
@@ -349,9 +460,12 @@ try {
   const native = model.generateFloor(survey.location, 1);
   const fixture = systems.ruinLayout(survey.location, 1);
   await walkInRuin(native, fixture.inscription);
+  await click('Examine inscription');
   await click(/^Read inscription/);
+  await closePanel();
   assert.equal((await slot()).fieldwork.histories[site].chapters, 1);
   await walkInRuin(native, fixture.device);
+  await click('Examine mechanism');
   await click('Inspect connections');
   await click('Use local history');
   assert.equal((await slot()).fieldwork.circuits[levelKey].mode, 'channel');
@@ -364,6 +478,7 @@ try {
   await click(/^Change setting/);
   assert.equal((await slot()).fieldwork.circuits[levelKey].mode, 'isolate');
   assert.equal(await view.locator('.sa-maze [data-fixture="shortcut"]').count(), 0);
+  await closePanel();
   await click('Return to town');
   await click('Journal');
   await click('Survey');
@@ -387,9 +502,12 @@ try {
   await click('Donate to the archive');
   assert.equal((await slot()).frontier.sites[site].donated, true);
   await click('Map');
+  await click('Roads and notes');
   assert(await view.getByLabel('Historic site leads').locator('option').count() >= 2);
+  await closePanel();
   await checkViewport();
   await click('Town life');
+  await click('Market');
   for (const [id, name] of [['grain', 'Grain'], ['herb', 'Herbs']]) {
     if (!(await slot()).goods[id]) await view.locator('.sa-market > div').filter({ hasText: name }).first().getByRole('button', { name: /^Buy/ }).click();
   }
@@ -405,6 +523,7 @@ try {
   assert.equal((await slot()).frontier.recipe.base, 'grain');
   await snap('field-guide-phone');
   await click('Town life');
+  await click('Market');
   if ((await slot()).goods.lantern < 2) await oil.getByRole('button', { name: /^Buy/ }).click();
   await click('Explore');
   await click(/^Enter the ruins/);
@@ -428,32 +547,53 @@ try {
   const feed = await view.locator('.sa-feed').boundingBox();
   assert(strike.y + strike.height <= feed.y, 'Primary battle actions fit above the travel log on phones');
   await snap('tactics-phone');
+  for (const viewport of smallScreens) {
+    await view.setViewportSize(viewport);
+    await checkViewport();
+    await checkOnScreen(board, 'Tactical board');
+    await checkOnScreen(view.locator('.sa-tactical-moves button'), 'Tactical moves');
+    await checkOnScreen(view.locator('.sa-delve-tools button'), 'Tactical shortcuts');
+    const header = await view.locator('.sa-delve-head').boundingBox();
+    const controls = await view.locator('.sa-delve-actions').boundingBox();
+    assert(header.y + header.height <= controls.y + 1, 'Tactical moves leave the dungeon header unobstructed');
+    await snap('frontier-tactics-' + viewport.width);
+  }
   await view.setViewportSize({ width: 844, height: 390 });
   await checkViewport();
-  await board.scrollIntoViewIfNeeded();
   await snap('tactics-landscape');
   await click('Title');
   await view.reload();
   await open();
-  await click('Continue');
+  await click(/^Continue/);
   await board.waitFor();
   assert.equal((await slot()).delve.cell, tile);
   assert.equal((await slot()).delve.encounter.turn, turn + 1);
   assert.deepEqual(errors, []);
 
-  const jp = await browser.newPage({ viewport: { width: 320, height: 568 } });
+  const jp = await browser.newPage({ viewport: { width: 320, height: 568 }, isMobile: true, hasTouch: true });
   await jp.goto(url + '?jp=1');
   await jp
     .locator('.mini-game-select-card')
     .filter({ has: jp.locator('[style*="badges/school-trpg.png"]') })
     .click();
-  await jp.getByRole('button', { name: /^はじめる/ }).click();
-  await jp.getByRole('heading', { name: '鐘灯の自由冒険' }).waitFor();
+  await jp.getByRole('heading', { name: '学習ローグフロンティア', exact: true }).waitFor();
   await jp.screenshot({ path: out + '/title-ja-small.png' });
-  await jp.getByRole('button', { name: '物語を開く' }).click();
-  await jp.locator('body').getByText('放課後スクールTRPG', { exact: false }).first().waitFor();
+  await jp.getByRole('button', { name: /^物語キャンペーン/ }).click();
+  await jp.getByText('放課後スクールTRPG', { exact: true }).waitFor();
+  await jp.getByRole('button', { name: '戻る', exact: true }).click();
+  await jp.getByRole('heading', { name: '学習ローグフロンティア', exact: true }).waitFor();
+  await jp.setViewportSize({ width: 568, height: 320 });
+  await checkOnScreen(jp.locator('.sa-frontier-title button'), 'Japanese landscape title');
+  await jp.getByRole('button', { name: '新しい主人公', exact: true }).tap();
+  await jp.getByLabel('名前', { exact: true }).fill('灯里');
+  await jp.getByRole('button', { name: 'この主人公で冒険を始める', exact: true }).tap();
+  await jp.getByRole('button', { name: '遺跡へ入る', exact: true }).tap();
+  await checkOnScreen(jp.locator('.sa-delve-movement button, .sa-delve-actions button'), 'Japanese exploration controls');
+  await jp.getByRole('button', { name: '右を向く', exact: true }).tap();
+  await jp.getByRole('button', { name: '探索メニュー', exact: true }).tap();
+  await jp.getByRole('dialog').getByRole('button', { name: '自由宣言', exact: true }).waitFor();
   console.log(
-    'PASS router, mobile portrait and landscape, expeditions, automatic and tactical battles, historic sites, field guide, save reload and legacy entry',
+    'PASS Frontier title and campaign routing, JP/EN phone layouts, dungeon controls, combat, exploration, and save reload',
     out,
   );
 } finally {

@@ -4,6 +4,7 @@ import { storageService } from './services/storageService';
 import { Plane, Club, Skull, Compass, Mountain, Crown, Send, LucideIcon, Rocket, Gem, Dice5, Sparkles, CircleDot, Grid3X3, Layers3, Heart } from 'lucide-react';
 import { FLIGHT_COMBAT_LOG_KEY, FLIGHT_LOG_KEY, FLIGHT_ROUTE_LOG_KEY } from './mini-games/flight-school/logbook';
 import { clearAllSchoolTrpgSaves } from './mini-games/school-trpg/schoolTrpgSave';
+import { FRONTIER_TITLE } from './mini-games/school-trpg/frontierTitle';
 import { RUSH_BEST_KEY, STORY_KEY } from './mini-games/after-school-rush/rules';
 
 export interface MiniGameConfig {
@@ -293,8 +294,8 @@ export const MINI_GAMES: MiniGameConfig[] = [
   },
   {
     id: 'SCHOOL_TRPG',
-    name: '放課後スクールTRPG',
-    titleLines: ['放課後', 'スクールTRPG'],
+    name: FRONTIER_TITLE[0],
+    titleLines: ['学習ローグ', 'フロンティア'],
     description: '主人公をつくり、世界を旅し、町で暮らし、遺跡に挑もう。',
     screen: GameScreen.MINI_GAME_SCHOOL_TRPG,
     threshold: 0,

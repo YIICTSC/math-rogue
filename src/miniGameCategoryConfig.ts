@@ -1,4 +1,5 @@
 import { GameMode, GameScreen } from './types';
+import { FRONTIER_TITLE } from './mini-games/school-trpg/frontierTitle';
 
 /** 雑学内のゲーム系カテゴリと、そこから開くゲームの対応表。 */
 export const CATEGORY_MINI_GAME_SCREEN: Partial<Record<GameMode, GameScreen>> = {
@@ -16,7 +17,7 @@ export const getCategoryMiniGameScreen = (mode: GameMode): GameScreen | null =>
 
 export const CATEGORY_MINI_GAME_LABELS: Partial<Record<GameMode, string>> = {
   [GameMode.HOBBY_BOARD_GAMES]: '石ころの煌めき',
-  [GameMode.HOBBY_TRPG]: '放課後スクールTRPG',
+  [GameMode.HOBBY_TRPG]: FRONTIER_TITLE[0],
   [GameMode.HOBBY_CARD_GAMES]: '学習ローグTCG',
   [GameMode.HOBBY_SHOGI]: 'ミニ将棋',
   [GameMode.HOBBY_GO]: '九路盤 囲碁',

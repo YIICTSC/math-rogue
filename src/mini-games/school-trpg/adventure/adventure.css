@@ -160,16 +160,10 @@
 .sa-top > button {
   flex: 0 0 auto;
 }
-.sa-title,
 .sa-create {
   width: min(100%, 1240px);
   margin-inline: auto;
 }
-.sa-title {
-  padding-inline: clamp(10px, 2.2vw, 22px);
-  padding-bottom: max(16px, env(safe-area-inset-bottom));
-}
-.sa-title-hero,
 .sa-town-banner {
   position: relative;
   display: grid;
@@ -179,12 +173,6 @@
   border: 1px solid var(--sa-line);
   border-radius: 13px;
 }
-.sa-title-hero {
-  min-height: clamp(330px, 53vw, 570px);
-  margin-top: 16px;
-  align-items: center;
-}
-.sa-title-hero > img,
 .sa-town-banner > img {
   position: absolute;
   z-index: -2;
@@ -193,7 +181,6 @@
   inset: 0;
   object-fit: cover;
 }
-.sa-title-hero::after,
 .sa-town-banner::after {
   content: '';
   z-index: -1;
@@ -201,43 +188,10 @@
   inset: 0;
   background: linear-gradient(90deg, #0e1a1bf7, #152123b5 38%, #132a2b17 77%);
 }
-.sa-title-copy {
-  padding: clamp(20px, 5vw, 66px);
-  max-width: 660px;
-}
-.sa-title-copy > span,
 .sa-town-banner > div > span {
   color: #f6d69d;
   font-weight: 700;
   letter-spacing: 0.06em;
-}
-.sa-title-copy h1 {
-  font-size: clamp(30px, 6.5vw, 61px);
-  margin-block: 7px 12px;
-  text-shadow: 0 2px 8px #0009;
-}
-.sa-title-copy p {
-  color: #f0ecdf;
-  max-width: 36em;
-  margin-bottom: 20px;
-}
-.sa-title-bottom {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 335px), 1fr));
-  gap: 12px;
-  margin-top: 12px;
-}
-.sa-story-entry {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-self: start;
-}
-.sa-story-entry p {
-  color: var(--sa-muted);
-  margin-top: 5px;
 }
 .sa-slot-list {
   display: grid;
@@ -256,8 +210,7 @@
   justify-content: flex-start;
 }
 .sa-slot .sa-portrait,
-.sa-hero-status .sa-portrait,
-.sa-people-list .sa-portrait {
+.sa-hero-status .sa-portrait {
   width: 45px;
   height: 45px;
   object-fit: cover;
@@ -266,8 +219,7 @@
   border: 1px solid #ad9471;
 }
 .sa-slot > button:first-child span,
-.sa-hero-status > span,
-.sa-people-list > button > span {
+.sa-hero-status > span {
   display: grid;
   min-width: 0;
 }
@@ -277,8 +229,7 @@
   overflow-wrap: anywhere;
 }
 .sa-slot small,
-.sa-hero-status small,
-.sa-people-list small {
+.sa-hero-status small {
   color: var(--sa-muted);
 }
 .sa-confirm-delete {
@@ -547,7 +498,7 @@
   min-height: 0;
   padding: 9px clamp(8px, 2vw, 21px) 15px;
 }
-.sa-main > :is(.sa-town-grid, .sa-life-grid, .sa-delve, .sa-save-error, .sa-lesson, .sa-stack) {
+.sa-main > :is(.sa-town-grid, .sa-delve, .sa-save-error, .sa-lesson, .sa-stack) {
   width: min(100%, 1200px);
   margin-inline: auto;
 }
@@ -609,18 +560,13 @@
   margin-inline-start: 0.55em;
 }
 
-.sa-town-grid,
-.sa-life-grid {
+.sa-town-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.6fr) minmax(265px, 1fr);
   gap: 12px;
   align-items: start;
 }
-.sa-life-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-.sa-town-grid > *,
-.sa-life-grid > * {
+.sa-town-grid > * {
   min-width: 0;
 }
 .sa-town-banner {
@@ -641,22 +587,6 @@
 }
 .sa-town-banner p {
   max-width: 42em;
-}
-.sa-town-actions {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
-  margin-block: 9px;
-}
-.sa-town-actions button {
-  text-align: start;
-  justify-content: flex-start;
-}
-.sa-town-actions button span {
-  display: grid;
-}
-.sa-town-actions small {
-  opacity: 0.88;
 }
 .sa-landmark {
   display: flex;
@@ -809,23 +739,12 @@
 .sa-market button {
   font-size: 0.85em;
 }
-.sa-people-list {
-  display: grid;
-  gap: 5px;
-}
 .sa-resident-portrait {
   display: block;
   flex: none;
   background-color: #233935;
   background-size: 300% 200%;
   background-repeat: no-repeat;
-}
-.sa-people-list .sa-resident-portrait { display: block; }
-.sa-people-list > button {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  justify-content: stretch;
-  text-align: start;
 }
 .sa-npc-head {
   display: flex;
@@ -953,11 +872,6 @@
 .sa-delve-head h1 {
   font-size: clamp(19px, 3.1vw, 31px);
 }
-.sa-delve-view {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(144px, 23vw, 238px);
-  gap: 8px;
-}
 .sa-dungeon-scene {
   position: relative;
   isolation: isolate;
@@ -1049,11 +963,6 @@
   text-shadow:
     0 0 24px #ffa858,
     0 0 5px #201410;
-}
-.sa-delve-side {
-  display: grid;
-  align-content: start;
-  gap: 8px;
 }
 .sa-minimap {
   background: #162628;
@@ -1260,26 +1169,8 @@
 }
 
 @media (max-width: 720px) {
-  .sa-town-grid,
-  .sa-life-grid,
-  .sa-create {
+  .sa-town-grid {
     grid-template-columns: minmax(0, 1fr);
-  }
-  .sa-title-hero {
-    min-height: clamp(325px, 87vw, 428px);
-    align-items: end;
-  }
-  .sa-title-hero > img {
-    object-position: 59% center;
-  }
-  .sa-title-hero::after {
-    background: linear-gradient(0deg, #131e20f2, #06141491 49%, #10222203 87%);
-  }
-  .sa-title-copy {
-    padding: 14px;
-  }
-  .sa-title-copy h1 {
-    font-size: clamp(27px, 8.5vw, 49px);
   }
   .sa-create-preview {
     height: min(285px, 65vw);
@@ -1347,21 +1238,6 @@
     min-height: 52px;
     font-size: 0.74em;
   }
-  .sa-town-actions {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .sa-town-actions button span {
-    grid-template-columns: auto 1fr;
-    gap: 5px;
-    align-items: center;
-  }
-  .sa-town-actions small {
-    text-align: end;
-  }
-  .sa-delve-view {
-    grid-template-columns: minmax(0, 1fr) 116px;
-    gap: 5px;
-  }
   .sa-dungeon-scene {
     min-height: 202px;
     height: clamp(202px, 58vw, 290px);
@@ -1388,9 +1264,6 @@
   .sa-technique-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .sa-delve-head .sa-inline {
-    gap: 4px;
-  }
 }
 @media (orientation: landscape) and (max-height: 520px) {
   .sa-status {
@@ -1403,9 +1276,6 @@
   .sa-health > span {
     display: flex;
   }
-  .sa-title-hero {
-    min-height: 265px;
-  }
   .sa-nav button {
     flex-direction: row;
     min-height: 33px;
@@ -1413,9 +1283,6 @@
   .sa-dungeon-scene {
     height: 240px;
     min-height: 192px;
-  }
-  .sa-delve-view {
-    grid-template-columns: minmax(0, 1fr) 150px;
   }
   .sa-create-preview {
     height: 205px;
@@ -1449,25 +1316,11 @@
 }
 
 @media (orientation: landscape) and (max-height: 520px) {
-  .sa-delve {
-    grid-template-columns: minmax(0, 1fr) minmax(208px, 36%);
-    grid-template-rows: auto auto 1fr;
-    align-items: start;
-  }
   .sa-delve-head {
     grid-column: 1 / -1;
   }
   .sa-delve-head .sa-hint {
     display: none;
-  }
-  .sa-delve-head .sa-inline > button {
-    min-height: 34px;
-    padding-block: 5px;
-  }
-  .sa-delve-view {
-    grid-column: 1;
-    grid-row: 2 / span 2;
-    grid-template-columns: minmax(0, 1fr) clamp(96px, 15vw, 128px);
   }
   .sa-dungeon-scene {
     min-height: 154px;
@@ -1475,9 +1328,6 @@
   }
   .sa-dungeon-scene[data-combat] .sa-scene-line {
     padding: 4px 6px;
-  }
-  .sa-delve-side {
-    gap: 5px;
   }
   .sa-minimap {
     padding: 4px;
@@ -1487,15 +1337,6 @@
   }
   .sa-dpad button {
     min-height: 30px;
-  }
-  .sa-delve > :is(.sa-techniques, .sa-find) {
-    grid-column: 2;
-    grid-row: 2;
-    padding: 6px 8px;
-  }
-  .sa-delve > .sa-supplies {
-    grid-column: 2;
-    grid-row: 3;
   }
   .sa-delve .sa-supplies button {
     min-height: 30px;
@@ -1551,11 +1392,6 @@
   .sa-delve-head h1 {
     font-size: 16px;
   }
-  .sa-delve-head .sa-inline > button {
-    min-height: 28px;
-    padding-block: 3px;
-    font-size: 0.8em;
-  }
   .sa-techniques .sa-section-row button,
   .sa-technique-grid button,
   .sa-find .sa-inline button {
@@ -1610,23 +1446,6 @@
   color: var(--sa-gold);
 }
 
-.sa-season, .sa-delve-context {
-  color: var(--sa-muted);
-  font-size: 0.88em;
-  margin-top: 5px;
-  padding: 6px 9px;
-  background: #172827;
-  border-radius: 7px;
-}
-.sa-season {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px 8px;
-  align-items: center;
-}
-.sa-season strong, .sa-delve-context strong {
-  color: var(--sa-green);
-}
 .sa-app .sa-town-expedition {
   width: 100%;
   padding: 9px 12px;
@@ -1636,11 +1455,7 @@
   border-color: #7b6c50;
   background: linear-gradient(120deg, #374137, #252e2b);
 }
-.sa-town-expedition > div {
-  flex: 1 1 auto;
-  display: grid;
-}
-.sa-town-expedition > svg, .sa-town-expedition > div > strong {
+.sa-town-expedition > svg {
   color: var(--sa-gold);
 }
 .sa-expedition-progress {
@@ -1802,8 +1617,6 @@
 .sa-memory h3 { color: var(--sa-gold); }
 .sa-formation { display: flex; flex-wrap: wrap; align-items: end; gap: 4px 8px; margin-block: 7px; }
 .sa-formation > small { max-width: 26em; }
-.sa-delve-context { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 0; }
-.sa-delve-context > span { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 7px; }
 .sa-app .sa-town-field {
   width: 100%;
   margin-top: 6px;
@@ -1843,11 +1656,6 @@
 .sa-map-mark { margin-bottom: 7px; }
 .sa-rumor-list { margin-block: 7px; }
 .sa-app .sa-map-tile[data-rumored] { outline: 1px solid #cbb78f; outline-offset: -3px; }
-.sa-auto-walk { gap: 3px; }
-.sa-auto-walk button { min-height: 32px; padding: 4px 6px; line-height: 1.2; font-size: .8em; }
-.sa-expkit-supplies { display: grid; align-content: start; gap: 6px; }
-.sa-expkit-supplies > details { min-width: 0; }
-.sa-delve-view[data-manual] { grid-template-columns: minmax(0, 1fr); }
 .sa-tactical { display: grid; gap: 6px; align-content: start; }
 .sa-tactical-grid { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); width: min(100%, 390px); gap: 2px; justify-self: center; }
 .sa-app .sa-tactical-grid button {
@@ -1874,19 +1682,6 @@
 .sa-tactical-moves { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; margin-bottom: 5px; }
 .sa-tactical-moves button > span { display: grid; text-align: start; }
 .sa-tactical-moves small { color: var(--sa-muted); }
-@media (orientation: portrait) and (max-width: 580px) {
-  .sa-delve[data-tactical] { gap: 5px; }
-  .sa-delve[data-tactical] .sa-delve-head h1 { font-size: clamp(16px, 4.6vw, 23px); }
-  .sa-delve[data-tactical] .sa-delve-context { font-size: .79em; padding-block: 3px; }
-  .sa-tactical { padding: 6px 8px; }
-  .sa-tactical-grid { width: min(100%, 38dvh, 390px); }
-  .sa-tactical-moves { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .sa-app .sa-tactical-moves button { min-height: 42px; padding: 3px 5px; font-size: .86em; }
-}
-@media (orientation: landscape) and (max-height: 520px) {
-  .sa-tactical-grid { width: min(100%, 242px); }
-  .sa-tactical-moves button { min-height: 33px; padding: 4px 6px; }
-}
 .sa-scene-fixture {
   display: block;
   z-index: 1;
@@ -1951,8 +1746,6 @@
   .sa-expedition-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .sa-expedition-accept, .sa-active-expedition { grid-template-columns: minmax(0, 1fr); }
   .sa-active-expedition > img { max-height: min(175px, 40dvh); }
-  .sa-delve-view:has(.sa-dungeon-scene[data-combat]) { grid-template-columns: minmax(0, 1fr); }
-  .sa-delve-view:has(.sa-dungeon-scene[data-combat]) > .sa-delve-side { display: none; }
 }
 @media (orientation: landscape) and (max-height: 470px) {
   .sa-expedition-board { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 5px 10px; padding: 7px 10px; }
@@ -1969,13 +1762,6 @@
   .sa-active-expedition { grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr); }
   .sa-active-expedition > img { max-height: min(180px, 44dvh); }
   .sa-app .sa-journal-tabs button { min-height: 33px; padding-block: 4px; }
-}
-@media (orientation: landscape) and (max-height: 520px) {
-  .sa-delve:has(> .sa-delve-context) { grid-template-rows: auto auto auto 1fr; }
-  .sa-delve-context { grid-column: 1 / -1; grid-row: 2; padding-block: 2px; }
-  .sa-delve:has(> .sa-delve-context) > .sa-delve-view { grid-row: 3 / span 2; }
-  .sa-delve:has(> .sa-delve-context) > :is(.sa-techniques, .sa-find) { grid-row: 3; }
-  .sa-delve:has(> .sa-delve-context) > .sa-supplies { grid-row: 4; }
 }
 .sa-combat-party {
   display: grid;

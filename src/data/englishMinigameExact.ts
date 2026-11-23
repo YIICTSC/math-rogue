@@ -122,6 +122,8 @@ export const ENGLISH_MINIGAME_EXACT: Readonly<Record<string, string>> = Object.f
   '石ころの煌めき': 'Stone Glow',
   '石ころを集め、鉱山カードを買って煌めき点を競おう。': 'Collect stones, buy mine cards, and race for Glow points.',
   '放課後スクールTRPG': 'After-School School TRPG',
+  '学習ローグフロンティア': 'Learning Rogue Frontier',
+  '主人公をつくり、世界を旅し、町で暮らし、遺跡に挑もう。': 'Create a character, travel the world, settle in towns, and explore ruins.',
   'サイコロを振って学校生活の物語を進めよう。': 'Roll the dice and guide a school-life story.',
   '学習ローグTCG': 'Learning Rogue TCG',
   'おなじみのカードイラストで、エナジーを使って対戦。': 'Battle with familiar card art and spend Energy wisely.',

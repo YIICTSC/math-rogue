@@ -1,6 +1,6 @@
-# 『Caves of Qud』と「鐘灯の自由冒険」の機能比較
+# 『Caves of Qud』と「学習ローグフロンティア」の機能比較
 
-2026年11月22日時点の『Caves of Qud』本編の公開資料と、「鐘灯の自由冒険」の `47dcc0e4` を照合した。地形を生成する冒険、町での生活、飢え、最大6人の自動戦闘、装備製作、勢力、遠征、手記、敗北時の再開ルールは既にあった。以下はそこから追加した遊びと、方式や規模に差が残る項目。 [公式サイト](https://www.cavesofqud.com/) · [Steamの機能一覧](https://store.steampowered.com/app/333640/Caves_of_Qud/) · [ゲーム概念](https://wiki.cavesofqud.com/wiki/Game_Concepts) · [仕組みの索引](https://wiki.cavesofqud.com/wiki/Mechanics)
+2026年11月22日時点の『Caves of Qud』本編の公開資料と、「学習ローグフロンティア」（当時の題名は「鐘灯の自由冒険」）の `47dcc0e4` を照合した。地形を生成する冒険、町での生活、飢え、最大6人の自動戦闘、装備製作、勢力、遠征、手記、敗北時の再開ルールは既にあった。以下はそこから追加した遊びと、方式や規模に差が残る項目。 [公式サイト](https://www.cavesofqud.com/) · [Steamの機能一覧](https://store.steampowered.com/app/333640/Caves_of_Qud/) · [ゲーム概念](https://wiki.cavesofqud.com/wiki/Game_Concepts) · [仕組みの索引](https://wiki.cavesofqud.com/wiki/Mechanics)
 
 | 比較項目 | 変更前 | 鐘灯で遊べるようにしたこと | 残る差・参照資料 |
 | --- | --- | --- | --- |

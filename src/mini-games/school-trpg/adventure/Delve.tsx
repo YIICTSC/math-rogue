@@ -3,6 +3,9 @@ import {
   ArrowDown,
   ArrowUp,
   ArrowUpToLine,
+  Backpack,
+  Footprints,
+  List,
   Compass,
   Flame,
   Map,
@@ -32,7 +35,8 @@ import { formParty } from './party';
 import { MEAL_IDS, mealRecipe } from './provisions';
 import { ruinCondition } from './ruinConditions';
 import { MECHANISMS, circuitAt, historyTitle, ruinLayout } from './ruinSystems';
-import { TacticalMoves, TacticalView } from './TacticalView';
+import { TacticalMoves, TacticalTarget, TacticalView } from './TacticalView';
+import ScreenDialog from './ScreenDialog';
 import DungeonCorridor from './DungeonCorridor';
 import {
   MAX_PARTY_SIZE,
@@ -179,95 +183,76 @@ function LabyrinthMap({ s, floor, t, layout }: { s: Adventure; floor: Floor; t: 
   );
 }
 
-function FeatureActions({
-  s,
-  floor,
-  t,
-  send,
-  declare,
-}: {
-  s: Adventure;
-  floor: Floor;
-  t: Local;
-  send: Send;
-  declare: () => void;
-}) {
+function explorationChoices(s: Adventure, floor: Floor) {
   const d = s.delve!;
   const record = recordFor(s, d.floor);
   const type = floor.features[d.cell];
   const locked = type === 'stairs' && !record.cleared.includes(floor.seal);
   const cleared = record.cleared.includes(d.cell);
   const inspected = record.inspected.includes(d.cell);
-  const action = (verb: DungeonVerb, copy: Text, primary = false) => (
-    <button
-      type="button"
-      className={primary ? 'sa-primary' : undefined}
-      onClick={() => send({ type: 'feature', verb })}
-    >
-      {t(copy)}
-    </button>
-  );
-  return (
-    <section className="sa-panel sa-find">
-      <div className="sa-section-row">
-        <h2>
-          {t(
-            d.cell === ENTRY_CELL
-              ? ['地下の入口', 'Stairwell']
-              : type
-                ? FEATURES[type]
-                : ['通路', 'Passage'],
-          )}
-        </h2>
-        {type && cleared && <span>{t(['調査済み', 'Resolved'])}</span>}
-      </div>
-      {type === 'runes' && inspected && !cleared && <p className="sa-hint">{t(runeClue(floor))}</p>}
-      {locked && (
-        <p className="sa-hint">
-          {t([
-            '守護者から通行の証を得ると、階段が開きます。',
-            'Earn passage from the guardian to open the stairs.',
-          ])}
-        </p>
-      )}
-      <div className="sa-inline">
-        {d.cell === ENTRY_CELL && d.floor > 1 && action('ascend', ['上の階へ', 'Ascend'])}
-        {type === 'stairs' && !locked && action('descend', ['次の階へ', 'Descend'], true)}
-        {type && type !== 'stairs' && !cleared && (
-          <>
-            {!inspected && action('inspect', ['調べる', 'Inspect'])}
-            {type === 'cache' && action('open', ['宝箱を開ける', 'Open chest'], true)}
-            {type === 'sanctum' && action('meditate', ['祭壇で休む', 'Rest at altar'], true)}
-            {type === 'vein' && action('harvest', ['素材を採る', 'Take materials'], true)}
-            {type === 'pack' && action('sneak', ['気づかれず通る', 'Sneak past'])}
-            {(type === 'pack' || type === 'guardian') &&
-              action('confront', ['対峙する', 'Confront'], true)}
-            {(type === 'runes' || type === 'trap') && (
-              <>
-                {action('pick', ['仕掛けを解除', 'Disarm mechanism'])}
-                {action('force', ['力で突破', 'Force through'])}
-              </>
-            )}
-            {type === 'runes' &&
-              inspected &&
-              RUNES.map((rune, symbol) => (
-                <button
-                  type="button"
-                  key={symbol}
-                  onClick={() => send({ type: 'feature', verb: 'open', symbol })}
-                >
-                  {t(rune)}
-                </button>
-              ))}
-          </>
-        )}
-        <button type="button" onClick={declare}>
-          <Sparkles size={16} />
-          {t(['自由宣言', 'Declare an action', 'じゆうせんげん'])}
-        </button>
-      </div>
-    </section>
-  );
+  const options: Array<{ verb: DungeonVerb; name: Text; primary?: boolean; symbol?: number }> = [];
+  if (d.cell === ENTRY_CELL && d.floor > 1)
+    options.push({ verb: 'ascend', name: ['上の階へ', 'Ascend', 'うえの かいへ'], primary: true });
+  if (type === 'stairs' && !locked)
+    options.push({
+      verb: 'descend',
+      name: ['次の階へ', 'Descend', 'つぎの かいへ'],
+      primary: true,
+    });
+  if (type && type !== 'stairs' && !cleared) {
+    if (!inspected) options.push({ verb: 'inspect', name: ['調べる', 'Inspect', 'しらべる'] });
+    if (type === 'cache')
+      options.push({
+        verb: 'open',
+        name: ['宝箱を開ける', 'Open chest', 'たからばこを あける'],
+        primary: true,
+      });
+    if (type === 'sanctum')
+      options.push({
+        verb: 'meditate',
+        name: ['祭壇で休む', 'Rest at altar', 'さいだんで やすむ'],
+        primary: true,
+      });
+    if (type === 'vein')
+      options.push({
+        verb: 'harvest',
+        name: ['素材を採る', 'Take materials', 'そざいを とる'],
+        primary: true,
+      });
+    if (type === 'pack')
+      options.push({ verb: 'sneak', name: ['気づかれず通る', 'Sneak past', 'きづかれず とおる'] });
+    if (type === 'pack' || type === 'guardian')
+      options.push({
+        verb: 'confront',
+        name: ['対峙する', 'Confront', 'たいじする'],
+        primary: true,
+      });
+    if (type === 'runes' || type === 'trap') {
+      options.push(
+        { verb: 'pick', name: ['仕掛けを解除', 'Disarm mechanism', 'しかけを かいじょ'] },
+        { verb: 'force', name: ['力で突破', 'Force through', 'ちからで とっぱ'] },
+      );
+    }
+    if (type === 'runes' && inspected) {
+      RUNES.forEach((name, symbol) => options.push({ verb: 'open', name, symbol }));
+    }
+  }
+  const location: Text =
+    d.cell === ENTRY_CELL
+      ? ['地下の入口', 'Stairwell', 'ちかの いりぐち']
+      : type
+        ? FEATURES[type]
+        : ['通路', 'Passage', 'つうろ'];
+  const hint: Text | null = locked
+    ? [
+        '守護者から通行の証を得ると、階段が開きます。',
+        'Earn passage from the guardian to open the stairs.',
+      ]
+    : type === 'runes' && inspected && !cleared
+      ? runeClue(floor)
+      : null;
+  const preferred = options.find((option) => option.primary) ?? options[0];
+  return { options, location, hint, preferred };
 }
 
 function DungeonScene({
@@ -394,11 +379,15 @@ export default function DelveView({
   const carved = s.frontier.alterations[`${address}/${d.floor}`]?.dug.length ?? 0;
   const floor = useMemo(() => fieldFloor(s), [address, d.floor, setting, carved]);
   const layout = useMemo(() => ruinLayout(s.location, d.floor), [address, d.floor]);
-  const fixture = d.cell === layout.device ? 'device' : d.cell === layout.inscription ? 'inscription' : null;
+  const fixture =
+    d.cell === layout.device ? 'device' : d.cell === layout.inscription ? 'inscription' : null;
   const battle = d.encounter;
   const manual = Boolean(battle?.tactics);
   const [picked, setPicked] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [sheet, setSheet] = useState<'actions' | 'map' | 'supplies' | null>(null);
+  const combatOpen = !!battle;
+  const blocked = modalOpen || sheet !== null;
   const target =
     battle?.enemies[picked]?.hp && battle.enemies[picked].hp > 0
       ? picked
@@ -407,15 +396,16 @@ export default function DelveView({
     setPicked(0);
     setPaused(false);
   }, [battle?.cell, battle?.bound]);
+  useEffect(() => setSheet(null), [d.floor, d.cell, combatOpen]);
   useEffect(() => {
-    if (!battle || manual || modalOpen || paused) return;
+    if (!battle || manual || blocked || paused) return;
     const timer = window.setInterval(() => {
       if (document.visibilityState === 'visible') send({ type: 'auto-combat', target });
     }, 850);
     return () => window.clearInterval(timer);
-  }, [battle, manual, modalOpen, paused, target, send]);
+  }, [battle, manual, blocked, paused, target, send]);
   useEffect(() => {
-    if (battle || modalOpen) return;
+    if (battle || blocked) return;
     const keys: Record<string, DelveMove> = {
       arrowup: 'forward',
       w: 'forward',
@@ -443,150 +433,390 @@ export default function DelveView({
     };
     window.addEventListener('keydown', move);
     return () => window.removeEventListener('keydown', move);
-  }, [battle, modalOpen, send]);
+  }, [battle, blocked, send]);
   const town = townAt(s.location);
   const biome = BIOMES[town.biome];
   const condition = ruinCondition(s.location, d.floor);
   const expedition = s.journey.expedition;
+  const explore = battle ? null : explorationChoices(s, floor);
+  const auto = !battle && plannedWalk(s).length > 0;
+  const actionLabel = t(
+    battle
+      ? ['戦闘メニュー', 'Battle options', 'せんとう メニュー']
+      : ['探索メニュー', 'Explore options', 'たんさく メニュー'],
+  );
+  const mapLabel = t(['見取り図', 'Automap', 'みとりず']);
+  const kitLabel = t(['道具と能力', 'Supplies and powers', 'どうぐと のうりょく']);
+  const groundTitle =
+    fixture === 'device'
+      ? MECHANISMS[town.biome].name
+      : fixture === 'inscription'
+        ? historyTitle(s.location)
+        : explore?.location;
+  const declareFromMenu = () => {
+    setSheet(null);
+    declare();
+  };
+  const move = (direction: DelveMove) => send({ type: 'move', direction });
+  const interact = (option: NonNullable<typeof explore>['options'][number]) =>
+    send({ type: 'feature', verb: option.verb, symbol: option.symbol });
+
   return (
-    <div className="sa-delve" data-tactical={manual || undefined}>
-      <div className="sa-section-row sa-delve-head">
-        <div>
-          <span className="sa-hint">{t(town.name)}</span>
-          <h1>
-            {t(biome.ruin)} · B{d.floor}
-          </h1>
-          <FieldStatus s={s} t={t} />
+    <div className="sa-delve" data-mode={manual ? 'tactical' : battle ? 'battle' : 'explore'}>
+      <header className="sa-delve-head">
+        <h1>
+          {t(biome.ruin)} <strong>B{d.floor}</strong>
+        </h1>
+        <div className="sa-delve-tools">
+          <button
+            type="button"
+            className="sa-lamp"
+            aria-label={t(GOODS.lantern.name) + ' ×' + s.goods.lantern}
+            title={t(['灯油を補充', 'Refill the lamp', 'あぶらを たす'])}
+            disabled={!s.goods.lantern || d.light >= 14}
+            onClick={() => send({ type: 'use', good: 'lantern' })}
+          >
+            <Flame size={16} />
+            <span>{d.light}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setSheet('supplies')}
+            aria-label={kitLabel}
+            title={kitLabel}
+          >
+            <Backpack size={17} />
+          </button>
+          <button
+            type="button"
+            aria-label={mapLabel}
+            title={mapLabel}
+            onClick={() => setSheet('map')}
+          >
+            <Map size={17} />
+          </button>
+          {!battle && (
+            <button
+              type="button"
+              aria-label={t(['地上へ戻る', 'Return to town', 'ちじょうへ もどる'])}
+              title={t(['地上へ戻る', 'Return to town', 'ちじょうへ もどる'])}
+              onClick={() => send({ type: 'leave-delve' })}
+            >
+              <ArrowUpToLine size={17} />
+            </button>
+          )}
         </div>
-        <div className="sa-inline">
-          <span className="sa-lamp">
-            <Flame size={17} />
-            {t(['灯り', 'Light'])} {d.light}
-          </span>
-          {!manual && <button type="button" disabled={!!battle} onClick={() => send({ type: 'leave-delve' })}>
-            <ArrowUpToLine size={17} />
-            {t(['地上へ戻る', 'Return to town', 'ちじょうへ もどる'])}
-          </button>}
-        </div>
+      </header>
+      <div className="sa-delve-view">
+        {manual ? (
+          <TacticalView
+            s={s}
+            floor={floor}
+            t={t}
+            target={target}
+            select={setPicked}
+            send={send}
+            modalOpen={blocked}
+          />
+        ) : (
+          <DungeonScene
+            s={s}
+            floor={floor}
+            t={t}
+            target={target}
+            select={setPicked}
+            fixture={fixture}
+          />
+        )}
+        {!battle && (
+          <aside className="sa-delve-overview" aria-hidden="true">
+            <LabyrinthMap s={s} floor={floor} t={t} layout={layout} />
+          </aside>
+        )}
       </div>
-      {(d.floor > 1 || setting || (expedition && atSource(s, expedition) && expedition.stage === 'task')) && (
-        <div className="sa-delve-context">
-          {d.floor > 1 && <span><strong>{t(condition.name)}</strong><small>{t(condition.hint)}</small></span>}
-          {setting && <span><strong>{t(MECHANISMS[town.biome].name)}</strong><small>{t(MECHANISMS[town.biome][setting].name)}</small></span>}
-          {expedition && atSource(s, expedition) && expedition.stage === 'task' && <ExpeditionProgress s={s} e={expedition} t={t} />}
+
+      {!battle && (
+        <div className="sa-delve-movement">
+          <div
+            className="sa-dpad"
+            role="group"
+            aria-label={t(['移動操作', 'Movement controls', 'いどう そうさ'])}
+          >
+            <button
+              className="sa-step-front"
+              type="button"
+              disabled={delveDestination(s, floor) < 0}
+              aria-label={t(['前進', 'Step forward', 'ぜんしん'])}
+              onClick={() => move('forward')}
+            >
+              <ArrowUp size={22} />
+            </button>
+            <button
+              className="sa-turn-left"
+              type="button"
+              aria-label={t(['左を向く', 'Turn left', 'ひだりを むく'])}
+              onClick={() => move('left')}
+            >
+              <RotateCcw size={20} />
+            </button>
+            <button
+              className="sa-turn-right"
+              type="button"
+              aria-label={t(['右を向く', 'Turn right', 'みぎを むく'])}
+              onClick={() => move('right')}
+            >
+              <RotateCw size={20} />
+            </button>
+            <button
+              className="sa-step-back"
+              type="button"
+              disabled={delveDestination(s, floor, true) < 0}
+              aria-label={t(['後退', 'Step backward', 'こうたい'])}
+              onClick={() => move('backward')}
+            >
+              <ArrowDown size={22} />
+            </button>
+          </div>
         </div>
       )}
-      <div className="sa-delve-view" data-manual={manual || undefined}>
-        {manual ? <TacticalView s={s} floor={floor} t={t} target={target} select={setPicked} send={send} modalOpen={modalOpen} /> :
-          <DungeonScene s={s} floor={floor} t={t} target={target} select={setPicked} fixture={fixture} />}
-        {!manual && <aside className="sa-delve-side">
-          <LabyrinthMap s={s} floor={floor} t={t} layout={layout} />
-          {!battle && (
-            <div
-              className="sa-dpad"
-              role="group"
-              aria-label={t(['探索操作', 'Exploration controls'])}
-            >
-              <button
-                className="sa-step-front"
-                type="button"
-                disabled={delveDestination(s, floor) < 0}
-                aria-label={t(['前進', 'Step forward'])}
-                onClick={() => send({ type: 'move', direction: 'forward' })}
-              >
-                <ArrowUp size={20} />
-              </button>
-              <button
-                className="sa-turn-left"
-                type="button"
-                aria-label={t(['左を向く', 'Turn left'])}
-                onClick={() => send({ type: 'move', direction: 'left' })}
-              >
-                <RotateCcw size={20} />
-              </button>
-              <button
-                className="sa-step-back"
-                type="button"
-                disabled={delveDestination(s, floor, true) < 0}
-                aria-label={t(['後退', 'Step backward'])}
-                onClick={() => send({ type: 'move', direction: 'backward' })}
-              >
-                <ArrowDown size={20} />
-              </button>
-              <button
-                className="sa-turn-right"
-                type="button"
-                aria-label={t(['右を向く', 'Turn right'])}
-                onClick={() => send({ type: 'move', direction: 'right' })}
-              >
-                <RotateCw size={20} />
+
+      <section
+        className="sa-delve-actions"
+        aria-label={t(
+          battle ? ['戦闘操作', 'Battle controls'] : ['探索操作', 'Exploration controls'],
+        )}
+      >
+        {battle ? (
+          <>
+            {manual && (
+              <>
+                <TacticalTarget s={s} t={t} target={target} floor={floor} send={send} />
+                <TacticalMoves s={s} t={t} target={target} floor={floor} send={send} />
+              </>
+            )}
+            <div className="sa-delve-quick">
+              {!manual && (
+                <button
+                  type="button"
+                  aria-pressed={paused}
+                  onClick={() => setPaused((value) => !value)}
+                >
+                  {paused
+                    ? t(['戦闘を再開', 'Resume combat', 'せんとうを さいかい'])
+                    : t(['一時停止', 'Pause', 'いちじていし'])}
+                </button>
+              )}
+              <button type="button" onClick={() => setSheet('actions')}>
+                <List size={16} />
+                {actionLabel}
               </button>
             </div>
+          </>
+        ) : (
+          <>
+            {fixture ? (
+              <button className="sa-primary" type="button" onClick={() => setSheet('actions')}>
+                {t(
+                  fixture === 'device'
+                    ? ['仕掛けを見る', 'Examine mechanism', 'しかけを みる']
+                    : ['刻印を見る', 'Examine inscription', 'こくいんを みる'],
+                )}
+              </button>
+            ) : explore?.preferred ? (
+              <button
+                className="sa-primary"
+                type="button"
+                onClick={() => interact(explore.preferred!)}
+              >
+                {t(explore.preferred.name)}
+              </button>
+            ) : (
+              <button type="button" disabled={!auto} onClick={() => send({ type: 'auto-walk' })}>
+                <Footprints size={17} />
+                {t(['自動探索', 'Auto-explore', 'じどう たんさく'])}
+              </button>
+            )}
+            <button type="button" onClick={() => setSheet('actions')}>
+              <List size={16} />
+              {actionLabel}
+            </button>
+          </>
+        )}
+      </section>
+
+      {sheet && (
+        <ScreenDialog
+          title={sheet === 'map' ? mapLabel : sheet === 'supplies' ? kitLabel : actionLabel}
+          t={t}
+          close={() => setSheet(null)}
+        >
+          {sheet === 'map' ? (
+            <div className="sa-delve-map-detail">
+              <LabyrinthMap s={s} floor={floor} t={t} layout={layout} />
+              <div className="sa-stack">
+                <span>
+                  {t(town.name)} · {t(groundTitle ?? biome.ruin)}
+                </span>
+                <span className="sa-gold">
+                  {t(DIRECTIONS[d.direction])} · {t(['灯り', 'Light', 'あかり'])} {d.light}
+                </span>
+                <FieldStatus s={s} t={t} />
+                {d.floor > 1 && (
+                  <p>
+                    <strong>{t(condition.name)}</strong> · {t(condition.hint)}
+                  </p>
+                )}
+                {setting && (
+                  <p>
+                    <strong>{t(MECHANISMS[town.biome].name)}</strong> ·{' '}
+                    {t(MECHANISMS[town.biome][setting].name)}
+                  </p>
+                )}
+                {expedition && atSource(s, expedition) && expedition.stage === 'task' && (
+                  <ExpeditionProgress s={s} e={expedition} t={t} />
+                )}
+              </div>
+            </div>
+          ) : sheet === 'supplies' ? (
+            <div className="sa-stack">
+              <Supplies state={s} t={t} send={send} />
+              <FieldSupplies
+                s={s}
+                t={t}
+                send={send}
+                target={battle?.tactics?.cells[target]}
+                foe={battle?.tactics ? target : undefined}
+              />
+            </div>
+          ) : battle ? (
+            <div className="sa-stack">
+              <h3>
+                {t(['仲間', 'Party', 'なかま'])} · {s.followers.length + 1}/{MAX_PARTY_SIZE}
+              </h3>
+              <CombatParty s={s} t={t} />
+              <div className="sa-inline">
+                {!manual && (
+                  <button
+                    type="button"
+                    onClick={() => send({ type: 'combat', move: 'parley', target })}
+                  >
+                    {t(['交渉する', 'Parley', 'こうしょうする'])}
+                  </button>
+                )}
+                {!manual &&
+                  !battle.guardian &&
+                  (battle.enemies[target]?.epithets || fieldSkill(s, 'diplomacy')) && (
+                    <button
+                      type="button"
+                      disabled={
+                        s.frontier.liquids.water < 2 || s.followers.length >= MAX_PARTY_SIZE - 1
+                      }
+                      onClick={() => send({ type: 'combat', move: 'befriend', target })}
+                    >
+                      {t(['水で勧誘する', 'Offer water and recruit', 'みずで さそう'])}
+                    </button>
+                  )}
+                <button
+                  type="button"
+                  onClick={() => send({ type: 'combat', move: 'retreat', target })}
+                >
+                  {t(['退却を試みる', 'Try to retreat', 'たいきゃくを こころみる'])}
+                </button>
+                <button type="button" onClick={declareFromMenu}>
+                  <Sparkles size={16} />
+                  {t(['自由宣言', 'Declare', 'じゆうせんげん'])}
+                </button>
+              </div>
+              <FormationChoice s={s} t={t} send={send} />
+            </div>
+          ) : (
+            <div className="sa-stack">
+              {fixture ? (
+                <RuinFixture
+                  s={s}
+                  t={t}
+                  send={send}
+                  fixture={fixture}
+                  shortcut={layout.shortcut >= 0}
+                  declare={declareFromMenu}
+                />
+              ) : (
+                <section className="sa-find">
+                  <h3>{t(explore!.location)}</h3>
+                  {explore!.hint && <p className="sa-hint">{t(explore!.hint)}</p>}
+                  <div className="sa-inline">
+                    {explore!.options.map((option) => (
+                      <button
+                        key={option.verb + (option.symbol ?? '')}
+                        className={option.primary ? 'sa-primary' : undefined}
+                        type="button"
+                        onClick={() => interact(option)}
+                      >
+                        {t(option.name)}
+                      </button>
+                    ))}
+                    <button type="button" onClick={declareFromMenu}>
+                      <Sparkles size={16} />
+                      {t(['自由宣言', 'Declare an action', 'じゆうせんげん'])}
+                    </button>
+                  </div>
+                </section>
+              )}
+              <div className="sa-inline">
+                <button type="button" disabled={!auto} onClick={() => send({ type: 'auto-walk' })}>
+                  {t(['未踏の道を探す', 'Auto-explore', 'まだの みちを さがす'])}
+                </button>
+                <button
+                  type="button"
+                  disabled={!plannedWalk(s, ENTRY_CELL).length}
+                  onClick={() => send({ type: 'auto-walk', target: ENTRY_CELL })}
+                >
+                  {t(['入口への道をたどる', 'Follow the way back', 'いりぐちへ もどる'])}
+                </button>
+              </div>
+            </div>
           )}
-          {!battle && <div className="sa-auto-walk">
-            <button type="button" disabled={!plannedWalk(s).length} onClick={() => send({ type: 'auto-walk' })}>{t(['未踏の道を探す', 'Auto-explore', 'まだの みちを さがす'])}</button>
-            <button type="button" disabled={!plannedWalk(s, ENTRY_CELL).length} onClick={() => send({ type: 'auto-walk', target: ENTRY_CELL })}>{t(['入口への道をたどる', 'Follow the way back', 'いりぐちへ もどる'])}</button>
-          </div>}
-        </aside>}
-      </div>
-      {battle ? (
-        <section className="sa-panel sa-techniques">
-          <div className="sa-section-row">
-            <h2>
-              <Swords size={18} />
-              {t(manual ? ['行動を選ぶ', 'Choose an action', 'こうどうを えらぶ'] : ['自動戦闘', 'Auto combat', 'じどうせんとう'])} · {s.followers.length + 1}/{MAX_PARTY_SIZE}
-            </h2>
-            {!manual && <button type="button" aria-pressed={paused} onClick={() => setPaused((value) => !value)}>
-              {paused ? t(['戦闘を再開', 'Resume combat', 'せんとうを さいかい']) : t(['一時停止', 'Pause', 'いちじていし'])}
-            </button>}
-          </div>
-          {manual && <TacticalMoves s={s} t={t} target={target} floor={floor} send={send} />}
-          <div className="sa-combat-party" aria-label={t(['戦闘中の仲間', 'Combat party', 'せんとうちゅうの なかま'])}>
-            <article>
-              <Portrait id={s.character.portrait} />
-              <span><strong>{s.character.name}</strong><small>HP {s.hp}/{maxHp(s)}</small>
-                <progress value={s.hp} max={maxHp(s)} aria-label={s.character.name + ' HP'} /></span>
-            </article>
-            {(battle.allies ?? formParty(s)).map((ally) => {
-              const { resident } = s.friends[ally.id];
-              const name = t(resident.name);
-              return <article key={ally.id} data-down={ally.hp <= 0 || undefined}>
-                <ResidentPortrait role={resident.role} />
-                <span><strong>{name}</strong>
-                  <small>{ally.hp <= 0 ? t(['戦闘不能', 'Knocked out', 'せんとうふのう']) : 'HP ' + ally.hp + '/' + ally.max}</small>
-                  <progress value={ally.hp} max={ally.max} aria-label={name + ' HP'} /></span>
-              </article>;
-            })}
-          </div>
-          <div className="sa-inline">
-            {!manual && <button type="button" onClick={() => send({ type: 'combat', move: 'parley', target })}>
-              {t(['交渉する', 'Parley', 'こうしょうする'])}
-            </button>}
-            {!manual && !battle.guardian && (battle.enemies[target]?.epithets || fieldSkill(s, 'diplomacy')) && <button type="button" disabled={s.frontier.liquids.water < 2 || s.followers.length >= MAX_PARTY_SIZE - 1}
-              onClick={() => send({ type: 'combat', move: 'befriend', target })}>{t(['水で勧誘する', 'Offer water and recruit', 'みずを わけて さそう'])}</button>}
-            <button type="button" onClick={() => send({ type: 'combat', move: 'retreat', target })}>
-              {t(['退却を試みる', 'Try to retreat', 'たいきゃくを こころみる'])}
-            </button>
-            <button type="button" onClick={declare}>
-              <Sparkles size={16} />{t(['自由宣言', 'Declare', 'じゆうせんげん'])}
-            </button>
-          </div>
-          <FormationChoice s={s} t={t} send={send} />
-          {!manual && <span className="sa-hint">
-            {t(['攻撃と援護は自動で進みます。狙う敵はタップで変更できます。', 'Attacks and support are automatic. Tap an enemy to change targets.', 'こうげきと えんごは じどうです。てきを タップして ねらいを かえられます。'])}
-          </span>}
-        </section>
-      ) : fixture ? (
-        <RuinFixture s={s} t={t} send={send} fixture={fixture} shortcut={layout.shortcut >= 0} declare={declare} />
-      ) : (
-        <FeatureActions s={s} floor={floor} t={t} send={send} declare={declare} />
+        </ScreenDialog>
       )}
-      <div className="sa-supplies sa-expkit-supplies">
-        <Supplies state={s} t={t} send={send} />
-        <details className="sa-field-detail"><summary>{t(['野営の道具と能力', 'Field kit and powers', 'やえいの どうぐと のうりょく'])}</summary>
-          <FieldSupplies s={s} t={t} send={send} target={battle?.tactics?.cells[target]} foe={battle?.tactics ? target : undefined} />
-        </details>
-      </div>
+    </div>
+  );
+}
+
+function CombatParty({ s, t }: { s: Adventure; t: Local }) {
+  const battle = s.delve!.encounter!;
+  return (
+    <div
+      className="sa-combat-party"
+      aria-label={t(['戦闘中の仲間', 'Combat party', 'せんとうちゅうの なかま'])}
+    >
+      <article>
+        <Portrait id={s.character.portrait} />
+        <span>
+          <strong>{s.character.name}</strong>
+          <small>
+            HP {s.hp}/{maxHp(s)}
+          </small>
+          <progress value={s.hp} max={maxHp(s)} aria-label={s.character.name + ' HP'} />
+        </span>
+      </article>
+      {(battle.allies ?? formParty(s)).map((ally) => {
+        const { resident } = s.friends[ally.id];
+        const name = t(resident.name);
+        return (
+          <article key={ally.id} data-down={ally.hp <= 0 || undefined}>
+            <ResidentPortrait role={resident.role} />
+            <span>
+              <strong>{name}</strong>
+              <small>
+                {ally.hp <= 0
+                  ? t(['戦闘不能', 'Knocked out', 'せんとうふのう'])
+                  : 'HP ' + ally.hp + '/' + ally.max}
+              </small>
+              <progress value={ally.hp} max={ally.max} aria-label={name + ' HP'} />
+            </span>
+          </article>
+        );
+      })}
     </div>
   );
 }

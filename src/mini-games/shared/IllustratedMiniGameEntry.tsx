@@ -11,7 +11,6 @@ const entries: Partial<Record<GameScreen, { art: MiniGameTitleArt; title: [strin
   [GameScreen.MINI_GAME_CHESS]: { art: 'chess', title: ['スクールチェス', 'School Chess', 'スクールチェス'] },
   [GameScreen.MINI_GAME_MAHJONG]: { art: 'mahjong', title: ['まなび麻雀', 'Learning Mahjong', 'まなびマージャン'] },
   [GameScreen.MINI_GAME_STONE_GLOW]: { art: 'stone-glow', title: ['石ころの煌めき', 'Stone Glow', 'いしころのきらめき'] },
-  [GameScreen.MINI_GAME_SCHOOL_TRPG]: { art: 'school-trpg', title: ['放課後スクールTRPG', 'After-school School TRPG', 'ほうかごスクールTRPG'] },
   [GameScreen.MINI_GAME_LEARNING_TCG]: { art: 'learning-tcg', title: ['学習ローグTCG', 'Learning Rogue TCG', 'がくしゅうローグTCG'] },
   [GameScreen.MINI_GAME_CRANE]: { art: 'crane', title: ['クレーンゲーム', 'Crane Game', 'クレーンゲーム'] },
 };

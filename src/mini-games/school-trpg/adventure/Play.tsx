@@ -49,6 +49,8 @@ import { ExpeditionBoard, JourneyCollection } from './JourneyPanel';
 import { LifePanel, PeoplePanel, TownOverview, WorldMap } from './Town';
 import { checkBonus, equipped, hoursUntilMeal, hungerPenalty, maxFocus, maxHp, scoreFor, xpGoal, type Adventure } from './state';
 import type { SaveResult } from './save';
+import ScreenDialog from './ScreenDialog';
+import PanelNavigation from './PanelNavigation';
 import { addressKey, dayAt, hourAt, townAt, weatherAt } from './world';
 import { art, DiceResult, Portrait, type Local, type Send } from './ui';
 
@@ -112,7 +114,7 @@ function CharacterStatus({ s, t, back }: { s: Adventure; t: Local; back: () => v
       </button>
       <div className="sa-hero-status">
         <Portrait id={s.character.portrait} />
-        <span>
+        <span title={s.character.name}>
           <strong>{s.character.name}</strong>
           <small>
             Lv. {s.level} · {t(CALLINGS[s.character.calling].name)}
@@ -158,144 +160,197 @@ function CharacterStatus({ s, t, back }: { s: Adventure; t: Local; back: () => v
   );
 }
 
+const GEAR_PANELS = {
+  equipment: ['装備', 'Equipment', 'そうび'],
+  growth: ['能力と成長', 'Growth', 'のうりょくと せいちょう'],
+  materials: ['素材と道具', 'Materials', 'そざいと どうぐ'],
+} satisfies Record<string, Text>;
+
 function GearPanel({ s, send, t }: { s: Adventure; send: Send; t: Local }) {
+  const [panel, setPanel] = useState<keyof typeof GEAR_PANELS>('equipment');
   const [filter, setFilter] = useState<'all' | 'weapon' | 'coat' | 'charm'>('all');
   const offhand = s.gear.find((gear) => gear.id === s.frontier.offhand);
   const canPair = !twoHanded(equipped(s, 'weapon')?.weapon);
   return (
-    <div className="sa-town-grid">
-      <div className="sa-stack">
-        <section className="sa-panel">
-          <h2>{t(['装備中', 'Equipped', 'そうびちゅう'])}</h2>
-          <dl className="sa-equipment">
-            {SLOT_IDS.map((slot) => {
-              const gear = equipped(s, slot);
-              return (
-                <div key={slot}>
-                  <dt>{t(SLOT_NAMES[slot])}</dt>
-                  <dd>{gear ? t(gearName(gear)) + ' +' + gear.power : '–'}</dd>
-                </div>
-              );
-            })}
-            <div>
-              <dt>{t(['逆手', 'Off hand', 'ぎゃくて'])}</dt>
-              <dd>{offhand ? t(gearName(offhand)) + ' +' + offhand.power : '–'}</dd>
-            </div>
-          </dl>
-        </section>
-        <section className="sa-panel">
-          <h2>{t(['能力と成長', 'Attributes and growth'])}</h2>
-          <div className="sa-section-row">
-            <b>
-              Lv. {s.level} · XP {s.xp}/{xpGoal(s.level)}
-            </b>
-            <span className="sa-gold">
-              {t(['成長ポイント', 'Growth points'])} {s.talent}
-            </span>
-          </div>
-          <div className="sa-action-list">
-            {STAT_IDS.map((stat) => (
-              <div key={stat} className="sa-section-row">
-                <div>
-                  <strong>
-                    {t(STATS[stat])} {scoreFor(s, stat)}
-                  </strong>
-                  <small className="sa-hint">
-                    {' '}
-                    · {t(['判定補正', 'Check bonus'])} {checkBonus(s, stat) >= 0 ? '+' : ''}
-                    {checkBonus(s, stat)}
-                  </small>
-                </div>
-                <button
-                  type="button"
-                  disabled={!s.talent || s.character.stats[stat] >= 12}
-                  onClick={() => send({ type: 'train', stat })}
-                  aria-label={t(['伸ばす', 'Train']) + ' · ' + t(STATS[stat])}
-                >
-                  <Plus size={16} />
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
-        <section className="sa-panel">
-          <h2>{t(['素材と道具', 'Supplies and materials'])}</h2>
-          <Supplies state={s} send={send} t={t} />
-          <div className="sa-goods-grid">
-            {GOOD_IDS.filter((id) => s.goods[id] > 0).map((id) => (
-              <span key={id}>
-                {t(GOODS[id].name)} <b>×{s.goods[id]}</b>
-              </span>
-            ))}
-          </div>
-        </section>
-      </div>
-      <section className="sa-panel">
-        <div className="sa-section-row">
-          <h2>
-            {t(['装備袋', 'Gear bag'])} <small>{s.gear.length}/120</small>
-          </h2>
-          <label className="sa-field">
-            <span>{t(['種類', 'Type'])}</span>
-            <select
-              value={filter}
-              onChange={(event) => setFilter(event.target.value as typeof filter)}
-            >
-              <option value="all">{t(['すべて', 'All gear'])}</option>
-              {SLOT_IDS.map((slot) => (
-                <option key={slot} value={slot}>
-                  {t(SLOT_NAMES[slot])}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <div className="sa-gear-list">
-          {s.gear
-            .filter((gear) => filter === 'all' || filter === gear.slot)
-            .map((gear) => {
-              const worn = s.equipment[gear.slot] === gear.id;
-              const loaned = Object.values(s.frontier.lent).includes(gear.id);
-              const paired = gear.id === s.frontier.offhand;
-              const masterwork = gear.masterwork && MASTERWORKS[gear.masterwork];
-              return (
-                <div className="sa-gear" key={gear.id} data-rarity={gear.rarity}>
-                  <div className="sa-gear-summary">
-                    {masterwork && <img src={art('expedition/' + masterwork.art)} alt="" loading="lazy" />}
-                    <span>
-                      <strong>{t(gearName(gear))} +{gear.power}</strong>
-                      <p>{t(gearType(gear))}{gear.affix && ' · ' + t(AFFIXES[gear.affix].hint)}</p>
-                      {masterwork && <small className="sa-gold">{t(masterwork.hint)}</small>}
-                    </span>
+    <div className="sa-workspace">
+      <PanelNavigation
+        labels={GEAR_PANELS}
+        current={panel}
+        select={setPanel}
+        t={t}
+        name={['持ち物の項目', 'Gear panels', 'もちものの こうもく']}
+      />
+      <div className="sa-workspace-body sa-stack" key={panel}>
+        {panel === 'equipment' && (
+          <section className="sa-panel">
+            <h2>{t(['装備中', 'Equipped', 'そうびちゅう'])}</h2>
+            <dl className="sa-equipment">
+              {SLOT_IDS.map((slot) => {
+                const gear = equipped(s, slot);
+                return (
+                  <div key={slot}>
+                    <dt>{t(SLOT_NAMES[slot])}</dt>
+                    <dd>{gear ? t(gearName(gear)) + ' +' + gear.power : '–'}</dd>
                   </div>
-                  {loaned ? <small>{t(['仲間が装備中', 'Loaned to a companion', 'なかまに かしだしちゅう'])}</small> : paired ? (
-                    <button type="button" onClick={() => send({ type: 'field', operation: { kind: 'offhand', id: null } })}>{t(['逆手から外す', 'Remove from off hand', 'ぎゃくてから はずす'])}</button>
-                  ) : worn ? (
-                    <small>{t(['装備中', 'Equipped'])}</small>
-                  ) : (
-                    <div className="sa-inline">
-                      <button type="button" onClick={() => send({ type: 'equip', id: gear.id })}>
-                        {t(['装備', 'Equip'])}
-                      </button>
-                      {gear.slot === 'weapon' && canPair && !twoHanded(gear.weapon) && <button type="button" onClick={() => send({ type: 'field', operation: { kind: 'offhand', id: gear.id } })}>
-                        {t(['逆手に持つ', 'Equip in off hand', 'ぎゃくてに もつ'])}
-                      </button>}
-                      <button type="button" onClick={() => send({ type: 'salvage', id: gear.id })}>
-                        {t(['分解', 'Salvage'])}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => send({ type: 'sell-gear', id: gear.id })}
-                      >
-                        {t(['売却', 'Sell'])} {gearValue(gear)} G
-                      </button>
-                    </div>
-                  )}
+                );
+              })}
+              <div>
+                <dt>{t(['逆手', 'Off hand', 'ぎゃくて'])}</dt>
+                <dd>{offhand ? t(gearName(offhand)) + ' +' + offhand.power : '–'}</dd>
+              </div>
+            </dl>
+          </section>
+        )}
+        {panel === 'growth' && (
+          <section className="sa-panel">
+            <h2>{t(['能力と成長', 'Attributes and growth'])}</h2>
+            <div className="sa-section-row">
+              <b>
+                Lv. {s.level} · XP {s.xp}/{xpGoal(s.level)}
+              </b>
+              <span className="sa-gold">
+                {t(['成長ポイント', 'Growth points'])} {s.talent}
+              </span>
+            </div>
+            <div className="sa-action-list">
+              {STAT_IDS.map((stat) => (
+                <div key={stat} className="sa-section-row">
+                  <div>
+                    <strong>
+                      {t(STATS[stat])} {scoreFor(s, stat)}
+                    </strong>
+                    <small className="sa-hint">
+                      {' '}
+                      · {t(['判定補正', 'Check bonus'])} {checkBonus(s, stat) >= 0 ? '+' : ''}
+                      {checkBonus(s, stat)}
+                    </small>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={!s.talent || s.character.stats[stat] >= 12}
+                    onClick={() => send({ type: 'train', stat })}
+                    aria-label={t(['伸ばす', 'Train']) + ' · ' + t(STATS[stat])}
+                  >
+                    <Plus size={16} />
+                  </button>
                 </div>
-              );
-            })}
-        </div>
-      </section>
+              ))}
+            </div>
+          </section>
+        )}
+        {panel === 'materials' && (
+          <section className="sa-panel">
+            <h2>{t(['素材と道具', 'Supplies and materials'])}</h2>
+            <Supplies state={s} send={send} t={t} />
+            <div className="sa-goods-grid">
+              {GOOD_IDS.filter((id) => s.goods[id] > 0).map((id) => (
+                <span key={id}>
+                  {t(GOODS[id].name)} <b>×{s.goods[id]}</b>
+                </span>
+              ))}
+            </div>
+          </section>
+        )}
+        {panel === 'equipment' && (
+          <section className="sa-panel">
+            <div className="sa-section-row">
+              <h2>
+                {t(['装備袋', 'Gear bag'])} <small>{s.gear.length}/120</small>
+              </h2>
+              <label className="sa-field">
+                <span>{t(['種類', 'Type'])}</span>
+                <select
+                  value={filter}
+                  onChange={(event) => setFilter(event.target.value as typeof filter)}
+                >
+                  <option value="all">{t(['すべて', 'All gear'])}</option>
+                  {SLOT_IDS.map((slot) => (
+                    <option key={slot} value={slot}>
+                      {t(SLOT_NAMES[slot])}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <div className="sa-gear-list">
+              {s.gear
+                .filter((gear) => filter === 'all' || filter === gear.slot)
+                .map((gear) => {
+                  const worn = s.equipment[gear.slot] === gear.id;
+                  const loaned = Object.values(s.frontier.lent).includes(gear.id);
+                  const paired = gear.id === s.frontier.offhand;
+                  const masterwork = gear.masterwork && MASTERWORKS[gear.masterwork];
+                  return (
+                    <div className="sa-gear" key={gear.id} data-rarity={gear.rarity}>
+                      <div className="sa-gear-summary">
+                        {masterwork && (
+                          <img src={art('expedition/' + masterwork.art)} alt="" loading="lazy" />
+                        )}
+                        <span>
+                          <strong>
+                            {t(gearName(gear))} +{gear.power}
+                          </strong>
+                          <p>
+                            {t(gearType(gear))}
+                            {gear.affix && ' · ' + t(AFFIXES[gear.affix].hint)}
+                          </p>
+                          {masterwork && <small className="sa-gold">{t(masterwork.hint)}</small>}
+                        </span>
+                      </div>
+                      {loaned ? (
+                        <small>
+                          {t(['仲間が装備中', 'Loaned to a companion', 'なかまに かしだしちゅう'])}
+                        </small>
+                      ) : paired ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            send({ type: 'field', operation: { kind: 'offhand', id: null } })
+                          }
+                        >
+                          {t(['逆手から外す', 'Remove from off hand', 'ぎゃくてから はずす'])}
+                        </button>
+                      ) : worn ? (
+                        <small>{t(['装備中', 'Equipped'])}</small>
+                      ) : (
+                        <div className="sa-inline">
+                          <button
+                            type="button"
+                            onClick={() => send({ type: 'equip', id: gear.id })}
+                          >
+                            {t(['装備', 'Equip'])}
+                          </button>
+                          {gear.slot === 'weapon' && canPair && !twoHanded(gear.weapon) && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                send({ type: 'field', operation: { kind: 'offhand', id: gear.id } })
+                              }
+                            >
+                              {t(['逆手に持つ', 'Equip in off hand', 'ぎゃくてに もつ'])}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => send({ type: 'salvage', id: gear.id })}
+                          >
+                            {t(['分解', 'Salvage'])}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => send({ type: 'sell-gear', id: gear.id })}
+                          >
+                            {t(['売却', 'Sell'])} {gearValue(gear)} G
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+          </section>
+        )}
+      </div>
     </div>
   );
 }
@@ -561,6 +616,7 @@ export default function AdventurePlay(props: PlayProps) {
   const [fieldView, setFieldView] = useState<FieldView>('sites');
   const [declare, setDeclare] = useState(false);
   const [lesson, setLesson] = useState(false);
+  const [logOpen, setLogOpen] = useState(false);
   const fallen = s.fallenAt !== null;
   const delving = !!s.delve;
   const bgm = lesson ? 'math' : s.delve?.encounter ? 'battle' : delving ? 'dungeon_library' : 'map';
@@ -598,7 +654,12 @@ export default function AdventurePlay(props: PlayProps) {
           })}
         </nav>
       )}
-      <div className="sa-main" ref={main}>
+      <div
+        className="sa-main"
+        ref={main}
+        data-delve={(delving && !lesson && !fallen) || undefined}
+        data-town-view={(!delving && !lesson && !fallen) || undefined}
+      >
         {!fallen && !lesson && !delving && <FieldStatus s={s} t={t} />}
         {saveResult !== 'saved' && (
           <div className="sa-save-error" role="alert">
@@ -610,7 +671,9 @@ export default function AdventurePlay(props: PlayProps) {
             )}
           </div>
         )}
-        {fallen ? <FallenJournal s={s} t={t} back={back} /> : lesson ? (
+        {fallen ? (
+          <FallenJournal s={s} t={t} back={back} />
+        ) : lesson ? (
           <section className="sa-panel sa-lesson">
             <button type="button" onClick={() => setLesson(false)}>
               <ArrowLeft size={16} />
@@ -634,7 +697,13 @@ export default function AdventurePlay(props: PlayProps) {
             </div>
           </section>
         ) : delving ? (
-          <DelveView state={s} t={t} send={send} declare={openDeclaration} modalOpen={declare} />
+          <DelveView
+            state={s}
+            t={t}
+            send={send}
+            declare={openDeclaration}
+            modalOpen={declare || logOpen}
+          />
         ) : tab === 'town' ? (
           <TownOverview
             state={s}
@@ -654,27 +723,76 @@ export default function AdventurePlay(props: PlayProps) {
         ) : tab === 'gear' ? (
           <GearPanel s={s} t={t} send={send} />
         ) : (
-          <div className="sa-stack">
-            <nav className="sa-journal-tabs sa-journal-tabs-main" aria-label={t(['旅の記録の種類', 'Journey views', 'たびの きろくの しゅるい'])}>
+          <div className="sa-workspace sa-journal-workspace">
+            <nav
+              className="sa-journal-tabs sa-journal-tabs-main"
+              aria-label={t(['旅の記録の種類', 'Journey views', 'たびの きろくの しゅるい'])}
+            >
               {(Object.keys(JOURNAL_VIEWS) as JournalView[]).map((view) => (
-                <button key={view} type="button" aria-pressed={journalView === view} onClick={() => setJournalView(view)}>{t(JOURNAL_VIEWS[view])}</button>
+                <button
+                  key={view}
+                  type="button"
+                  aria-pressed={journalView === view}
+                  onClick={() => setJournalView(view)}
+                >
+                  {t(JOURNAL_VIEWS[view])}
+                </button>
               ))}
             </nav>
-            {journalView === 'routes' ? <ExpeditionBoard s={s} t={t} send={send} showMap={showMap} showLife={() => setTab('life')} /> :
-              journalView === 'collection' ? <JourneyCollection s={s} t={t} send={send} /> :
-              journalView === 'survey' ? <FieldNotes s={s} t={t} send={send} /> :
-              journalView === 'frontier' ? <FrontierPanel s={s} t={t} send={send} view={fieldView} changeView={setFieldView} /> :
-              <TravelJournal s={s} t={t} send={send} />}
+            <div className="sa-workspace-body" key={journalView}>
+              {journalView === 'routes' ? (
+                <ExpeditionBoard
+                  s={s}
+                  t={t}
+                  send={send}
+                  showMap={showMap}
+                  showLife={() => setTab('life')}
+                />
+              ) : journalView === 'collection' ? (
+                <JourneyCollection s={s} t={t} send={send} />
+              ) : journalView === 'survey' ? (
+                <FieldNotes s={s} t={t} send={send} />
+              ) : journalView === 'frontier' ? (
+                <FrontierPanel s={s} t={t} send={send} view={fieldView} changeView={setFieldView} />
+              ) : (
+                <TravelJournal s={s} t={t} send={send} />
+              )}
+            </div>
           </div>
         )}
       </div>
       {!fallen && !lesson && latest && (
-        <footer className="sa-feed" role="status">
-          <p>{t(latest.text)}</p>
+        <footer className="sa-feed">
+          <p role="status">{t(latest.text)}</p>
           {recentCheck && <DiceResult check={recentCheck} t={t} />}
+          <button
+            type="button"
+            onClick={() => setLogOpen(true)}
+            aria-label={t(['行動ログ', 'Adventure log', 'こうどう ログ'])}
+          >
+            <BookOpen size={16} />
+          </button>
         </footer>
       )}
-      {!fallen && declare && <Declaration s={s} t={t} send={send} close={() => setDeclare(false)} />}
+      {logOpen && (
+        <ScreenDialog
+          title={t(['行動ログ', 'Adventure log', 'こうどう ログ'])}
+          t={t}
+          close={() => setLogOpen(false)}
+        >
+          <ol className="sa-event-list">
+            {s.journal.map((entry, index) => (
+              <li key={index} data-tone={entry.tone}>
+                <p>{t(entry.text)}</p>
+                {entry.check && <DiceResult check={entry.check} t={t} />}
+              </li>
+            ))}
+          </ol>
+        </ScreenDialog>
+      )}
+      {!fallen && declare && (
+        <Declaration s={s} t={t} send={send} close={() => setDeclare(false)} />
+      )}
     </>
   );
 }
