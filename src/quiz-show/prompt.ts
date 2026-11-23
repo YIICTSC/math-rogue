@@ -1,6 +1,6 @@
 import type { ShowView } from './types';
 /** Keep rule/category instructions in settings; preserve the question's meaning. */
-export function onAirPrompt(round: NonNullable<ShowView['round']>): string {
+export function onAirPrompt(round: Pick<NonNullable<ShowView['round']>, 'mode' | 'prompt'>): string {
   if (!['CONSENSUS', 'MAJORITY', 'WOLF'].includes(round.mode)) return round.prompt;
   const prompt = round.prompt;
   const example = /^(.+)：代表を一つだけ(?:書こう|言う)。$/.exec(prompt);

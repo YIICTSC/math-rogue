@@ -67,9 +67,10 @@ export function hostConnection(w: ShowWorld, connected: boolean, now = Date.now(
   if (!connected && w.phase === 'open' && w.round && !w.round.paused) { w.round.remaining = Math.max(0, w.round.deadline - now); w.round.paused = true; }
   w.revision++;
 }
-function shuffle<T>(values: T[]) {
+export function shuffle<T>(values: readonly T[]) {
   const result = [...values];
-  for (let i = result.length - 1; i > 0; i--) { const j = crypto.getRandomValues(new Uint32Array(1))[0] % (i + 1); [result[i], result[j]] = [result[j], result[i]]; }
+  const random = crypto.getRandomValues(new Uint32Array(result.length));
+  for (let i = result.length - 1; i > 0; i--) { const j = random[i] % (i + 1); [result[i], result[j]] = [result[j], result[i]]; }
   return result;
 }
 function prepare(w: ShowWorld) {

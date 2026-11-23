@@ -1,5 +1,8 @@
 import type { LanguageMode } from '../types';
-import type { PartyCategory, ShowMode, ShowQuestion } from './types';
+import { PARTY_CATEGORIES, supportsLearningUnits, type PartyCategory, type ShowMode, type ShowQuestion, type ShowWorld } from './types';
+import { generatedQuestions, VARIETY_LEVELS } from './catalogue/questions';
+import { shuffle } from './engine';
+import { onAirPrompt } from './prompt';
 import prompts from './partyPrompts.json';
 import variety from './varietyPrompts.json';
 import reviewed from './reviewedPrompts.json';
@@ -71,8 +74,7 @@ function question(mode:ShowMode,language:LanguageMode,q:PartyPrompt,id:string):S
  const locale=language==='ENGLISH'?1:language==='HIRAGANA'?2:0;
  return {id,prompt:q.prompt[locale],answer:q.answer[locale],aliases:[...new Set([...q.aliases,...q.answer.filter(Boolean),q.answer[1].replace(/^(?:a|an) /,'')])].filter(Boolean),options:q.options[locale]||[],format:mode==='DRAW'?'FLIP':'TEXT',seconds:mode==='DRAW'||mode==='VOTE'?90:mode==='BUZZER'?25:mode==='NEAREST'?60:40,points:100,party:true,difficulty:q.difficulty as ShowQuestion['difficulty'],category:q.category as ShowQuestion['category']||classify(q.prompt[0]),opinion:['CONSENSUS','MAJORITY','WOLF','VOTE','NEAREST'].includes(mode)};
 }
-/** Category and difficulty filtering is authoritative, shared by host and server. */
-export function varietyQuestions(mode:ShowMode,language:LanguageMode):ShowQuestion[]{
+function authoredQuestions(mode:ShowMode,language:LanguageMode):ShowQuestion[]{
  const original = banks[mode].flatMap((q,i)=>i<starterLimits[mode]&&!retiredStarter[mode]?.includes(i)
   ? [question(mode,language,q,`starter-${mode}-${i}`)] : []);
  const retired = knowledgeModes.has(mode)?retiredKnowledge:retiredVariety[mode];
@@ -85,13 +87,65 @@ export function varietyQuestions(mode:ShowMode,language:LanguageMode):ShowQuesti
   ...extra.map((q,i)=>question(mode,language,q,`expanded-${mode}-${i}`))];
 }
 
-/** Give new rooms one prompt per category and level while keeping the catalogue IDs. */
+const locales = ['JAPANESE', 'ENGLISH', 'HIRAGANA'] as const;
+const catalogues = new Map<ShowMode, ShowQuestion[][]>();
+export const MIN_VARIETY_PER_LEVEL = 30;
+export const MAX_VARIETY_PACK = 240;
+export type VarietySelection = Pick<ShowWorld['plan'], 'partyCategory' | 'partyLevel' | 'order'>;
+
+const textKey = (value: string) => value.normalize('NFKC').toLowerCase().replace(/[\p{P}\p{Z}\s]/gu, '');
+const promptKey = (mode: ShowMode, q: ShowQuestion) =>
+ textKey(mode === 'DRAW' ? q.answer : onAirPrompt({mode, prompt:q.prompt}));
+
+/** Keep the same catalogue IDs and selection in all three languages. */
+export function varietyQuestions(mode: ShowMode, language: LanguageMode): ShowQuestion[] {
+ let banks = catalogues.get(mode);
+ if (!banks) {
+  banks = locales.map(locale => authoredQuestions(mode, locale));
+  const authoredKeys = banks.map(bank => new Set(bank.map(q => promptKey(mode, q))));
+  const authoredAnswers = banks.map(bank => new Set(bank.filter(q => !q.opinion).map(q => textKey(q.answer))));
+  for (const category of PARTY_CATEGORIES) {
+   if (category === 'ALL') continue;
+   for (const level of VARIETY_LEVELS) {
+    const variants = locales.map(locale => generatedQuestions(mode, locale, category, level));
+    const existing = banks[0].filter(q => q.category === category && q.difficulty === level).length;
+    let added = 0;
+    for (const [i] of variants[0].entries()) {
+     if (existing + added >= MIN_VARIETY_PER_LEVEL) break;
+     const rows = variants.map(list => list[i]);
+     const keys = rows.map(q => promptKey(mode, q));
+     if (keys.some((key, locale) => authoredKeys[locale].has(key))) continue;
+     if (supportsLearningUnits(mode) && level === 'EASY' && rows.some((q, locale) => authoredAnswers[locale].has(textKey(q.answer)))) continue;
+     for (const [locale, q] of rows.entries()) {
+      authoredKeys[locale].add(keys[locale]);
+      banks[locale].push(q);
+     }
+     added++;
+    }
+   }
+  }
+  catalogues.set(mode, banks);
+ }
+ return banks[language === 'ENGLISH' ? 1 : language === 'HIRAGANA' ? 2 : 0].slice();
+}
+
+export function varietyPack(catalogue: ShowQuestion[], selection: VarietySelection): ShowQuestion[] {
+ const {partyCategory = 'ALL', partyLevel = 'ALL', order} = selection;
+ const eligible = catalogue.filter(q => (partyCategory === 'ALL' || partyCategory === q.category) &&
+  (partyLevel === 'ALL' || partyLevel === q.difficulty));
+ if (eligible.length <= MAX_VARIETY_PACK) return eligible;
+ return (order === 'RANDOM' ? shuffle(eligible) : eligible).slice(0, MAX_VARIETY_PACK);
+}
+
+/** A fresh room starts with one random prompt from each category and level. */
 export function starterQuestions(mode: ShowMode, language: LanguageMode): ShowQuestion[] {
- const bank=varietyQuestions(mode,language);
- const preferred=[...bank.filter(q=>q.id.startsWith('expanded-')),...bank];
- return (['EASY','NORMAL','HARD'] as const).flatMap(level=>
-  Object.keys(CATEGORY_COPY).flatMap(category=>{
-   const q=preferred.find(entry=>entry.category===category&&entry.difficulty===level);
-   return q?[q]:[];
-  }));
+ const choices = new Map<string, ShowQuestion>();
+ for (const q of shuffle(varietyQuestions(mode, language))) {
+  const key = `${q.category}:${q.difficulty}`;
+  if (!choices.has(key)) choices.set(key, q);
+ }
+ return VARIETY_LEVELS.flatMap(level => PARTY_CATEGORIES.flatMap(category => {
+  const q = choices.get(`${category}:${level}`);
+  return q ? [q] : [];
+ }));
 }

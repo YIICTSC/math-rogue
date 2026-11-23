@@ -7,8 +7,7 @@ import { supportsLearningUnits, MODES, type ShowAction, type ShowError, type Sho
 import { copy, ERRORS, MODE_COPY } from './copy';
 import { addressText, clearQuizLocation, invitationFromLocation, markHost, parseAddress, type RoomAddress } from './invite';
 import { QuizShowRoom, quizShowServerUrl, savedHost } from './room';
-import { starterQuestions, varietyQuestions, CATEGORY_COPY } from './questions';
-import type {PartyCategory} from './types';
+import { starterQuestions, varietyQuestions, varietyPack, CATEGORY_COPY, type VarietySelection } from './questions';
 import InvitePanel from './InvitePanel';
 import HostDesk from './HostDesk';
 import { MajorityAnswer, AnswerGrid, AnswerInput, Leaderboard, QuestionStage } from './Stage';
@@ -34,9 +33,17 @@ export default function QuizShow({ languageMode = 'JAPANESE', onBack, direct = f
   const [name, setName] = useState(''), [code, setCode] = useState(initial ? addressText(initial.address) : ''), [mode, setMode] = useState<ShowMode>('STANDARD'), [title, setTitle] = useState(t('みんなでクイズ', 'Everyone’s Quiz', 'みんなでクイズ')), [transport, setTransport] = useState<RoomAddress['transport']>('host');
   const [rules, setRules] = useState(false), [editor, setEditor] = useState(false), [lesson, setLesson] = useState(false), [lessonBusy, setLessonBusy] = useState(false), [lessonError, setLessonError] = useState(''), [lessonCount, setLessonCount] = useState(12), [inviteOpen, setInviteOpen] = useState(false), [, setInkVersion] = useState(0), [sound, setSound] = useState(true);
   const room = useRef<QuizShowRoom | null>(null), restore = useRef(savedHost()).current, session = useRef(0);
+  const varietyDraft = useRef<{ mode: ShowMode; selection: VarietySelection } | null>(null);
   const quizAudio = useQuizAudio(view, sound);
   const [modesOpen, setModesOpen] = useState(false), [resultTab, setResultTab] = useState('answers');
   useEffect(() => setResultTab(view?.phase==='finished'?'ranking':'answers'), [view?.phase]);
+  useEffect(() => {
+    const draft = varietyDraft.current, plan = view?.plan;
+    if (!draft || !plan || draft.mode !== view?.mode) return;
+    const target = draft.selection;
+    if (target.partyCategory === (plan.partyCategory || 'ALL') && target.partyLevel === (plan.partyLevel || 'ALL') &&
+      target.order === plan.order) varietyDraft.current = null;
+  }, [view?.mode, view?.plan]);
   const seenScreens = useRef(0);
   useEffect(() => { const count=view?.audienceScreens||0; if(view?.role==='host'&&count>seenScreens.current)setSound(false); seenScreens.current=count; },[view?.role,view?.audienceScreens]);
   const [screenOverview, setScreenOverview] = useState<boolean | null>(null);
@@ -63,6 +70,7 @@ export default function QuizShow({ languageMode = 'JAPANESE', onBack, direct = f
   useEffect(() => () => { session.current++; room.current?.close(); }, []);
   function makeRoom() {
     room.current?.close();
+    varietyDraft.current = null;
     const current = ++session.current;
     const next = new QuizShowRoom(v => { if (current === session.current) setView(v); }, e => { if (current === session.current) setError(e); }, s => { if (current === session.current) setState(s); }, () => { if (current === session.current) setInkVersion(v => v + 1); });
     room.current = next; return { next, current };
@@ -104,10 +112,20 @@ export default function QuizShow({ languageMode = 'JAPANESE', onBack, direct = f
       if (!room.current.send({ type: 'bank', questions, source })) throw new Error(); setLesson(false); setEditor(false);
     } catch { setLessonError(t('問題を用意できませんでした。別の単元か少ない問題数を選んでください。', 'Could not prepare the pack. Try another unit or fewer questions.', 'もんだいをよういできません。べつのたんげんをえらんでね。')); } finally { setLessonBusy(false); }
   }
-  function useVariety(category:PartyCategory=view?.plan.partyCategory||'ALL') {
-    if(!view)return;
-    send({type:'bank',questions:varietyQuestions(view.mode,language),source:t('バラエティ','Variety','バラエティ')+' · '+t(...CATEGORY_COPY[category])});
-    send({type:'plan',partyCategory:category});
+  function useVariety(patch: Partial<VarietySelection> = {}, selectedMode?: ShowMode) {
+    if (!view) return;
+    const mode = selectedMode ?? varietyDraft.current?.mode ?? view.mode;
+    const base = varietyDraft.current?.selection ?? view.plan;
+    const selection: VarietySelection = {
+      partyCategory: patch.partyCategory ?? base.partyCategory ?? 'ALL',
+      partyLevel: patch.partyLevel ?? base.partyLevel ?? 'ALL',
+      order: patch.order ?? base.order,
+    };
+    varietyDraft.current = { mode, selection };
+    const category = selection.partyCategory || 'ALL';
+    const questions = varietyPack(varietyQuestions(mode, language), selection);
+    send({ type:'bank', questions, source:t('バラエティ','Variety','バラエティ')+' · '+t(...CATEGORY_COPY[category]) });
+    send({ type:'plan', ...selection });
   }
   const errorText = error ? t(...(ERRORS[error] || ERRORS.NETWORK)) : '';
   function enableSound() { if (!quizAudio.ready) { quizAudio.unlock(); return; } setSound(v => !v); }
