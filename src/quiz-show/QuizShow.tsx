@@ -67,6 +67,17 @@ export default function QuizShow({ languageMode = 'JAPANESE', onBack, direct = f
     return () => cancelAnimationFrame(frame);
   }, []);
   const active = state === 'connected' && !busy;
+  const refreshedCatalogue = useRef(0);
+  useEffect(() => {
+    if (!active || !view || view.role !== 'host' || view.phase !== 'lobby' ||
+        refreshedCatalogue.current === session.current) return;
+    const bank = view.host?.bank;
+    if (!bank?.some(q => q.id.startsWith('catalogue-')) || !bank.every(q => q.party)) return;
+    const questions = varietyPack(varietyQuestions(view.mode, language), view.plan);
+    if (room.current?.send({ type: 'bank', questions, source: view.questionSource })) {
+      refreshedCatalogue.current = session.current;
+    }
+  }, [active, language, view]);
   useEffect(() => () => { session.current++; room.current?.close(); }, []);
   function makeRoom() {
     room.current?.close();

@@ -1,6 +1,6 @@
 import type { LanguageMode } from '../types';
 import { PARTY_CATEGORIES, supportsLearningUnits, type PartyCategory, type ShowMode, type ShowQuestion, type ShowWorld } from './types';
-import { generatedQuestions, VARIETY_LEVELS } from './catalogue/questions';
+import { themedQuestions, topicKey, VARIETY_LEVELS } from './catalogue/partyTopics';
 import { shuffle } from './engine';
 import { onAirPrompt } from './prompt';
 import prompts from './partyPrompts.json';
@@ -93,34 +93,56 @@ export const MIN_VARIETY_PER_LEVEL = 30;
 export const MAX_VARIETY_PACK = 240;
 export type VarietySelection = Pick<ShowWorld['plan'], 'partyCategory' | 'partyLevel' | 'order'>;
 
-const textKey = (value: string) => value.normalize('NFKC').toLowerCase().replace(/[\p{P}\p{Z}\s]/gu, '');
 const promptKey = (mode: ShowMode, q: ShowQuestion) =>
- textKey(mode === 'DRAW' ? q.answer : onAirPrompt({mode, prompt:q.prompt}));
+ topicKey(mode === 'DRAW' ? q.answer : onAirPrompt({mode, prompt:q.prompt}));
+
+const partyModes = ['CONSENSUS', 'MAJORITY', 'VOTE', 'WOLF'] as const;
 
 /** Keep the same catalogue IDs and selection in all three languages. */
 export function varietyQuestions(mode: ShowMode, language: LanguageMode): ShowQuestion[] {
  let banks = catalogues.get(mode);
  if (!banks) {
-  banks = locales.map(locale => authoredQuestions(mode, locale));
-  const authoredKeys = banks.map(bank => new Set(bank.map(q => promptKey(mode, q))));
-  const authoredAnswers = banks.map(bank => new Set(bank.filter(q => !q.opinion).map(q => textKey(q.answer))));
+  banks = locales.map(() => []);
+  const own = locales.map(locale => authoredQuestions(mode, locale));
+  const sharedModes = partyModes.includes(mode as typeof partyModes[number]) ? partyModes.filter(m => m !== mode) : [];
+  const shared = locales.map(locale => sharedModes.flatMap(m => authoredQuestions(m, locale)));
+  const visibleKeys = locales.map(() => new Set<string>());
+  const menuTopics = new Set<string>();
   for (const category of PARTY_CATEGORIES) {
    if (category === 'ALL') continue;
-   for (const level of VARIETY_LEVELS) {
-    const variants = locales.map(locale => generatedQuestions(mode, locale, category, level));
-    const existing = banks[0].filter(q => q.category === category && q.difficulty === level).length;
-    let added = 0;
-    for (const [i] of variants[0].entries()) {
-     if (existing + added >= MIN_VARIETY_PER_LEVEL) break;
-     const rows = variants.map(list => list[i]);
-     const keys = rows.map(q => promptKey(mode, q));
-     if (keys.some((key, locale) => authoredKeys[locale].has(key))) continue;
-     if (supportsLearningUnits(mode) && level === 'EASY' && rows.some((q, locale) => authoredAnswers[locale].has(textKey(q.answer)))) continue;
-     for (const [locale, q] of rows.entries()) {
-      authoredKeys[locale].add(keys[locale]);
-      banks[locale].push(q);
-     }
-     added++;
+   const counts = { EASY: 0, NORMAL: 0, HARD: 0 };
+   const add = (rows: ShowQuestion[], theme: string) => {
+    const keys = rows.map(q => promptKey(mode, q));
+    if (menuTopics.has(theme) || keys.some((key, locale) => visibleKeys[locale].has(key))) return;
+    const least = VARIETY_LEVELS.reduce((a, b) => counts[a] <= counts[b] ? a : b);
+    const preferred = rows[0].difficulty;
+    const level = preferred && counts[preferred] < MIN_VARIETY_PER_LEVEL ? preferred : least;
+    if (counts[level] >= MIN_VARIETY_PER_LEVEL) return;
+    counts[level]++;
+    menuTopics.add(theme);
+    for (const [locale, q] of rows.entries()) {
+     visibleKeys[locale].add(keys[locale]);
+     banks![locale].push({ ...q, difficulty: level, seconds: mode === 'VOTE' ? 90 : q.seconds });
+    }
+   };
+   const addAuthored = (source: ShowQuestion[][]) => {
+    for (const [i, q] of source[0].entries()) {
+     if (q.category !== category) continue;
+     const theme = q.answer && !/^\d/u.test(q.answer) ? topicKey(q.answer) : promptKey(mode, q);
+     add(source.map(items => items[i]), theme);
+    }
+   };
+   const candidates = locales.map(locale => themedQuestions(mode, locale, category));
+   if (!sharedModes.length) addAuthored(own);
+   for (const [i, entry] of candidates[0].entries()) {
+    if (sharedModes.length && entry.question.id.startsWith('party-estimate-')) continue;
+    add(candidates.map(items => items[i].question), entry.theme);
+   }
+   if (sharedModes.length) {
+    addAuthored(own);
+    addAuthored(shared);
+    for (const [i, entry] of candidates[0].entries()) {
+     if (entry.question.id.startsWith('party-estimate-')) add(candidates.map(items => items[i].question), entry.theme);
     }
    }
   }

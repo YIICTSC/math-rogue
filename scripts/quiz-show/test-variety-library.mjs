@@ -1,13 +1,11 @@
 import assert from 'node:assert/strict';
 import {build} from 'esbuild';
-const result=await build({stdin:{contents:"export * from './src/quiz-show/engine';export * from './src/quiz-show/questions';export * from './src/quiz-show/types';export * from './src/quiz-show/authority';export * from './src/quiz-show/prompt';",resolveDir:process.cwd()},bundle:true,format:'esm',platform:'node',write:false});
+const result=await build({stdin:{contents:"export * from './src/quiz-show/engine';export * from './src/quiz-show/questions';export * from './src/quiz-show/types';export * from './src/quiz-show/authority';export * from './src/quiz-show/prompt';export {themedQuestions} from './src/quiz-show/catalogue/partyTopics';",resolveDir:process.cwd()},bundle:true,format:'esm',platform:'node',write:false});
 const E=await import('data:text/javascript;base64,'+Buffer.from(result.outputFiles[0].text).toString('base64'));
 const H={id:'host',role:'host'},S={id:'screen',role:'screen'},P=id=>({id,role:'player'});
 const cmd=(w,a,actor=H,now=1000)=>assert.equal(E.act(w,actor,a,now),null,JSON.stringify(a));
 const patchWorld=E.createShow();cmd(patchWorld,{type:'plan',partyCategory:'ANIMALS'});cmd(patchWorld,{type:'plan',partyFormat:'CHOICE'});cmd(patchWorld,{type:'plan',limit:2});assert.equal(patchWorld.plan.partyCategory,'ANIMALS');assert.equal(patchWorld.plan.partyFormat,'CHOICE');assert.equal(patchWorld.plan.limit,2);
 let total=0;
-const originalFormats = new Set(['STANDARD','CONSENSUS','MAJORITY','NEAREST','DRAW','VOTE','WOLF']);
-const questionsByLanguage = new Map();
 const allowedStarterLimit={STANDARD:12,BUZZER:12,SURVIVAL:12,TEAMS:12,CONSENSUS:20,WOLF:0,VOTE:0,MAJORITY:0,DRAW:20,NEAREST:20};
 for(const language of ['JAPANESE','ENGLISH','HIRAGANA'])for(const mode of E.MODES){
  const bank=E.varietyQuestions(mode,language);
@@ -18,19 +16,17 @@ for(const language of ['JAPANESE','ENGLISH','HIRAGANA'])for(const mode of E.MODE
  assert(largestQuestions.slice(0,E.MAX_VARIETY_PACK).reduce((a,b)=>a+b,1024)<256000,'Largest possible pack must fit the existing transport');
  const onAir=bank.map(q=>(mode==='DRAW'?q.answer:E.onAirPrompt({mode,prompt:q.prompt})).normalize('NFKC').toLowerCase().replace(/\s|[？?。]/g,''));
  assert.equal(new Set(onAir).size,bank.length,'Repeated on-air question or drawing subject '+mode+'/'+language);
- if (originalFormats.has(mode)) {
-  if (!questionsByLanguage.has(language)) questionsByLanguage.set(language, new Map());
-  const seen = questionsByLanguage.get(language);
-  for (const [i, q] of bank.entries()) {
-   const added = q.id.startsWith('expanded-') || q.id.startsWith('catalogue-');
-   if (added || seen.get(onAir[i])) assert(!seen.has(onAir[i]), 'New question overlaps another format: '+q.id+'/'+language);
-   seen.set(onAir[i], added);
-  }
+ if (language === 'JAPANESE') {
+  const selectedIds = new Set(bank.map(q => q.id));
+  assert(!bank.some(q => q.id.startsWith('catalogue-')), 'Retired angle-based prompts must stay out of the bank');
+  const topics = E.PARTY_CATEGORIES.slice(1).flatMap(category => E.themedQuestions(mode, language, category))
+   .filter(({question}) => selectedIds.has(question.id)).map(({theme}) => theme);
+  assert.equal(new Set(topics).size, topics.length, 'A specific topic can only appear once across the three levels in '+mode);
  }
  for(const q of bank){
   const index=Number(q.id.split('-').at(-1));
-  if(q.id.startsWith('starter-'))assert(index<allowedStarterLimit[mode],'Retired template in '+mode);
-  if(['CONSENSUS','WOLF','VOTE'].includes(mode)&&q.id.startsWith('variety-'))assert(index>=64,'Misrouted preference survey in '+mode);
+  if(q.id.startsWith('starter-'))assert(index<allowedStarterLimit[q.id.split('-')[1]],'Retired template in '+mode);
+  if(['CONSENSUS','WOLF','VOTE'].includes(mode)&&q.id.startsWith('variety-'+mode+'-'))assert(index>=64,'Misrouted preference survey in '+mode);
  }
  for(const q of bank){if(!['DRAW','NEAREST'].includes(mode)){assert.equal(q.options.length,4);assert.equal(new Set(q.options).size,4);if(!q.opinion)assert(q.options.includes(q.answer));}}
  if(language==='JAPANESE')total+=bank.length;

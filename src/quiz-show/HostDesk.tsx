@@ -12,7 +12,7 @@ export default function HostDesk({ view: v, language, connected, send, onEdit, o
   const categoryCounts=useMemo(()=>Object.fromEntries(PARTY_CATEGORIES.map(c=>[c,catalog.filter(q=>
     (c==='ALL'||q.category===c)&&(!v.plan.partyLevel||v.plan.partyLevel==='ALL'||q.difficulty===v.plan.partyLevel)).length])),[catalog,v.plan.partyLevel]);
   const catalogIds = useMemo(() => new Set(catalog.map(q => q.id)), [catalog]);
-  const builtIn = !!v.host?.bank.length && v.host.bank.every(q => q.party && catalogIds.has(q.id));
+  const builtIn = !!v.host?.bank.length && v.host.bank.every(q => q.party && (catalogIds.has(q.id) || q.id.startsWith('catalogue-')));
   const t = copy(language), r = v.round, between = ['lobby', 'ready', 'scoreboard', 'finished'].includes(v.phase), reveal = ['closed', 'reveal'].includes(v.phase);
   const action = (type: 'start' | 'open' | 'close' | 'score' | 'next' | 'voting' | 'revealAll' | 'revealAnswer' | 'autoJudge' | 'pause' | 'extraTime' | 'publish' | 'autoPause') => send({ type, roundId: r?.id });
   const pending = r && ['STANDARD', 'BUZZER', 'SURVIVAL', 'TEAMS'].includes(r.mode) ? r.tiles.filter(a => a.submitted && a.correct === undefined).length : 0;
