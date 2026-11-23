@@ -6,11 +6,22 @@ const H={id:'host',role:'host'},S={id:'screen',role:'screen'},P=id=>({id,role:'p
 const cmd=(w,a,actor=H,now=1000)=>assert.equal(E.act(w,actor,a,now),null,JSON.stringify(a));
 const patchWorld=E.createShow();cmd(patchWorld,{type:'plan',partyCategory:'ANIMALS'});cmd(patchWorld,{type:'plan',partyFormat:'CHOICE'});cmd(patchWorld,{type:'plan',limit:2});assert.equal(patchWorld.plan.partyCategory,'ANIMALS');assert.equal(patchWorld.plan.partyFormat,'CHOICE');assert.equal(patchWorld.plan.limit,2);
 let total=0;
+const originalFormats = new Set(['STANDARD','CONSENSUS','MAJORITY','NEAREST','DRAW','VOTE','WOLF']);
+const questionsByLanguage = new Map();
 const allowedStarterLimit={STANDARD:12,BUZZER:12,SURVIVAL:12,TEAMS:12,CONSENSUS:20,WOLF:0,VOTE:0,MAJORITY:0,DRAW:20,NEAREST:20};
 for(const language of ['JAPANESE','ENGLISH','HIRAGANA'])for(const mode of E.MODES){
  const bank=E.varietyQuestions(mode,language);assert(E.validBankForMode(mode,bank),mode+language);assert(bank.length>60);assert.equal(new Set(bank.map(q=>q.id)).size,bank.length);assert(bank.length<=E.MAX_SHOW_QUESTIONS);
  const onAir=bank.map(q=>(mode==='DRAW'?q.answer:E.onAirPrompt({mode,prompt:q.prompt})).normalize('NFKC').toLowerCase().replace(/\s|[？?。]/g,''));
  assert.equal(new Set(onAir).size,bank.length,'Repeated on-air question or drawing subject '+mode+'/'+language);
+ if (originalFormats.has(mode)) {
+  if (!questionsByLanguage.has(language)) questionsByLanguage.set(language, new Map());
+  const seen = questionsByLanguage.get(language);
+  for (const [i, q] of bank.entries()) {
+   const added = q.id.startsWith('expanded-');
+   if (added || seen.get(onAir[i])) assert(!seen.has(onAir[i]), 'New question overlaps another format: '+q.id+'/'+language);
+   seen.set(onAir[i], added);
+  }
+ }
  for(const q of bank){
   const index=Number(q.id.split('-').at(-1));
   if(q.id.startsWith('starter-'))assert(index<allowedStarterLimit[mode],'Retired template in '+mode);
@@ -19,13 +30,18 @@ for(const language of ['JAPANESE','ENGLISH','HIRAGANA'])for(const mode of E.MODE
  for(const q of bank){if(!['DRAW','NEAREST'].includes(mode)){assert.equal(q.options.length,4);assert.equal(new Set(q.options).size,4);if(!q.opinion)assert(q.options.includes(q.answer));}}
  if(language==='JAPANESE')total+=bank.length;
  for(const category of E.PARTY_CATEGORIES)for(const level of ['ALL','EASY','NORMAL','HARD']){
+  const matching = bank.filter(q => E.matchesPartyPlan(q, { partyCategory:category, partyLevel:level }));
+  if (category!=='ALL' && level!=='ALL') {
+   const before = matching.filter(q => !q.id.startsWith('expanded-')).length;
+   assert(matching.length >= Math.max(before, 2) + 2, 'Sparse or unchanged category '+mode+'/'+category+'/'+level);
+  }
   const w=E.createShow();for(const id of ['a','b','c'])E.addAnswerer(w,id,id);cmd(w,{type:'configure',title:'Test',mode,teamCount:2});cmd(w,{type:'bank',questions:bank,source:'Variety '+category});cmd(w,{type:'plan',...w.plan,partyCategory:category,partyLevel:level,partyFormat:'CHOICE'});cmd(w,{type:'start'});
-  assert(w.queue.length>0,mode+category+level);assert(w.queue.every(i=>E.matchesPartyPlan(bank[i],w.plan)));assert.equal(E.viewFor(w,S).questionSource,'Variety '+category);
+  assert.equal(w.queue.length,matching.length,mode+category+level);assert(w.queue.every(i=>E.matchesPartyPlan(bank[i],w.plan)));assert.equal(E.viewFor(w,S).questionSource,'Variety '+category);
   cmd(w,{type:'open',roundId:w.round.id});
   if(!['DRAW','NEAREST'].includes(mode)){assert.equal(w.round.question.options.length,4);assert.equal(new Set(w.round.question.options).size,4);if(!w.round.question.opinion)assert(w.round.question.options.includes(w.round.question.answer));}
  }
 }
-assert.equal(total,1290,'Reviewed catalogue size');
+assert.equal(total,2738,'Expanded catalogue size');
 assert.equal(E.PARTY_CATEGORIES.length,21,'20 categories plus all');
 // The host can judge live; audience packets and ink fetches cannot reveal a submitted flip.
 const w=E.createShow();for(const id of ['a','b'])E.addAnswerer(w,id,id);

@@ -3,10 +3,12 @@ import type { PartyCategory, ShowMode, ShowQuestion } from './types';
 import prompts from './partyPrompts.json';
 import variety from './varietyPrompts.json';
 import reviewed from './reviewedPrompts.json';
+import expandedPrompts from './expandedPrompts.json';
 interface PartyPrompt { prompt: string[]; answer: string[]; aliases: string[]; options: string[][]; difficulty: string; category?: string }
 const banks: Record<ShowMode,PartyPrompt[]> = prompts;
 const additions: Record<ShowMode,PartyPrompt[]> = variety;
 const newQuestions: Partial<Record<ShowMode,PartyPrompt[]>> = reviewed;
+const expandedQuestions: Partial<Record<ShowMode,PartyPrompt[]>> = expandedPrompts;
 const knowledgeModes: ReadonlySet<ShowMode> = new Set(['STANDARD','BUZZER','SURVIVAL','TEAMS']);
 
 // Keep source positions as IDs. Retired rows stay in the original data for older rooms.
@@ -76,14 +78,17 @@ export function varietyQuestions(mode:ShowMode,language:LanguageMode):ShowQuesti
  const retired = knowledgeModes.has(mode)?retiredKnowledge:retiredVariety[mode];
  const expanded = additions[mode].flatMap((q,i)=>(!sharedOpinionPrefix.has(mode)||i>=64)&&!retired?.includes(i)
   ? [question(mode,language,q,`variety-${mode}-${i}`)] : []);
- const authored = newQuestions[knowledgeModes.has(mode)?'STANDARD':mode]??[];
- return [...original,...expanded,...authored.map((q,i)=>question(mode,language,q,`reviewed-${mode}-${i}`))];
+ const sourceMode = knowledgeModes.has(mode) ? 'STANDARD' : mode;
+ const authored = newQuestions[sourceMode] ?? [];
+ const extra = expandedQuestions[sourceMode] ?? [];
+ return [...original,...expanded,...authored.map((q,i)=>question(mode,language,q,`reviewed-${mode}-${i}`)),
+  ...extra.map((q,i)=>question(mode,language,q,`expanded-${mode}-${i}`))];
 }
 
 /** Give new rooms one prompt per category and level while keeping the catalogue IDs. */
 export function starterQuestions(mode: ShowMode, language: LanguageMode): ShowQuestion[] {
  const bank=varietyQuestions(mode,language);
- const preferred=[...bank.filter(q=>q.id.startsWith('reviewed-')),...bank];
+ const preferred=[...bank.filter(q=>q.id.startsWith('expanded-')),...bank];
  return (['EASY','NORMAL','HARD'] as const).flatMap(level=>
   Object.keys(CATEGORY_COPY).flatMap(category=>{
    const q=preferred.find(entry=>entry.category===category&&entry.difficulty===level);

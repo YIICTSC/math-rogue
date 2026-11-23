@@ -4,7 +4,7 @@ import { Play, Pause, TimerReset, Eye, WandSparkles, CheckCheck, SkipForward, Se
 import type { LanguageMode } from '../types';
 import { minimumAnswerers, supportsLearningUnits, MODES, PARTY_CATEGORIES, type PartyCategory, type ShowAction, type ShowView } from './types';
 import { validBankForMode } from './engine';
-import { starterQuestions, varietyQuestions, CATEGORY_COPY, MODE_VARIETY_COPY } from './questions';
+import { varietyQuestions, CATEGORY_COPY, MODE_VARIETY_COPY } from './questions';
 import { copy, MODE_COPY } from './copy';
 export default function HostDesk({ view: v, language, connected, send, onEdit, onLesson, onSamples }: { view: ShowView; language: LanguageMode; connected: boolean; send: (a: ShowAction) => void; onEdit: () => void; onLesson: () => void; onSamples: (category?:PartyCategory) => void }) {
   const [settings, setSettings] = useState(false);
@@ -15,9 +15,10 @@ export default function HostDesk({ view: v, language, connected, send, onEdit, o
   const pending = r && ['STANDARD', 'BUZZER', 'SURVIVAL', 'TEAMS'].includes(r.mode) ? r.tiles.filter(a => a.submitted && a.correct === undefined).length : 0;
   const connectedPlayers = v.players.filter(p => p.connected).length, compatible = !!v.host && validBankForMode(v.mode,v.host.bank), readyToStart = compatible && v.questionCount > 0 && connectedPlayers >= minimumAnswerers(v.mode);
   const changeMode = (mode: typeof v.mode) => {
-    const untouched = [starterQuestions(v.mode,language),varietyQuestions(v.mode,language)].some(pack=>JSON.stringify(v.host?.bank)===JSON.stringify(pack));
+    const catalogIds = new Set(catalog.map(q => q.id));
+    const builtIn = !!v.host?.bank.length && v.host.bank.every(q => q.party && catalogIds.has(q.id));
     send({type:'configure',title:v.title,mode,teamCount:v.teamCount});
-    if (untouched) send({type:'bank',questions:varietyQuestions(mode,language),source:t('バラエティ','Variety','バラエティ')+' · '+t(...CATEGORY_COPY[v.plan.partyCategory||'ALL'])});
+    if (builtIn) send({type:'bank',questions:varietyQuestions(mode,language),source:t('バラエティ','Variety','バラエティ')+' · '+t(...CATEGORY_COPY[v.plan.partyCategory||'ALL'])});
   };
   const primary = v.phase === 'lobby' ? ['start', t('番組をスタート', 'Start the show', 'ばんぐみをスタート')] : v.phase === 'ready' ? ['open', t('出題スタート！', 'Start question!', 'しゅつだいスタート！')] : v.phase === 'open' ? ['close', t('回答を締め切る', 'Close answers', 'こたえをしめきる')] : reveal && !r?.showJudgments ? ['publish', t('全員の回答・正誤を表示', 'Reveal all answers & judgments', 'みんなのこたえ・せいごをひょうじ')] : reveal ? (r?.mode === 'VOTE' ? ['voting', t('投票を始める', 'Open voting', 'とうひょうをはじめる')] : ['score', t('採点して順位発表', 'Score & show results', 'さいてんしてじゅんいはっぴょう')]) : v.phase === 'voting' ? ['score', t('投票を締め切り集計', 'Close vote & score', 'とうひょうをしめきりしゅうけい')] : v.phase === 'scoreboard' || v.phase === 'dawn' ? ['next', v.wolf && v.phase === 'scoreboard' && (v.index + 1) % 5 === 0 ? t('5問終了・審議へ', 'Five questions done · deliberate', '5もんしゅうりょう・しんぎへ') : t('次の問題へ', 'Next question', 'つぎのもんだいへ')] : null;
   return <><div className="qs-host-bar">
