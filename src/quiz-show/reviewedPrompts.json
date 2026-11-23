@@ -1,0 +1,1976 @@
+{
+  "CONSENSUS": [
+    {
+      "category": "ANIMALS",
+      "prompt": [
+        "ふわふわの毛で思い浮かぶ動物は？",
+        "Which animal comes to mind for fluffy fur?",
+        "ふわふわのけでおもいうかぶどうぶつは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "ヒツジ",
+          "ウサギ",
+          "アルパカ",
+          "ポメラニアン"
+        ],
+        [
+          "Sheep",
+          "Rabbit",
+          "Alpaca",
+          "Pomeranian"
+        ],
+        [
+          "ひつじ",
+          "うさぎ",
+          "あるぱか",
+          "ぽめらにあん"
+        ]
+      ],
+      "difficulty": "EASY"
+    },
+    {
+      "category": "FOOD",
+      "prompt": [
+        "包丁なしでみんなに配りやすい果物といえば？",
+        "Which fruit is easiest to share without a knife?",
+        "ほうちょうなしでみんなにくばりやすいくだものといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "ミカン",
+          "バナナ",
+          "ブドウ",
+          "イチゴ"
+        ],
+        [
+          "Mandarins",
+          "Bananas",
+          "Grapes",
+          "Strawberries"
+        ],
+        [
+          "みかん",
+          "ばなな",
+          "ぶどう",
+          "いちご"
+        ]
+      ],
+      "difficulty": "NORMAL"
+    },
+    {
+      "category": "LOVE",
+      "prompt": [
+        "友達と離れても持っていたいおそろいの品は？",
+        "What matching keepsake would friends keep after moving apart?",
+        "ともだちとはなれてももっていたいおそろいのしなは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "キーホルダー",
+          "ミサンガ",
+          "マグカップ",
+          "しおり"
+        ],
+        [
+          "Key ring",
+          "Friendship bracelet",
+          "Mug",
+          "Bookmark"
+        ],
+        [
+          "きーほるだー",
+          "みさんが",
+          "まぐかっぷ",
+          "しおり"
+        ]
+      ],
+      "difficulty": "NORMAL"
+    },
+    {
+      "category": "DAILY",
+      "prompt": [
+        "玄関で「おかえり」を感じるものは？",
+        "What by the front door makes you feel most at home?",
+        "げんかんで「おかえり」をかんじるものは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "明かり",
+          "スリッパ",
+          "家族の声",
+          "夕食のにおい"
+        ],
+        [
+          "A light",
+          "Slippers",
+          "Family voices",
+          "Dinner smells"
+        ],
+        [
+          "あかり",
+          "すりっぱ",
+          "かぞくのこえ",
+          "ゆうしょくのにおい"
+        ]
+      ],
+      "difficulty": "EASY"
+    },
+    {
+      "category": "WORLD",
+      "prompt": [
+        "旅先で撮りたくなる町の看板といえば？",
+        "Which sign would travelers stop to photograph?",
+        "たびさきでとりたくなるまちのかんばんといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "通りの名前",
+          "昔からの店の看板",
+          "名所の入口",
+          "交通標識"
+        ],
+        [
+          "Street name",
+          "Old shop sign",
+          "Landmark entrance",
+          "Road sign"
+        ],
+        [
+          "とおりのなまえ",
+          "むかしからのみせのかんばん",
+          "めいしょのいりぐち",
+          "こうつうひょうしき"
+        ]
+      ],
+      "difficulty": "NORMAL"
+    },
+    {
+      "category": "NATURE",
+      "prompt": [
+        "風の強さが目で分かるものといえば？",
+        "What lets you see how strong the wind is?",
+        "かぜのつよさがめでわかるものといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "旗",
+          "木の枝",
+          "波",
+          "洗濯物"
+        ],
+        [
+          "A flag",
+          "Tree branches",
+          "Waves",
+          "Laundry"
+        ],
+        [
+          "はた",
+          "きのえだ",
+          "なみ",
+          "せんたくもの"
+        ]
+      ],
+      "difficulty": "NORMAL"
+    },
+    {
+      "category": "CULTURE",
+      "prompt": [
+        "舞台で幕が開く直前に聞こえそうな音は？",
+        "What sound might you hear just before the curtain rises?",
+        "ぶたいでまくがひらくちょくぜんにきこえそうなおとは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "客席のざわめき",
+          "開演ベル",
+          "楽器の音合わせ",
+          "案内放送"
+        ],
+        [
+          "Audience chatter",
+          "Opening bell",
+          "Instruments tuning",
+          "An announcement"
+        ],
+        [
+          "きゃくせきのざわめき",
+          "かいえんべる",
+          "がっきのおとあわせ",
+          "あんないほうそう"
+        ]
+      ],
+      "difficulty": "NORMAL"
+    },
+    {
+      "category": "FANTASY",
+      "prompt": [
+        "空飛ぶ島が地上とやりとりする方法といえば？",
+        "How would a floating island communicate with the ground?",
+        "そらとぶしまがちじょうとやりとりするほうほうといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "伝書バト",
+          "光の合図",
+          "魔法の鏡",
+          "空飛ぶ郵便屋"
+        ],
+        [
+          "Carrier pigeon",
+          "Light signals",
+          "Magic mirror",
+          "Flying mail carrier"
+        ],
+        [
+          "でんしょばと",
+          "ひかりのあいず",
+          "まほうのかがみ",
+          "そらとぶゆうびんや"
+        ]
+      ],
+      "difficulty": "HARD"
+    },
+    {
+      "category": "SPORTS",
+      "prompt": [
+        "試合後に勝ったチームがすることといえば？",
+        "What does the winning team do after a match?",
+        "しあいごにかったちーむがすることといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "握手する",
+          "円陣を組む",
+          "写真を撮る",
+          "観客に手を振る"
+        ],
+        [
+          "Shake hands",
+          "Form a huddle",
+          "Take a photo",
+          "Wave to the crowd"
+        ],
+        [
+          "あくしゅする",
+          "えんじんをくむ",
+          "しゃしんをとる",
+          "かんきゃくにてをふる"
+        ]
+      ],
+      "difficulty": "NORMAL"
+    },
+    {
+      "category": "GAMES",
+      "prompt": [
+        "ゲームで「危険な場所」を示す色といえば？",
+        "What color most often signals danger in a game?",
+        "げーむで「きけんなばしょ」をしめすいろといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "赤",
+          "黄",
+          "紫",
+          "黒"
+        ],
+        [
+          "Red",
+          "Yellow",
+          "Purple",
+          "Black"
+        ],
+        [
+          "あか",
+          "き",
+          "むらさき",
+          "くろ"
+        ]
+      ],
+      "difficulty": "EASY"
+    },
+    {
+      "category": "SCHOOL",
+      "prompt": [
+        "授業のあと、机の上に残りやすい小さなごみは？",
+        "What tiny scrap is most often left on a desk after class?",
+        "じゅぎょうのあと、つくえのうえにのこりやすいちいさなごみは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "消しゴムのかす",
+          "鉛筆の削りかす",
+          "紙の切れ端",
+          "テープの切れ端"
+        ],
+        [
+          "Eraser crumbs",
+          "Pencil shavings",
+          "Scraps of paper",
+          "Bits of tape"
+        ],
+        [
+          "けしごむのかす",
+          "えんぴつのけずりかす",
+          "かみのきれはし",
+          "てーぷのきれはし"
+        ]
+      ],
+      "difficulty": "EASY"
+    },
+    {
+      "category": "WORK",
+      "prompt": [
+        "開店前のパン屋で最初に目につくものは？",
+        "What would stand out at a bakery before it opens?",
+        "かいてんまえのぱんやでさいしょにめにつくものは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "粉のついたエプロン",
+          "焼きたてのパン",
+          "仕込み台",
+          "開店前の札"
+        ],
+        [
+          "A floury apron",
+          "Fresh bread",
+          "Prep counter",
+          "Closed sign"
+        ],
+        [
+          "こなのついたえぷろん",
+          "やきたてのぱん",
+          "しこみだい",
+          "かいてんまえのさつ"
+        ]
+      ],
+      "difficulty": "NORMAL"
+    },
+    {
+      "category": "HISTORY",
+      "prompt": [
+        "古い写真の年代を推測する手がかりは？",
+        "What would help you date an old photograph?",
+        "ふるいしゃしんのねんだいをすいそくするてがかりは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "服装",
+          "車",
+          "建物",
+          "写真の色"
+        ],
+        [
+          "Clothing",
+          "Cars",
+          "Buildings",
+          "The color of the photo"
+        ],
+        [
+          "ふくそう",
+          "くるま",
+          "たてもの",
+          "しゃしんのいろ"
+        ]
+      ],
+      "difficulty": "HARD"
+    },
+    {
+      "category": "TECH",
+      "prompt": [
+        "オンライン会議で最初に確かめることは？",
+        "What do you check first in a video call?",
+        "おんらいんかいぎでさいしょにたしかめることは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "マイク",
+          "カメラ",
+          "画面共有",
+          "通信状態"
+        ],
+        [
+          "Microphone",
+          "Camera",
+          "Screen sharing",
+          "Connection"
+        ],
+        [
+          "まいく",
+          "かめら",
+          "がめんきょうゆう",
+          "つうしんじょうたい"
+        ]
+      ],
+      "difficulty": "NORMAL"
+    },
+    {
+      "category": "MYSTERY",
+      "prompt": [
+        "閉じた箱を開けずに中身を探る方法は？",
+        "How would you investigate the contents of a box without opening it?",
+        "とじたはこをひらけずになかみをさぐるほうほうは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "重さを量る",
+          "軽く振る",
+          "においをかぐ",
+          "箱の表示を見る"
+        ],
+        [
+          "Weigh it",
+          "Shake it gently",
+          "Smell it",
+          "Read the label"
+        ],
+        [
+          "おもさをはかる",
+          "かるくふる",
+          "においをかぐ",
+          "はこのひょうじをみる"
+        ]
+      ],
+      "difficulty": "HARD"
+    },
+    {
+      "category": "MONEY",
+      "prompt": [
+        "レシートを取っておきたい買い物といえば？",
+        "What kind of purchase makes you want to keep the receipt?",
+        "れしーとをとっておきたいかいものといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "家電",
+          "服",
+          "靴",
+          "ゲーム機"
+        ],
+        [
+          "Appliances",
+          "Clothes",
+          "Shoes",
+          "A game console"
+        ],
+        [
+          "かでん",
+          "ふく",
+          "くつ",
+          "げーむき"
+        ]
+      ],
+      "difficulty": "NORMAL"
+    },
+    {
+      "category": "SEASONS",
+      "prompt": [
+        "梅雨が明けたと感じる風景といえば？",
+        "What scene tells you the rainy season is over?",
+        "つゆがあけたとかんじるふうけいといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "セミが鳴く",
+          "入道雲が出る",
+          "洗濯物がよく乾く",
+          "日傘が増える"
+        ],
+        [
+          "Cicadas calling",
+          "Towering clouds",
+          "Laundry drying fast",
+          "More parasols"
+        ],
+        [
+          "せみがなく",
+          "にゅうどうぐもがでる",
+          "せんたくものがよくかわく",
+          "ひがさがふえる"
+        ]
+      ],
+      "difficulty": "EASY"
+    },
+    {
+      "category": "TRANSPORT",
+      "prompt": [
+        "駅に着いたとき、進む方向を教えてくれるものは？",
+        "What points the way when you arrive at a station?",
+        "えきについたとき、すすむほうこうをおしえてくれるものは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "案内板",
+          "駅員",
+          "路線図",
+          "床の矢印"
+        ],
+        [
+          "Signs",
+          "Station staff",
+          "A route map",
+          "Arrows on the floor"
+        ],
+        [
+          "あんないばん",
+          "えきいん",
+          "ろせんず",
+          "ゆかのやじるし"
+        ]
+      ],
+      "difficulty": "EASY"
+    },
+    {
+      "category": "HEALTH",
+      "prompt": [
+        "長く座っていたあとに最初にほぐしたい場所は？",
+        "What would you stretch first after sitting for a long time?",
+        "ながくすわっていたあとにさいしょにほぐしたいばしょは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "肩",
+          "首",
+          "腰",
+          "足"
+        ],
+        [
+          "Shoulders",
+          "Neck",
+          "Lower back",
+          "Legs"
+        ],
+        [
+          "かた",
+          "くび",
+          "こし",
+          "あし"
+        ]
+      ],
+      "difficulty": "EASY"
+    },
+    {
+      "category": "SPACE",
+      "prompt": [
+        "夜空に向かって地球の場所を伝える目印といえば？",
+        "What landmark would you use to tell someone where Earth is?",
+        "よぞらにむかってちきゅうのばしょをつたえるめじるしといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "太陽",
+          "月",
+          "天の川",
+          "土星の輪"
+        ],
+        [
+          "The Sun",
+          "The Moon",
+          "The Milky Way",
+          "Saturn’s rings"
+        ],
+        [
+          "たいよう",
+          "つき",
+          "あまのがわ",
+          "どせいのわ"
+        ]
+      ],
+      "difficulty": "HARD"
+    }
+  ],
+  "WOLF": [
+    {
+      "category": "ANIMALS",
+      "prompt": [
+        "動物の足跡が残りやすい場所といえば？",
+        "Where would you expect to spot animal footprints?",
+        "どうぶつのあしあとがのこりやすいばしょといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "雪の上",
+          "ぬかるみ",
+          "砂浜",
+          "川辺"
+        ],
+        [
+          "Snow",
+          "Mud",
+          "A sandy beach",
+          "A riverbank"
+        ],
+        [
+          "ゆきのうえ",
+          "ぬかるみ",
+          "すなはま",
+          "かわべ"
+        ]
+      ],
+      "difficulty": "NORMAL"
+    },
+    {
+      "category": "FOOD",
+      "prompt": [
+        "暗い部屋でも香りで気づきそうな料理は？",
+        "Which dish would you recognize by smell in a dark room?",
+        "くらいへやでもかおりできづきそうなりょうりは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "カレー",
+          "焼き魚",
+          "焼きたてのパン",
+          "にんにく炒め"
+        ],
+        [
+          "Curry",
+          "Grilled fish",
+          "Fresh bread",
+          "Garlic stir-fry"
+        ],
+        [
+          "かれー",
+          "やきざかな",
+          "やきたてのぱん",
+          "にんにくいため"
+        ]
+      ],
+      "difficulty": "EASY"
+    },
+    {
+      "category": "LOVE",
+      "prompt": [
+        "友達が落ち込んでいる日の誘い文句は？",
+        "What might you say to cheer up a friend who is feeling down?",
+        "ともだちがおちこんでいるひのさそいもんくは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "散歩しよう",
+          "話を聞くよ",
+          "おやつ食べよう",
+          "ゲームしよう"
+        ],
+        [
+          "Let’s walk",
+          "I’m here to listen",
+          "Let’s grab a snack",
+          "Let’s play a game"
+        ],
+        [
+          "さんぽしよう",
+          "はなしをきくよ",
+          "おやつたべよう",
+          "げーむしよう"
+        ]
+      ],
+      "difficulty": "EASY"
+    },
+    {
+      "category": "DAILY",
+      "prompt": [
+        "夜中に家で小さな音がした。何の音だと思う？",
+        "What might cause a quiet noise at home in the middle of the night?",
+        "よなかにいえでちいさなおとがした。なんのおとだとおもう？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "冷蔵庫",
+          "窓を揺らす風",
+          "水道",
+          "時計"
+        ],
+        [
+          "The fridge",
+          "Wind at the window",
+          "Pipes",
+          "A clock"
+        ],
+        [
+          "れいぞうこ",
+          "まどをゆらすかぜ",
+          "すいどう",
+          "とけい"
+        ]
+      ],
+      "difficulty": "NORMAL"
+    },
+    {
+      "category": "WORLD",
+      "prompt": [
+        "観光客が少ない早朝の町で会いそうな人は？",
+        "Who might you meet in a quiet town early in the morning?",
+        "かんこうきゃくがすくないそうちょうのまちであいそうなひとは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "犬を散歩する人",
+          "新聞配達の人",
+          "パン屋さん",
+          "清掃の人"
+        ],
+        [
+          "A dog walker",
+          "A newspaper carrier",
+          "A baker",
+          "A cleaner"
+        ],
+        [
+          "いぬをさんぽするひと",
+          "しんぶんはいたつのひと",
+          "ぱんやさん",
+          "せいそうのひと"
+        ]
+      ],
+      "difficulty": "NORMAL"
+    },
+    {
+      "category": "NATURE",
+      "prompt": [
+        "晴れの日でもぬれていそうな場所といえば？",
+        "What place might stay wet even on a sunny day?",
+        "はれのひでもぬれていそうなばしょといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "滝のそば",
+          "洞窟",
+          "池のほとり",
+          "森の日陰"
+        ],
+        [
+          "Near a waterfall",
+          "A cave",
+          "A pond edge",
+          "Forest shade"
+        ],
+        [
+          "たきのそば",
+          "どうくつ",
+          "いけのほとり",
+          "もりのひかげ"
+        ]
+      ],
+      "difficulty": "NORMAL"
+    },
+    {
+      "category": "CULTURE",
+      "prompt": [
+        "拍手をせずに静かに楽しむ場所といえば？",
+        "Where would you enjoy something in silence without clapping?",
+        "はくしゅをせずにしずかにたのしむばしょといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "美術館",
+          "図書館",
+          "映画館",
+          "プラネタリウム"
+        ],
+        [
+          "An art museum",
+          "A library",
+          "A movie theater",
+          "A planetarium"
+        ],
+        [
+          "びじゅつかん",
+          "としょかん",
+          "えいがかん",
+          "ぷらねたりうむ"
+        ]
+      ],
+      "difficulty": "NORMAL"
+    },
+    {
+      "category": "FANTASY",
+      "prompt": [
+        "魔法が切れたことに気づく合図といえば？",
+        "What sign suggests a spell has worn off?",
+        "まほうがきれたことにきづくあいずといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "光が消える",
+          "音が止まる",
+          "道具が元に戻る",
+          "印が消える"
+        ],
+        [
+          "The light fades",
+          "A sound stops",
+          "An object returns to normal",
+          "A mark vanishes"
+        ],
+        [
+          "ひかりがきえる",
+          "おとがとまる",
+          "どうぐがもとにもどる",
+          "いんがきえる"
+        ]
+      ],
+      "difficulty": "HARD"
+    },
+    {
+      "category": "SPORTS",
+      "prompt": [
+        "試合の直前に緊張している人がしそうなことは？",
+        "What might a nervous player do just before a match?",
+        "しあいのちょくぜんにきんちょうしているひとがしそうなことは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "深呼吸",
+          "靴ひもを結び直す",
+          "水を飲む",
+          "ストレッチ"
+        ],
+        [
+          "Take a deep breath",
+          "Retie their shoes",
+          "Drink water",
+          "Stretch"
+        ],
+        [
+          "しんこきゅう",
+          "くつひもをむすびなおす",
+          "みずをのむ",
+          "すとれっち"
+        ]
+      ],
+      "difficulty": "EASY"
+    },
+    {
+      "category": "GAMES",
+      "prompt": [
+        "対戦相手が迷っていると気づくしぐさといえば？",
+        "What gesture tells you an opponent is unsure about their move?",
+        "たいせんあいてがまよっているときづくしぐさといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "手を止める",
+          "カードを何度も見る",
+          "首をかしげる",
+          "机を指でたたく"
+        ],
+        [
+          "Pause mid-move",
+          "Check their cards repeatedly",
+          "Tilt their head",
+          "Tap the table"
+        ],
+        [
+          "てをとめる",
+          "かーどをなんどもみる",
+          "くびをかしげる",
+          "つくえをゆびでたたく"
+        ]
+      ],
+      "difficulty": "NORMAL"
+    },
+    {
+      "category": "SCHOOL",
+      "prompt": [
+        "誰もいない教室に忘れられていそうなものは？",
+        "What might be left behind in an empty classroom?",
+        "だれもいないきょうしつにわすれられていそうなものは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "筆箱",
+          "水筒",
+          "上着",
+          "消しゴム"
+        ],
+        [
+          "Pencil case",
+          "Water bottle",
+          "Jacket",
+          "Eraser"
+        ],
+        [
+          "ふでばこ",
+          "すいとう",
+          "うわぎ",
+          "けしごむ"
+        ]
+      ],
+      "difficulty": "EASY"
+    },
+    {
+      "category": "WORK",
+      "prompt": [
+        "閉店作業で最後に確かめることといえば？",
+        "What might staff check last before closing a shop?",
+        "へいてんさぎょうでさいごにたしかめることといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "鍵",
+          "照明",
+          "レジ",
+          "忘れ物"
+        ],
+        [
+          "Locks",
+          "Lights",
+          "Register",
+          "Lost property"
+        ],
+        [
+          "かぎ",
+          "しょうめい",
+          "れじ",
+          "わすれもの"
+        ]
+      ],
+      "difficulty": "NORMAL"
+    },
+    {
+      "category": "HISTORY",
+      "prompt": [
+        "昔の手紙が大事なものだと分かる外見の特徴は？",
+        "What visible clue might tell you an old letter was important?",
+        "むかしのてがみがだいじなものだとわかるがいけんのとくちょうは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "封ろう",
+          "立派な箱",
+          "きれいな筆文字",
+          "何重もの包み"
+        ],
+        [
+          "Wax seal",
+          "Fine box",
+          "Careful handwriting",
+          "Layers of wrapping"
+        ],
+        [
+          "ふうろう",
+          "りっぱなはこ",
+          "きれいなふでもじ",
+          "なんじゅうものつつみ"
+        ]
+      ],
+      "difficulty": "HARD"
+    },
+    {
+      "category": "TECH",
+      "prompt": [
+        "スマホが圏外になったとき先に試すことは？",
+        "What would you try first when your phone loses its signal?",
+        "すまほがけんがいになったときさきにためすことは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "場所を移す",
+          "機内モードを切り替える",
+          "再起動する",
+          "Wi-Fiを探す"
+        ],
+        [
+          "Move somewhere else",
+          "Toggle airplane mode",
+          "Restart it",
+          "Look for Wi-Fi"
+        ],
+        [
+          "ばしょをうつす",
+          "きないもーどをきりかえる",
+          "さいきどうする",
+          "Wi-Fiをさがす"
+        ]
+      ],
+      "difficulty": "NORMAL"
+    },
+    {
+      "category": "MYSTERY",
+      "prompt": [
+        "部屋に誰かが来たと気づく小さな変化は？",
+        "What small change might show someone entered a room?",
+        "へやにだれかがきたときづくちいさなへんかは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "椅子の位置",
+          "開いた引き出し",
+          "残った足跡",
+          "少し開いた窓"
+        ],
+        [
+          "A moved chair",
+          "An open drawer",
+          "Footprints",
+          "A partly open window"
+        ],
+        [
+          "いすのいち",
+          "ひらいたひきだし",
+          "のこったあしあと",
+          "すこしひらいたまど"
+        ]
+      ],
+      "difficulty": "HARD"
+    },
+    {
+      "category": "MONEY",
+      "prompt": [
+        "財布がないと気づいて最初に探す場所は？",
+        "Where would you look first after noticing your wallet is missing?",
+        "さいふがないときづいてさいしょにさがすばしょは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "バッグの底",
+          "上着のポケット",
+          "最後に払った店",
+          "家の玄関"
+        ],
+        [
+          "The bottom of your bag",
+          "A coat pocket",
+          "The last shop you paid at",
+          "Your front hall"
+        ],
+        [
+          "ばっぐのそこ",
+          "うわぎのぽけっと",
+          "さいごにはらったみせ",
+          "いえのげんかん"
+        ]
+      ],
+      "difficulty": "EASY"
+    },
+    {
+      "category": "SEASONS",
+      "prompt": [
+        "秋の初めを感じる音といえば？",
+        "What sound signals the start of autumn?",
+        "あきのはじめをかんじるおとといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "夜の虫の声",
+          "落ち葉を踏む音",
+          "運動会の練習",
+          "夕方の風"
+        ],
+        [
+          "Crickets at night",
+          "Crunching leaves",
+          "Sports-day practice",
+          "Evening wind"
+        ],
+        [
+          "よるのむしのこえ",
+          "おちばをふむおと",
+          "うんどうかいのれんしゅう",
+          "ゆうがたのかぜ"
+        ]
+      ],
+      "difficulty": "HARD"
+    },
+    {
+      "category": "TRANSPORT",
+      "prompt": [
+        "バスが遅れているときに見たくなる情報は？",
+        "What would you check when a bus is running late?",
+        "ばすがおくれているときにみたくなるじょうほうは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "到着予想",
+          "今の位置",
+          "迂回経路",
+          "別のバスの時刻"
+        ],
+        [
+          "Expected arrival",
+          "Current location",
+          "Detour route",
+          "Other bus times"
+        ],
+        [
+          "とうちゃくよそう",
+          "いまのいち",
+          "うかいけいろ",
+          "べつのばすのじこく"
+        ]
+      ],
+      "difficulty": "NORMAL"
+    },
+    {
+      "category": "HEALTH",
+      "prompt": [
+        "集中が切れたときに戻るきっかけといえば？",
+        "What would help most when you lose focus?",
+        "しゅうちゅうがきれたときにもどるきっかけといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "立ち上がる",
+          "水を飲む",
+          "窓の外を見る",
+          "深呼吸する"
+        ],
+        [
+          "Stand up",
+          "Drink water",
+          "Look out the window",
+          "Take a deep breath"
+        ],
+        [
+          "たちあがる",
+          "みずをのむ",
+          "まどのそとをみる",
+          "しんこきゅうする"
+        ]
+      ],
+      "difficulty": "NORMAL"
+    },
+    {
+      "category": "SPACE",
+      "prompt": [
+        "宇宙の映像で無重力を実感する場面といえば？",
+        "Which video scene most clearly shows weightlessness?",
+        "うちゅうのえいぞうでむじゅうりょくをじっかんするばめんといえば？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "水が丸く浮かぶ",
+          "人が逆さに浮く",
+          "食べ物が飛ぶ",
+          "髪が広がる"
+        ],
+        [
+          "A floating ball of water",
+          "A person floating upside down",
+          "Food drifting",
+          "Hair fanning out"
+        ],
+        [
+          "みずがまるくうかぶ",
+          "ひとがさかさにうく",
+          "たべものがとぶ",
+          "かみがひろがる"
+        ]
+      ],
+      "difficulty": "HARD"
+    }
+  ],
+  "VOTE": [
+    {
+      "category": "ANIMALS",
+      "prompt": [
+        "カメがゴール前で急に歩みを止めた。観客も納得した理由は？",
+        "A turtle stops just before the finish. What reason wins over the crowd?",
+        "かめがごーるまえできゅうにあゆみをとめた。かんきゃくもなっとくしたりゆうは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "ゴールの字を直したい",
+          "観客席に祖母がいた",
+          "もう一歩で昼休み",
+          "背中のゼッケンが逆さま"
+        ],
+        [
+          "Fix a typo on the finish banner",
+          "Spotted Grandma",
+          "One step away from lunch break",
+          "The race number is upside down"
+        ],
+        [
+          "ごーるのじをなおしたい",
+          "かんきゃくせきにそぼがいた",
+          "もういっぽでひるやすみ",
+          "せなかのぜっけんがさかさま"
+        ]
+      ],
+      "difficulty": "EASY"
+    },
+    {
+      "category": "FOOD",
+      "prompt": [
+        "湯気の立つスープにだけ聞こえる悩み相談。どんな悩み？",
+        "Only steaming soup can hear this complaint. What is it?",
+        "ゆげのたつすーぷにだけきこえるなやみそうだん。どんななやみ？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "具が底で渋滞中",
+          "スプーンが迷子",
+          "最後の一口を譲り合う",
+          "胡椒が照れている"
+        ],
+        [
+          "The ingredients are stuck in traffic",
+          "The spoon is lost",
+          "Nobody wants to take the last sip",
+          "The pepper is shy"
+        ],
+        [
+          "ぐがそこでじゅうたいちゅう",
+          "すぷーんがまいご",
+          "さいごのひとくちをゆずりあう",
+          "こしょうがてれている"
+        ]
+      ],
+      "difficulty": "NORMAL"
+    },
+    {
+      "category": "SCHOOL",
+      "prompt": [
+        "今日の時間割に教科名がひとつだけ絵文字。何をする授業？",
+        "One lesson on the timetable has an emoji for a name. What do you study?",
+        "きょうのじかんわりにきょうかめいがひとつだけえもじ。なにをするじゅぎょう？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "拍手の計測",
+          "給食の未来予想",
+          "黒板の洗い方",
+          "廊下を静かに走る理論"
+        ],
+        [
+          "Measuring applause",
+          "Forecasting school lunch",
+          "Washing a blackboard",
+          "The theory of running quietly"
+        ],
+        [
+          "はくしゅのけいそく",
+          "きゅうしょくのみらいよそう",
+          "こくばんのあらいほう",
+          "ろうかをしずかにはしるりろん"
+        ]
+      ],
+      "difficulty": "NORMAL"
+    },
+    {
+      "category": "MYSTERY",
+      "prompt": [
+        "現場に残った証拠が全部やわらかい。何が起きた？",
+        "Every piece of evidence is soft. What happened?",
+        "げんばにのこったしょうこがぜんぶやわらかい。なにがおきた？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "枕投げの反省会",
+          "羊の密会",
+          "タオルの雪崩",
+          "パン生地の脱走"
+        ],
+        [
+          "A pillow-fight debrief",
+          "A secret sheep meeting",
+          "A towel avalanche",
+          "A runaway batch of dough"
+        ],
+        [
+          "まくらなげのはんせいかい",
+          "ひつじのみっかい",
+          "たおるのなだれ",
+          "ぱんきじのだっそう"
+        ]
+      ],
+      "difficulty": "HARD"
+    },
+    {
+      "category": "SPACE",
+      "prompt": [
+        "宇宙船で重力が一分だけ戻る。乗組員が真っ先にすることは？",
+        "Gravity returns for one minute aboard a spaceship. What does the crew do first?",
+        "うちゅうせんでじゅうりょくがいっぷんだけもどる。のりくみいんがまっさきにすることは？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "靴下を拾う",
+          "落ちるコインで占う",
+          "床に寝転ぶ",
+          "沈んだ茶葉を探す"
+        ],
+        [
+          "Pick up socks",
+          "Read fortunes from falling coins",
+          "Lie on the floor",
+          "Find the sunken tea leaves"
+        ],
+        [
+          "くつしたをひろう",
+          "おちるこいんでうらなう",
+          "ゆかにねころぶ",
+          "しずんだちゃばをさがす"
+        ]
+      ],
+      "difficulty": "HARD"
+    }
+  ],
+  "MAJORITY": [
+    {
+      "category": "GAMES",
+      "prompt": [
+        "遊び終わったゲームを人に貸すとしたら、どの渡し方がいい？",
+        "How would you lend a game you have finished?",
+        "あそびおわったげーむをひとにかすとしたら、どのわたしかたがいい？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "説明なしで渡す",
+          "序盤のこつを添える",
+          "一緒に最初だけ遊ぶ",
+          "好きだった場面を話す"
+        ],
+        [
+          "Hand it over without explanation",
+          "Share a starter tip",
+          "Play through the beginning together",
+          "Mention a favorite scene"
+        ],
+        [
+          "せつめいなしでわたす",
+          "じょばんのこつをそえる",
+          "いっしょにさいしょだけあそぶ",
+          "すきだったばめんをはなす"
+        ]
+      ],
+      "difficulty": "NORMAL"
+    },
+    {
+      "category": "HEALTH",
+      "prompt": [
+        "散歩の途中で急に元気が出るのは、どんなとき？",
+        "What would give you a sudden lift during a walk?",
+        "さんぽのとちゅうできゅうにげんきがでるのは、どんなとき？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "いい香りがする",
+          "知り合いに会う",
+          "見晴らしが開ける",
+          "好きな曲が流れる"
+        ],
+        [
+          "A pleasant smell",
+          "Running into someone I know",
+          "A view opening up",
+          "Hearing a favorite song"
+        ],
+        [
+          "いいかおりがする",
+          "しりあいにあう",
+          "みはらしがひらける",
+          "すきなきょくがながれる"
+        ]
+      ],
+      "difficulty": "EASY"
+    }
+  ],
+  "NEAREST": [
+    {
+      "category": "ANIMALS",
+      "prompt": [
+        "庭に野鳥用の水皿を置く。直径は何センチにしたい？",
+        "What diameter in centimeters would you choose for a garden bird bath?",
+        "にわにやちょうようのみずさらをおく。ちょっけいはなんせんちにしたい？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [],
+        [],
+        []
+      ],
+      "difficulty": "HARD"
+    },
+    {
+      "category": "LOVE",
+      "prompt": [
+        "年の初めに何人の友達へ、自分から連絡したい？",
+        "How many friends would you contact first at the start of the year?",
+        "ねんのはじめになんにんのともだちへ、じぶんかられんらくしたい？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [],
+        [],
+        []
+      ],
+      "difficulty": "EASY"
+    },
+    {
+      "category": "DAILY",
+      "prompt": [
+        "一日に同じ傘を何回まで畳んだり開いたりしても平気？",
+        "How many times a day would you happily open and close the same umbrella?",
+        "いちにちにおなじかさをなんかいまでたたんだりひらいたりしてもへいき？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [],
+        [],
+        []
+      ],
+      "difficulty": "EASY"
+    },
+    {
+      "category": "TRANSPORT",
+      "prompt": [
+        "街を歩くとき、横断歩道の青信号は何秒あると安心？",
+        "How many seconds of green light feel comfortable at a pedestrian crossing?",
+        "まちをあるくとき、おうだんほどうのあおしんごうはなんびょうあるとあんしん？"
+      ],
+      "answer": [
+        "",
+        "",
+        ""
+      ],
+      "aliases": [],
+      "options": [
+        [],
+        [],
+        []
+      ],
+      "difficulty": "EASY"
+    }
+  ],
+  "DRAW": [
+    {
+      "category": "FANTASY",
+      "prompt": [
+        "絵で伝えよう：空中に浮いた階段",
+        "Draw: Floating stairs",
+        "えでつたえよう：くうちゅうにういたかいだん"
+      ],
+      "answer": [
+        "空中に浮いた階段",
+        "Floating stairs",
+        "くうちゅうにういたかいだん"
+      ],
+      "aliases": [],
+      "options": [
+        [],
+        [],
+        []
+      ],
+      "difficulty": "HARD"
+    },
+    {
+      "category": "TRANSPORT",
+      "prompt": [
+        "絵で伝えよう：踏切で下りた遮断機",
+        "Draw: A lowered railroad crossing gate",
+        "えでつたえよう：ふみきりでおりたしゃだんき"
+      ],
+      "answer": [
+        "踏切で下りた遮断機",
+        "A lowered railroad crossing gate",
+        "ふみきりでおりたしゃだんき"
+      ],
+      "aliases": [],
+      "options": [
+        [],
+        [],
+        []
+      ],
+      "difficulty": "NORMAL"
+    },
+    {
+      "category": "DAILY",
+      "prompt": [
+        "絵で伝えよう：物干しロープに並んだ靴下",
+        "Draw: Socks on a clothesline",
+        "えでつたえよう：ものほしろーぷにならんだくつした"
+      ],
+      "answer": [
+        "物干しロープに並んだ靴下",
+        "Socks on a clothesline",
+        "ものほしろーぷにならんだくつした"
+      ],
+      "aliases": [],
+      "options": [
+        [],
+        [],
+        []
+      ],
+      "difficulty": "EASY"
+    }
+  ],
+  "STANDARD": [
+    {
+      "category": "LOVE",
+      "prompt": [
+        "友達と交互に書いて渡し合うノートを何という？",
+        "What do people call a notebook they take turns writing in and passing back?",
+        "ともだちとこうごにかいてわたしあうのーとをなんという？"
+      ],
+      "answer": [
+        "交換日記",
+        "Exchange diary",
+        "こうかんにっき"
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "交換日記",
+          "家計簿",
+          "地図帳",
+          "出席簿"
+        ],
+        [
+          "Exchange diary",
+          "Household ledger",
+          "Atlas",
+          "Attendance book"
+        ],
+        [
+          "こうかんにっき",
+          "かけいぼ",
+          "ちずちょう",
+          "しゅっせきぼ"
+        ]
+      ],
+      "difficulty": "EASY"
+    },
+    {
+      "category": "WORLD",
+      "prompt": [
+        "フィンランドとスウェーデンの間に広がる海は？",
+        "What sea lies between Finland and Sweden?",
+        "ふぃんらんどとすうぇーでんのあいだにひろがるうみは？"
+      ],
+      "answer": [
+        "バルト海",
+        "Baltic Sea",
+        "ばるとかい"
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "バルト海",
+          "黒海",
+          "紅海",
+          "カリブ海"
+        ],
+        [
+          "Baltic Sea",
+          "Black Sea",
+          "Red Sea",
+          "Caribbean Sea"
+        ],
+        [
+          "ばるとかい",
+          "こっかい",
+          "こうかい",
+          "かりぶかい"
+        ]
+      ],
+      "difficulty": "HARD"
+    },
+    {
+      "category": "DAILY",
+      "prompt": [
+        "濡れた手でねじのふたを回すと滑る。布をかぶせると開けやすいのはなぜ？",
+        "Why does covering a slippery screw-top lid with a cloth help you open it?",
+        "ぬれたてでねじのふたをまわすとすべる。ぬのをかぶせるとひらけやすいのはなぜ？"
+      ],
+      "answer": [
+        "手とふたの間の摩擦を増やせる",
+        "It improves grip",
+        "てとふたのあいだのまさつをふやせる"
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "手とふたの間の摩擦を増やせる",
+          "容器の中の空気が減る",
+          "金属の重さが軽くなる",
+          "ふたのねじ山が増える"
+        ],
+        [
+          "It improves grip",
+          "It removes air from the jar",
+          "It makes metal lighter",
+          "It adds threads to the lid"
+        ],
+        [
+          "てとふたのあいだのまさつをふやせる",
+          "ようきのなかのくうきがへる",
+          "きんぞくのおもさがかるくなる",
+          "ふたのねじやまがふえる"
+        ]
+      ],
+      "difficulty": "HARD"
+    },
+    {
+      "category": "FOOD",
+      "prompt": [
+        "こんにゃくの主な原料は何からとる？",
+        "What is the main ingredient of konnyaku made from?",
+        "こんにゃくのおもなげんりょうはなにからとる？"
+      ],
+      "answer": [
+        "こんにゃくいも",
+        "Konjac corm",
+        "こんにゃくいも"
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "こんにゃくいも",
+          "サトイモ",
+          "もち米",
+          "トウモロコシ"
+        ],
+        [
+          "Konjac corm",
+          "Taro",
+          "Glutinous rice",
+          "Corn"
+        ],
+        [
+          "こんにゃくいも",
+          "さといも",
+          "もちこめ",
+          "とうもろこし"
+        ]
+      ],
+      "difficulty": "EASY"
+    },
+    {
+      "category": "NATURE",
+      "prompt": [
+        "地面にできる影が晴れた正午ごろに短くなるのはなぜ？",
+        "Why do shadows usually shorten around noon on a clear day?",
+        "じめんにできるかげがはれたしょうごごろにみじかくなるのはなぜ？"
+      ],
+      "answer": [
+        "太陽が空の高い位置に来るから",
+        "The Sun is higher in the sky",
+        "たいようがそらのたかいいちにくるから"
+      ],
+      "aliases": [],
+      "options": [
+        [
+          "太陽が空の高い位置に来るから",
+          "地面が温まるから",
+          "風が弱まるから",
+          "空気が乾くから"
+        ],
+        [
+          "The Sun is higher in the sky",
+          "The ground warms up",
+          "The wind slows",
+          "The air dries out"
+        ],
+        [
+          "たいようがそらのたかいいちにくるから",
+          "じめんがあたたまるから",
+          "かぜがよわまるから",
+          "くうきがかわくから"
+        ]
+      ],
+      "difficulty": "NORMAL"
+    }
+  ]
+}

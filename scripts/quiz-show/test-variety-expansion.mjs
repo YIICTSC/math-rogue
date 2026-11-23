@@ -25,14 +25,14 @@ const authored=sourceKinds.flatMap(mode=>raw[mode].slice(-80).map(q=>q.prompt[0]
 for(const mode of ['CONSENSUS','MAJORITY','VOTE','WOLF','NEAREST'])assert(raw[mode].slice(-80).every(q=>q.answer.every(a=>a==='')));
 for(const mode of ['MAJORITY','VOTE'])assert(raw[mode].slice(-80).every(q=>!factual.has(q.prompt[0])));
 for(const language of ['JAPANESE','ENGLISH','HIRAGANA']){
- for(const mode of ['STANDARD','BUZZER','SURVIVAL','TEAMS'])for(const q of E.varietyQuestions(mode,language).slice(-80)){
+ for(const mode of ['STANDARD','BUZZER','SURVIVAL','TEAMS'])for(const q of E.varietyQuestions(mode,language)){
   const w=round(mode,q),id=w.round.id;if(mode==='BUZZER')cmd(w,{type:'buzz',roundId:id},P('a'));
   cmd(w,{type:'answer',roundId:id,text:q.answer,ink:[],submit:true},P('a'));assert.equal(w.round.grades.a,true);cmd(w,{type:'close',roundId:id});cmd(w,{type:'score',roundId:id});assert.equal(w.players.a.score,100);
  }
- for(const q of E.varietyQuestions('DRAW',language).slice(-80)){
+ for(const q of E.varietyQuestions('DRAW',language)){
   const w=round('DRAW',q),id=w.round.id,text=q.aliases.find(a=>a!==q.answer)||q.answer;
   cmd(w,{type:'answer',roundId:id,text,ink:[],submit:true},P('b'));cmd(w,{type:'close',roundId:id});cmd(w,{type:'score',roundId:id});assert.equal(w.players.b.score,100,'Accepted drawing answer: '+text);
  }
 }
 assert.deepEqual(raw.CONSENSUS.slice(-80),raw.WOLF.slice(-80),'Wolf uses consensus material without inventing fixed correct answers');
-console.log('PASS 800 additional mode entries from 480 authored prompts; 20 categories × 4 per mode, distinct prompt families, 960 automatic factual scores, 240 drawing aliases and opinion/survey semantics.');
+console.log('PASS original expansion data and scoring of every active knowledge and drawing prompt in all three languages.');

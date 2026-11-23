@@ -2,9 +2,30 @@ import type { LanguageMode } from '../types';
 import type { PartyCategory, ShowMode, ShowQuestion } from './types';
 import prompts from './partyPrompts.json';
 import variety from './varietyPrompts.json';
+import reviewed from './reviewedPrompts.json';
 interface PartyPrompt { prompt: string[]; answer: string[]; aliases: string[]; options: string[][]; difficulty: string; category?: string }
 const banks: Record<ShowMode,PartyPrompt[]> = prompts;
 const additions: Record<ShowMode,PartyPrompt[]> = variety;
+const newQuestions: Partial<Record<ShowMode,PartyPrompt[]>> = reviewed;
+const knowledgeModes: ReadonlySet<ShowMode> = new Set(['STANDARD','BUZZER','SURVIVAL','TEAMS']);
+
+// Keep source positions as IDs. Retired rows stay in the original data for older rooms.
+const starterLimits: Record<ShowMode,number> = {
+ STANDARD:12, BUZZER:12, SURVIVAL:12, TEAMS:12, CONSENSUS:20,
+ WOLF:0, MAJORITY:0, VOTE:0, DRAW:20, NEAREST:20,
+};
+const retiredStarter: Partial<Record<ShowMode,number[]>> = {
+ STANDARD:[2,10], SURVIVAL:[0,11], TEAMS:[3,8], BUZZER:[9],
+ CONSENSUS:[2,3,7,9,11,12,15,17,19],
+ DRAW:[1,2,7,10,17], NEAREST:[4,6,7,14,18],
+};
+const sharedOpinionPrefix: ReadonlySet<ShowMode> = new Set(['CONSENSUS','WOLF','VOTE']);
+const retiredKnowledge = [20,23,61,68,72,77,83];
+const retiredVariety: Partial<Record<ShowMode,number[]>> = {
+ MAJORITY:[1,7,23,25,28,29,32,34,40,42,56],
+ NEAREST:[3,11,12,17,18,40,44,47,63,100],
+ DRAW:[1],
+};
 export const CATEGORY_COPY: Record<PartyCategory,[string,string,string]> = {
  ALL:['すべて','All categories','すべて'],ANIMALS:['どうぶつ','Animals','どうぶつ'],FOOD:['たべもの','Food','たべもの'],LOVE:['恋愛・友情','Love & friendship','れんあい・ゆうじょう'],DAILY:['くらし','Everyday life','くらし'],WORLD:['旅・世界','Travel & the world','たび・せかい'],NATURE:['自然・科学','Nature & science','しぜん・かがく'],CULTURE:['音楽・物語','Music & stories','おんがく・ものがたり'],FANTASY:['もしも・空想','What if?','もしも・くうそう'],
  SPORTS:['スポーツ','Sports','スポーツ'],GAMES:['ゲーム・遊び','Games & play','ゲーム・あそび'],SCHOOL:['学校・青春','School days','がっこう・せいしゅん'],WORK:['仕事・発明','Jobs & inventions','しごと・はつめい'],HISTORY:['歴史・昔の暮らし','History & life in the past','れきし・むかしのくらし'],TECH:['デジタル・未来','Digital life & the future','デジタル・みらい'],MYSTERY:['ひらめき・謎','Puzzles & mysteries','ひらめき・なぞ'],MONEY:['お金・買い物','Money & shopping','おかね・かいもの'],SEASONS:['季節・行事','Seasons & celebrations','きせつ・ぎょうじ'],TRANSPORT:['乗り物','Transport','のりもの'],HEALTH:['からだ・健康','Body & well-being','からだ・けんこう'],SPACE:['宇宙・天体','Space & astronomy','うちゅう・てんたい'],
@@ -48,11 +69,24 @@ function question(mode:ShowMode,language:LanguageMode,q:PartyPrompt,id:string):S
  const locale=language==='ENGLISH'?1:language==='HIRAGANA'?2:0;
  return {id,prompt:q.prompt[locale],answer:q.answer[locale],aliases:[...new Set([...q.aliases,...q.answer.filter(Boolean),q.answer[1].replace(/^(?:a|an) /,'')])].filter(Boolean),options:q.options[locale]||[],format:mode==='DRAW'?'FLIP':'TEXT',seconds:mode==='DRAW'||mode==='VOTE'?90:mode==='BUZZER'?25:mode==='NEAREST'?60:40,points:100,party:true,difficulty:q.difficulty as ShowQuestion['difficulty'],category:q.category as ShowQuestion['category']||classify(q.prompt[0]),opinion:['CONSENSUS','MAJORITY','WOLF','VOTE','NEAREST'].includes(mode)};
 }
-/** Preserve the original 60-question packs and IDs for saved rooms. */
-export function starterQuestions(mode: ShowMode, language: LanguageMode): ShowQuestion[] {
- return banks[mode].map((q,i)=>question(mode,language,q,`starter-${mode}-${i}`));
-}
 /** Category and difficulty filtering is authoritative, shared by host and server. */
 export function varietyQuestions(mode:ShowMode,language:LanguageMode):ShowQuestion[]{
- return [...starterQuestions(mode,language),...additions[mode].map((q,i)=>question(mode,language,q,`variety-${mode}-${i}`))];
+ const original = banks[mode].flatMap((q,i)=>i<starterLimits[mode]&&!retiredStarter[mode]?.includes(i)
+  ? [question(mode,language,q,`starter-${mode}-${i}`)] : []);
+ const retired = knowledgeModes.has(mode)?retiredKnowledge:retiredVariety[mode];
+ const expanded = additions[mode].flatMap((q,i)=>(!sharedOpinionPrefix.has(mode)||i>=64)&&!retired?.includes(i)
+  ? [question(mode,language,q,`variety-${mode}-${i}`)] : []);
+ const authored = newQuestions[knowledgeModes.has(mode)?'STANDARD':mode]??[];
+ return [...original,...expanded,...authored.map((q,i)=>question(mode,language,q,`reviewed-${mode}-${i}`))];
+}
+
+/** Give new rooms one prompt per category and level while keeping the catalogue IDs. */
+export function starterQuestions(mode: ShowMode, language: LanguageMode): ShowQuestion[] {
+ const bank=varietyQuestions(mode,language);
+ const preferred=[...bank.filter(q=>q.id.startsWith('reviewed-')),...bank];
+ return (['EASY','NORMAL','HARD'] as const).flatMap(level=>
+  Object.keys(CATEGORY_COPY).flatMap(category=>{
+   const q=preferred.find(entry=>entry.category===category&&entry.difficulty===level);
+   return q?[q]:[];
+  }));
 }
