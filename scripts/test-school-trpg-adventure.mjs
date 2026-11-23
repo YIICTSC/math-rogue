@@ -27,6 +27,8 @@ try {
   const [field, frontier, fieldWorld, fieldActions, tactics] = await Promise.all(
     ['frontierContent', 'frontierState', 'frontierWorld', 'frontierActions', 'fieldTactics'].map((file) => vite.ssrLoadModule(path + file + '.ts')),
   );
+  const { BATTLE_ART } = await vite.ssrLoadModule(path + 'battleFeedback.ts');
+  const { TECHNIQUES, loadoutTechniques } = await vite.ssrLoadModule(path + 'battleTechniques.ts');
   const { adventureTransition: transition } = engine;
   const { defaultCharacter, startAdventure, PORTRAIT_IDS, nextRandom } = state;
   const draft = { ...defaultCharacter(), name: 'Aoi', calling: 'envoy' };
@@ -691,6 +693,12 @@ try {
   state.advance(liquidKit, 24);
   assert.equal(frontier.thirst(liquidKit), 24);
   assert(frontier.fieldCheck(liquidKit, 'insight') < 0);
+  const refilled = operate(liquidKit, { kind: 'well' });
+  assert.equal(frontier.thirst(refilled), 0);
+  assert.equal(refilled.gold, liquidKit.gold);
+  assert.equal(refilled.frontier.liquids.water, liquidKit.frontier.liquids.water);
+  assert.equal(frontier.thirstPenalty(refilled), 0);
+  assert.match(refilled.journal[0].text[1], /town well/);
   liquidKit = operate(liquidKit, { kind: 'drink', id: 'water' });
   assert.equal(frontier.thirst(liquidKit), 0);
   liquidKit = operate(liquidKit, { kind: 'fill', id: 'oil' });
@@ -797,6 +805,108 @@ try {
   assert.deepEqual(save.loadAdventures(), [manual]);
   assert(save.deleteAdventure(manual.id));
 
+  assert.equal(Object.keys(TECHNIQUES).length, 15);
+  const effectHashes = await Promise.all(BATTLE_ART.map(async (name) => {
+    const image = await readFile('public/sprites/school-adventure/combat/' + name + '.webp');
+    assert.equal(image.subarray(8, 12).toString(), 'WEBP', name);
+    assert(image.length > 10000, name);
+    return createHash('sha256').update(image).digest('hex');
+  }));
+  assert.equal(new Set(effectHashes).size, 12);
+
+  const lane = [0, 1, 2, 3, 4].map((x) => 4 * world.SIDE + x + 1);
+  const testBattle = (weapon, calling, cells = [lane[1], lane[3]]) => {
+    const fixture = structuredClone(manual);
+    fixture.delve.cell = lane[0];
+    fixture.delve.light = 12;
+    fixture.hp = state.maxHp(fixture);
+    fixture.focus = 12;
+    fixture.followers = [];
+    fixture.lastMealAt = fixture.time;
+    fixture.rng = seedFor((face) => face === 18);
+    fixture.character.calling = calling;
+    state.equipped(fixture, 'weapon').weapon = weapon;
+    fixture.frontier.alterations[world.floorKey(fixture.location, fixture.delve.floor)] = {
+      dug: lane,
+      patches: {},
+    };
+    const battle = fixture.delve.encounter;
+    const template = content.FOES.findIndex((foe) => foe.pattern[0] === 'strike');
+    battle.turn = 1;
+    battle.enemies = cells.map(() => ({ template, pattern: 0, hp: 90, max: 90, power: 4, known: false, stagger: false }));
+    battle.allies = [];
+    battle.tactics = { cells, aim: null };
+    return fixture;
+  };
+  const perform = (fixture, move, target = 0) => {
+    const events = [];
+    const result = transition(fixture, { type: 'combat', move, target }, events);
+    assert.notEqual(result, fixture, move);
+    assert(!Object.hasOwn(result, 'events'), 'Visual feedback stays outside the save');
+    return { result, events, battle: result.delve.encounter };
+  };
+  const vanguard = testBattle('hammer', 'vanguard');
+  assert.deepEqual(loadoutTechniques(vanguard), ['hammerDrive', 'vanguardBash']);
+  const collision = perform(vanguard, 'hammerDrive');
+  assert.equal(collision.result.focus, vanguard.focus - TECHNIQUES.hammerDrive.cost);
+  assert.equal(collision.battle.tactics.cells[0], lane[2], 'The primary target stops before the blocker');
+  assert.equal(collision.battle.tactics.cells[1], lane[3]);
+  assert.deepEqual(collision.events.filter(({ art, outcome }) => art === 'collision' && outcome === 'hit')
+    .map(({ to, hp }) => [to.cell, hp]), [[lane[2], -4], [lane[3], -4]]);
+  assert.equal(collision.events[0].from.cell, lane[0]);
+  assert.equal(collision.events[0].to.cell, lane[1]);
+  assert.equal(vanguard.delve.encounter.enemies[0].hp, 90);
+  assert.equal(transition(vanguard, { type: 'combat', move: 'bowPin', target: 0 }), vanguard);
+
+  const edge = 5 * world.SIDE - 2;
+  const wallFight = testBattle('hammer', 'vanguard', [edge]);
+  wallFight.delve.cell = edge - 1;
+  wallFight.frontier.alterations[world.floorKey(wallFight.location, wallFight.delve.floor)].dug.push(edge - 1, edge);
+  assert(!fieldWorld.fieldFloor(wallFight).open.has(edge + 1));
+  const wallImpact = perform(wallFight, 'hammerDrive');
+  assert.equal(wallImpact.battle.tactics.cells[0], edge);
+  assert(wallImpact.events.some(({ art, to, hp }) => art === 'collision' && to.cell === edge && hp === -4));
+  const defended = perform(testBattle('knife', 'scout', [lane[1]]), 'guard');
+  assert(defended.events.some(({ from, to, outcome, hp }) =>
+    from.side === 'foe' && from.cell === lane[1] &&
+    to.side === 'hero' && to.cell === lane[0] && outcome === 'block' && hp < 0));
+
+  const burning = testBattle('spear', 'captain', [lane[1]]);
+  const patches = burning.frontier.alterations[world.floorKey(burning.location, burning.delve.floor)].patches;
+  patches[lane[2]] = { terrain: 'fire', until: null };
+  const shoved = perform(burning, 'pikeShove');
+  assert(shoved.events.some(({ art, to, hp }) => art === 'fire' && to.cell === lane[2] && hp === -5));
+  const oil = testBattle('hammer', 'artisan');
+  oil.frontier.alterations[world.floorKey(oil.location, oil.delve.floor)].patches[lane[1]] = { terrain: 'oil', until: null };
+  const ignited = perform(oil, 'artisanSpark');
+  assert.equal(fieldWorld.terrainAt(ignited.result, lane[1], ignited.result.delve.floor), 'fire');
+  assert(ignited.events.some(({ art, hp }) => art === 'fire' && hp === -5));
+
+  const archer = testBattle('bow', 'scout', [lane[3]]);
+  const pinned = perform(archer, 'bowPin');
+  assert.equal(pinned.battle.tactics.cells[0], lane[3]);
+  assert.equal(pinned.battle.enemies[0].pinnedUntil, pinned.battle.turn);
+  assert(pinned.events.some(({ art, to }) => art === 'snare' && to.cell === lane[3]));
+  const marks = perform(archer, 'scoutMark');
+  const repeat = (fixture) => {
+    fixture.rng = seedFor((face) => face === 18);
+    return perform(fixture, 'strike').events[0].hp;
+  };
+  const unmarked = structuredClone(marks.result);
+  delete unmarked.delve.encounter.enemies[0].markedUntil;
+  assert.equal(repeat(marks.result), repeat(unmarked) - 3);
+  assert.equal(save.saveAdventure(pinned.result, null), 'saved');
+  assert.deepEqual(save.loadAdventures(), [pinned.result]);
+  assert(save.deleteAdventure(pinned.result.id));
+
+  const conduit = testBattle('staff', 'scholar');
+  const puddles = conduit.frontier.alterations[world.floorKey(conduit.location, conduit.delve.floor)].patches;
+  for (const cell of [lane[1], lane[2]]) puddles[cell] = { terrain: 'puddle', until: null };
+  assert.equal(transition(conduit, { type: 'combat', move: 'scholarSeal', target: 0 }), conduit);
+  const lightning = perform(conduit, 'staffChain');
+  assert(lightning.events.some(({ art, from, to, hp }) =>
+    art === 'shock' && from.cell === lane[1] && to.cell === lane[3] && hp < 0));
+
   const legacy = structuredClone(original);
   legacy.version = 1;
   delete legacy.journey;
@@ -881,7 +991,7 @@ try {
   assert.deepEqual(save.loadAdventures(), []);
   assert.equal(storage.get(originalStory.SCHOOL_TRPG_SAVE_KEY), 'existing-story');
   console.log(
-    `PASS 40 unique portraits, ${newArt.length + fieldArt.length} adventure assets, ${floors} seeded floors, expeditions, tactical movement, field devices and reactions, six historic records, and v1–v4 save migration.`,
+    `PASS 40 unique portraits, ${newArt.length + fieldArt.length} adventure assets, ${BATTLE_ART.length} battle effects, ${Object.keys(TECHNIQUES).length} techniques, ${floors} seeded floors, expeditions, hydration, tactical reactions, six historic records, and v1–v4 save migration.`,
   );
 } finally {
   await vite.close();

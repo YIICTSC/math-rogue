@@ -53,7 +53,7 @@ import {
   fieldRecipe,
   fieldSkill,
   hasAuxiliaryMount,
-  thirst,
+  thirstPenalty,
   totalLiquid,
   vesselCapacity,
   type DeviceItem,
@@ -67,6 +67,7 @@ import {
   terrainAt,
 } from './frontierWorld';
 import { marketPrice } from './life';
+import { hydrationLabel } from './FrontierSurvival';
 import { affordable, maxHp, MAX_PARTY_SIZE, type Adventure } from './state';
 import { addressKey, residentPresent, residentsAt, townAt } from './world';
 import { art, type Local, type Send } from './ui';
@@ -367,9 +368,9 @@ export function FieldStatus({ s, t }: Pick<Props, 's' | 't'>) {
   return (
     <div className="sa-field-status">
       {s.frontier.rules.weather && (
-        <span>
+        <span className={thirstPenalty(s) ? 'sa-field-wound' : undefined}>
           <Droplets size={14} />
-          {t(['水を飲んでから', 'Since drinking', 'みずを のんでから'])} {thirst(s)}h
+          {t(hydrationLabel(s))}
         </span>
       )}
       {resonance > 0 && (

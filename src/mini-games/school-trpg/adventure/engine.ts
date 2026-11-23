@@ -1,4 +1,5 @@
 import { applyDelveAction } from './delve';
+import type { BattleEvent } from './battleFeedback';
 import { applyTownAction, declareInTown } from './life';
 import { claimBadge } from './guild';
 import { STAT_IDS } from './content';
@@ -9,13 +10,13 @@ import { FORMATIONS } from './journeyState';
 import { fileHistory } from './ruinSystems';
 import { finishDefeat, note, type Action, type Adventure } from './state';
 
-export function adventureTransition(state: Adventure, action: Action) {
+export function adventureTransition(state: Adventure, action: Action, events?: BattleEvent[]) {
   if (state.fallenAt !== null) return state;
   const next = structuredClone(state);
   let changed: boolean;
   switch (action.type) {
     case 'field':
-      changed = next.delve ? applyDelveAction(next, action) : applyField(next, action.operation);
+      changed = next.delve ? applyDelveAction(next, action, events) : applyField(next, action.operation);
       break;
     case 'file-history':
       changed = fileHistory(next, action.key, action.choice);
@@ -57,13 +58,13 @@ export function adventureTransition(state: Adventure, action: Action) {
       const statement = action.statement.trim().slice(0, 120);
       if (!statement || !STAT_IDS.includes(action.stat)) return state;
       const declaration = { ...action, statement };
-      changed = next.delve ? applyDelveAction(next, declaration) : declareInTown(next, declaration);
+      changed = next.delve ? applyDelveAction(next, declaration, events) : declareInTown(next, declaration);
       break;
     }
     default:
       changed =
         next.delve || action.type === 'enter'
-          ? applyDelveAction(next, action)
+          ? applyDelveAction(next, action, events)
           : applyTownAction(next, action);
   }
   if (!changed) return state;

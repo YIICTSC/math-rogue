@@ -156,7 +156,9 @@ function validSlot(slot: Adventure) {
           (e.tactics.linked === undefined || (e.tactics.linked && integer(e.tactics.linked.foe, 0, e.enemies.length - 1) && integer(e.tactics.linked.until))))) &&
         e.enemies.every(
           (foe) =>
-            integer(foe.template, 0, FOES.length - 1) && integer(foe.hp) && integer(foe.max, 1),
+            integer(foe.template, 0, FOES.length - 1) && integer(foe.hp) && integer(foe.max, 1) &&
+            (foe.pinnedUntil === undefined || integer(foe.pinnedUntil, 1, e.turn + 1)) &&
+            (foe.markedUntil === undefined || integer(foe.markedUntil, 1, e.turn + 3)),
         )))
   );
 }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ScreenDialog from './ScreenDialog';
 import PanelNavigation from './PanelNavigation';
+import { HYDRATION_MENU, SURVIVAL_GUIDE, SurvivalGuide, TownHydration } from './FrontierSurvival';
 import {
   ArrowDown,
   ArrowLeft,
@@ -9,6 +10,7 @@ import {
   BookOpen,
   Compass,
   DoorOpen,
+  Droplets,
   Hammer,
   Home,
   Leaf,
@@ -206,12 +208,18 @@ export function TownOverview({
   const taleRecord = s.townTales[key];
   const season = seasonAt(s.time);
   const expedition = s.journey.expedition;
-  const [panel, setPanel] = useState<'landmark' | 'commissions' | null>(null);
+  const [panel, setPanel] = useState<'landmark' | 'commissions' | 'water' | 'guide' | null>(null);
   const ruinTitle = t(biome.ruin);
   return (
     <div className="sa-town-hub">
       <section className="sa-town-banner" data-night={isNight(s.time) || undefined}>
         <img src={art(townArt(s.location))} alt="" decoding="async" />
+        <nav className="sa-town-utility" aria-label={t(['町での備え', 'Town provisions', 'まちでの そなえ'])}>
+          <button type="button" onClick={() => setPanel('water')}><Droplets size={16} />{t(HYDRATION_MENU)}</button>
+          <button type="button" onClick={() => setPanel('guide')} aria-label={t(SURVIVAL_GUIDE)}>
+            <BookOpen size={16} />{t(['生き方', 'Life guide', 'いきかた'])}
+          </button>
+        </nav>
         <div>
           <span>
             {t(realmName(s.location.world))} · {t(biome.name)}
@@ -287,14 +295,14 @@ export function TownOverview({
       {panel && (
         <ScreenDialog
           title={
-            panel === 'commissions'
+            panel === 'water' ? t(HYDRATION_MENU) : panel === 'guide' ? t(SURVIVAL_GUIDE) : panel === 'commissions'
               ? t(['依頼掲示板', 'Commissions', 'いらいけいじばん'])
               : t(town.name)
           }
           t={t}
           close={() => setPanel(null)}
         >
-          {panel === 'commissions' ? (
+          {panel === 'water' ? <TownHydration s={s} t={t} send={send} showGuide={() => setPanel('guide')} /> : panel === 'guide' ? <SurvivalGuide t={t} /> : panel === 'commissions' ? (
             <Commission state={s} send={send} t={t} />
           ) : (
             <div className="sa-stack">

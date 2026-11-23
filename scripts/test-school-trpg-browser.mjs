@@ -17,6 +17,14 @@ await writeFile(
   import { audioService } from './src/services/audioService';
   import './src/styles.css';
   audioService.playBGM = async () => {};
+  window.frontierBattleSounds = [];
+  for (const name of ['playAttackEffectSound', 'playStatusEffectSound']) {
+    const play = audioService[name].bind(audioService);
+    audioService[name] = (sound, ...args) => {
+      window.frontierBattleSounds.push(sound);
+      return play(sound, ...args);
+    };
+  }
   const languageMode = new URLSearchParams(location.search).get('jp') ? 'JAPANESE' : 'ENGLISH';
   function Menu() {
     const [screen, select] = React.useState(null);
@@ -227,12 +235,19 @@ try {
   for (const viewport of smallScreens) {
     await view.setViewportSize(viewport);
     await checkOnScreen(view.locator('.sa-town-hub-actions button'), 'Town activities');
+    await checkOnScreen(view.locator('.sa-town-utility button'), 'Hydration and life guide');
     await checkViewport();
     await snap('frontier-town-' + viewport.width);
   }
   await view.setViewportSize({ width: 1300, height: 850 });
   await click('Commissions');
   await view.getByRole('dialog').waitFor();
+  await closePanel();
+  await click('How to live in the Frontier');
+  const living = view.getByRole('dialog', { name: 'How to live in the Frontier' });
+  await living.getByRole('heading', { name: 'Water and travel' }).waitFor();
+  await living.getByRole('heading', { name: 'Meals and rest' }).waitFor();
+  await living.getByText('After 24 hours', { exact: false }).waitFor();
   await closePanel();
 
   await click(/^Declare an action/);
@@ -342,6 +357,12 @@ try {
   const target = Object.entries(floor.features).find(([, feature]) => feature === 'pack');
   await walkInRuin(floor, Number(target[0]));
   await click('Confront');
+  const tutorial = view.getByRole('dialog', { name: 'Your first Frontier battle' });
+  await tutorial.waitFor();
+  const firstTurn = (await slot()).delve.encounter.turn;
+  await view.waitForTimeout(925);
+  assert.equal((await slot()).delve.encounter.turn, firstTurn, 'The first battle waits for the tutorial');
+  await tutorial.getByRole('button', { name: 'Continue to battle' }).tap();
   await view.getByRole('group', { name: 'Combat targets' }).waitFor();
   await click('Pause');
   const pausedTurn = (await slot()).delve.encounter.turn;
@@ -349,8 +370,15 @@ try {
   assert.equal((await slot()).delve.encounter.turn, pausedTurn);
   await click('Battle options');
   assert.equal(await view.locator('.sa-combat-party article').count(), 2);
+  await click('Combat tutorial');
+  await tutorial.waitFor();
   await closePanel();
+  await click('Combat techniques');
+  const techniques = view.getByRole('dialog', { name: 'Combat techniques' });
+  await techniques.getByRole('heading', { name: 'Star-ash pulse' }).waitFor();
+  await techniques.getByRole('heading', { name: 'Disarming question' }).waitFor();
   await snap('battle-phone');
+  await closePanel();
   for (const viewport of [
     { width: 844, height: 390 },
     { width: 568, height: 320 },
@@ -371,6 +399,9 @@ try {
     assert(round.y + round.height <= enemy.y, 'Turn and combo stay above the combat targets');
   }
   await click('Resume combat');
+  await view.waitForFunction(() =>
+    window.frontierBattleSounds.some((cue) => ['slash', 'flash', 'projectile', 'lightning', 'wind', 'impact'].includes(cue)),
+  );
   await view.getByRole('group', { name: 'Combat targets' }).waitFor({ state: 'detached', timeout: 25000 });
   assert((await slot()).counters.combats >= 1);
   await click('Return to town');
@@ -522,6 +553,31 @@ try {
   await click('Cook your blend');
   assert.equal((await slot()).frontier.recipe.base, 'grain');
   await snap('field-guide-phone');
+  await view.getByLabel('Thirst and terrain effects').check();
+  await click('Town life');
+  await click('Home');
+  await click('Wait eight hours');
+  await click('Wait eight hours');
+  await click('Explore');
+  await click('Hydration');
+  const hydration = view.getByRole('dialog', { name: 'Hydration' });
+  await hydration.getByText(/Dehydrated|Thirsty/).waitFor();
+  const beforeWater = await slot();
+  assert(await hydration.getByRole('button', { name: /^Drink from the well/ }).isEnabled());
+  await click(/^Drink from the well/);
+  assert.equal((await slot()).frontier.hydration, beforeWater.time);
+  assert.equal((await slot()).gold, beforeWater.gold);
+  await hydration.getByText('Hydrated', { exact: true }).waitFor();
+  const refill = hydration.getByRole('button', { name: /^Refill flask with water/ });
+  if (await refill.isEnabled()) {
+    await refill.tap();
+    assert.equal((await slot()).frontier.liquids.water, beforeWater.frontier.liquids.water + 1);
+    assert.equal((await slot()).gold, beforeWater.gold - 2);
+  }
+  await snap('frontier-hydration');
+  await closePanel();
+  await click('Journal');
+  await view.getByLabel('Thirst and terrain effects').uncheck();
   await click('Town life');
   await click('Market');
   if ((await slot()).goods.lantern < 2) await oil.getByRole('button', { name: /^Buy/ }).click();
@@ -539,9 +595,12 @@ try {
   assert.equal((await slot()).delve.encounter.turn, turn, 'Manual battles wait for the player');
   const step = board.locator('button[data-step]').first();
   const tile = Number(await step.getAttribute('data-tile'));
+  const soundsBeforeStep = await view.evaluate(() => window.frontierBattleSounds.length);
   await step.tap();
   assert.equal((await slot()).delve.cell, tile);
   assert.equal((await slot()).delve.encounter.turn, turn + 1);
+  await view.waitForFunction((count) =>
+    window.frontierBattleSounds.slice(count).includes('impact'), soundsBeforeStep);
   await checkViewport();
   const strike = await view.locator('.sa-tactical-moves button').first().boundingBox();
   const feed = await view.locator('.sa-feed').boundingBox();
@@ -568,6 +627,30 @@ try {
   await board.waitFor();
   assert.equal((await slot()).delve.cell, tile);
   assert.equal((await slot()).delve.encounter.turn, turn + 1);
+  const picturedFoe = board.locator('button[data-foe] img').first();
+  await picturedFoe.waitFor();
+  await view.waitForFunction(() => {
+    const sprite = document.querySelector('.sa-tactical-unit img');
+    return sprite?.naturalWidth > 0;
+  });
+  assert(await picturedFoe.getAttribute('src'), 'A creature sprite occupies its tactical tile');
+  assert.equal(await tutorial.count(), 0, 'The tutorial stays dismissed after a reload');
+  const firstFoe = board.locator('button[data-foe]').first();
+  await firstFoe.tap();
+  const foeCell = await firstFoe.getAttribute('data-tile');
+  await click('Combat techniques');
+  const pulse = techniques.getByRole('button', { name: 'Use · Star-ash pulse', exact: true });
+  assert(await pulse.isEnabled(), 'The selected tactical foe is within casting range');
+  const priorSounds = await view.evaluate(() => window.frontierBattleSounds.length);
+  await pulse.tap();
+  const impact = view.locator(`.sa-tactical-grid [data-battle-art="arcane"][data-hit-cell="${foeCell}"]`).first();
+  await impact.waitFor({ state: 'attached', timeout: 3000 });
+  const aim = await impact.evaluate((event) => parseFloat(event.style.getPropertyValue('--to-x')));
+  assert.equal(aim, ((Number(foeCell) % model.SIDE) + 0.5) * (100 / model.SIDE));
+  await impact.locator('.sa-strike-landing > img').evaluate((image) => image.decode(), null, { timeout: 3000 });
+  await view.waitForFunction((count) => window.frontierBattleSounds.slice(count).includes('flash'), priorSounds);
+  await view.waitForTimeout(135);
+  await snap('tactics-directed-impact');
   assert.deepEqual(errors, []);
 
   const jp = await browser.newPage({ viewport: { width: 320, height: 568 }, isMobile: true, hasTouch: true });
@@ -587,13 +670,19 @@ try {
   await jp.getByRole('button', { name: '新しい主人公', exact: true }).tap();
   await jp.getByLabel('名前', { exact: true }).fill('灯里');
   await jp.getByRole('button', { name: 'この主人公で冒険を始める', exact: true }).tap();
+  await jp.getByRole('button', { name: '水分補給', exact: true }).tap();
+  await jp.getByRole('dialog', { name: '水分補給' }).getByText('井戸で水を飲む', { exact: true }).waitFor();
+  await jp.getByRole('button', { name: 'フロンティアの世界での生き方', exact: true }).last().tap();
+  await jp.getByRole('dialog', { name: 'フロンティアの世界での生き方' })
+    .getByRole('heading', { name: '食事と休息', exact: true }).waitFor();
+  await jp.getByRole('button', { name: '閉じる', exact: true }).tap();
   await jp.getByRole('button', { name: '遺跡へ入る', exact: true }).tap();
   await checkOnScreen(jp.locator('.sa-delve-movement button, .sa-delve-actions button'), 'Japanese exploration controls');
   await jp.getByRole('button', { name: '右を向く', exact: true }).tap();
   await jp.getByRole('button', { name: '探索メニュー', exact: true }).tap();
   await jp.getByRole('dialog').getByRole('button', { name: '自由宣言', exact: true }).waitFor();
   console.log(
-    'PASS Frontier title and campaign routing, JP/EN phone layouts, dungeon controls, combat, exploration, and save reload',
+    'PASS Frontier title, campaign routing, JP/EN phone layouts, hydration, guide, first battle, directional combat art and sound, exploration, and save reload',
     out,
   );
 } finally {

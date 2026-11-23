@@ -1,4 +1,5 @@
 import { type Intent } from './content';
+import { techniqueFor } from './battleTechniques';
 import { fieldCondition, fieldSkill } from './frontierState';
 import {
   fieldFloor,
@@ -8,7 +9,7 @@ import {
   pathTo,
   terrainAt,
 } from './frontierWorld';
-import { cellPoint, floorKey, type Floor } from './world';
+import { cellPoint, floorKey, neighbor, type Floor } from './world';
 import { equipped, type Adventure, type CombatMove, type Encounter } from './state';
 
 export type Tactics = {
@@ -74,6 +75,8 @@ export function canTacticalStep(s: Adventure, cell: number, floor = fieldFloor(s
 }
 
 export function moveRange(s: Adventure, move: CombatMove) {
+  const technique = techniqueFor(move);
+  if (technique) return technique.range + Number(move === 'bowPin' && fieldSkill(s, 'marksman'));
   if (move === 'spark') return 4;
   if (move === 'parley' || move === 'befriend' || move === 'study') return 4;
   if (move !== 'strike') return 1;
@@ -86,12 +89,18 @@ export function tacticalTarget(s: Adventure, move: CombatMove, index: number, fl
   const d = s.delve;
   const battle = d?.encounter;
   if (!battle?.tactics) return true;
-  if (move === 'guard' || move === 'retreat') return true;
+  if (move === 'guard' || move === 'retreat' || techniqueFor(move)?.range === 0) return true;
   if (!(battle.enemies[index]?.hp > 0) || borrowedCreature(battle) === index) return false;
+  const from = actionPosition(s);
+  const target = battle.tactics.cells[index];
+  if (move === 'pikeShove') {
+    const a = cellPoint(from), b = cellPoint(target);
+    if (a.x !== b.x && a.y !== b.y) return false;
+  }
   return glancingSight(
     floor ?? fieldFloor(s),
-    actionPosition(s),
-    battle.tactics.cells[index],
+    from,
+    target,
     moveRange(s, move),
   );
 }
@@ -108,6 +117,7 @@ export function enemyInRange(
   const point = battle.tactics.cells[index];
   const range = intent === 'hex' || intent === 'drain' ? 3 : 1;
   if (glancingSight(floor, point, d.cell, range)) return true;
+  if ((battle.enemies[index].pinnedUntil ?? 0) >= battle.turn) return false;
   if (terrainAt(s, point, d.floor, floor) === 'resin' && battle.turn % 2 === 1) return false;
   const reached = pathsFrom(
     point,
@@ -116,6 +126,32 @@ export function enemyInRange(
   const path = pathTo(reached, point, d.cell);
   if (path.length > 1) battle.tactics.cells[index] = path[0];
   return false;
+}
+
+export function shoveFoe(s: Adventure, battle: Encounter, index: number, tiles: number, floor: Floor) {
+  const board = battle.tactics!;
+  const actor = cellPoint(actionPosition(s));
+  const origin = board.cells[index];
+  const foe = cellPoint(origin);
+  const dx = foe.x - actor.x, dy = foe.y - actor.y;
+  const direction = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 1 : 3) : (dy > 0 ? 2 : 0);
+  let cell = origin;
+  let collision: 'wall' | number | null = null;
+  for (let step = 0; step < tiles; step++) {
+    const next = neighbor(cell, direction);
+    if (!floor.open.has(next) || next === s.delve!.cell) {
+      collision = 'wall';
+      break;
+    }
+    const blockingFoe = board.cells.findIndex((point, other) => point === next && other !== index && battle.enemies[other].hp > 0);
+    if (blockingFoe >= 0) {
+      if (blockingFoe !== borrowedCreature(battle)) collision = blockingFoe;
+      break;
+    }
+    cell = next;
+  }
+  board.cells[index] = cell;
+  return { origin, cell, collision };
 }
 
 export function coverBonus(s: Adventure, floor: Floor) {

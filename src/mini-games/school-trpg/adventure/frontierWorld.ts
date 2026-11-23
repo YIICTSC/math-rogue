@@ -228,6 +228,12 @@ export function pourAt(s: Adventure, cell: number, liquid: Liquid) {
   return terrain;
 }
 
+export function igniteOilAt(s: Adventure, cell: number, floor: Floor) {
+  if (terrainAt(s, cell, s.delve!.floor, floor) !== 'oil') return false;
+  mutableFloor(s).patches[cell] = { terrain: 'fire', until: s.time + 4 };
+  return true;
+}
+
 export function fieldHazard(
   s: Adventure,
   cell: number,

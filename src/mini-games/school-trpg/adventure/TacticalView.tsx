@@ -1,7 +1,10 @@
 import React, { useEffect } from 'react';
-import { Crosshair, Sparkles, Swords } from 'lucide-react';
+import { Anchor, Crosshair, Sparkles, Swords } from 'lucide-react';
 import { FOES, INTENTS, creatureArt, type Text } from './content';
-import { COMBAT_MOVES, damageNames, foeIntent, recordFor } from './delve';
+import { COMBAT_MOVES, canCombatMove, damageNames, foeIntent, recordFor } from './delve';
+import { BattleEffects } from './BattleEffects';
+import { battleCueDelay, type BattleCue } from './battleFeedback';
+import { loadoutTechniques, techniqueFor } from './battleTechniques';
 import { TERRAIN } from './frontierContent';
 import {
   actionPosition,
@@ -9,10 +12,8 @@ import {
   canTacticalStep,
   distanceToTarget,
   moveRange,
-  occupied,
   tacticalTarget,
 } from './fieldTactics';
-import { fieldSkill } from './frontierState';
 import { glancingSight, terrainAt } from './frontierWorld';
 import { type Adventure, type CombatMove } from './state';
 import { neighbor, SIDE, type Floor } from './world';
@@ -26,16 +27,9 @@ type Props = {
   send: Send;
   t: Local;
   modalOpen: boolean;
+  cue?: BattleCue | null;
 };
-const ATTACKS: readonly CombatMove[] = [
-  'strike',
-  'heavy',
-  'quick',
-  'spark',
-  'guard',
-  'study',
-  'parley',
-];
+const ATTACKS: readonly CombatMove[] = ['strike', 'spark', 'guard', 'study'];
 const MOVE_LABELS: Partial<Record<CombatMove, Text>> = {
   heavy: ['崩し', 'Break', 'くずし'],
   spark: ['星灯', 'Spell', 'ほしあかり'],
@@ -44,7 +38,7 @@ const MOVE_LABELS: Partial<Record<CombatMove, Text>> = {
   befriend: ['勧誘', 'Recruit', 'かんゆう'],
 };
 
-export function TacticalView({ s, floor, target, select, send, t, modalOpen }: Props) {
+export function TacticalView({ s, floor, target, select, send, t, modalOpen, cue }: Props) {
   const d = s.delve!;
   const battle = d.encounter!;
   const grid = battle.tactics!;
@@ -52,6 +46,12 @@ export function TacticalView({ s, floor, target, select, send, t, modalOpen }: P
   const hero = d.cell;
   const from = actionPosition(s);
   const linked = borrowedCreature(battle);
+  const creatures = battle.enemies.map((enemy) => art(creatureArt(FOES[enemy.template])));
+  const casualties = new Set(
+    cue?.events.flatMap((event) =>
+      event.hp && event.hp < 0 && event.to.side === 'foe' ? [event.to.index] : [],
+    ),
+  );
   const canSee = (cell: number) => glancingSight(floor, from, cell, 6);
   useEffect(() => {
     if (modalOpen) return;
@@ -113,12 +113,14 @@ export function TacticalView({ s, floor, target, select, send, t, modalOpen }: P
         {Array.from({ length: SIDE * SIDE }, (_, cell) => {
           const open = floor.open.has(cell);
           const visible = canSee(cell);
-          const unit =
-            visible && occupied(battle, cell)
-              ? grid.cells.findIndex(
-                  (value, index) => value === cell && battle.enemies[index].hp > 0,
-                )
+          const unit = visible
+            ? grid.cells.findIndex((value, index) => value === cell && battle.enemies[index].hp > 0)
+            : -1;
+          const down =
+            visible && cell !== hero && unit < 0
+              ? grid.cells.findIndex((value, index) => value === cell && casualties.has(index))
               : -1;
+          const shown = unit >= 0 ? unit : down;
           const borrowed = unit >= 0 && unit === linked;
           const step = canTacticalStep(s, cell, floor);
           const terrain =
@@ -127,13 +129,46 @@ export function TacticalView({ s, floor, target, select, send, t, modalOpen }: P
             unit >= 0
               ? t(battle.enemies[unit].epithets ?? FOES[battle.enemies[unit].template].name)
               : '';
+          const pinned = unit >= 0 && (battle.enemies[unit].pinnedUntil ?? 0) >= battle.turn;
+          const marked = unit >= 0 && (battle.enemies[unit].markedUntil ?? 0) >= battle.turn;
+          const moving =
+            unit >= 0 &&
+            cue?.events.some(
+              (event) =>
+                event.outcome === 'push' &&
+                event.to.side === 'foe' &&
+                event.to.index === unit &&
+                event.to.cell === cell,
+            );
+          const hurt =
+            cue?.events.findIndex(
+              (event) =>
+                event.to.cell === cell && (event.outcome === 'hit' || event.outcome === 'block'),
+            ) ?? -1;
           const mark =
             cell === hero ? (
               <Portrait id={s.character.portrait} />
-            ) : borrowed ? (
-              '◆'
-            ) : unit >= 0 ? (
-              unit + 1
+            ) : shown >= 0 ? (
+              <span
+                className="sa-tactical-unit"
+                data-down={down >= 0 || undefined}
+                data-shoved={moving || undefined}
+              >
+                <img src={creatures[shown]} alt="" draggable={false} />
+                {unit >= 0 && (
+                  <progress
+                    max={battle.enemies[unit].max}
+                    value={battle.enemies[unit].hp}
+                    aria-hidden="true"
+                  />
+                )}
+                {(pinned || marked) && (
+                  <span className="sa-unit-status" aria-hidden="true">
+                    {pinned && <Anchor size={11} />}
+                    {marked && <Crosshair size={11} />}
+                  </span>
+                )}
+              </span>
             ) : terrain ? (
               TERRAIN[terrain].mark
             ) : (
@@ -162,12 +197,14 @@ export function TacticalView({ s, floor, target, select, send, t, modalOpen }: P
               data-borrowed={borrowed || undefined}
               data-fog={!terrain || undefined}
               data-step={step || undefined}
+              data-hurt={hurt >= 0 && (cell === hero || shown >= 0) ? cue?.revision : undefined}
               aria-pressed={unit >= 0 ? unit === target : undefined}
               aria-label={label + ' ' + coords + (terrain ? ' · ' + t(TERRAIN[terrain].name) : '')}
               style={
-                terrain
-                  ? ({ '--terrain': TERRAIN[terrain].color } as React.CSSProperties)
-                  : undefined
+                {
+                  '--terrain': terrain ? TERRAIN[terrain].color : undefined,
+                  '--hit-delay': battleCueDelay(hurt) + 110 + 'ms',
+                } as React.CSSProperties
               }
               onClick={() => (unit >= 0 ? select(unit) : send({ type: 'tactical-step', cell }))}
             >
@@ -175,12 +212,13 @@ export function TacticalView({ s, floor, target, select, send, t, modalOpen }: P
             </button>
           );
         })}
+        {cue && <BattleEffects key={cue.revision} cue={cue} creatures={creatures} grid />}
       </div>
     </section>
   );
 }
 
-type ActionProps = Omit<Props, 'select' | 'modalOpen'>;
+type ActionProps = Omit<Props, 'select' | 'modalOpen' | 'cue'>;
 
 export function TacticalTarget({ s, send, t, target, floor }: ActionProps) {
   const battle = s.delve!.encounter!;
@@ -188,6 +226,16 @@ export function TacticalTarget({ s, send, t, target, floor }: ActionProps) {
   const enemy = battle.enemies[target];
   const targetCell = grid.cells[target];
   const template = enemy && enemy.hp > 0 && FOES[enemy.template];
+  const status: Text =
+    (enemy?.pinnedUntil ?? 0) >= battle.turn
+      ? ['足止め', 'Pinned', 'あしどめ']
+      : (enemy?.markedUntil ?? 0) >= battle.turn
+        ? ['目印あり', 'Marked', 'めじるし あり']
+        : enemy?.stagger
+          ? ['ひるみ', 'Staggered', 'ひるみ']
+          : enemy
+            ? INTENTS[foeIntent(battle, enemy)]
+            : ['不明', 'Unknown', 'ふめい'];
   return template && enemy && glancingSight(floor, actionPosition(s), targetCell, 6) ? (
     <div className="sa-tactical-target">
       <img src={art(creatureArt(template))} alt="" />
@@ -201,7 +249,7 @@ export function TacticalTarget({ s, send, t, target, floor }: ActionProps) {
           </b>
         </span>
         <small>
-          {t(enemy.stagger ? ['ひるみ', 'Staggered'] : INTENTS[foeIntent(battle, enemy)])}{' '}
+          {t(status)}{' '}
           <span className="sa-tactical-distance">
             · {t(['距離', 'Distance'])} {distanceToTarget(s, target)}
           </span>
@@ -233,16 +281,13 @@ export function TacticalTarget({ s, send, t, target, floor }: ActionProps) {
 }
 
 export function TacticalMoves({ s, send, t, target, floor }: ActionProps) {
-  const foe = s.delve?.encounter?.enemies[target];
-  const moves =
-    !s.delve?.encounter?.guardian && (foe?.epithets || fieldSkill(s, 'diplomacy'))
-      ? [...ATTACKS, 'befriend' as const]
-      : ATTACKS;
+  const moves: CombatMove[] = [...ATTACKS, ...loadoutTechniques(s)];
   return (
     <div className="sa-tactical-moves">
       {moves.map((move) => {
         const technique = COMBAT_MOVES[move];
-        const range = ['strike', 'heavy', 'quick', 'spark'].includes(move) ? moveRange(s, move) : 0;
+        const special = techniqueFor(move);
+        const range = special || move === 'strike' || move === 'spark' ? moveRange(s, move) : 0;
         const rangeLabel = t(['射程', 'Range', 'しゃてい']);
         const focusLabel = t(['集中', 'Focus', 'しゅうちゅう']);
         return (
@@ -251,24 +296,23 @@ export function TacticalMoves({ s, send, t, target, floor }: ActionProps) {
             type="button"
             aria-label={t(technique.name)}
             title={t(technique.hint)}
-            disabled={
-              !tacticalTarget(s, move, target, floor) ||
-              s.focus < technique.cost ||
-              (move === 'befriend' && (s.frontier.liquids.water < 2 || s.followers.length >= 5))
-            }
+            data-technique={special ? move : undefined}
+            disabled={!canCombatMove(s, move, target, floor)}
             onClick={() => send({ type: 'combat', move, target })}
           >
             <span>
-              {t(MOVE_LABELS[move] ?? technique.name)}
-              {range > 0 && (
+              {t(special?.short ?? MOVE_LABELS[move] ?? technique.name)}
+              {(range > 0 || technique.cost > 0) && (
                 <small
                   className="sa-tactical-range"
                   aria-label={rangeLabel + ' ' + range + ' · ' + focusLabel + ' ' + technique.cost}
                 >
-                  <span title={rangeLabel}>
-                    <Crosshair size={11} aria-hidden="true" />
-                    {range}
-                  </span>
+                  {range > 0 && (
+                    <span title={rangeLabel}>
+                      <Crosshair size={11} aria-hidden="true" />
+                      {range}
+                    </span>
+                  )}
                   {technique.cost > 0 && (
                     <span title={focusLabel}>
                       <Sparkles size={11} aria-hidden="true" />

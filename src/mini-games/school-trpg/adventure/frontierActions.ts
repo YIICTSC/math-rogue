@@ -328,6 +328,7 @@ function fluidAction(
   if (operation.kind === 'well') {
     if (!inTown(s) || s.frontier.hydration === s.time) return false;
     s.frontier.hydration = s.time;
+    note(s, ['井戸で水を飲んだ。', 'You drink from the town well.', 'いどで みずを のんだ。'], 'good');
     return true;
   }
   if (operation.kind === 'mix') {

@@ -38,6 +38,7 @@ import {
   type Text,
 } from './content';
 import DelveView, { Supplies } from './Delve';
+import type { BattleCue } from './battleFeedback';
 import { declarationDifficulty } from './delve';
 import { FieldNotes } from './FieldworkPanel';
 import { ADDRESS_NAMES } from './frontierContent';
@@ -56,6 +57,7 @@ import { art, DiceResult, Portrait, type Local, type Send } from './ui';
 
 export interface PlayProps {
   state: Adventure;
+  battleCue?: BattleCue | null;
   send: Send;
   t: Local;
   language: LanguageMode;
@@ -599,6 +601,7 @@ function FallenJournal({ s, t, back }: { s: Adventure; t: Local; back: () => voi
 export default function AdventurePlay(props: PlayProps) {
   const {
     state: s,
+    battleCue,
     t,
     send,
     back,
@@ -617,9 +620,10 @@ export default function AdventurePlay(props: PlayProps) {
   const [declare, setDeclare] = useState(false);
   const [lesson, setLesson] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
-  const fallen = s.fallenAt !== null;
-  const delving = !!s.delve;
-  const bgm = lesson ? 'math' : s.delve?.encounter ? 'battle' : delving ? 'dungeon_library' : 'map';
+  const ending = battleCue?.ending;
+  const fallen = s.fallenAt !== null && !ending;
+  const delving = Boolean(s.delve || ending);
+  const bgm = lesson ? 'math' : s.delve?.encounter || ending ? 'battle' : delving ? 'dungeon_library' : 'map';
   useEffect(() => audioService.acquireBgmScene(bgm, undefined, 24), [bgm]);
   const latest = s.journal[0];
   const recentCheck = s.journal.slice(0, 3).find((entry) => entry.check)?.check;
@@ -698,7 +702,8 @@ export default function AdventurePlay(props: PlayProps) {
           </section>
         ) : delving ? (
           <DelveView
-            state={s}
+            state={ending ?? s}
+            cue={battleCue}
             t={t}
             send={send}
             declare={openDeclaration}

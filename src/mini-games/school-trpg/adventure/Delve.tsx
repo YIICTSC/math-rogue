@@ -4,6 +4,7 @@ import {
   ArrowUp,
   ArrowUpToLine,
   Backpack,
+  BookOpen,
   Footprints,
   List,
   Compass,
@@ -15,6 +16,9 @@ import {
   Swords,
 } from 'lucide-react';
 import { BIOMES, FOES, GOODS, INTENTS, creatureArt, type Text } from './content';
+import { BattleEffects } from './BattleEffects';
+import { BATTLE_ART, battleCueDelay, type BattleCue } from './battleFeedback';
+import { BattleTechniqueMenu, BattleTutorial, TECHNIQUES_TITLE, readCombatIntro, rememberCombatIntro } from './BattleHelp';
 import {
   RUNES,
   damageNames,
@@ -29,7 +33,8 @@ import { RuinFixture } from './FieldworkPanel';
 import { FieldStatus, FieldSupplies } from './FrontierPanel';
 import { TERRAIN } from './frontierContent';
 import { fieldSkill } from './frontierState';
-import { fieldFloor, plannedWalk, terrainAt } from './frontierWorld';
+import { fieldFloor, glancingSight, plannedWalk, terrainAt } from './frontierWorld';
+import { actionPosition, borrowedCreature } from './fieldTactics';
 import { canEat } from './life';
 import { formParty } from './party';
 import { MEAL_IDS, mealRecipe } from './provisions';
@@ -262,6 +267,7 @@ function DungeonScene({
   target,
   select,
   fixture,
+  cue,
 }: {
   s: Adventure;
   floor: Floor;
@@ -269,6 +275,7 @@ function DungeonScene({
   target: number;
   select: (id: number) => void;
   fixture: 'device' | 'inscription' | null;
+  cue?: BattleCue | null;
 }) {
   const d = s.delve!;
   const battle = d.encounter;
@@ -277,6 +284,7 @@ function DungeonScene({
   const ahead = front && fieldSkill(s, 'wayfinding') ? terrainAt(s, neighbor(d.cell, d.direction), d.floor, floor) : 'floor';
   const record = recordFor(s, d.floor);
   const feature = record.cleared.includes(d.cell) ? undefined : floor.features[d.cell];
+  const creatures = battle?.enemies.map((enemy) => art(creatureArt(FOES[enemy.template]))) ?? [];
   return (
     <section
       className="sa-dungeon-scene"
@@ -312,9 +320,14 @@ function DungeonScene({
       {battle ? (
         <div className="sa-foes" role="group" aria-label={t(['攻撃対象', 'Combat targets'])}>
           {battle.enemies.map((enemy, index) => {
-            if (enemy.hp <= 0) return null;
+            const down = enemy.hp <= 0;
+            if (down && !cue?.events.some((event) => (event.hp ?? 0) < 0 &&
+              event.to.side === 'foe' && event.to.index === index)) return null;
             const template = FOES[enemy.template];
             const name = t(enemy.epithets ?? template.name);
+            const hurt = cue?.events.findIndex((event) =>
+              event.to.side === 'foe' && event.to.index === index && event.outcome === 'hit',
+            ) ?? -1;
             return (
               <button
                 key={index}
@@ -322,6 +335,11 @@ function DungeonScene({
                 aria-pressed={index === target}
                 onClick={() => select(index)}
                 className="sa-foe"
+                disabled={down}
+                data-down={down || undefined}
+                data-battle-foe={index}
+                data-hurt={hurt >= 0 ? cue?.revision : undefined}
+                style={{ '--hit-delay': battleCueDelay(hurt) + 110 + 'ms' } as React.CSSProperties}
               >
                 <span className="sa-intent">
                   {enemy.stagger
@@ -329,7 +347,7 @@ function DungeonScene({
                     : t(INTENTS[foeIntent(battle, enemy)])}
                 </span>
                 <img
-                  src={art(creatureArt(template))}
+                  src={creatures[index]}
                   alt=""
                 />
                 <span className="sa-foe-name">
@@ -345,6 +363,7 @@ function DungeonScene({
                     {t(damageNames[template.resist])}
                   </small>
                 )}
+                {(enemy.markedUntil ?? 0) >= battle.turn && <small>{t(['目印あり', 'Marked', 'めじるし あり'])}</small>}
               </button>
             );
           })}
@@ -356,18 +375,21 @@ function DungeonScene({
           {SYMBOLS[feature]}
         </div>
       ) : null}
+      {battle && cue && <BattleEffects key={cue.revision} cue={cue} creatures={creatures} />}
     </section>
   );
 }
 
 export default function DelveView({
   state: s,
+  cue,
   send,
   t,
   declare,
   modalOpen,
 }: {
   state: Adventure;
+  cue?: BattleCue | null;
   send: Send;
   t: Local;
   declare: () => void;
@@ -385,18 +407,31 @@ export default function DelveView({
   const manual = Boolean(battle?.tactics);
   const [picked, setPicked] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [sheet, setSheet] = useState<'actions' | 'map' | 'supplies' | null>(null);
+  const [sheet, setSheet] = useState<'actions' | 'map' | 'supplies' | 'techniques' | 'tutorial' | null>(null);
+  const [introSeen, setIntroSeen] = useState(readCombatIntro);
   const combatOpen = !!battle;
-  const blocked = modalOpen || sheet !== null;
-  const target =
-    battle?.enemies[picked]?.hp && battle.enemies[picked].hp > 0
-      ? picked
-      : Math.max(0, battle?.enemies.findIndex((enemy) => enemy.hp > 0) ?? 0);
+  const ending = Boolean(cue?.ending);
+  const tutorial = combatOpen && (!introSeen || sheet === 'tutorial') && !ending && !modalOpen;
+  const blocked = modalOpen || sheet !== null || tutorial || (combatOpen && !introSeen) || ending;
+  const validTarget = (index: number) => {
+    if (!battle || (battle.enemies[index]?.hp ?? 0) <= 0) return false;
+    return !battle.tactics || (index !== borrowedCreature(battle) &&
+      glancingSight(floor, actionPosition(s), battle.tactics.cells[index], 6));
+  };
+  const target = validTarget(picked) ? picked
+    : Math.max(0, battle?.enemies.findIndex((_, index) => validTarget(index)) ?? 0);
   useEffect(() => {
     setPicked(0);
     setPaused(false);
   }, [battle?.cell, battle?.bound]);
   useEffect(() => setSheet(null), [d.floor, d.cell, combatOpen]);
+  useEffect(() => {
+    if (!combatOpen) return;
+    for (const effect of BATTLE_ART) {
+      const image = new Image();
+      image.src = art('combat/' + effect);
+    }
+  }, [combatOpen]);
   useEffect(() => {
     if (!battle || manual || blocked || paused) return;
     const timer = window.setInterval(() => {
@@ -447,6 +482,7 @@ export default function DelveView({
   );
   const mapLabel = t(['見取り図', 'Automap', 'みとりず']);
   const kitLabel = t(['道具と能力', 'Supplies and powers', 'どうぐと のうりょく']);
+  const techniquesLabel = t(TECHNIQUES_TITLE);
   const groundTitle =
     fixture === 'device'
       ? MECHANISMS[town.biome].name
@@ -462,7 +498,7 @@ export default function DelveView({
     send({ type: 'feature', verb: option.verb, symbol: option.symbol });
 
   return (
-    <div className="sa-delve" data-mode={manual ? 'tactical' : battle ? 'battle' : 'explore'}>
+    <div className="sa-delve" data-mode={manual ? 'tactical' : battle ? 'battle' : 'explore'} inert={ending || undefined}>
       <header className="sa-delve-head">
         <h1>
           {t(biome.ruin)} <strong>B{d.floor}</strong>
@@ -517,6 +553,7 @@ export default function DelveView({
             select={setPicked}
             send={send}
             modalOpen={blocked}
+            cue={cue}
           />
         ) : (
           <DungeonScene
@@ -526,6 +563,7 @@ export default function DelveView({
             target={target}
             select={setPicked}
             fixture={fixture}
+            cue={cue}
           />
         )}
         {!battle && (
@@ -606,6 +644,10 @@ export default function DelveView({
                     : t(['一時停止', 'Pause', 'いちじていし'])}
                 </button>
               )}
+              <button type="button" onClick={() => setSheet('techniques')}>
+                <Swords size={16} />
+                {techniquesLabel}
+              </button>
               <button type="button" onClick={() => setSheet('actions')}>
                 <List size={16} />
                 {actionLabel}
@@ -644,9 +686,16 @@ export default function DelveView({
         )}
       </section>
 
-      {sheet && (
+      {tutorial && (
+        <BattleTutorial manual={manual} t={t} close={() => {
+          rememberCombatIntro();
+          setIntroSeen(true);
+          setSheet(null);
+        }} />
+      )}
+      {sheet && sheet !== 'tutorial' && !tutorial && !ending && (
         <ScreenDialog
-          title={sheet === 'map' ? mapLabel : sheet === 'supplies' ? kitLabel : actionLabel}
+          title={sheet === 'map' ? mapLabel : sheet === 'supplies' ? kitLabel : sheet === 'techniques' ? techniquesLabel : actionLabel}
           t={t}
           close={() => setSheet(null)}
         >
@@ -688,6 +737,9 @@ export default function DelveView({
                 foe={battle?.tactics ? target : undefined}
               />
             </div>
+          ) : sheet === 'techniques' ? (
+            <BattleTechniqueMenu s={s} t={t} floor={manual ? floor : undefined} send={send}
+              target={target} close={() => setSheet(null)} />
           ) : battle ? (
             <div className="sa-stack">
               <h3>
@@ -725,6 +777,10 @@ export default function DelveView({
                 <button type="button" onClick={declareFromMenu}>
                   <Sparkles size={16} />
                   {t(['自由宣言', 'Declare', 'じゆうせんげん'])}
+                </button>
+                <button type="button" onClick={() => setSheet('tutorial')}>
+                  <BookOpen size={16} />
+                  {t(['戦い方', 'Combat tutorial', 'たたかいかた'])}
                 </button>
               </div>
               <FormationChoice s={s} t={t} send={send} />

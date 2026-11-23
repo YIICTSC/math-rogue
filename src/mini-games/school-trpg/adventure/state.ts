@@ -23,6 +23,7 @@ import { newFieldwork, type Fieldwork } from './fieldworkState';
 import { ADDRESS_NAMES, DISCIPLINES, ENCOUNTER_RULES, type AddressName, type Discipline, type MealTrigger, type RunKind } from './frontierContent';
 import { fieldCheck, fieldCondition, fieldRecipe, mealTrigger, newFrontier, runSeed, thirst, validFieldRules, type Frontier, type FrontierRules } from './frontierState';
 import type { FieldOperation } from './frontierActions';
+import type { TechniqueId } from './battleTechniques';
 import type { Tactics } from './fieldTactics';
 import { newJourney, relicPower, type Formation, type Journey } from './journeyState';
 import { mealEffect, type MealId } from './provisions';
@@ -114,6 +115,8 @@ export type Enemy = {
   stagger: boolean;
   known: boolean;
   epithets?: Text;
+  pinnedUntil?: number;
+  markedUntil?: number;
 };
 export type Ally = { id: string; hp: number; max: number };
 export type Encounter = {
@@ -216,7 +219,8 @@ export type CombatMove =
   | 'study'
   | 'parley'
   | 'befriend'
-  | 'retreat';
+  | 'retreat'
+  | TechniqueId;
 export type DelveMove = 'forward' | 'backward' | 'left' | 'right';
 export type DungeonVerb =
   | 'confront'
