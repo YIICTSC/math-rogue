@@ -1,7 +1,7 @@
 // Generated from trans() UI literals. Mini-game content and debug-only screens are excluded.
-import {RELEASE_109_HIRAGANA} from './release109';
+import {RELEASE_110_HIRAGANA} from './release110';
 export const HIRAGANA_UI_EXACT: Record<string, string> = {
-  ...RELEASE_109_HIRAGANA,
+  ...RELEASE_110_HIRAGANA,
   "星潮の航路": "ほししおのこうろ",
   "ことば日和": "ことばびより",
   "にっぽんフライトスクール": "にっぽんフライトスクール",

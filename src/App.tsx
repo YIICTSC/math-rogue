@@ -5,7 +5,7 @@ import { MINI_GAME_UNIT_CORRECT_EVENT, type MiniGameUnitCorrectDetail } from './
 import {enableDebugRewards} from './point-exchange/debug';
 import PointExchangeEntry from './point-exchange/PointExchange';
 import QuestionExperience from './point-exchange/QuestionExperience';
-import {RELEASE_109} from './data/release109';
+import {RELEASE_110} from './data/release110';
 import{basketballInviteCode}from'./mini-games/basketball/invite';
 import{dodgeballInviteCode}from'./mini-games/dodgeball/invite';
 import {tennisInviteCode} from './mini-games/tennis/invite';
@@ -20166,7 +20166,7 @@ const App: React.FC = () => {
                                 </div>
 
                                     <button onClick={() => setShowDebugLog(true)} className="start-menu-version text-white text-[10px] hover:text-white flex items-center justify-center gap-1 transition-opacity">
-                                        <Terminal size={10} /> v1.0.9 YUSUKE ISHIGE
+                                        <Terminal size={10} /> v1.1.0 YUSUKE ISHIGE
                                     </button>
                                 </div>
 
@@ -20770,18 +20770,18 @@ const App: React.FC = () => {
                                     className="mb-4 w-full select-none border-b border-green-800 bg-transparent pb-2 text-left font-mono text-xl font-bold text-green-400 active:text-green-200"
                                     onClick={handleLogClick}
                                 >
-                                    System Release Notes v1.0.9
+                                    System Release Notes v1.1.0
                                 </button>
                             ) : (
                                 <h2 className="mb-4 select-none border-b border-green-800 pb-2 font-mono text-xl font-bold text-green-400">
-                                    System Release Notes v1.0.9
+                                    System Release Notes v1.1.0
                                 </h2>
                             )}
                             <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
                                 <section>
-                                    <h3 className="text-white font-bold mb-1">■ {trans(RELEASE_109.title, languageMode)}</h3>
+                                    <h3 className="text-white font-bold mb-1">■ {trans(RELEASE_110.title, languageMode)}</h3>
                                     <ul className="list-disc pl-5 space-y-1">
-                                        {RELEASE_109.items.map(item => <li key={item}>{trans(item, languageMode)}</li>)}
+                                        {RELEASE_110.items.map(item => <li key={item}>{trans(item, languageMode)}</li>)}
                                     </ul>
                                 </section>
                                 <section>

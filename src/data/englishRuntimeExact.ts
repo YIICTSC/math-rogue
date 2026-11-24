@@ -1,5 +1,5 @@
 import { RPG_ENGLISH } from './rpgEnglish';
-import {RELEASE_109_ENGLISH} from './release109';
+import {RELEASE_110_ENGLISH} from './release110';
 export const ENGLISH_RUNTIME_EXACT: Record<string, string> = {
   "障害物をかわし、教科を育てて帰宅を目指そう。": "Dodge obstacles and race home. Upgrade your skills.",
   "行動を予約し、連携で敵を倒す戦略バトル。": "Queue actions and outsmart your enemies.",
@@ -28,7 +28,7 @@ export const ENGLISH_RUNTIME_EXACT: Record<string, string> = {
   "道具とひらめき技を駆使して、毎回変わる迷宮を探索。": "Explore shifting dungeons with items and techniques.",
   "仲間を編成し、作戦と部隊指揮で戦場を切り開こう。": "Build squads, plan tactics and command the battlefield.",
 
-  ...RELEASE_109_ENGLISH,
+  ...RELEASE_110_ENGLISH,
   '星潮の航路': 'Star Tide',
   'ことば日和': 'Kotoba Biyori',
   '継界戦記 灯を継ぐ者たち': 'Confluence Chronicles: Heirs of the Lantern',
