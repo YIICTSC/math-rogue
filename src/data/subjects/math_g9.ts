@@ -38,7 +38,7 @@ export const MATH_G9_DATA: Record<string, GeneralProblem[]> = {
         { question: "xy + x + y + 1 を因数分解せよ。", answer: "(x + 1)(y + 1)", options: d("(x + 1)(y + 1)", "(x + y)(1 + 1)", "x(y + 1)", "xy(1 + 1)"), hint: "x(y+1) + (y+1) と考える。" },
         { question: "√50 を簡略化せよ。", answer: "5√2", options: d("5√2", "2√5", "10√5", "5√10"), hint: "50 = 25 × 2。" },
         { question: "√3 × √12 を計算せよ。", answer: "6", options: d("6", "√36", "12", "√15"), hint: "√36 = 6。" },
-        { question: "√2(√8 + √2) を計算せよ。", answer: "6", options: d("6", "√16 + 2", "4 + 2", "8"), hint: "分配法則を使う。" },
+        { question: "√2(√8 + √2) を計算せよ。", answer: "6", options: d("6", "4", "√10", "8"), hint: "分配法則を使い、√2×√8と√2×√2をそれぞれ計算する。" },
         { question: "(√3 + 1)(√3 - 1) を計算せよ。", answer: "2", options: d("2", "3", "√3", "4"), hint: "(a+b)(a-b) = a²-b²。" },
         { question: "(√5 + 2)² を展開せよ。", answer: "9 + 4√5", options: d("9 + 4√5", "7 + 4√5", "9 + 2√5", "5 + 4"), hint: "5 + 4 + 2×2×√5。" },
         { question: "√2 ≒ 1.414 とするとき、√8 の値は？", answer: "2.828", options: d("2.828", "1.414", "4.242", "0.707"), hint: "2√2 として計算。" },
@@ -151,7 +151,7 @@ export const MATH_G9_DATA: Record<string, GeneralProblem[]> = {
         { question: "高さが 12cm、底面の半径が 5cm の円錐の「母線」の長さは？", answer: "13cm", options: d("13cm", "17cm", "√119cm", "7cm"), hint: "5, 12, 13 の比を使おう。" },
         { question: "三平方の定理を使って、二点の座標から距離を出せる？", answer: "出せる", options: d("出せる", "出せない", "角度が必要", "グラフが必要"), hint: "横の差と縦の差を 2辺にする。" },
         { question: "標本調査。池の魚の数を推定する「（ ？）法」。", answer: "標識再捕法", options: d("標識再捕法", "全数調査法", "目視調査法", "聞き取り法"), hint: "印をつけて放し、再び捕まえる。" },
-        { question: "標本の平均値と母集団の平均値は、必ず一致する？", answer: "一致するとは限らない（近い値になる）", options: d("一致するとは限らない", "必ず一致する", "全く違う", "計算できない"), hint: "誤差（ごさ）が必ず生じる。" },
+        { question: "標本の平均値と母集団の平均値は、必ず一致する？", answer: "一致するとは限らない", options: d("一致するとは限らない", "必ず一致する", "全く違う", "計算できない"), hint: "標本の取り方によって、平均値が変わることがあります。" },
         { question: "三平方の定理の「三平方」とはどういう意味？", answer: "3つの辺をそれぞれ平方（2乗）すること", options: d("3つの辺を2乗", "3つの角を足す", "3つの辺をかける", "3回計算する"), hint: "平方 ＝ 2乗。" },
         { question: "半径 10cm の球の表面積は？", answer: "400π cm²", options: d("400π", "100π", "4/3 π", "31.4"), hint: "4 × π × 10²。" },
         { question: "半径 3cm の球の体積は？", answer: "36π cm³", options: d("36π", "12π", "108π", "9π"), hint: "4/3 × π × 3³。" },
@@ -464,7 +464,8 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
                 return { question: `標本 ${sample}個中 ${hit}個が該当。割合は？`, answer: `${hit}/${sample}`, options: d(`${hit}/${sample}`, `${sample}/${hit}`, `${hit + sample}`, `${sample - hit}`), hint: "該当数/標本数。", visual: { kind: 'bar_chart', values: [hit, sample - hit], labels: ['該当', 'その他'] } };
             }
             if (p === 1) {
-                return { question: `標本 ${sample}個中 ${hit}個が該当。百分率は？`, answer: `${Math.round((hit / sample) * 100)}%`, options: d(`${Math.round((hit / sample) * 100)}%`, `${hit * sample}%`, `${sample - hit}%`, `${hit}%`), hint: "割合×100。", visual: { kind: 'bar_chart', values: [hit, sample - hit], labels: ['該当', 'その他'] } };
+                const percent = Math.round((hit / sample) * 100);
+                return { question: `標本 ${sample}個中 ${hit}個が該当。百分率を小数第1位で四捨五入すると何％？`, answer: `${percent}%`, options: d(`${percent}%`, `${hit * sample}%`, `${sample - hit}%`, `${hit}%`), hint: "割合を100倍してから、整数に四捨五入します。", visual: { kind: 'bar_chart', values: [hit, sample - hit], labels: ['該当', 'その他'] } };
             }
             if (p === 2) {
                 const miss = sample - hit;

@@ -1,9 +1,10 @@
 import { GameMode, type AssignmentRangeFilter } from '../../types';
 export function arithmeticPool(safeMode: GameMode, rangeFilter: AssignmentRangeFilter | null) {
-const generatedProblems: { question: string; options: number[]; answer: number; problemKey?: string }[] = [];
+const generatedProblems: { question: string; options: number[]; answer: number; problemKey: string; remainder?: number }[] = [];
 const candidateCount = 96;
     for (let i = 0; i < candidateCount; i++) {
       let a, b, answer, operator;
+      let remainder: number | undefined;
       let type = safeMode;
 
       if (safeMode === GameMode.MIXED) {
@@ -36,16 +37,10 @@ const candidateCount = 96;
               operator = '-';
               break;
           case GameMode.SUB_1DIGIT_BORROW:
-              // くりさがりあり: 11-18 の数から 1-9 を引き、答えが1ケタ
-              answer = Math.floor(Math.random() * 9) + 1; // 答えも1ケタ
+              // 一の位より引く数を大きくする。
               b = Math.floor(Math.random() * 9) + 1;
-              a = answer + b;
-              // 繰り下がりの定義として a が 10以上である必要がある
-              if (a < 10) {
-                // 再生成の代わりに補正
-                a += 10;
-                answer = a - b;
-              }
+              a = 10 + Math.floor(Math.random() * b);
+              answer = a - b;
               operator = '-';
               break;
           case GameMode.ADDITION:
@@ -68,7 +63,10 @@ const candidateCount = 96;
                 : Math.floor(Math.random() * 8) + 2;
               answer = Math.floor(Math.random() * 9) + 1;
               a = b * answer;
-              if (rangeFilter?.kind === 'division' && rangeFilter.values.includes('remainder_with')) { const remainder = Math.floor(Math.random() * (b - 1)) + 1; a += remainder; answer = Math.floor(a / b); }
+              if (rangeFilter?.kind === 'division' && rangeFilter.values.includes('remainder_with')) {
+                remainder = Math.floor(Math.random() * (b - 1)) + 1;
+                a += remainder;
+              }
               operator = '÷';
               break;
           case GameMode.MULTIPLICATION:
@@ -95,6 +93,7 @@ const candidateCount = 96;
         question: `${a} ${operator} ${b} = ?`,
         options: Array.from(options).sort(() => Math.random() - 0.5),
         answer: answer,
+        remainder,
         problemKey: `${type}:${a}${operator}${b}`,
       });
     }

@@ -10,6 +10,7 @@ import RewardHintBanner from './RewardHintBanner';
 import { trans } from '../utils/textUtils';
 import { assignmentFilterForMode } from '../utils/assignmentRangeFilters';
 import { getProblemCycleScope, selectProblemsForCycle } from '../utils/problemCycle';
+import { matchesSchoolAnswer } from '../utils/schoolAnswer';
 
 interface EnglishChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -49,15 +50,6 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
   const [voiceEnabled, setVoiceEnabled] = useState(() => storageService.getEnglishVoiceEnabled());
   const questionStartedAtRef = React.useRef(Date.now());
   const speechGenerationRef = React.useRef(0);
-
-  const normalize = (s: string) => {
-    if (!s) return "";
-    return s
-      .replace(/\（.*?\）|\(.*?\)/g, "") // 括弧削除
-      .replace(/[\s　]+/g, "")           // 空白削除
-      .toLowerCase()                     // 英語は小文字に統一
-      .trim();
-  };
 
   const speakWord = useCallback((word: string) => {
     if (!('speechSynthesis' in window)) return;
@@ -197,7 +189,10 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
     setSelectedOption(option);
     setIsAnswered(true);
     
-    const isCorrect = normalize(option) === normalize(problems[currentProblemIndex].actualCorrectAnswer);
+    const problem = problems[currentProblemIndex];
+    const isCorrect = answerMode === 'INPUT'
+      ? matchesSchoolAnswer(option, problem.actualCorrectAnswer) || matchesSchoolAnswer(option, problem.answer)
+      : option === problem.actualCorrectAnswer;
     const answerResult = {
       pointReceipt: getPointReceipt(problems[currentProblemIndex],currentProblemIndex),
       mode,
@@ -340,7 +335,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
                 <button type="submit" disabled={isAnswered || !inputAnswer.trim()} className="w-full rounded-xl border-b-4 border-cyan-950 bg-cyan-600 py-3 text-xl font-bold transition-all hover:bg-cyan-500 active:translate-y-1 active:border-b-0 disabled:cursor-not-allowed disabled:opacity-50">{trans('決定', languageMode)}</button>
               </form> : <div className={`basic-challenge-options grid ${isConv ? 'grid-cols-1' : 'grid-cols-2'} gap-2 md:gap-4`}>
                 {currentProblem.options.map((opt, idx) => {
-                    const isCorrectOption = normalize(opt) === normalize(currentProblem.actualCorrectAnswer);
+                    const isCorrectOption = opt === currentProblem.actualCorrectAnswer;
                     const isSelectedWrong = opt === selectedOption && !isCorrectOption;
                     return (
                     <button

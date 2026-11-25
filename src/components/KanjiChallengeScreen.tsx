@@ -11,6 +11,7 @@ import KanjiHandwritingInput from './KanjiHandwritingInput';
 import { trans } from '../utils/textUtils';
 import { assignmentFilterForMode, matchesKanjiAssignmentRangeFilter } from '../utils/assignmentRangeFilters';
 import { getProblemCycleScope, selectProblemsForCycle } from '../utils/problemCycle';
+import { matchesSchoolAnswer } from '../utils/schoolAnswer';
 
 interface KanjiChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -65,15 +66,6 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
     setWritingCorrectStreak(0);
     setWritingWrongStreak(0);
   }, [isChallenge, mode, resolvedAnswerMode, reviewProblem]);
-
-  // 表記のゆらぎ（スペース、括弧内の補足、全角半角など）を排除して比較する関数
-  const normalize = (s: string) => {
-    if (!s) return "";
-    return s
-      .replace(/\（.*?\）|\(.*?\)/g, "") // （）や()の中身を削除
-      .replace(/[\s　]+/g, "")           // 全角・半角スペースを削除
-      .trim();
-  };
 
   useEffect(() => {
     if (debugSkip) {
@@ -164,7 +156,9 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
     const expectedAnswer = resolvedAnswerMode === 'WRITING'
       ? currentProblem.actualWrittenAnswer
       : currentProblem.actualCorrectAnswer;
-    const isCorrect = normalize(option) === normalize(expectedAnswer);
+    const isCorrect = resolvedAnswerMode === 'CHOICE'
+      ? option === expectedAnswer
+      : matchesSchoolAnswer(option, expectedAnswer);
     if (resolvedAnswerMode === 'WRITING') {
       if (isCorrect) {
         setWritingWrongStreak(0);
@@ -227,19 +221,9 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
 
   const handleInputSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (normalize(inputAnswer) === '') return;
+    if (!inputAnswer.trim()) return;
     handleAnswer(inputAnswer);
   };
-
-  useEffect(() => {
-    if (!isAnswered && problems.length > 0 && resolvedAnswerMode === 'INPUT') {
-      const normalizedInput = normalize(inputAnswer);
-      if (normalizedInput && normalizedInput === normalize(problems[currentProblemIndex]?.actualCorrectAnswer)) {
-        handleAnswer(inputAnswer);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputAnswer]);
 
   if (debugSkip) return <div className="w-full h-full bg-black"></div>;
 
@@ -329,7 +313,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
                 />
                 <button
                   type="submit"
-                  disabled={isAnswered || normalize(inputAnswer) === ''}
+                  disabled={isAnswered || inputAnswer.trim() === ''}
                   className="w-full rounded-lg border-b-4 border-cyan-950 bg-cyan-700 py-4 text-xl font-bold transition-all hover:bg-cyan-600 active:translate-y-1 active:border-b-0 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {trans('決定', languageMode)}
@@ -338,7 +322,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
             ) : (
               <div className="basic-challenge-options grid grid-cols-2 gap-4">
                 {currentProblem.options.map((opt, idx) => {
-                  const isCorrectOption = normalize(opt) === normalize(problems[currentProblemIndex].actualCorrectAnswer);
+                  const isCorrectOption = opt === problems[currentProblemIndex].actualCorrectAnswer;
                   const isSelectedWrong = opt === selectedOption && !isCorrectOption;
                   return (
                     <button

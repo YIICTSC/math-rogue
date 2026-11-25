@@ -17,6 +17,7 @@ import { formatProblemUnitName } from '../utils/problemUnitName';
 import MathText from './MathText';
 import { assignmentFilterForMode, matchesAssignmentRangeFilter } from '../utils/assignmentRangeFilters';
 import { getProblemCycleScope, selectProblemsForCycle } from '../utils/problemCycle';
+import { matchesSchoolAnswer, matchesSchoolSpeech, normalizeSchoolNumber, schoolAnswerOptions, schoolQuestionNeedsChoices, schoolQuestionPromptKey } from '../utils/schoolAnswer';
 
 interface GeneralChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -84,6 +85,7 @@ const buildCustomProblemOptions = (answer: string, providedOptions: string[] = [
 interface ExtendedGeneralProblem extends GeneralProblem {
   actualCorrectAnswer: string;
   sourceMode: string;
+  choiceRequired?: boolean;
   assignmentProblemId?: string;
   assignmentProblemKey?: string;
   isAssignmentRetry?: boolean;
@@ -168,7 +170,11 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   const [mapSymbolImageFailed, setMapSymbolImageFailed] = useState(false);
   const [isUnitBoardOpen, setIsUnitBoardOpen] = useState(false);
   const currentProblem = problems[currentProblemIndex];
-  const currentAnswerMode = assignmentUnits?.find((unit) => unit.modes.includes(currentProblem?.sourceMode || mode))?.answerMode || answerMode;
+  const preferredAnswerMode = assignmentUnits?.find((unit) => unit.modes.includes(currentProblem?.sourceMode || mode))?.answerMode || answerMode;
+  const currentAnswerMode = currentProblem?.choiceRequired ? 'CHOICE' : preferredAnswerMode;
+  const numericAnswer = normalizeSchoolNumber(currentProblem?.actualCorrectAnswer ?? '');
+  const inputMode = numericAnswer === null || numericAnswer.startsWith('-')
+    ? 'text' : numericAnswer.includes('.') ? 'decimal' : 'numeric';
   const shouldDuckBgmForEnglishAudio = isEnglishAudioFocusProblem(currentProblem, mode);
   const shouldUseEnglishAudioButton = languageMode === 'ENGLISH';
   const audioButtonLabel = shouldUseEnglishAudioButton ? 'Listen' : 'おとを きく';
@@ -201,163 +207,6 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
 
   const handleUnitBoardClose = useCallback(() => {
     setIsUnitBoardOpen(false);
-  }, []);
-
-  const canonicalizeEnglishNumbers = (value: string) => {
-    const smallNumberWords: Record<string, number> = {
-      zero: 0,
-      one: 1,
-      two: 2,
-      three: 3,
-      four: 4,
-      five: 5,
-      six: 6,
-      seven: 7,
-      eight: 8,
-      nine: 9,
-      ten: 10,
-      eleven: 11,
-      twelve: 12,
-      thirteen: 13,
-      fourteen: 14,
-      fifteen: 15,
-      sixteen: 16,
-      seventeen: 17,
-      eighteen: 18,
-      nineteen: 19,
-    };
-    const tensNumberWords: Record<string, number> = {
-      twenty: 20,
-      thirty: 30,
-      forty: 40,
-      fifty: 50,
-      sixty: 60,
-      seventy: 70,
-      eighty: 80,
-      ninety: 90,
-    };
-    const tokens = String(value || '')
-      .replace(/-/g, ' ')
-      .match(/\d+|[a-zA-Z]+|[^\s]/g);
-
-    if (!tokens) return String(value || '');
-
-    const normalizedTokens: string[] = [];
-
-    for (let i = 0; i < tokens.length; i += 1) {
-      const token = tokens[i];
-      const lower = token.toLowerCase();
-
-      if (/^\d+$/.test(token)) {
-        normalizedTokens.push(token);
-        continue;
-      }
-
-      if (!(lower in smallNumberWords) && !(lower in tensNumberWords) && lower !== 'hundred' && lower !== 'thousand') {
-        normalizedTokens.push(token);
-        continue;
-      }
-
-      let total = 0;
-      let current = 0;
-      let consumed = 0;
-
-      for (let j = i; j < tokens.length; j += 1) {
-        const part = tokens[j].toLowerCase();
-        if (part in smallNumberWords) {
-          current += smallNumberWords[part];
-          consumed += 1;
-          continue;
-        }
-        if (part in tensNumberWords) {
-          current += tensNumberWords[part];
-          consumed += 1;
-          continue;
-        }
-        if (part === 'hundred') {
-          current = Math.max(1, current) * 100;
-          consumed += 1;
-          continue;
-        }
-        if (part === 'thousand') {
-          total += Math.max(1, current) * 1000;
-          current = 0;
-          consumed += 1;
-          continue;
-        }
-        break;
-      }
-
-      if (consumed > 0) {
-        normalizedTokens.push(String(total + current));
-        i += consumed - 1;
-        continue;
-      }
-
-      normalizedTokens.push(token);
-    }
-
-    return normalizedTokens.join(' ');
-  };
-
-  const normalize = (s: string) => {
-    if (!s) return "";
-    return canonicalizeEnglishNumbers(s)
-      .replace(/’/g, "'")
-      .replace(/\bI'm\b/gi, 'I am')
-      .replace(/\byou're\b/gi, 'you are')
-      .replace(/\bhe's\b/gi, 'he is')
-      .replace(/\bshe's\b/gi, 'she is')
-      .replace(/\bit's\b/gi, 'it is')
-      .replace(/\bwe're\b/gi, 'we are')
-      .replace(/\bthey're\b/gi, 'they are')
-      .replace(/\bI've\b/gi, 'I have')
-      .replace(/\bwe've\b/gi, 'we have')
-      .replace(/\bthey've\b/gi, 'they have')
-      .replace(/\bdon't\b/gi, 'do not')
-      .replace(/\bdoesn't\b/gi, 'does not')
-      .replace(/\bdidn't\b/gi, 'did not')
-      .replace(/\bcan't\b/gi, 'cannot')
-      .replace(/\bwon't\b/gi, 'will not')
-      .replace(/\bwouldn't\b/gi, 'would not')
-      .replace(/\（.*?\）|\(.*?\)/g, "") // 括弧削除
-      .replace(/[\s　]+/g, "")           // 空白削除
-      .replace(/[.,!?'"`:-]/g, '')
-      .toLowerCase()
-      .trim();
-  };
-
-  const normalizeNumberInput = (value: string) => String(value || '')
-    .replace(/[０-９]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0xFEE0))
-    .replace(/[－ー―]/g, '-')
-    .replace(/[，,]/g, '')
-    .replace(/[\s　]+/g, '')
-    .trim();
-
-  const isNumericAnswer = (value: string) => /^-?\d+$/.test(normalizeNumberInput(value));
-
-  const matchesSpeechPrompt = useCallback((transcript: string, speechPrompt: NonNullable<GeneralProblem['speechPrompt']>) => {
-    const normalizedTranscript = normalize(transcript);
-    if (normalizedTranscript.length < 2) return false;
-    const answers = [
-      speechPrompt.expected,
-      ...(speechPrompt.alternates || []),
-    ];
-    const exactMatch = answers.some((answer) => {
-      const normalizedAnswer = normalize(answer);
-      return normalizedTranscript.includes(normalizedAnswer)
-        || (normalizedTranscript.length >= Math.max(3, Math.ceil(normalizedAnswer.length * 0.7))
-          && normalizedAnswer.includes(normalizedTranscript));
-    });
-    if (exactMatch) return true;
-
-    if (speechPrompt.keywords && speechPrompt.keywords.length > 0) {
-      const hits = speechPrompt.keywords.filter((keyword) => normalizedTranscript.includes(normalize(keyword))).length;
-      const requiredHits = speechPrompt.minKeywordHits || speechPrompt.keywords.length;
-      if (hits >= requiredHits) return true;
-    }
-
-    return false;
   }, []);
 
   const stopSpeechSynthesis = useCallback((settleMs = 0) => new Promise<void>((resolve) => {
@@ -446,10 +295,20 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     }
 
     if (reviewProblem) {
+      const source = SUBJECT_DATA[reviewProblem.mode] ?? [];
+      const original = source.find(problem =>
+        problem.question === reviewProblem.question && problem.options[0] === reviewProblem.correctAnswer,
+      );
+      const choiceDependent = original && source.some(problem =>
+        problem.question === original.question && problem.options[0] !== original.options[0] &&
+        schoolQuestionPromptKey(problem) === schoolQuestionPromptKey(original),
+      );
+      const availableOptions = original?.options ?? reviewProblem.options ?? [];
       setProblems([{
+        ...original,
         question: reviewProblem.question,
-        answer: reviewProblem.correctAnswer,
-        options: [...new Set([reviewProblem.correctAnswer, ...(reviewProblem.options || [])])].slice(0, 4).sort(() => Math.random() - 0.5),
+        answer: original?.answer ?? reviewProblem.correctAnswer,
+        options: [...new Set([reviewProblem.correctAnswer, ...availableOptions])].slice(0, 4).sort(() => Math.random() - 0.5),
         unitLabel: reviewProblem.unitName ? formatProblemUnitName(reviewProblem.unitName, languageMode) : trans('再出題', languageMode),
         sourceMode: reviewProblem.mode,
         assignmentProblemId: reviewProblem.problemId,
@@ -457,6 +316,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
         retryOfProblemKey: reviewProblem.problemKey,
         isAssignmentRetry: true,
         actualCorrectAnswer: reviewProblem.correctAnswer,
+        choiceRequired: choiceDependent || schoolQuestionNeedsChoices(reviewProblem.question),
       }]);
       return;
     }
@@ -500,7 +360,6 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     if (problemPool.length === 0) {
       problemPool = SUBJECT_DATA.MAP_SYMBOLS.map((p) => ({ ...p, sourceMode: 'MAP_SYMBOLS' }));
     }
-    
     const count = debugProblems.length > 0 ? debugProblems.length : isChallenge ? 1 : 3;
     const cycleEnabled = debugProblems.length === 0 && customProblems.length === 0 && !previewOnly;
     const orderedPool = cycleEnabled
@@ -513,14 +372,26 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       : debugProblems.length > 0 || customProblems.length > 0
         ? [...problemPool]
         : [...problemPool].sort(() => Math.random() - 0.5);
-    const shuffled = orderedPool
-        .slice(0, count)
+    const selectedProblems = orderedPool.slice(0, count);
+    const selectedPrompts = new Set(selectedProblems.map(problem => problem.question));
+    const answersByPrompt = new Map<string, string>();
+    const choiceDependentPrompts = new Set<string>();
+    for (const problem of problemPool) {
+      if (!selectedPrompts.has(problem.question)) continue;
+      const key = schoolQuestionPromptKey(problem);
+      const correct = problem.options[0];
+      const previous = answersByPrompt.get(key);
+      if (previous !== undefined && previous !== correct) choiceDependentPrompts.add(key);
+      answersByPrompt.set(key, correct);
+    }
+    const shuffled = selectedProblems
         .map(p => {
             // 指示通り、options[0]を絶対的な正解として保持する
             const correctAnswer = p.options[0];
             return {
                 ...p,
                 actualCorrectAnswer: correctAnswer,
+                choiceRequired: schoolQuestionNeedsChoices(p.question) || choiceDependentPrompts.has(schoolQuestionPromptKey(p)),
                 options: [...p.options].sort(() => Math.random() - 0.5),
                 assignmentProblemKey: ('assignmentProblemId' in p && typeof p.assignmentProblemId === 'string' ? p.assignmentProblemId : undefined) || `${p.sourceMode}:${p.question}`,
             };
@@ -631,8 +502,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   }, [correctCount, currentProblemIndex, isAnswered, isChallenge, onAnswerResult, onComplete, onModeCorrect, previewOnly, problems]);
 
   const handleAnswer = (option: string) => {
-    const isCorrect = normalize(option) === normalize(problems[currentProblemIndex].actualCorrectAnswer);
-    submitAnswerResult(isCorrect, option);
+    if (currentProblem) submitAnswerResult(option === currentProblem.actualCorrectAnswer, option);
   };
 
   useEffect(() => {
@@ -647,10 +517,10 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
 
   const handleInputSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!currentProblem || !normalize(inputAnswer)) return;
-    const isCorrect = isNumericAnswer(currentProblem.actualCorrectAnswer)
-      ? Number(normalizeNumberInput(inputAnswer)) === Number(normalizeNumberInput(currentProblem.actualCorrectAnswer))
-      : normalize(inputAnswer) === normalize(currentProblem.actualCorrectAnswer);
+    if (!currentProblem || !inputAnswer.trim()) return;
+    const options = schoolAnswerOptions(currentProblem.sourceMode, currentProblem.question);
+    const isCorrect = matchesSchoolAnswer(inputAnswer, currentProblem.actualCorrectAnswer, options)
+      || matchesSchoolAnswer(inputAnswer, currentProblem.answer, options);
     submitAnswerResult(isCorrect, inputAnswer);
   };
 
@@ -659,16 +529,6 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       inputRef.current.focus();
     }
   }, [isAnswered, currentProblemIndex]);
-
-  useEffect(() => {
-    if (!currentProblem || isAnswered || currentAnswerMode !== 'INPUT' || currentProblem.speechPrompt?.freeResponse) return;
-    const isCorrect = isNumericAnswer(currentProblem.actualCorrectAnswer)
-      ? Number(normalizeNumberInput(inputAnswer)) === Number(normalizeNumberInput(currentProblem.actualCorrectAnswer))
-      : normalize(inputAnswer) === normalize(currentProblem.actualCorrectAnswer);
-    if (normalize(inputAnswer) && isCorrect) {
-      submitAnswerResult(true, inputAnswer);
-    }
-  }, [currentAnswerMode, currentProblem, inputAnswer, isAnswered, submitAnswerResult]);
 
   const startSpeechRecognition = useCallback(async () => {
     if (!currentProblem?.speechPrompt || isAnswered || isListening || speechStartInProgressRef.current) return;
@@ -713,7 +573,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       const transcript = alternatives[0] || '';
       setSpeechTranscript(transcript);
       if (!result?.isFinal) return;
-      const acceptedTranscript = alternatives.find(candidate => matchesSpeechPrompt(candidate, currentProblem.speechPrompt!));
+      const acceptedTranscript = alternatives.find(candidate => matchesSchoolSpeech(candidate, currentProblem.speechPrompt!));
       submitAnswerResult(!!acceptedTranscript, acceptedTranscript || transcript || currentProblem.speechPrompt!.expected);
     };
     recognition.onerror = (event: any) => {
@@ -740,7 +600,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       setIsListening(false);
       speechStartInProgressRef.current = false;
     }
-  }, [currentProblem, isAnswered, isListening, languageMode, matchesSpeechPrompt, primeMicrophonePermission, stopSpeechSynthesis, submitAnswerResult]);
+  }, [currentProblem, isAnswered, isListening, languageMode, primeMicrophonePermission, stopSpeechSynthesis, submitAnswerResult]);
 
   useEffect(() => {
     if (visualCanvasRef.current && currentProblem?.visual) drawProblemVisual(visualCanvasRef.current, currentProblem.visual);
@@ -927,14 +787,13 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                     onChange={(event) => setInputAnswer(event.target.value)}
                     disabled={isAnswered}
                     autoFocus
-                    inputMode={isNumericAnswer(currentProblem.actualCorrectAnswer) ? 'numeric' : 'text'}
-                    pattern={isNumericAnswer(currentProblem.actualCorrectAnswer) ? '[-0-9０-９－ー―,，\s]*' : undefined}
+                    inputMode={inputMode}
                     className={`w-full rounded-xl border-4 bg-white px-4 py-4 text-center text-3xl font-black text-slate-950 outline-none transition-colors ${isAnswered ? 'border-slate-400 opacity-80' : 'border-emerald-400 focus:border-yellow-300'}`}
                     placeholder={trans('答えを入力', languageMode)}
                 />
                 <button
                     type="submit"
-                    disabled={isAnswered || normalize(inputAnswer) === ''}
+                    disabled={isAnswered || inputAnswer.trim() === ''}
                     className="w-full rounded-xl border-b-4 border-emerald-950 bg-emerald-600 py-3 text-xl font-bold transition-all hover:bg-emerald-500 active:translate-y-1 active:border-b-0 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     {trans('決定', languageMode)}
@@ -945,7 +804,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
             {!currentProblem.speechPrompt?.freeResponse && !(currentAnswerMode === 'INPUT') && (
             <div className="general-challenge-options w-full grid grid-cols-2 gap-2 md:gap-3 min-w-0">
                 {currentProblem.options.map((opt, idx) => {
-                    const isCorrectOption = normalize(opt) === normalize(currentProblem.actualCorrectAnswer);
+                    const isCorrectOption = opt === currentProblem.actualCorrectAnswer;
                     const isSelectedWrong = opt === selectedOption && !isCorrectOption;
                     return (
                         <button

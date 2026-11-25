@@ -651,7 +651,7 @@ export const ENGLISH_DATA: Record<string, EnglishProblem[]> = {
         { question: "Spread", answer: "広がる・広げる", options: ["広がる", "縮まる", "止まる", "消える"], hint: "普及する。" },
         { question: "Structure", answer: "構造・組み立てる", options: ["構造", "混沌", "破壊", "空白"], hint: "建物の仕組みなど。" },
         { question: "Transport", answer: "輸送する", options: ["輸送する", "置く", "取る", "投げる"], hint: "運ぶこと。" },
-        { question: "Volunteer", answer: "自ら進んで申し出る", options: ["ボランティア", "命じられる", "拒む", "休む"], hint: "進んでやること。" },
+        { question: "Volunteer (verb)", answer: "自ら進んで申し出る", options: ["自ら進んで申し出る", "命じられる", "拒む", "休む"], hint: "動詞として使うと、進んでやることを表す。" },
         { question: "Wander", answer: "歩き回る・彷徨う", options: ["歩き回る", "止まる", "座る", "急ぐ"], hint: "目的なく歩く様子。" },
         { question: "Yield", answer: "産出する・屈する", options: ["産出する・屈する", "抵抗する", "守る", "戦う"], hint: "実らせる、または譲ること。" },
         { question: "Zone", answer: "地帯・区域", options: ["地帯", "全体", "個人", "宇宙"], hint: "特定の範囲。" },

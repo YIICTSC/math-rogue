@@ -127,7 +127,7 @@ const MATH_G5_3: GeneralProblem[] = [
         { question: "「時速」を「分速」に直すには？", answer: "60 で割る", options: d("60 で割る", "60 をかける", "100 で割る", "3600 をかける"), hint: "1時間は60分だからね。" },
         { question: "「秒速」を「時速」に直すには？", answer: "3600 をかける", options: d("3600 をかける", "60 をかける", "60 で割る", "3.6 で割る"), hint: "60分×60秒 ＝ 3600秒。" },
         { question: "分数の掛け算。 「(2/3) × 4 ＝ 」 答えは？", answer: "8/3 (2と2/3)", options: d("8/3", "2/12", "6/3", "1/6"), hint: "分子（上）にだけかけよう。" },
-        { question: "分数の割り算。 「(4/5) ÷ 2 ＝ 」 答えは？", answer: "2/5 (4/10)", options: d("2/5", "4/10", "8/5", "2/10"), hint: "分子を割るか、分母にかける。" },
+        { question: "分数の割り算。 「(4/5) ÷ 2 ＝ 」 答えは？", answer: "2/5", options: d("2/5", "4/5", "8/5", "2/10"), hint: "分子を割るか、分母に2をかけて約分します。" },
         { question: "「2/7 × 3/5 ＝ 」 答えは？", answer: "6/35", options: d("6/35", "5/12", "10/21", "6/12"), hint: "上どうし、下どうしをかけるよ。" },
         { question: "「(1/2) ÷ (1/3) ＝ 」 答えは？", answer: "3/2 (1.5)", options: d("3/2", "1/6", "2/3", "3"), hint: "ひっくり返してかけよう。" },
         { question: "「帯グラフ」と「円グラフ」の共通点は？", answer: "全体に対する割合を表している", options: d("割合を表す", "時間の変化を表す", "数そのものを表す", "形が四角い"), hint: "％の合計は100になるよ。" },
@@ -531,7 +531,7 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             const b = (n % 8) + 1;
             const product = (a * b) / 100;
             if (n % 2 === 0) {
-                return { question: `0.${a} × 0.${b} = ?`, answer: `${product}`, options: d(`${product}`, `0.${a * b}`, `${a * b}`, `0.00${a * b}`), hint: "小数第1位×小数第1位。" };
+                return { question: `0.${a} × 0.${b} = ?`, answer: `${product}`, options: d(`${product}`, `${(a * b) / 10}`, `${a * b}`, `${(a * b) / 1000}`), hint: "小数第1位×小数第1位。" };
             }
             const scaled = (a * b) / 10;
             return {
@@ -641,12 +641,13 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
         case 'MATH_G5_U08': {
             const a = (n % 30) + 60;
             const b = (n % 20) + 70;
-            const c = (n % 10) + 80;
-            const avg = Math.floor((a + b + c) / 3);
+            const total = Math.ceil((a + b + (n % 10) + 80) / 3) * 3;
+            const c = total - a - b;
+            const avg = total / 3;
             if (n % 2 === 0) {
                 return { question: `${a}, ${b}, ${c} の平均は？`, answer: `${avg}`, options: d(`${avg}`, `${a + b + c}`, `${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`), hint: "合計÷個数。" };
             }
-            return { question: `3この数の平均が ${avg}。 合計は？`, answer: `${avg * 3}`, options: d(`${avg * 3}`, `${avg}`, `${avg + 3}`, `${a + b + c}`), hint: "平均×個数。" };
+            return { question: `3この数の平均が ${avg}。 合計は？`, answer: `${total}`, options: d(`${total}`, `${avg}`, `${avg + 3}`, `${total + 3}`), hint: "平均×個数。" };
         }
         case 'MATH_G5_U09': {
             const form = n % 2;

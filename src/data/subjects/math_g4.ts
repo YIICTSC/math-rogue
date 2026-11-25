@@ -622,7 +622,7 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             return {
                 question: `${bigDigit}.${bigDigit} - ${smallDigit}.${smallDigit} = ?`,
                 answer: diffBig,
-                options: d(diffBig, `${bigDigit - smallDigit}`, `${sum}`, `${(bigDigit - smallDigit).toFixed(1)}`),
+                options: d(diffBig, bigDigit === smallDigit ? "0.2" : String(bigDigit - smallDigit), sum, (diffValue + 0.1).toFixed(1)),
                 hint: "同じ位どうしをひく。",
                 visual: {
                     kind: 'number_line',

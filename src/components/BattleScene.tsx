@@ -3424,7 +3424,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
     }, [card.id, cutinCount, delayStepMs, panelDelays]);
 
     return (
-        <div className="absolute inset-0 z-[160] pointer-events-none overflow-hidden">
+        <div data-battle-finisher className="absolute inset-0 z-[160] pointer-events-none overflow-hidden">
             <div className={`absolute inset-0 ${isEnemyFinisher ? 'bg-gradient-to-l from-black/80 via-black/45 to-transparent' : 'bg-gradient-to-r from-black/80 via-black/40 to-transparent'} animate-finish-dim`}></div>
 
             {isEnemyFinisher ? (
@@ -3721,9 +3721,9 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                 </div>
             )}
 
-            <div className="absolute left-6 bottom-8 md:bottom-12 animate-finish-title">
+            <div className="absolute inset-x-6 bottom-8 md:bottom-12 animate-finish-title">
                 <div className="text-orange-200 text-xs md:text-sm font-bold tracking-[0.18em] mb-1">{trans("フィニッシュ", languageMode)}</div>
-                <div className="text-white text-2xl md:text-4xl font-black drop-shadow-[0_0_18px_rgba(0,0,0,1)]">{translated}</div>
+                <div title={translated} className="line-clamp-2 break-words text-white text-2xl md:text-4xl font-black drop-shadow-[0_0_18px_rgba(0,0,0,1)]">{translated}</div>
             </div>
 
             <div className={`absolute ${isEnemyFinisher ? 'left-[13%] bottom-[28%] md:left-[12%] md:bottom-[30%]' : 'inset-0 flex items-center justify-center'}`}>

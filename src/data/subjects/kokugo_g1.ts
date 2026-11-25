@@ -680,7 +680,7 @@ const makeRefinedLanguageProblem = (unitId: string, n: number): GeneralProblem =
   }
   if (unitId === 'KOKUGO_G1_U11') {
     const item = sentenceWritingRows[index];
-    if (variant === 0) return { question: `「${item.words}」を つかって かいた ぶんは？`, answer: item.sentence, options: d(item.sentence, item.sentence.replace('。', ''), `${item.action} ${item.subject}。`, `${item.subject} ${item.action}。`.replace(/は |が /, '')), hint: 'ことばの じゅんと「。」を たしかめよう。' };
+    if (variant === 0) return { question: `「${item.words}」を つかい、おわりに「。」を つけた ぶんは？`, answer: item.sentence, options: d(item.sentence, item.sentence.replace('。', ''), `${item.action} ${item.subject}。`, `${item.subject} ${item.action}。`.replace(/は |が /, '')), hint: 'ことばの じゅんと「。」を たしかめよう。' };
     if (variant === 1) return { question: `「${item.sentence}」で、だれや なにを あらわす まとまりは？`, answer: item.subject, options: fieldOptions(item.subject, sentenceWritingRows.map((row) => row.subject), index), hint: 'だれが するのかを みつけよう。' };
     if (variant === 2) return { question: `「${item.sentence}」で、したことを あらわす まとまりは？`, answer: item.action, options: fieldOptions(item.action, sentenceWritingRows.map((row) => row.action), index), hint: 'なにを したかを みつけよう。' };
     if (variant === 3) return { question: `「${item.sentence}」に ようすを くわしく たす ことばは？`, answer: item.detail, options: fieldOptions(item.detail, sentenceWritingRows.map((row) => row.detail), index), hint: 'どこで、いつ、どのようにを たすと くわしくなる。' };

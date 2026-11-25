@@ -111,7 +111,7 @@ const MATH_G3_3: GeneralProblem[] = [
         { question: "「48 ÷ 4 ＝ 」 あんざんで 答えは？", answer: "12", options: d("12", "10", "11", "14"), hint: "40÷4 と 8÷4 に 分けよう。" },
         { question: "「630 ÷ 3 ＝ 」 答えは？", answer: "210", options: d("210", "21", "230", "310"), hint: "63 ÷ 3 は？" },
         { question: "一億（いちおく）は、一万（いちまん）を 何こ あつめた 数？", answer: "10000こ", options: d("10000こ", "100こ", "1000こ", "10こ"), hint: "万が 万こで 億に なるよ。" },
-        { question: "「1.2 ＋ 0.8 ＝ 」 答えは？", answer: "2", options: d("2", "1.10", "2.0", "1.28"), hint: "くりあがり が あるよ。" },
+        { question: "「1.2 ＋ 0.8 ＝ 」 答えは？", answer: "2", options: d("2", "1.10", "2.8", "1.28"), hint: "くりあがり が あるよ。" },
         { question: "分数. 「4/5」 と 「3/5」、どっちが 大きい？", answer: "4/5", options: d("4/5", "3/5", "同じ", "比べられない"), hint: "分子（上）の 数を くらべよう。" },
         { question: "「1km」 を 「m」 に なおすと？", answer: "1000m", options: d("1000m", "100m", "10000m", "10m"), hint: "何度も 出てきたね。大事な たんい。" },
         { question: "正三角形の 1つの 角の 大きさは 何度？", answer: "60度", options: d("60度", "90度", "45度", "30度"), hint: "全部で 180度. それを 3で 割ると？" },
@@ -148,7 +148,7 @@ const MATH_G3_3: GeneralProblem[] = [
         { question: "一億の 1つ 下の くらいは？", answer: "千万", options: d("千万", "百万", "十万", "一万"), hint: "千、万、億。" },
         { question: "「45000000」 の 読み方は？", answer: "四千五百万", options: d("四千五百万", "四億五千万", "四百五十万", "四千五百"), hint: "0の 数を 数える。" },
         { question: "「0.1 + 0.1 + 0.1 = 」 答えは？", answer: "0.3", options: d("0.3", "3", "0.111", "0.03"), hint: "0.1 が 3つ。" },
-        { question: "「1.5 - 0.5 = 」 答えは？", answer: "1", options: d("1", "0.5", "1.0", "1.1"), hint: "半分 ひく。" },
+        { question: "「1.5 - 0.5 = 」 答えは？", answer: "1", options: d("1", "0.5", "2", "1.1"), hint: "半分 ひく。" },
         { question: "1kg は 何g？", answer: "1000g", options: d("1000g", "100g", "10g", "1g"), hint: "大事な たんい。" },
         { question: "「500g」 は 1kgの 何分の一？", answer: "2分の一", options: d("2分の一", "4分の一", "10分の一", "1分の一"), hint: "半分だね。" },
         { question: "「250g」 は 1kgの 何分の一？", answer: "4分の一", options: d("4分の一", "2分の一", "8分の一", "5分の一"), hint: "半分の 半分。" },
@@ -459,7 +459,7 @@ export const MATH_G3_UNIT_DATA: Record<string, GeneralProblem[]> = {
         { question: "3/4と1/4。大きいのは？", answer: "3/4", options: d("3/4", "1/4", "同じ", "くらべられない"), hint: "分母が同じなら分子でくらべる。" },
         { question: "2/6と5/6。小さいのは？", answer: "2/6", options: d("2/6", "5/6", "同じ", "くらべられない"), hint: "2は5より小さい。" },
         { question: "4/4は整数で書くと？", answer: "1", options: d("1", "4", "0", "8"), hint: "全部そろった。" },
-        { question: "1/3が3こで？", answer: "1", options: d("1", "3/3", "1/9", "3"), hint: "3/3は1。" },
+        { question: "1/3が3こで？", answer: "1", options: d("1", "2/3", "1/9", "3"), hint: "3/3は1。" },
         { question: "分数で、下の数を何という？", answer: "分母", options: d("分母", "分子", "整数", "小数点"), hint: "いくつに分けたか。" },
         { question: "分数で、上の数を何という？", answer: "分子", options: d("分子", "分母", "整数", "小数"), hint: "そのうち何こか。" },
         { question: "1mの1/10は？", answer: "10cm", options: d("10cm", "1cm", "100cm", "0cm"), hint: "1mは100cm。" },
@@ -645,7 +645,7 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             if (n % 2 === 0) {
                 return { question: `0.${a} + 0.${b} = ?`, answer: `${sum}`, options: d(`${sum}`, `0.${a}`, `0.${b}`, `${a + b}`), hint: "小数第1位どうしを たそう。", visual: { kind: 'number_line', min: 0, max: 2, step: 0.1, markers: [{ value: a / 10, label: `0.${a}`, emphasized: true }], jump: { from: a / 10, to: sum, label: `+0.${b}` } } };
             }
-            return { question: `0.1 が ${a}こ と 0.1 が ${b}こ。 あわせて いくつ？`, answer: `${sum}`, options: d(`${sum}`, `${a + b}`, `0.${a}`, `1.${Math.max(0, a + b - 10)}`), hint: "0.1 を 何こ 集めたかで 考える。", visual: { kind: 'number_line', min: 0, max: 2, step: 0.1, markers: [{ value: a / 10, label: `0.${a}`, emphasized: true }], jump: { from: a / 10, to: sum, label: `${b}こ分` } } };
+            return { question: `0.1 が ${a}こ と 0.1 が ${b}こ。 あわせて いくつ？`, answer: `${sum}`, options: d(`${sum}`, `${a + b}`, `0.${a}`, `${(a + b) / 100}`), hint: "0.1 を 何こ 集めたかで 考える。", visual: { kind: 'number_line', min: 0, max: 2, step: 0.1, markers: [{ value: a / 10, label: `0.${a}`, emphasized: true }], jump: { from: a / 10, to: sum, label: `${b}こ分` } } };
         }
         case 'MATH_G3_U13': {
             const den = (n % 6) + 3;

@@ -31,8 +31,11 @@ export function buildLesson(selection: LessonSelection, count = 3, history: stri
     const kanji = mode === GameMode.KANJI_MIXED ? Object.values(KANJI_DATA).flat() : mode === GameMode.KANKEN_MIXED ? Object.values(KANKEN_DATA).flat() : mode === GameMode.HARD_KANJI_MIXED ? Object.values(HARD_KANJI_DATA).flat() : KANJI_DATA[mode] || KANKEN_DATA[mode] || HARD_KANJI_DATA[mode];
     if (kanji) source = kanji.filter(p => matchesKanjiAssignmentRangeFilter(p, filter));
     else if (arithmeticModes.includes(mode)) {
-      source = arithmeticPool(mode as GameMode, filter).map(p => ({ question: p.question, answer: String(p.answer), options: [String(p.answer), ...p.options.map(String)] }));
-      if (filter?.kind === 'division' && filter.values.includes('remainder_with')) source = source.map(p => { const nums = p.question.match(/\d+/g)!.map(Number); const answer = `${Math.floor(nums[0] / nums[1])} あまり ${nums[0] % nums[1]}`; return { ...p, answer, options: [answer, ...[1, 2, 3].map(n => `${Math.floor(nums[0] / nums[1]) + n} あまり ${nums[0] % nums[1]}`)] }; });
+      source = arithmeticPool(mode as GameMode, filter).map(problem => {
+        const format = (value: number) => problem.remainder === undefined ? String(value) : `${value} あまり ${problem.remainder}`;
+        const answer = format(problem.answer);
+        return { question: problem.question, answer, options: [answer, ...problem.options.map(format)] };
+      });
       source = source.filter(p => matchesAssignmentRangeFilter(p, filter));
     } else {
       source = SUBJECT_DATA[mode] || (mode === GameMode.ENGLISH_MIXED ? Object.values(ENGLISH_DATA).flat() : ENGLISH_DATA[mode]) || [];

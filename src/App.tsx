@@ -347,7 +347,30 @@ import { isRpgAdventureSetup, type RpgAdventureSetup } from './rpg/setup';
 const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
 const ENEMY_FINISHER_BURST_VOICE_DELAY_MS = 760;
-const MAX_CARD_DETAIL_VFX = 80;
+const MAX_CARD_DETAIL_VFX = 12;
+
+const advanceDefeatedEnemyPhase = (
+    enemy: Enemy,
+    theme: GameState['visualTheme'],
+    debugHpOne: boolean,
+    logs: string[],
+    effects: VisualEffectInstance[],
+    delay = 0,
+) => {
+    if (!(enemy.currentHp <= 0) || !canTransformEnemy(enemy)) return;
+
+    const demon = enemy.enemyType === 'RPG_DEMON';
+    enemy.phase = nextDemonPhase(enemy);
+    enemy.currentHp = debugHpOne ? 1 : enemy.maxHp;
+    enemy.name = demon ? demonName(enemy.phase) : theme === 'magic' ? '真・大魔女校長' : '真・校長先生';
+    enemy.poison = 0;
+    enemy.weak = 0;
+    enemy.vulnerable = 0;
+    const phaseId = `${Date.now()}-${enemy.id}-${enemy.phase}`;
+    enemy.floatingText = { id: `phase-evo-${phaseId}`, text: '本気モード！', color: 'text-yellow-500' };
+    logs.push(demon ? `${enemy.name}に変身した！` : theme === 'magic' ? '大魔女校長が真の姿を現した！' : '校長先生が真の姿を現した！');
+    effects.push({ id: `vfx-evo-${phaseId}`, type: 'BUFF', targetId: enemy.id, delay });
+};
 const CROWDFUNDING_BANNER_URL = 'https://camp-fire.jp/projects/954165/view?utm_campaign=cp_po_share_c_msg_mypage_projects_open';
 const CROWDFUNDING_BANNER_IMAGE = assetUrl('banners/campfire-crowdfunding.webp');
 const ASSIGNMENT_INTRO_BANNER_IMAGE = assetUrl('banners/daily-assignment-reward-intro.webp');
@@ -10200,25 +10223,29 @@ const App: React.FC = () => {
                 : null;
             const actorPlayer = actorEntry?.player ?? prev.player;
             const selectedCard = actorPlayer.hand.find(handCard => handCard.id === card.id) ?? card;
-            const p = { ...actorPlayer, hand: [...actorPlayer.hand], discardPile: [...actorPlayer.discardPile], powers: { ...actorPlayer.powers } };
+            const p = { ...actorPlayer, hand: [...actorPlayer.hand], discardPile: [...actorPlayer.discardPile], powers: { ...actorPlayer.powers }, relicCounters: { ...actorPlayer.relicCounters } };
             const selectionPeerId = prev.challengeMode === 'COOP' ? (coopActorPeerId || coopSelfPeerId) : undefined;
             const mode = selectionPeerId
                 ? (prev.coopBattleState?.selectionStateByPeerId?.[selectionPeerId] || prev.selectionState)
                 : prev.selectionState;
             if (mode.type === 'DISCARD' || mode.type === 'EXHAUST') {
+                const enemies = prev.enemies.map(enemy => ({ ...enemy }));
+                const logs: string[] = [];
+                const effects: VisualEffectInstance[] = [];
                 p.hand = p.hand.filter(c => c.id !== selectedCard.id);
                 if (mode.type === 'DISCARD') {
                     p.discardPile.push(clearRetainedCardMarker(selectedCard));
-                    applyRelicDiscardEffects(p, selectedCard, prev.enemies);
+                    applyRelicDiscardEffects(p, selectedCard, enemies);
                     if (selectedCard.name === 'カンニングペーパー' || selectedCard.name === 'STRATEGIST') {
                         p.nextTurnEnergy += 2;
                         p.floatingText = { id: `strat-${Date.now()}-${Math.random()}`, text: '+2 Next Turn', color: 'text-yellow-400', iconType: 'zap' };
                     }
                 } else if (mode.type === 'EXHAUST') {
-                    applyRelicDiscardEffects(p, selectedCard, prev.enemies, true);
+                    applyRelicDiscardEffects(p, selectedCard, enemies, true);
                     if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
                 }
                 const newAmount = mode.amount - 1;
+                enemies.forEach(enemy => advanceDefeatedEnemyPhase(enemy, prev.visualTheme, isDebugHpOne, logs, effects));
                 const nextSelectionState = { ...mode, active: newAmount > 0, amount: newAmount };
                 const updatedBattleState = prev.challengeMode === 'COOP'
                     ? (coopActorPeerId
@@ -10227,6 +10254,9 @@ const App: React.FC = () => {
                     : prev.coopBattleState;
                 return {
                     ...prev,
+                    enemies: enemies.filter(enemy => enemy.currentHp > 0),
+                    combatLog: [...prev.combatLog, ...logs].slice(-100),
+                    activeEffects: [...prev.activeEffects, ...attachCoopEffectOwner(effects, coopActorPeerId)],
                     player: coopActorPeerId ? prev.player : p,
                     coopBattleState: prev.challengeMode === 'COOP'
                         ? withCoopSelectionStateForPeer(updatedBattleState, selectionPeerId, nextSelectionState)
@@ -10771,6 +10801,7 @@ const App: React.FC = () => {
             }
 
 
+            enemies.forEach(enemy => advanceDefeatedEnemyPhase(enemy, prev.visualTheme, isDebugHpOne, newLogs, nextActiveEffects));
             const remainingEnemies = enemies.filter(e => e.currentHp > 0);
             const nextSelectedEnemyId =
                 remainingEnemies.find(e => e.id === actorSelectedEnemyId)?.id
@@ -10898,8 +10929,8 @@ const App: React.FC = () => {
         card = adjustedCard;
 
         if (actionPlayer.currentEnergy < effectiveCost && !actionPlayer.partner) return false;
-        if (actionState.enemies.length === 0) return false;
-        if (actingEnemyId) return false;
+        if (actionState.screen !== GameScreen.BATTLE || actionState.enemies.length === 0) return false;
+        if (actingEnemyId || (actionState.challengeMode !== 'COOP' && isEndingTurnRef.current)) return false;
         const activeSelectionPeerId = actionState.challengeMode === 'COOP' ? (coopActorPeerId || coopSelfPeerId) : undefined;
         const activeSelectionState = activeSelectionPeerId
             ? (actionState.coopBattleState?.selectionStateByPeerId?.[activeSelectionPeerId] || INACTIVE_SELECTION_STATE)
@@ -11351,6 +11382,12 @@ const App: React.FC = () => {
             }
             const voicedEnemyDamageIds = new Set<string>();
             const voicedEnemyDefeatIds = new Set<string>();
+            let highestHitDamage = 0;
+            let resolvedHits = 0;
+            const advanceEnemyPhases = (delay = 0) => {
+                enemies.forEach(enemy => advanceDefeatedEnemyPhase(enemy, prev.visualTheme, isDebugHpOne, currentLogs, nextActiveEffects, delay));
+            };
+            advanceEnemyPhases();
 
             let baseVfx = 'SLASH';
             if (card.type === CardType.ATTACK) {
@@ -11365,15 +11402,20 @@ const App: React.FC = () => {
                 if (card.playCopies) hits += card.playCopies;
                 if (card.hitsPerSkillInHand) hits = p.hand.filter(c => c.type === CardType.SKILL && c.id !== card.id).length;
                 if (card.hitsPerAttackPlayed) hits = p.attacksPlayedThisTurn;
-                hits = Math.max(1, Math.floor(hits));
+                hits = Number.isFinite(hits) ? Math.max(1, Math.floor(hits)) : 1;
                 const visualHitCount = Math.min(hits, MAX_CARD_DETAIL_VFX);
                 const hitsToLog = Math.min(hits, 10);
                 const multihitFrameSequence = getMultihitFrameSequence(visualHitCount);
 
                 for (let h = 0; h < hits; h++) {
-                    const hitDelay = (act * hits + h) * 80;
-
                     if (enemies.every(e => e.currentHp <= 0)) break;
+                    const hitIndex = resolvedHits++;
+                    const showHitDetail = hitIndex < MAX_CARD_DETAIL_VFX;
+                    const hitDelay = Math.min(hitIndex, MAX_CARD_DETAIL_VFX - 1) * 80;
+                    const queueHitEffect = (effect: VisualEffectInstance) => {
+                        if (!showHitDetail) return;
+                        nextActiveEffects.push({ ...effect, id: `${effect.id}-hit-${hitIndex}-${nextActiveEffects.length}` });
+                    };
                     let targets: Enemy[] = [];
                     if (card.target === TargetType.ALL_ENEMIES) targets = enemies.filter(e => e.currentHp > 0);
                     else if (card.target === TargetType.RANDOM_ENEMY) {
@@ -11407,12 +11449,12 @@ const App: React.FC = () => {
                                 energySpent: card.xCost ? effectiveCost : undefined,
                                 block: p.block,
                                 hpLostThisTurn: hpLostAtCardPlay,
-                                handCountExcludingSelf: p.hand.filter(c => c.id !== card.id).length,
-                                attackCountInHand: p.hand.filter(c => c.id !== card.id && c.type === CardType.ATTACK).length,
+                                handCountExcludingSelf: card.damagePerCardInHand ? p.hand.filter(c => c.id !== card.id).length : undefined,
+                                attackCountInHand: card.damagePerAttackInHand ? p.hand.filter(c => c.id !== card.id && c.type === CardType.ATTACK).length : undefined,
                                 attacksPlayedThisTurn: p.attacksPlayedThisTurn,
                                 cardsPlayedThisTurn: p.cardsPlayedThisTurn,
                                 cardsPlayedThisBattle: p.cardsPlayedThisBattle,
-                                strikeCount: p.deck.filter(c => c.name === 'えんぴつ攻撃' || c.originalNames?.includes('えんぴつ攻撃')).length,
+                                strikeCount: card.damagePerStrike ? p.deck.filter(c => c.name === 'えんぴつ攻撃' || c.originalNames?.includes('えんぴつ攻撃')).length : undefined,
                                 deckCount: p.deck.length,
                                 drawPileCount: p.drawPile.length,
                             });
@@ -11492,45 +11534,35 @@ const App: React.FC = () => {
                                 p.relicCounters['ANIMAL_CARE_BADGE_HEALS'] += 1;
                             }
                             if (e.currentHp <= 0 && hasRelic(p, 'GYMNASIUM_FLAG')) p.relicCounters['NEXT_CARD_EFFECT_BONUS'] = 4;
-                            if (!coopActorPeerId && damage > 0) storageService.saveHighestCardDamage(damage, card.name);
+                            if (damage > highestHitDamage) highestHitDamage = damage;
 
-                            let finalVfx: VFXType = baseVfx as VFXType;
-                            const shouldShowDetailVfx = h < MAX_CARD_DETAIL_VFX || h === hits - 1;
-                            const attackEffectKey = card.type === CardType.ATTACK
-                                ? getAttackEffectKeyForCard(card, visualHitCount, e.currentHp <= 0)
-                                : undefined;
-                            const attackEffectFrame = attackEffectKey === 'multihit'
-                                ? multihitFrameSequence[Math.min(h, multihitFrameSequence.length - 1)] ?? multihitFrameSequence[multihitFrameSequence.length - 1]
-                                : undefined;
-                            if (card.type === CardType.ATTACK) {
-                                finalVfx = 'ATTACK_SPRITE';
-                            } else {
-                                if (damage > 15 && finalVfx === 'SLASH') finalVfx = 'CRITICAL';
-                                if (e.currentHp <= 0 && (finalVfx === 'SLASH' || finalVfx === 'CRITICAL')) finalVfx = 'EXPLOSION';
-                            }
-
-                            if (shouldShowDetailVfx) {
-                                nextActiveEffects.push({
+                            if (showHitDetail) {
+                                const attackEffectKey = card.type === CardType.ATTACK
+                                    ? getAttackEffectKeyForCard(card, visualHitCount, e.currentHp <= 0)
+                                    : undefined;
+                                const attackEffectFrame = attackEffectKey === 'multihit'
+                                    ? multihitFrameSequence[Math.min(h, multihitFrameSequence.length - 1)]
+                                    : undefined;
+                                let finalVfx = baseVfx as VFXType;
+                                if (card.type === CardType.ATTACK) {
+                                    finalVfx = 'ATTACK_SPRITE';
+                                } else if (finalVfx === 'SLASH') {
+                                    if (e.currentHp <= 0) finalVfx = 'EXPLOSION';
+                                    else if (damage > 15) finalVfx = 'CRITICAL';
+                                }
+                                queueHitEffect({
                                     id: `vfx-${Date.now()}-${Math.random()}`,
                                     type: finalVfx,
                                     targetId: e.id,
                                     screenShake: damage > 0,
-                                    delay: Math.min(hitDelay, MAX_CARD_DETAIL_VFX * 80),
+                                    delay: hitDelay,
                                     rotation: Math.random() * 360,
                                     attackEffectKey,
                                     attackEffectFrame
                                 });
                             }
 
-                            if (e.currentHp <= 0 && canTransformEnemy(e)) {
-                                e.currentHp = isDebugHpOne ? 1 : e.maxHp;
-                                e.phase = nextDemonPhase(e);
-                                e.name = e.enemyType==='RPG_DEMON'?demonName(e.phase):prev.visualTheme === 'magic' ? "真・大魔女校長" : "真・校長先生";
-                                e.poison = 0; e.weak = 0; e.vulnerable = 0;
-                                e.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
-                                currentLogs.push(e.enemyType==='RPG_DEMON'?`${e.name}に変身した！`:prev.visualTheme === 'magic' ? "大魔女校長が真の姿を現した！" : "校長先生が真の姿を現した！");
-                                nextActiveEffects.push({ id: `vfx-evo-${Date.now()}`, type: 'BUFF', targetId: e.id, delay: hitDelay + 200 });
-                            }
+                            advanceDefeatedEnemyPhase(e, prev.visualTheme, isDebugHpOne, currentLogs, nextActiveEffects, hitDelay + 200);
                             if (damage > 0 && hpBeforeDamage > 0) {
                                 if (e.currentHp <= 0) {
                                     if (!voicedEnemyDefeatIds.has(e.id)) {
@@ -11567,7 +11599,7 @@ const App: React.FC = () => {
                             }
                             if (card.lifesteal && damage > 0) {
                                 p.currentHp = Math.min(p.currentHp + damage, p.maxHp);
-                                nextActiveEffects.push({ id: `vfx-heal-ls-${Date.now()}`, type: 'HEAL', targetId: 'player', delay: hitDelay });
+                                queueHitEffect({ id: `vfx-heal-ls-${Date.now()}`, type: 'HEAL', targetId: 'player', delay: hitDelay });
                             }
                             if (e.currentHp <= 0) {
                                 currentLogs.push(`${trans(e.name, languageMode)}${trans("を倒した！", languageMode)}`);
@@ -11599,7 +11631,7 @@ const App: React.FC = () => {
                                             other.currentHp -= e.maxHp;
                                             other.floatingText = { id: `expl-${Date.now()}`, text: `${e.maxHp}`, color: 'text-green-400' };
                                             currentLogs.push(`${trans("衝撃のうわさ", languageMode)}: ${trans(other.name, languageMode)}に${e.maxHp}${trans("ダメージ", languageMode)}`);
-                                            nextActiveEffects.push({ id: `vfx-expl-${Date.now()}-${other.id}`, type: 'FIRE', targetId: other.id, delay: hitDelay + 100 });
+                                            queueHitEffect({ id: `vfx-expl-${Date.now()}-${other.id}`, type: 'FIRE', targetId: other.id, delay: hitDelay + 100 });
                                         }
                                     });
                                 }
@@ -11719,7 +11751,7 @@ const App: React.FC = () => {
                                     p.discardPile.push(captured);
                                     e.floatingText = { id: `cap-${Date.now()}`, text: 'GET!', color: 'text-yellow-400' };
                                     currentLogs.push(`${trans(capturedDisplayName, languageMode)}を${trans("捕獲した！", languageMode)} (${trans(randomCardTemplate.name, languageMode)}の効果付与)`);
-                                    nextActiveEffects.push({ id: `vfx-cap-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+                                    queueHitEffect({ id: `vfx-cap-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
                                 }
                                 if (card.name === '羅生門' || card.originalNames?.includes('羅生門') || card.originalNames?.includes('RASHOMON') || (card.id && card.id.includes('RASHOMON'))) {
                                     nextSelectionState = { active: true, type: 'EXHAUST', amount: 1 };
@@ -11730,7 +11762,7 @@ const App: React.FC = () => {
                                 e.nextIntent = { type: EnemyIntentType.SLEEP, value: 0 };
                                 currentLogs.push(`${trans(e.name, languageMode)}の行動を遅らせた！`);
                                 e.floatingText = { id: `delay-${Date.now()}`, text: '遅延', color: 'text-blue-400' };
-                                nextActiveEffects.push({ id: `vfx-delay-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay });
+                                queueHitEffect({ id: `vfx-delay-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay });
                             }
                         });
                     }
@@ -11747,7 +11779,7 @@ const App: React.FC = () => {
                             logParts.push(`x0.75(${trans("もろい", languageMode)})`);
                         }
                         p.block += blk;
-                        nextActiveEffects.push({ id: `vfx-blk-${Date.now()}`, type: 'BLOCK', targetId: 'player', delay: hitDelay });
+                        queueHitEffect({ id: `vfx-blk-${Date.now()}`, type: 'BLOCK', targetId: 'player', delay: hitDelay });
                         const formula = logParts.length > 1 ? `(${logParts.join(' ')}) = ` : '';
                         if (h < hitsToLog) {
                             currentLogs.push(`${trans("ブロック", languageMode)}${formula}${blk}を${trans("獲得", languageMode)}`);
@@ -11755,7 +11787,7 @@ const App: React.FC = () => {
                     }
                     if (card.doubleBlock) {
                         p.block *= 2;
-                        nextActiveEffects.push({ id: `vfx-dblblk-${Date.now()}`, type: 'BLOCK', targetId: 'player', delay: hitDelay });
+                        queueHitEffect({ id: `vfx-dblblk-${Date.now()}`, type: 'BLOCK', targetId: 'player', delay: hitDelay });
                     }
                     if (card.heal) {
                         const healAmount = card.heal * magicEffectMultiplier;
@@ -11764,7 +11796,7 @@ const App: React.FC = () => {
                             p.partner.currentHp = Math.min(p.partner.maxHp, p.partner.currentHp + healAmount);
                             p.partner.floatingText = { id: `heal-p-${Date.now()}`, text: `+${healAmount}`, color: 'text-green-500' };
                         }
-                        nextActiveEffects.push({ id: `vfx-heal-${Date.now()}`, type: 'HEAL', targetId: 'player', delay: hitDelay });
+                        queueHitEffect({ id: `vfx-heal-${Date.now()}`, type: 'HEAL', targetId: 'player', delay: hitDelay });
                     }
                     if (card.energy) p.currentEnergy += card.energy * magicEffectMultiplier;
                     if (card.selfDamage) {
@@ -11774,9 +11806,9 @@ const App: React.FC = () => {
                         currentLogs.push(`${trans("自分に", languageMode)}${selfDamage}${trans("ダメージ", languageMode)}`);
                         if (p.powers['RUPTURE']) {
                             p.strength += p.powers['RUPTURE'];
-                            nextActiveEffects.push({ id: `vfx-rup-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+                            queueHitEffect({ id: `vfx-rup-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
                         }
-                        nextActiveEffects.push({ id: `vfx-sd-${Date.now()}`, type: 'SLASH', targetId: 'player', screenShake: selfDamage > 0, delay: hitDelay });
+                        queueHitEffect({ id: `vfx-sd-${Date.now()}`, type: 'SLASH', targetId: 'player', screenShake: selfDamage > 0, delay: hitDelay });
                     }
 
                     // --- FIX: fatalMaxHp as instant boost for non-attack Skills (target: SELF) ---
@@ -11785,7 +11817,7 @@ const App: React.FC = () => {
                         p.maxHp += maxHpAmount;
                         p.currentHp += maxHpAmount;
                         p.floatingText = { id: `maxhp-${Date.now()}`, text: `MaxHP+${maxHpAmount}`, color: 'text-green-400', iconType: 'heart' };
-                        nextActiveEffects.push({ id: `vfx-mhp-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+                        queueHitEffect({ id: `vfx-mhp-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
                     }
 
                     if (card.strength) {
@@ -11798,7 +11830,7 @@ const App: React.FC = () => {
                             currentLogs.push(`${trans("敵のムキムキ", languageMode)}${strengthAmount > 0 ? '+' : ''}${strengthAmount}`);
                         } else {
                             p.strength += strengthAmount;
-                            nextActiveEffects.push({ id: `vfx-buff-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay, statusEffectKey: 'strength' });
+                            queueHitEffect({ id: `vfx-buff-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay, statusEffectKey: 'strength' });
                             currentLogs.push(`${trans("ムキムキ", languageMode)}+${strengthAmount}`);
                         }
                     }
@@ -11807,24 +11839,24 @@ const App: React.FC = () => {
                         if (card.target === TargetType.SELF) {
                             p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + vulnerableAmount;
                             p.floatingText = { id: `self-vuln-${Date.now()}`, text: `${trans("びくびく", languageMode)}+${vulnerableAmount}`, color: 'text-pink-400' };
-                            nextActiveEffects.push({ id: `vfx-self-dbuff-${Date.now()}`, type: 'DEBUFF', targetId: 'player', delay: hitDelay, statusEffectKey: 'vulnerable' });
+                            queueHitEffect({ id: `vfx-self-dbuff-${Date.now()}`, type: 'DEBUFF', targetId: 'player', delay: hitDelay, statusEffectKey: 'vulnerable' });
                         } else {
                             targets.forEach(e => {
                                 applyDebuff(e, 'VULNERABLE', vulnerableAmount, p, enemies.length);
-                                nextActiveEffects.push({ id: `vfx-dbuff-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay, statusEffectKey: 'vulnerable' });
+                                queueHitEffect({ id: `vfx-dbuff-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay, statusEffectKey: 'vulnerable' });
                             });
                         }
                     }
                     if (card.weak) targets.forEach(e => {
                         applyDebuff(e, 'WEAK', card.weak! * magicEffectMultiplier, p, enemies.length);
-                        nextActiveEffects.push({ id: `vfx-dbuff-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay, statusEffectKey: 'weak' });
+                        queueHitEffect({ id: `vfx-dbuff-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay, statusEffectKey: 'weak' });
                     });
                     if (card.poison) {
                         let amt = card.poison * magicEffectMultiplier;
                         if (p.relics.find(r => r.id === 'SNAKE_SKULL')) amt += 1;
                         targets.forEach(e => {
                             applyDebuff(e, 'POISON', amt, p, enemies.length);
-                            nextActiveEffects.push({ id: `vfx-dbuff-p-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay, statusEffectKey: 'poison' });
+                            queueHitEffect({ id: `vfx-dbuff-p-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay, statusEffectKey: 'poison' });
                         });
                         if (h < hitsToLog) currentLogs.push(`${trans("ドクドク", languageMode)}${amt}${trans("を付与", languageMode)}`);
                     }
@@ -11833,25 +11865,25 @@ const App: React.FC = () => {
                             if (e.poison > 0) {
                                 e.poison *= card.poisonMultiplier!;
                                 currentLogs.push(`${trans(e.name, languageMode)}の${trans("毒", languageMode)}が${card.poisonMultiplier}倍になった！`);
-                                nextActiveEffects.push({ id: `vfx-dbuff-pm-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay, statusEffectKey: 'poison' });
+                                queueHitEffect({ id: `vfx-dbuff-pm-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay, statusEffectKey: 'poison' });
                             }
                         });
                     }
                     if (card.upgradeHand) {
                         p.hand = p.hand.map(c => getUpgradedCard(c));
                         currentLogs.push(trans("手札を強化", languageMode));
-                        nextActiveEffects.push({ id: `vfx-uh-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+                        queueHitEffect({ id: `vfx-uh-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
                     }
                     if (card.upgradeDeck) {
                         p.hand = p.hand.map(c => getUpgradedCard(c));
                         p.drawPile = p.drawPile.map(c => getUpgradedCard(c));
                         p.discardPile = p.discardPile.map(c => getUpgradedCard(c));
                         currentLogs.push(trans("デッキ全体を強化", languageMode));
-                        nextActiveEffects.push({ id: `vfx-ud-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+                        queueHitEffect({ id: `vfx-ud-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
                     }
                     if (card.doubleStrength) {
                         p.strength *= 2;
-                        nextActiveEffects.push({ id: `vfx-ds-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+                        queueHitEffect({ id: `vfx-ds-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
                     }
                     const isWeatherForecastCard =
                         card.name === '天気予報' ||
@@ -11874,7 +11906,7 @@ const App: React.FC = () => {
                         } else {
                             currentLogs.push(trans("天気予報：並べ替えるカードがなかった", languageMode));
                         }
-                        nextActiveEffects.push({ id: `vfx-weather-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+                        queueHitEffect({ id: `vfx-weather-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
                     }
                     if (isGalaxyExpressCard) {
                         const peekCards: ICard[] = [];
@@ -11890,7 +11922,7 @@ const App: React.FC = () => {
                                 ? trans("銀河鉄道の夜：カード選択を開始", languageMode)
                                 : trans("銀河鉄道の夜：見られるカードがなかった", languageMode)
                         );
-                        nextActiveEffects.push({ id: `vfx-galaxy-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+                        queueHitEffect({ id: `vfx-galaxy-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
                     }
                     if (card.name === '金魚すくい' || card.originalNames?.includes('金魚すくい') || card.id?.includes('OUT_GOLD_FISH')) {
                         p.turnFlags = { ...p.turnFlags, GOLD_FISH_PENDING_MODAL: true };
@@ -12120,9 +12152,9 @@ const App: React.FC = () => {
                         if (card.applyPower.id === 'CORPSE_EXPLOSION' && targets.length > 0) {
                             targets.forEach(e => e.corpseExplosion = true);
                             currentLogs.push(trans("衝撃のうわさを付与", languageMode));
-                            nextActiveEffects.push({ id: `vfx-ce-${Date.now()}`, type: 'DEBUFF', targetId: targets[0].id, delay: hitDelay });
+                            queueHitEffect({ id: `vfx-ce-${Date.now()}`, type: 'DEBUFF', targetId: targets[0].id, delay: hitDelay });
                         }
-                        nextActiveEffects.push({ id: `vfx-ap-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+                        queueHitEffect({ id: `vfx-ap-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
                     }
                     if (
                         (card.name === '奇跡のリボン' || card.originalNames?.includes('奇跡のリボン') || card.id?.includes('GIRLS_MIRACLE_RIBBON'))
@@ -12233,7 +12265,7 @@ const App: React.FC = () => {
                                 e.currentHp = 0;
                                 currentLogs.push(`${trans(e.name, languageMode)}は${trans("早退", languageMode)}になった！`);
                                 e.floatingText = { id: `kill-${Date.now()}`, text: '早退!', color: 'text-red-600', iconType: 'skull' };
-                                nextActiveEffects.push({ id: `vfx-exp-${Date.now()}`, type: 'SLASH', targetId: e.id, screenShake: false, delay: hitDelay });
+                                queueHitEffect({ id: `vfx-exp-${Date.now()}`, type: 'SLASH', targetId: e.id, screenShake: false, delay: hitDelay });
                             } else {
                                 currentLogs.push(`${trans(e.name, languageMode)}は${trans("早退", languageMode)}を免れた`);
                             }
@@ -12243,8 +12275,9 @@ const App: React.FC = () => {
                     if (card.name === '大ジャンプ' || card.name === 'VAULT' || card.originalNames?.includes('大ジャンプ') || card.originalNames?.includes('VAULT')) {
                         p.turnFlags['VAULT_EXTRA_TURN'] = true;
                         currentLogs.push(trans("追加ターンを得る！", languageMode));
-                        nextActiveEffects.push({ id: `vfx-vault-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
+                        queueHitEffect({ id: `vfx-vault-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
                     }
+                    advanceEnemyPhases(hitDelay + 200);
                 }
             }
 
@@ -12372,6 +12405,8 @@ const App: React.FC = () => {
                 }
             }
 
+            if (!coopActorPeerId && highestHitDamage > 0) storageService.saveHighestCardDamage(highestHitDamage, card.name);
+            advanceEnemyPhases();
             let nextSelectedId = actorSelectedEnemyId;
             const aliveEnemies = enemies.filter(e => e.currentHp > 0);
             const endlessBossInBattle = enemies.find(e => e.enemyType === 'ENDLESS_BOSS');
@@ -12414,9 +12449,11 @@ const App: React.FC = () => {
             };
         });
 
-        const effectClearDelay = Math.max(1200, Math.min(5000, cardAttackPreviewHitCount * 80 + 700));
+        const effectClearDelay = Math.max(1200, Math.min(cardAttackPreviewHitCount, MAX_CARD_DETAIL_VFX) * 80 + 700);
         setTimeout(() => {
-            setGameState(prev => ({ ...prev, activeEffects: [] }));
+            setGameState(prev => prev.screen === GameScreen.BATTLE && prev.activeEffects.length > 0
+                ? { ...prev, activeEffects: [] }
+                : prev);
         }, effectClearDelay);
         return true;
     };
@@ -12449,12 +12486,17 @@ const App: React.FC = () => {
         }
         if (!isCoopHostRemoteAction) setTurnLog(getSelfTurnLogLabel());
         setGameState(prev => {
+            if (prev.screen !== GameScreen.BATTLE || prev.enemies.length === 0) {
+                isEndingTurnRef.current = false;
+                return prev;
+            }
             const actorEntry = coopActorPeerId
                 ? prev.coopBattleState?.players.find(entry => entry.peerId === coopActorPeerId)
                 : null;
             const actorPlayer = actorEntry?.player ?? prev.player;
             const actorSelectedEnemyId = actorEntry?.selectedEnemyId ?? prev.selectedEnemyId;
-            const p = { ...actorPlayer };
+            const p = { ...actorPlayer, relicCounters: { ...actorPlayer.relicCounters }, powers: { ...actorPlayer.powers } };
+            const enemies = prev.enemies.map(enemy => ({ ...enemy }));
             const currentLogs: string[] = [];
             const nextActiveEffects: VisualEffectInstance[] = [];
             let extraEnergy = 0;
@@ -12478,7 +12520,7 @@ const App: React.FC = () => {
             Object.keys(p.relicCounters)
                 .filter(key => key.startsWith('SHURIKEN_TARGET_'))
                 .forEach(key => delete p.relicCounters[key]);
-            applyRelicTurnStartEffects(p, prev.enemies, prev.turn + 1, currentLogs, nextActiveEffects);
+            applyRelicTurnStartEffects(p, enemies, prev.turn + 1, currentLogs, nextActiveEffects);
             drawBonus += p.relicCounters['RELIC_TURN_DRAW_BONUS'] || 0;
             extraEnergy += p.relicCounters['RELIC_TURN_ENERGY_BONUS'] || 0;
             if (p.relicCounters['DETENTION_DRAW_PENALTY'] === 1) {
@@ -12511,12 +12553,10 @@ const App: React.FC = () => {
                 nextActiveEffects.push({ id: `vfx-deva-${Date.now()}`, type: 'BUFF', targetId: 'player' });
             }
             if (p.powers['NOXIOUS_FUMES']) {
-                const enemies = prev.enemies.map(e => {
-                    const newPoison = e.poison + p.powers['NOXIOUS_FUMES'];
+                enemies.forEach(e => {
+                    e.poison += p.powers['NOXIOUS_FUMES'];
                     nextActiveEffects.push({ id: `vfx-fumes-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, statusEffectKey: 'poison' });
-                    return { ...e, poison: newPoison };
                 });
-                prev.enemies = enemies;
             }
             if (prev.turn === 1 && p.relics.find(r => r.id === 'MUTAGENIC_STRENGTH')) {
                 p.strength -= 3;
@@ -12524,12 +12564,11 @@ const App: React.FC = () => {
                 nextActiveEffects.push({ id: `vfx-mutagen-${Date.now()}`, type: 'DEBUFF', targetId: 'player' });
             }
             if (p.relics.find(r => r.id === 'MERCURY_HOURGLASS')) {
-                prev.enemies.forEach(e => {
+                enemies.forEach(e => {
                     e.currentHp -= 3;
                     e.floatingText = { id: `dmg-hg-${Date.now()}-${e.id}`, text: '3', color: 'text-gray-400', iconType: 'sword' };
                     nextActiveEffects.push({ id: `vfx-hg-${Date.now()}-${e.id}`, type: 'SLASH', targetId: e.id });
                 });
-                prev.enemies = prev.enemies.filter(e => e.currentHp > 0);
             }
             if (prev.turn === 1 && p.relics.find(r => r.id === 'HORN_CLEAT')) {
                 p.block += 14;
@@ -12698,8 +12737,10 @@ const App: React.FC = () => {
 
             isEndingTurnRef.current = false;
 
+            enemies.forEach(enemy => advanceDefeatedEnemyPhase(enemy, prev.visualTheme, isDebugHpOne, currentLogs, nextActiveEffects));
             return {
                 ...prev,
+                enemies: enemies.filter(enemy => enemy.currentHp > 0),
                 player: coopActorPeerId ? prev.player : p,
                 coopBattleState: nextCoopBattleStateWithSelection,
                 selectionState: coopActorPeerId ? prev.selectionState : nextSelection,
@@ -12743,13 +12784,14 @@ const App: React.FC = () => {
         isEndingTurnRef.current = true;
 
         const currentState = stateRef.current;
-        if (currentState.enemies.length === 0) {
+        const battleHasEnded = () => {
+            const current = stateRef.current;
+            if (current.screen === GameScreen.BATTLE && current.enemies.length > 0) return false;
             isEndingTurnRef.current = false;
-            if (currentState.challengeMode !== 'COOP') {
-                startPlayerTurn();
-            }
-            return;
-        }
+            setActingEnemyId(null);
+            return true;
+        };
+        if (battleHasEnded()) return;
 
         const pCurrent = stateRef.current.player;
         if (!rpgDuelRef.current && pCurrent.turnFlags['VAULT_EXTRA_TURN']) {
@@ -12770,6 +12812,7 @@ const App: React.FC = () => {
             const p = { ...prev.player, relicCounters: { ...prev.player.relicCounters } };
             const newLogs: string[] = [];
             const nextActiveEffects: VisualEffectInstance[] = [];
+            let nextEnemies = prev.enemies.map(enemy => ({ ...enemy }));
             const clonePlayerForEndTurn = (player: Player): Player => ({
                 ...player,
                 hand: [...player.hand],
@@ -12843,7 +12886,7 @@ const App: React.FC = () => {
             if (shouldDrainMagicForLocalPlayer) {
                 applyMagicTransformationDamage(p);
             }
-            applyRelicEndTurnEffects(p, prev.enemies, newLogs);
+            applyRelicEndTurnEffects(p, nextEnemies, newLogs);
             if (hasRelic(p, 'POCKETWATCH')) {
                 p.relicCounters['POCKETWATCH_PENDING'] = p.cardsPlayedThisTurn <= 3 ? 1 : 0;
             }
@@ -12884,9 +12927,8 @@ const App: React.FC = () => {
                 p.floatingText = { id: `pow-metal-${Date.now()}`, text: `+${p.powers['METALLICIZE']}`, color: 'text-blue-400', iconType: 'shield' };
             }
             tickPlayerDebuffs(p);
-            let nextEnemies = prev.enemies;
             if ((p.familiars || []).length > 0) {
-                nextEnemies = resolveHighSchoolFamiliars(p, prev.enemies, newLogs, nextActiveEffects);
+                nextEnemies = resolveHighSchoolFamiliars(p, nextEnemies, newLogs, nextActiveEffects);
             }
             let nextCoopBattleState = prev.coopBattleState;
             if (prev.challengeMode === 'COOP' && coopSession?.isHost && prev.coopBattleState) {
@@ -12927,16 +12969,18 @@ const App: React.FC = () => {
                     })
                 };
             }
+            nextEnemies.forEach(enemy => advanceDefeatedEnemyPhase(enemy, prev.visualTheme, isDebugHpOne, newLogs, nextActiveEffects));
             return {
                 ...prev,
                 player: p,
-                enemies: nextEnemies,
+                enemies: nextEnemies.filter(enemy => enemy.currentHp > 0),
                 coopBattleState: nextCoopBattleState,
                 combatLog: [...prev.combatLog, ...newLogs].slice(-100),
                 activeEffects: [...prev.activeEffects, ...nextActiveEffects]
             };
         });
         await wait(400);
+        if (battleHasEnded()) return;
         await new Promise<void>(resolve => {
             setGameState(prev => {
                 let nextEnemies = prev.enemies.map(e => ({ ...e }));
@@ -12951,17 +12995,10 @@ const App: React.FC = () => {
                         enemy.floatingText = { id: `psn-${Date.now()}-${enemy.id}`, text: `${poisonDmg}`, color: 'text-green-500', iconType: 'poison' };
                         nextLogs.push(`${trans(enemy.name, languageMode)}に毒ダメージ${poisonDmg}`);
                         nextActiveEffects.push({ id: `vfx-psn-${Date.now()}-${enemy.id}`, type: 'FIRE', targetId: enemy.id, screenShake: false });
-                        if (enemy.currentHp <= 0 && canTransformEnemy(enemy)) {
-                            enemy.currentHp = isDebugHpOne ? 1 : enemy.maxHp;
-                            enemy.phase = nextDemonPhase(enemy);
-                            enemy.name = enemy.enemyType==='RPG_DEMON'?demonName(enemy.phase):prev.visualTheme === 'magic' ? "真・大魔女校長" : "真・校長先生";
-                            enemy.poison = 0; enemy.weak = 0; enemy.vulnerable = 0;
-                            enemy.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
-                            nextLogs.push(enemy.enemyType==='RPG_DEMON'?`${enemy.name}に変身した！`:prev.visualTheme === 'magic' ? "大魔女校長が真の姿を現した！" : "校長先生が真の姿を現した！");
-                        }
                     }
+                    advanceDefeatedEnemyPhase(enemy, prev.visualTheme, isDebugHpOne, nextLogs, nextActiveEffects);
                     return enemy;
-                }).filter(e => e.currentHp > 0 || (canTransformEnemy(e)));
+                }).filter(e => e.currentHp > 0);
                 if (hasRelic(p, 'BIRD_FACED_URN')) {
                     const defeatedByPoison = prev.enemies.length - nextEnemies.length;
                     if (defeatedByPoison > 0) {
@@ -12987,6 +13024,7 @@ const App: React.FC = () => {
             });
             setTimeout(resolve, 600);
         });
+        if (battleHasEnded()) return;
         const livingEnemiesAtStart = stateRef.current.enemies.filter(enemy => enemy.currentHp > 0);
         const coopEnemyTurnRemainingBlock = new Map<string, number>();
         if (stateRef.current.challengeMode === 'COOP' && coopSession?.isHost) {
@@ -13034,6 +13072,7 @@ const App: React.FC = () => {
             });
         }
         for (const enemyTemplate of enemiesToAct) {
+            if (battleHasEnded()) return;
             const hasLivingCoopTarget =
                 stateRef.current.challengeMode === 'COOP' &&
                 !!coopSession?.isHost &&
@@ -13460,15 +13499,7 @@ const App: React.FC = () => {
                             newLogs.push(`${trans("トゲトゲ", languageMode)}で${p.powers['THORNS']}反撃ダメージ`);
                             nextActiveEffects.push({ id: `vfx-thn-${Date.now()}`, type: 'SLASH', targetId: e.id });
                         }
-                        if (e.currentHp <= 0 && canTransformEnemy(e)) {
-                            e.currentHp = isDebugHpOne ? 1 : e.maxHp;
-                            e.phase = nextDemonPhase(e);
-                            e.name = e.enemyType==='RPG_DEMON'?demonName(e.phase):prev.visualTheme === 'magic' ? "真・大魔女校長" : "真・校長先生";
-                            enemy.poison = 0; enemy.weak = 0; enemy.vulnerable = 0;
-                            enemy.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
-                            newLogs.push(e.enemyType==='RPG_DEMON'?`${e.name}に変身した！`:prev.visualTheme === 'magic' ? "大魔女校長が真の姿を現した！" : "校長先生が真の姿を現した！");
-                            nextActiveEffects.push({ id: `vfx-evo2-${Date.now()}`, type: 'BUFF', targetId: e.id });
-                        }
+                        advanceDefeatedEnemyPhase(e, prev.visualTheme, isDebugHpOne, newLogs, nextActiveEffects);
                         if (didHpDamage && p.currentHp <= 0) {
                             lastLethalEnemyRef.current = { ...e };
                         }
@@ -13603,6 +13634,7 @@ const App: React.FC = () => {
             });
             await wait(100);
         }
+        if (battleHasEnded()) return;
         setGameState(prev => ({
             ...prev,
             enemies: prev.enemies.map(enemy => {
@@ -13747,6 +13779,7 @@ const App: React.FC = () => {
             }
             try {
                 await executeEndTurn(coopBattlePlan.enemyActions);
+                if (stateRef.current.screen !== GameScreen.BATTLE || stateRef.current.enemies.length === 0) return;
                 if (coopSession?.isHost) {
                     const latestBattleState = stateRef.current.coopBattleState || realtimeEnemyPhaseState || coopBattleState;
                     let nextCursor = coopBattlePlan.nextCursor;
@@ -14924,28 +14957,30 @@ const App: React.FC = () => {
     useEffect(() => { stateRef.current = gameState; }, [gameState]);
 
     const resolveBattleVictory = useCallback(() => {
-        if (battleVictoryResolvingRef.current) return;
+        const battle = stateRef.current;
+        if (battle.screen !== GameScreen.BATTLE || battleVictoryResolvingRef.current) return;
         if (rpgEncounterRef.current) rpgEncounterRef.current.outcome = 'victory';
         battleVictoryResolvingRef.current = true;
-        const shouldKeepBattleBgm =
-            stateRef.current.challengeMode === 'COOP' &&
-            stateRef.current.coopBattleState?.battleMode === 'REALTIME';
-        if (!shouldKeepBattleBgm) {
-            audioService.stopBGM();
-        }
-        audioService.playSound('win');
-        if(stateRef.current.rpgOnline&&stateRef.current.visualTheme!=='high-school'&&rpgSnapshotRef.current?.world.players[rpgSnapshotRef.current.selfId]?.hero)void audioService.playRpgHeroVoice('finish');
-        if (stateRef.current.visualTheme === 'high-school') {
-            audioService.playHighSchoolVoice(stateRef.current.player.id, 'finish');
-        }
+        const debugBoss = crowdfundingBossDebugRef.current;
+        const finalClear = !debugBoss && battle.act === 4 && !battle.isEndless;
+        const unlockedCard = finalClear ? unlockRandomAdditionalCard() : null;
         setGameState(prev => {
+            if (prev.screen !== GameScreen.BATTLE) return prev;
             const completedNodeType = prev.map.find(node => node.id === prev.currentMapNodeId)?.type;
             const nextPlayer = buildPostBattlePlayer(prev.player, true, completedNodeType);
+            const postBattle = {
+                ...prev,
+                player: nextPlayer,
+                activeEffects: [],
+                selectionState: INACTIVE_SELECTION_STATE,
+                codexOptions: undefined,
+                parryState: { active: false, enemyId: null, success: false },
+            };
 
-            if (crowdfundingBossDebugRef.current === 'AZUKI') {
+            if (debugBoss === 'AZUKI') {
                 const rewardPrefix = `debug-azuki-${Date.now()}`;
                 return {
-                    ...prev,
+                    ...postBattle,
                     player: {
                         ...nextPlayer,
                         turnFlags: { ...nextPlayer.turnFlags, [AZUKI_BOSS_FLAG]: true }
@@ -14958,11 +14993,10 @@ const App: React.FC = () => {
                     })),
                 };
             }
-            if (crowdfundingBossDebugRef.current === 'DODOMEDESU') {
+            if (debugBoss === 'DODOMEDESU') {
                 const rewardPrefix = `debug-dodomedesu-${Date.now()}`;
                 return {
-                    ...prev,
-                    player: nextPlayer,
+                    ...postBattle,
                     screen: GameScreen.REWARD,
                     rewards: DODOMEDESU_REWARD_CARDS.map((card, index) => ({
                         type: 'CARD' as const,
@@ -14972,39 +15006,9 @@ const App: React.FC = () => {
                 };
             }
 
-            if (prev.act === 4 && !prev.isEndless) {
-                const unlockedCard = unlockRandomAdditionalCard();
-                const nextDifficultyUnlock = Math.min(10, (prev.difficultyLevel || 1) + 1);
-                storageService.unlockDifficulty(nextDifficultyUnlock);
-                setMaxUnlockedDifficulty(storageService.getMaxUnlockedDifficulty());
-                const score = calculateScore(prev, true);
-                storageService.saveScore({
-                    id: `victory-${Date.now()}`,
-                    playerName: 'Player',
-                    characterName: selectedCharName,
-                    score: score,
-                    act: prev.act,
-                    floor: prev.floor,
-                    victory: true,
-                    date: Date.now(),
-                    challengeMode: prev.challengeMode,
-                    teamPublicCodes: prev.challengeMode === 'COOP'
-                        ? [...new Set((coopSession?.participants || []).map(participant => participant.publicCode).filter((code): code is string => !!code))].sort()
-                        : undefined
-                });
-
-                setNewlyUnlockedCard(unlockedCard);
-                setLegacyCardSelected(false);
-                audioService.playBGM('victory');
-                if (prev.visualTheme === 'magic') {
-                    storageService.saveMagicEndingGalleryEntries(
-                        getMagicEndingGalleryEntries(nextPlayer, getMagicProtagonistId(nextPlayer))
-                    );
-                }
-
+            if (finalClear) {
                 return {
-                    ...prev,
-                    player: nextPlayer,
+                    ...postBattle,
                     screen: prev.visualTheme === 'magic' && hasMagicEnding(nextPlayer, getMagicProtagonistId(nextPlayer))
                         ? GameScreen.MAGIC_ROMANCE_ENDING
                         : GameScreen.ENDING,
@@ -15012,12 +15016,46 @@ const App: React.FC = () => {
                 };
             } else {
                 if (prev.challengeMode === 'TYPING') {
-                    return { ...prev, player: nextPlayer, screen: GameScreen.REWARD, rewards: [] };
+                    return { ...postBattle, screen: GameScreen.REWARD, rewards: [] };
                 }
                 const challengeScreen = getChallengeScreenForMode(localAssignmentProblemConfig?.mode || prev.mode);
-                return { ...prev, player: nextPlayer, screen: challengeScreen };
+                return { ...postBattle, screen: challengeScreen };
             }
         });
+
+        if (finalClear) {
+            storageService.unlockDifficulty(Math.min(10, (battle.difficultyLevel || 1) + 1));
+            setMaxUnlockedDifficulty(storageService.getMaxUnlockedDifficulty());
+            storageService.saveScore({
+                id: `victory-${Date.now()}`,
+                playerName: 'Player',
+                characterName: selectedCharName,
+                score: calculateScore(battle, true),
+                act: battle.act,
+                floor: battle.floor,
+                victory: true,
+                date: Date.now(),
+                challengeMode: battle.challengeMode,
+                teamPublicCodes: battle.challengeMode === 'COOP'
+                    ? [...new Set((coopSession?.participants || []).map(participant => participant.publicCode).filter((code): code is string => !!code))].sort()
+                    : undefined
+            });
+            setNewlyUnlockedCard(unlockedCard);
+            setLegacyCardSelected(false);
+            if (battle.visualTheme === 'magic') {
+                storageService.saveMagicEndingGalleryEntries(
+                    getMagicEndingGalleryEntries(battle.player, getMagicProtagonistId(battle.player))
+                );
+            }
+        }
+        const shouldKeepBattleBgm = battle.challengeMode === 'COOP' && battle.coopBattleState?.battleMode === 'REALTIME';
+        if (!shouldKeepBattleBgm) audioService.stopBGM();
+        audioService.playSound('win');
+        if (battle.rpgOnline && battle.visualTheme !== 'high-school' && rpgSnapshotRef.current?.world.players[rpgSnapshotRef.current.selfId]?.hero) {
+            void audioService.playRpgHeroVoice('finish');
+        }
+        if (battle.visualTheme === 'high-school') audioService.playHighSchoolVoice(battle.player.id, 'finish');
+        if (finalClear) void audioService.playBGM('victory');
     }, [coopSelfPeerId, coopSession, localAssignmentProblemConfig, selectedCharName, unlockRandomAdditionalCard]);
 
     const createEnemyFinisherCard = useCallback((enemy: Enemy): ICard => {
@@ -15274,15 +15312,23 @@ const App: React.FC = () => {
         if (gameState.screen !== GameScreen.BATTLE) {
             battleVictoryResolvingRef.current = false;
             battleDefeatResolvingRef.current = false;
+            isEndingTurnRef.current = false;
+            setActingEnemyId(null);
+            lastPlayedCardRef.current = null;
+            lastPlayedCardVoicePlayedRef.current = false;
             lastActingEnemyRef.current = null;
             lastLethalEnemyRef.current = null;
             lastDefeatedEnemyForFinisherRef.current = null;
-            if (enemyDefeatVoiceTimerRef.current) {
-                clearTimeout(enemyDefeatVoiceTimerRef.current);
-                enemyDefeatVoiceTimerRef.current = null;
+            for (const timer of [victorySequenceTimerRef, defeatSequenceTimerRef, enemyDefeatVoiceTimerRef]) {
+                if (timer.current !== null) {
+                    clearTimeout(timer.current);
+                    timer.current = null;
+                }
             }
-        }
-        if (gameState.screen === GameScreen.BATTLE) {
+            if (gameState.challengeMode !== 'COOP' || !coopSession || coopSession.isHost) {
+                setBattleFinisherCutinCard(null);
+            }
+        } else {
             if(rpgDuelRef.current)return;
             if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
                 return;
@@ -15292,9 +15338,29 @@ const App: React.FC = () => {
                 lastLethalEnemyRef.current = null;
                 return;
             }
-            const isHeartTransforming = gameState.enemies.some(e => canTransformEnemy(e) && e.currentHp <= 0);
-            if (gameState.enemies.length === 0 && !isHeartTransforming) {
-                if (battleFinisherCutinCard) return;
+            if (gameState.enemies.some(enemy => canTransformEnemy(enemy) && enemy.currentHp <= 0)) {
+                setGameState(prev => {
+                    if (prev.screen !== GameScreen.BATTLE) return prev;
+                    const logs: string[] = [];
+                    const effects: VisualEffectInstance[] = [];
+                    const enemies = prev.enemies.map(enemy => {
+                        if (enemy.currentHp > 0 || !canTransformEnemy(enemy)) return enemy;
+                        const advancingEnemy = { ...enemy };
+                        advanceDefeatedEnemyPhase(advancingEnemy, prev.visualTheme, isDebugHpOne, logs, effects);
+                        return advancingEnemy;
+                    });
+                    if (!effects.length) return prev;
+                    return {
+                        ...prev,
+                        enemies,
+                        combatLog: [...prev.combatLog, ...logs].slice(-100),
+                        activeEffects: [...prev.activeEffects, ...effects],
+                    };
+                });
+                return;
+            }
+            if (gameState.enemies.length === 0) {
+                if (battleVictoryResolvingRef.current || victorySequenceTimerRef.current !== null) return;
 
                 if (lastPlayedCardRef.current) {
                     const finisherCard = { ...lastPlayedCardRef.current };
@@ -15303,6 +15369,16 @@ const App: React.FC = () => {
                     lastPlayedCardRef.current = null;
                     lastPlayedCardVoicePlayedRef.current = false;
                     lastDefeatedEnemyForFinisherRef.current = null;
+                    victorySequenceTimerRef.current = setTimeout(() => {
+                        victorySequenceTimerRef.current = null;
+                        setBattleFinisherCutinCard(null);
+                        const current = stateRef.current;
+                        if (current.screen === GameScreen.BATTLE && current.enemies.length === 0) {
+                            resolveBattleVictory();
+                        }
+                    }, COOP_FINISHER_DISPLAY_MS);
+                    setBattleFinisherCutinCard(finisherCard);
+
                     const finisherIsOffensive =
                         finisherCard.type === CardType.ATTACK
                         || (finisherCard.damage ?? 0) > 0
@@ -15312,15 +15388,14 @@ const App: React.FC = () => {
                         && finisherIsOffensive
                         && !finisherVoiceAlreadyPlayed
                     ) {
-                        audioService.playMagicVoice(
+                        void audioService.playMagicVoice(
                             getMagicProtagonistId(stateRef.current.player),
                             finisherCard.magicRuleCardIndex !== undefined ? 'spell' : 'attack',
                             3,
                             finisherCard.magicRuleCardIndex !== undefined ? finisherCard.magicRuleCardIndex + 1 : undefined,
                             stateRef.current.player.magicTransformed,
-                        );
+                        ).catch(() => undefined);
                     }
-                    setBattleFinisherCutinCard(finisherCard);
                     if (enemyDefeatVoiceTimerRef.current) {
                         clearTimeout(enemyDefeatVoiceTimerRef.current);
                     }
@@ -15339,14 +15414,6 @@ const App: React.FC = () => {
                         }, ENEMY_FINISHER_BURST_VOICE_DELAY_MS);
                     }
 
-                    if (victorySequenceTimerRef.current) {
-                        clearTimeout(victorySequenceTimerRef.current);
-                    }
-                    victorySequenceTimerRef.current = setTimeout(() => {
-                        setBattleFinisherCutinCard(null);
-                        resolveBattleVictory();
-                        victorySequenceTimerRef.current = null;
-                    }, COOP_FINISHER_DISPLAY_MS);
                 } else {
                     resolveBattleVictory();
                 }
@@ -15409,19 +15476,19 @@ const App: React.FC = () => {
                         clearTimeout(defeatSequenceTimerRef.current);
                     }
                     defeatSequenceTimerRef.current = setTimeout(() => {
+                        defeatSequenceTimerRef.current = null;
                         setBattleFinisherCutinCard(null);
                         lastActingEnemyRef.current = null;
                         lastLethalEnemyRef.current = null;
                         lastDefeatedEnemyForFinisherRef.current = null;
-                        resolveBattleDefeat();
-                        defeatSequenceTimerRef.current = null;
+                        if (stateRef.current.screen === GameScreen.BATTLE) resolveBattleDefeat();
                     }, COOP_FINISHER_DISPLAY_MS);
                 } else {
                     resolveBattleDefeat();
                 }
             }
         }
-    }, [applyCoopAutoRevives, gameState.enemies, gameState.player.currentHp, gameState.coopBattleState, gameState.screen, gameState.act, gameState.challengeMode, coopSession, unlockRandomAdditionalCard, battleFinisherCutinCard, resolveBattleVictory, createEnemyFinisherCard, resolveBattleDefeat]);
+    }, [applyCoopAutoRevives, gameState.enemies, gameState.player.currentHp, gameState.coopBattleState, gameState.screen, gameState.act, gameState.challengeMode, coopSession, isDebugHpOne, resolveBattleVictory, createEnemyFinisherCard, resolveBattleDefeat]);
 
     useEffect(() => {
         if (gameState.challengeMode !== 'COOP') return;
@@ -19444,7 +19511,7 @@ const App: React.FC = () => {
                     </button>
                 )}
 
-                {isPreloadingGameAssets && (
+                {isPreloadingGameAssets && gameState.screen !== GameScreen.ENDING && gameState.screen !== GameScreen.MAGIC_ROMANCE_ENDING && (
                     <div className="pointer-events-none fixed bottom-3 right-3 z-[10030] text-white">
                         <div className="rounded border border-cyan-300/60 bg-slate-950/85 px-3 py-2 text-center shadow-[0_0_18px_rgba(34,211,238,0.2)]">
                             <div className="text-[10px] font-black text-cyan-100">{trans("素材をバックグラウンド読み込み中", languageMode)}</div>
@@ -22597,7 +22664,7 @@ const App: React.FC = () => {
                     </div>
                 )}
 
-                {battleFinisherCutinCard && gameState.screen !== GameScreen.BATTLE && (
+                {battleFinisherCutinCard && gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost && gameState.screen !== GameScreen.BATTLE && (
                     <div className="fixed inset-0 z-[300] pointer-events-none overflow-hidden">
                         <BattleFinisherCutinOverlay card={battleFinisherCutinCard} languageMode={languageMode} appearanceMode={gameState.player.appearanceMode} />
                     </div>
@@ -22746,15 +22813,15 @@ const App: React.FC = () => {
                 ) && (
                     <div
                         data-gamepad-initial-scope="main-ending"
-                        className="ending-screen w-full h-full bg-yellow-900 bg-cover bg-center flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar relative"
+                        data-gamepad-navigation-root
+                        className="ending-screen relative flex h-full min-h-0 w-full flex-col items-center overflow-hidden bg-yellow-900 bg-cover bg-center p-4 text-center text-white"
                         style={{
                             backgroundImage: getEnvironmentBackgroundCss(activeRunVisualTheme, 'actClear', gameState.player.appearanceMode)
                         }}
                     >
                         <div className="absolute inset-0 bg-amber-950/62 pointer-events-none" />
                         <div
-                            data-gamepad-navigation-root
-                            className={`ending-content relative z-10 my-auto w-full ${newlyUnlockedCard ? 'max-w-5xl' : 'max-w-2xl'} py-8`}
+                            className={`ending-content relative z-10 my-auto min-h-0 w-full ${newlyUnlockedCard ? 'max-w-5xl' : 'max-w-2xl'} overflow-y-auto overflow-x-hidden overscroll-contain custom-scrollbar py-4`}
                         >
                             {newlyUnlockedCard && (
                                 <div className="ending-unlocked-card mb-8 p-6 bg-white/20 border-2 border-white rounded-2xl animate-in zoom-in duration-500 shadow-xl">
@@ -22851,15 +22918,15 @@ const App: React.FC = () => {
                                     </p>
                                 </div>
                             ) : null}
-                            <div className="ending-actions flex flex-col gap-4 items-center mt-4 pb-8 shrink-0">
-                                <button onClick={startEndlessMode} className="bg-purple-900 border-4 border-purple-500 px-8 py-4 cursor-pointer text-xl hover:bg-purple-800 font-bold w-full max-sm shadow-[0_0_20px_rgba(168,85,247,0.5)] transform transition-transform hover:scale-105 active:scale-95 flex items-center justify-center animate-pulse">
-                                    <Infinity className="mr-2" /> {trans("エンドレスモードへ", languageMode)} (Act {gameState.act + 1})
-                                </button>
-                                <button onClick={returnToTitle} className="bg-blue-600 border-2 border-white px-8 py-4 cursor-pointer text-xl hover:bg-blue-500 font-bold w-full max-sm shadow-lg transform transition-transform hover:scale-105 active:scale-95">
-                                    {trans("伝説となる", languageMode)} ({trans("タイトルへ戻る", languageMode)})
-                                </button>
                             </div>
-                            </div>
+                        </div>
+                        <div className="ending-actions relative z-10 grid w-full max-w-2xl shrink-0 grid-cols-1 gap-2 pt-2 sm:grid-cols-2">
+                            <button onClick={startEndlessMode} data-gamepad-initial-choice={legacyCardSelected || !getDifficultyConfig(gameState.difficultyLevel).legacyCardAllowed || gameState.player.deck.length === 0 || undefined} className="min-w-0 rounded-lg bg-purple-900 border-4 border-purple-500 px-4 py-3 cursor-pointer text-lg hover:bg-purple-800 font-bold w-full shadow-[0_0_20px_rgba(168,85,247,0.5)] flex items-center justify-center">
+                                <Infinity className="mr-2" /> {trans("エンドレスモードへ", languageMode)} (Act {gameState.act + 1})
+                            </button>
+                            <button onClick={returnToTitle} className="min-w-0 rounded-lg bg-blue-600 border-2 border-white px-4 py-3 cursor-pointer text-lg hover:bg-blue-500 font-bold w-full shadow-lg">
+                                {trans("伝説となる", languageMode)} ({trans("タイトルへ戻る", languageMode)})
+                            </button>
                         </div>
                     </div>
                 )}

@@ -160,30 +160,39 @@ const makeG7GrammarProblem = (unitId: string, n: number): GeneralProblem | null 
       return prompt(`${subject} ___ ${object} every day.`, third, [base, `${base}ing`, `${base}ed`], '三人称単数現在の形。');
     }
     case 'ENGLISH_G7_U10': {
-      const places = [['in', 'the box'], ['on', 'the desk'], ['under', 'the table'], ['by', 'the door'], ['near', 'the station'], ['behind', 'the chair'], ['in front of', 'the school']] as const;
+      const places = [
+        ['in', 'the box', '箱の中'], ['on', 'the desk', '机の上'], ['under', 'the table', 'テーブルの下'],
+        ['by', 'the door', '戸のすぐそば'], ['near', 'the station', '駅の近く'], ['behind', 'the chair', 'いすの後ろ'],
+        ['in front of', 'the school', '学校の前'],
+      ] as const;
       const things = ['The cat', 'The book', 'The ball', 'My bag', 'The bicycle', 'The dog'];
-      const [prep, place] = places[n % places.length];
+      const [prep, place, meaning] = places[n % places.length];
       const thing = things[Math.floor(n / places.length) % things.length];
-      const otherPreps = places.filter(([p]) => p !== prep).map(([p]) => p);
-      return prompt(`${thing} is ___ ${place}.`, prep, [otherPreps[n % otherPreps.length], otherPreps[(n + 2) % otherPreps.length], otherPreps[(n + 4) % otherPreps.length]], '場所を表す前置詞。');
+      const nearPlace = prep === 'by' || prep === 'near';
+      const otherPreps = places.filter(([p]) => p !== prep && !(nearPlace && (p === 'by' || p === 'near'))).map(([p]) => p);
+      return prompt(`${thing} is ___ ${place}.（${meaning}にいる、またはある）`, prep, [otherPreps[n % otherPreps.length], otherPreps[(n + 2) % otherPreps.length], otherPreps[(n + 4) % otherPreps.length]], 'かっこの意味を表す前置詞を入れよう。');
     }
     case 'ENGLISH_G7_U11': {
       const nouns = [['book', 'books'], ['dog', 'dogs'], ['pen', 'pens'], ['box', 'boxes'], ['bus', 'buses'], ['watch', 'watches'], ['dish', 'dishes'], ['city', 'cities'], ['baby', 'babies'], ['child', 'children'], ['person', 'people'], ['man', 'men']] as const;
       const [single, plural] = nouns[n % nouns.length];
       const otherPlurals = nouns.filter(([, p]) => p !== plural).map(([, p]) => p);
       if (n % 2 === 0) return prompt(`${single} の 複数形は？`, plural, [otherPlurals[n % otherPlurals.length], otherPlurals[(n + 3) % otherPlurals.length], single], '複数形のつづりを確認。');
-      return prompt(`two ___ に 入るのは？`, plural, [single, otherPlurals[(n + 2) % otherPlurals.length], otherPlurals[(n + 5) % otherPlurals.length]], 'two の後は複数形。');
+      return prompt(`two ___ に「${single}」を正しい形で入れると？`, plural, [single, otherPlurals[(n + 2) % otherPlurals.length], otherPlurals[(n + 5) % otherPlurals.length]], 'two の後は複数形。');
     }
     case 'ENGLISH_G7_U12': {
       const pronouns = [
         ['I', 'my', 'me', 'mine', 'am'], ['you', 'your', 'you', 'yours', 'are'], ['he', 'his', 'him', 'his', 'is'], ['she', 'her', 'her', 'hers', 'is'], ['we', 'our', 'us', 'ours', 'are'], ['they', 'their', 'them', 'theirs', 'are'],
       ] as const;
-      const [subject, possessive, object, possessivePronoun, be] = pronouns[Math.floor(n / 5) % pronouns.length];
+      const index = Math.floor(n / 5) % pronouns.length;
+      const [subject, possessive, object, possessivePronoun, be] = pronouns[index];
       const form = n % 5;
       if (form === 0) return prompt(`「${subject}」の 所有格は？`, possessive, ['my', 'your', 'his', 'her', 'our', 'their'].filter(x => x !== possessive).slice(0, 3), '「〜の」を表す形。');
       if (form === 1) return prompt(`This is ___ book. (${subject})`, possessive, ['my', 'your', 'his', 'her', 'our', 'their'].filter(x => x !== possessive).slice(0, 3), '名詞の前には所有格。');
       if (form === 2) return prompt(`Please help ___. (${subject})`, object, ['me', 'you', 'him', 'her', 'us', 'them'].filter(x => x !== object).slice(0, 3), '動詞の後には目的格。');
-      if (form === 3) return prompt(`___ ${be} ready.`, subject, ['I', 'you', 'he', 'she', 'we', 'they'].filter(x => x !== subject).slice(0, 3), '文の主語になる代名詞。');
+      if (form === 3) {
+        const meaning = ['わたし', 'あなた', '彼', '彼女', 'わたしたち', '彼ら'][index];
+        return prompt(`___ ${be} ready.（${meaning}は準備ができています）`, subject, ['I', 'you', 'he', 'she', 'we', 'they'].filter(x => x !== subject).slice(0, 3), 'かっこの意味に合う主語を入れよう。');
+      }
       return prompt(`This book is ___. (${subject})`, possessivePronoun, ['mine', 'yours', 'his', 'hers', 'ours', 'theirs'].filter(x => x !== possessivePronoun).slice(0, 3), '名詞をくり返さずに「〜のもの」と表す。');
     }
     default:
