@@ -12,6 +12,7 @@ export class ShowAuthority {
     this.world = saved?.world || createShow(title);
     this.world.plan ||= { order: 'RANDOM', limit: 0, shuffleChoices: true, autoAdvance: true };
     this.world.plan.autoAdvance ??= true;
+    this.world.plan.partyAudience ??= 'ALL';
     this.world.queue ||= this.world.bank.map((_, i) => i);
     if (this.world.round) this.world.round.showJudgments ??= false;
     this.world.audienceScreens = 0;

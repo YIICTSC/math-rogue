@@ -1,4 +1,4 @@
-import { minimumAnswerers, MAX_ANSWERERS, MAX_SHOW_QUESTIONS, PARTY_CATEGORIES, MODES, type Actor, type Answer, type InkStroke, type Player, type Round, type ShowAction, type ShowError, type ShowQuestion, type ShowView, type ShowWorld } from './types';
+import { minimumAnswerers, MAX_ANSWERERS, MAX_SHOW_QUESTIONS, PARTY_CATEGORIES, QUIZ_AUDIENCES, MODES, type Actor, type Answer, type InkStroke, type Player, type Round, type ShowAction, type ShowError, type ShowQuestion, type ShowView, type ShowWorld, type VarietySelection } from './types';
 import { checkWolfWinner, nightActors, startWolves, wolfAction } from './wolf';
 
 const key = () => crypto.randomUUID();
@@ -33,6 +33,9 @@ export function validQuestion(q: unknown): q is ShowQuestion {
     Array.isArray(v.options) && v.options.length <= 6 && v.options.every(a => typeof a === 'string' && a.length > 0 && a.length <= 3000) &&
     ['TEXT', 'FLIP', 'CHOICE'].includes(v.format) && (v.format !== 'CHOICE' || (v.options.length >= 2 && new Set(v.options).size === v.options.length && (v.options.includes(v.answer) || (v.opinion === true && v.answer === '')))) &&
     (v.category === undefined || PARTY_CATEGORIES.slice(1).includes(v.category)) &&
+    (v.audiences === undefined || (Array.isArray(v.audiences) && v.audiences.length > 0 &&
+      v.audiences.length <= QUIZ_AUDIENCES.length - 1 && new Set(v.audiences).size === v.audiences.length &&
+      v.audiences.every(audience => QUIZ_AUDIENCES.slice(1).includes(audience)))) &&
     (v.party === undefined || typeof v.party === 'boolean') && (v.opinion === undefined || typeof v.opinion === 'boolean') && (v.freeDraw === undefined || typeof v.freeDraw === 'boolean') && (v.difficulty === undefined || ['EASY','NORMAL','HARD'].includes(v.difficulty)) &&
     finiteInt(v.seconds, 10, 600) && finiteInt(v.points, 10, 1000) &&
     (v.passage === undefined || (typeof v.passage === 'string' && v.passage.length <= 16000)) &&
@@ -45,11 +48,28 @@ export function validBank(bank: unknown): bank is ShowQuestion[] {
 export function validBankForMode(mode: typeof MODES[number], bank: ShowQuestion[]) {
   return validBank(bank) && (mode !== 'DRAW' || bank.every(q => q.freeDraw || !!q.answer.trim())) && bank.every(q => (!q.freeDraw || mode==='DRAW') && (!q.opinion || ['NEAREST','DRAW','CONSENSUS','MAJORITY','WOLF','VOTE'].includes(mode)));
 }
-export function matchesPartyPlan(q: ShowQuestion, plan: ShowWorld['plan']) {
-  return !q.party || ((!plan.partyLevel || plan.partyLevel==='ALL' || q.difficulty===plan.partyLevel) && (!plan.partyCategory || plan.partyCategory==='ALL' || q.category===plan.partyCategory));
+export function matchesPartyPlan(q: ShowQuestion, plan: Partial<VarietySelection>) {
+  return !q.party || (
+    (!plan.partyLevel || plan.partyLevel === 'ALL' || q.difficulty === plan.partyLevel) &&
+    (!plan.partyCategory || plan.partyCategory === 'ALL' || q.category === plan.partyCategory) &&
+    (!plan.partyAudience || plan.partyAudience === 'ALL' || !!q.audiences?.includes(plan.partyAudience))
+  );
+}
+function validVarietySelection(value: VarietySelection) {
+  return value && ['SEQUENTIAL', 'RANDOM'].includes(value.order) &&
+    (value.partyCategory === undefined || PARTY_CATEGORIES.includes(value.partyCategory)) &&
+    (value.partyLevel === undefined || ['ALL', 'EASY', 'NORMAL', 'HARD'].includes(value.partyLevel)) &&
+    (value.partyAudience === undefined || QUIZ_AUDIENCES.includes(value.partyAudience));
+}
+export function validBankUpdate({ questions, source, variety }: Extract<ShowAction, {type: 'bank'}>) {
+  if (source !== undefined && (typeof source !== 'string' || source.length > 160)) return false;
+  if (variety === undefined) return validBank(questions);
+  return !!validVarietySelection(variety) && Array.isArray(questions) &&
+    (questions.length === 0 || validBank(questions)) &&
+    questions.every(question => question.party && matchesPartyPlan(question, variety));
 }
 export function createShow(title = 'みんなでクイズ', now = Date.now()): ShowWorld {
-  return { revision: 1, title, mode: 'STANDARD', teamCount: 2, phase: 'lobby', players: {}, bank: [], index: 0, round: null, accepting: true, hostConnected: true, createdAt: now, wolf: null, overview: false, plan: { order: 'RANDOM', limit: 0, shuffleChoices: true, autoAdvance: true }, queue: [] };
+  return { revision: 1, title, mode: 'STANDARD', teamCount: 2, phase: 'lobby', players: {}, bank: [], index: 0, round: null, accepting: true, hostConnected: true, createdAt: now, wolf: null, overview: false, plan: { order: 'RANDOM', limit: 0, shuffleChoices: true, autoAdvance: true, partyAudience: 'ALL' }, queue: [] };
 }
 export function addAnswerer(w: ShowWorld, id: string, name: unknown): ShowError | null {
   if (owns(w.players, id)) { w.players[id].connected = true; w.revision++; return null; }
@@ -258,29 +278,36 @@ export function act(w: ShowWorld, actor: Actor, raw: unknown, now = Date.now(), 
         for (const p of Object.values(w.players)) p.team %= w.teamCount;
         if (w.phase === 'ready' && r) r.mode = a.mode;
         break;
-      case 'bank':
-        if (!['lobby', 'finished'].includes(w.phase) || !validBank(a.questions)) return 'QUESTION';
-        if (a.source !== undefined && (typeof a.source !== 'string' || a.source.length > 160)) return 'QUESTION';
+      case 'bank': {
+        if (!['lobby', 'finished'].includes(w.phase) || !validBankUpdate(a)) return 'QUESTION';
+        const selection = a.variety;
         w.questionSource = a.source || ''; w.autoPaused = false;
-        w.bank = structuredClone(a.questions); w.index = 0; w.round = null; w.phase = 'lobby'; w.wolf = null; w.queue = []; w.plan.limit = Math.min(w.plan.limit, w.bank.length);
+        w.bank = structuredClone(a.questions); w.index = 0; w.round = null; w.phase = 'lobby'; w.wolf = null; w.queue = [];
+        if (selection) {
+          w.plan = {
+            ...w.plan, order: selection.order, partyCategory: selection.partyCategory ?? 'ALL',
+            partyLevel: selection.partyLevel ?? 'ALL', partyAudience: selection.partyAudience ?? 'ALL',
+          };
+        } else w.plan.limit = Math.min(w.plan.limit, w.bank.length);
         break;
+      }
       case 'plan': {
         const next = {...w.plan,...a};
         if (!['lobby', 'finished'].includes(w.phase) || !['SEQUENTIAL', 'RANDOM'].includes(next.order) || !finiteInt(next.limit, 0, MAX_SHOW_QUESTIONS) || typeof next.shuffleChoices !== 'boolean' || (next.autoAdvance !== undefined && typeof next.autoAdvance !== 'boolean')) return 'PHASE';
-        if ((next.partyCategory!==undefined&&!PARTY_CATEGORIES.includes(next.partyCategory))||(next.partyFormat!==undefined&&!['TEXT','FLIP','CHOICE'].includes(next.partyFormat))||(next.partyLevel!==undefined&&!['ALL','EASY','NORMAL','HARD'].includes(next.partyLevel))||(next.drawFree!==undefined&&typeof next.drawFree!=='boolean'))return 'QUESTION';
-        w.plan = {order:next.order,limit:next.limit,shuffleChoices:next.shuffleChoices,autoAdvance:next.autoAdvance??w.plan.autoAdvance??true,partyFormat:next.partyFormat??w.plan.partyFormat??'TEXT',partyLevel:next.partyLevel??w.plan.partyLevel??'ALL',partyCategory:next.partyCategory??w.plan.partyCategory??'ALL',drawFree:next.drawFree??w.plan.drawFree??false}; break;
+        if (!validVarietySelection(next) || (next.partyFormat!==undefined&&!['TEXT','FLIP','CHOICE'].includes(next.partyFormat)) || (next.drawFree!==undefined&&typeof next.drawFree!=='boolean')) return 'QUESTION';
+        w.plan = {order:next.order,limit:next.limit,shuffleChoices:next.shuffleChoices,autoAdvance:next.autoAdvance??w.plan.autoAdvance??true,partyFormat:next.partyFormat??w.plan.partyFormat??'TEXT',partyLevel:next.partyLevel??w.plan.partyLevel??'ALL',partyCategory:next.partyCategory??w.plan.partyCategory??'ALL',partyAudience:next.partyAudience??w.plan.partyAudience??'ALL',drawFree:next.drawFree??w.plan.drawFree??false}; break;
       }
       case 'start':
         if (!validBankForMode(w.mode,w.bank)) return 'QUESTION';
         if (w.phase !== 'lobby' || !w.bank.length || Object.values(w.players).filter(p => p.connected).length < minimumAnswerers(w.mode)) return 'PHASE';
+        const all = w.bank.map((_, i) => i).filter(i=>matchesPartyPlan(w.bank[i],w.plan)), ordered = w.plan.order === 'RANDOM' ? shuffle(all) : all;
+        if (!ordered.length) return 'QUESTION';
         if (w.mode === 'WOLF') {
           const ids = Object.values(w.players).filter(p => p.connected).map(p => p.id); if (ids.length < 3) return 'PHASE';
           w.wolf = startWolves(ids); w.accepting = false;
         }
         for (const p of Object.values(w.players)) { p.score = 0; p.lives = 3; }
-        const all = w.bank.map((_, i) => i).filter(i=>matchesPartyPlan(w.bank[i],w.plan)), ordered = w.plan.order === 'RANDOM' ? shuffle(all) : all;
         w.queue = w.wolf || !w.plan.limit ? ordered : ordered.slice(0, w.plan.limit);
-        if (!ordered.length) return 'QUESTION';
         w.autoPaused = false; w.index = 0; prepare(w); break;
       case 'open':
         if (w.phase !== 'ready' || !r) return 'PHASE';

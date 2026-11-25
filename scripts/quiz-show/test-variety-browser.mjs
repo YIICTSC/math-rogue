@@ -22,6 +22,22 @@ try{
  const oldPackRevision=await host.evaluate(()=>{const {view,send}=__quiz;send({type:'bank',questions:[{...view.host.bank[0],id:'catalogue-STANDARD-WORK-HARD-0',prompt:'Retired prompt'}]});return view.revision;});
  await host.waitForFunction(revision=>__quiz.view.revision>=revision+2&&__quiz.view.host.bank.length===30&&__quiz.view.host.bank.every(q=>!q.id.startsWith('catalogue-')),oldPackRevision);
 
+ const audiencePicker=host.getByRole('group',{name:'対象年代',exact:true});
+ assert.equal(await audiencePicker.getByRole('button').count(),5);
+ const elementary=audiencePicker.getByRole('button',{name:/小学生向け/});
+ await elementary.click();
+ await host.waitForFunction(()=>__quiz.view.plan.partyAudience==='ELEMENTARY'&&__quiz.view.host.bank.length===0);
+ assert.equal(await elementary.getAttribute('aria-pressed'),'true');
+ assert(await host.locator('.qs-host-primary').isDisabled());
+ await host.locator('.qs-empty-audience').waitFor();
+ const adult=audiencePicker.getByRole('button',{name:/社会人向け/});
+ await adult.click();
+ await host.waitForFunction(()=>__quiz.view.plan.partyAudience==='ADULT'&&__quiz.view.host.bank.length===30);
+ assert.equal(await adult.getAttribute('aria-pressed'),'true');
+ assert(await host.evaluate(()=>__quiz.view.host.bank.every(q=>q.audiences.includes('ADULT'))));
+ await adult.scrollIntoViewIfNeeded();
+ await host.screenshot({path:out+'/studio-audience.png'});
+
  assert(await host.evaluate(()=>__quiz.view.host.bank.every(q=>q.category==='WORK'&&q.difficulty==='HARD')&&__quiz.view.host.bank.some(q=>q.id.startsWith('party-trivia-'))));await host.getByLabel('バラエティの回答形式',{exact:true}).selectOption('CHOICE');await host.getByLabel('出題する問題数',{exact:true}).selectOption('1');if(await host.locator('.qs-workspace[open]').count())await host.locator('.qs-workspace-card>header button').click();await host.getByRole('button',{name:'番組をスタート',exact:true}).click();await a.waitForFunction(()=>__quiz.view.phase==='open');await b.waitForFunction(()=>__quiz.view.phase==='open');assert.equal(await a.locator('.qs-choices button').count(),4);assert.equal(await host.evaluate(()=>__quiz.view.host.bank.find(q=>q.prompt===__quiz.view.round.prompt).difficulty),'HARD');const correct=await host.evaluate(()=>__quiz.view.round.answer);for(const p of [a,b])await p.locator('.qs-choices button').filter({has:p.getByText(correct,{exact:true})}).click();await host.waitForFunction(()=>__quiz.view.phase==='finished');
  async function change(mode){await host.locator('.qs-settings-toggle').click();await host.locator('.qs-host-settings').evaluate(e=>e.open=true);await host.getByLabel('ゲームルール').selectOption(mode);await host.waitForFunction(mode=>__quiz.view.mode===mode&&__quiz.view.phase==='lobby',mode);}
  await change('DRAW');assert.equal(await host.getByLabel('バラエティの回答形式',{exact:true}).count(),0);await host.getByLabel('お絵かきのお題',{exact:true}).selectOption('FREE');if(await host.locator('.qs-workspace[open]').count())await host.locator('.qs-workspace-card>header button').click();await host.getByRole('button',{name:'番組をスタート',exact:true}).click();await a.waitForFunction(()=>__quiz.view.phase==='open');await b.waitForFunction(()=>__quiz.view.phase==='open');const aid=await a.evaluate(()=>__quiz.view.self),artistId=await host.evaluate(()=>__quiz.view.round.artist),artist=aid===artistId?a:b,guess=artist===a?b:a;await artist.getByLabel('秘密のお題を決める',{exact:true}).fill('月で踊るカメ');assert.equal(await guess.locator('.qs-answer-input textarea').count(),0);await artist.getByRole('button',{name:'このお題で描き始める',exact:true}).click();await guess.locator('.qs-answer-input textarea').waitFor();assert(!JSON.stringify(await guess.evaluate(()=>__quiz.view)).includes('月で踊るカメ'));await artist.locator('.qs-draw-surface').waitFor();await guess.locator('.qs-answer-input textarea').fill('月で踊るカメ');await guess.getByRole('button',{name:'回答を決定！',exact:true}).click();await host.waitForFunction(()=>__quiz.view.phase==='finished');assert.equal(await guess.evaluate(()=>__quiz.view.players.find(p=>p.id===__quiz.view.self).score),100);

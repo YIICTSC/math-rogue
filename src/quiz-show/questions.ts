@@ -1,7 +1,8 @@
 import type { LanguageMode } from '../types';
-import { PARTY_CATEGORIES, supportsLearningUnits, type PartyCategory, type ShowMode, type ShowQuestion, type ShowWorld } from './types';
+import { PARTY_CATEGORIES, supportsLearningUnits, type PartyCategory, type ShowMode, type ShowQuestion, type VarietySelection } from './types';
 import { themedQuestions, topicKey, VARIETY_LEVELS } from './catalogue/partyTopics';
-import { shuffle } from './engine';
+import { recommendedAudiences } from './catalogue/audiences';
+import { matchesPartyPlan, shuffle } from './engine';
 import { onAirPrompt } from './prompt';
 import prompts from './partyPrompts.json';
 import variety from './varietyPrompts.json';
@@ -91,7 +92,7 @@ const locales = ['JAPANESE', 'ENGLISH', 'HIRAGANA'] as const;
 const catalogues = new Map<ShowMode, ShowQuestion[][]>();
 export const MIN_VARIETY_PER_LEVEL = 30;
 export const MAX_VARIETY_PACK = 240;
-export type VarietySelection = Pick<ShowWorld['plan'], 'partyCategory' | 'partyLevel' | 'order'>;
+export type { VarietySelection } from './types';
 
 const promptKey = (mode: ShowMode, q: ShowQuestion) =>
  topicKey(mode === 'DRAW' ? q.answer : onAirPrompt({mode, prompt:q.prompt}));
@@ -120,9 +121,10 @@ export function varietyQuestions(mode: ShowMode, language: LanguageMode): ShowQu
     if (counts[level] >= MIN_VARIETY_PER_LEVEL) return;
     counts[level]++;
     menuTopics.add(theme);
+    const audiences = recommendedAudiences(rows[0], level);
     for (const [locale, q] of rows.entries()) {
      visibleKeys[locale].add(keys[locale]);
-     banks![locale].push({ ...q, difficulty: level, seconds: mode === 'VOTE' ? 90 : q.seconds });
+     banks![locale].push({ ...q, audiences, difficulty: level, seconds: mode === 'VOTE' ? 90 : q.seconds });
     }
    };
    const addAuthored = (source: ShowQuestion[][]) => {
@@ -152,11 +154,9 @@ export function varietyQuestions(mode: ShowMode, language: LanguageMode): ShowQu
 }
 
 export function varietyPack(catalogue: ShowQuestion[], selection: VarietySelection): ShowQuestion[] {
- const {partyCategory = 'ALL', partyLevel = 'ALL', order} = selection;
- const eligible = catalogue.filter(q => (partyCategory === 'ALL' || partyCategory === q.category) &&
-  (partyLevel === 'ALL' || partyLevel === q.difficulty));
+ const eligible = catalogue.filter(q => matchesPartyPlan(q, selection));
  if (eligible.length <= MAX_VARIETY_PACK) return eligible;
- return (order === 'RANDOM' ? shuffle(eligible) : eligible).slice(0, MAX_VARIETY_PACK);
+ return (selection.order === 'RANDOM' ? shuffle(eligible) : eligible).slice(0, MAX_VARIETY_PACK);
 }
 
 /** A fresh room starts with one random prompt from each category and level. */

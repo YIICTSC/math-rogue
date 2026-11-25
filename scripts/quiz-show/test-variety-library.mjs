@@ -11,12 +11,17 @@ for(const language of ['JAPANESE','ENGLISH','HIRAGANA'])for(const mode of E.MODE
  const bank=E.varietyQuestions(mode,language);
  assert(bank.every(E.validQuestion),mode+language);
  assert.equal(new Set(bank.map(q=>q.id)).size,bank.length);
- assert.deepEqual(bank.map(q=>q.id),E.varietyQuestions(mode,'JAPANESE').map(q=>q.id));
+ assert.deepEqual(bank.map(q=>[q.id,q.audiences]),E.varietyQuestions(mode,'JAPANESE').map(q=>[q.id,q.audiences]));
  const largestQuestions=bank.map(q=>Buffer.byteLength(JSON.stringify(q))+1).sort((a,b)=>b-a);
  assert(largestQuestions.slice(0,E.MAX_VARIETY_PACK).reduce((a,b)=>a+b,1024)<256000,'Largest possible pack must fit the existing transport');
  const onAir=bank.map(q=>(mode==='DRAW'?q.answer:E.onAirPrompt({mode,prompt:q.prompt})).normalize('NFKC').toLowerCase().replace(/\s|[？?。]/g,''));
  assert.equal(new Set(onAir).size,bank.length,'Repeated on-air question or drawing subject '+mode+'/'+language);
  if (language === 'JAPANESE') {
+  const audiencePools = E.QUIZ_AUDIENCES.slice(1).map(partyAudience => bank.filter(q => E.matchesPartyPlan(q, {partyAudience})));
+  for (const pool of audiencePools) {
+   assert(pool.length >= E.MAX_VARIETY_PACK && pool.length < bank.length, mode + ' should have a substantial age-selected pool');
+  }
+  assert.equal(new Set(audiencePools.map(pool=>pool.map(q=>q.id).join('|'))).size,4,mode + ' should offer four distinct selections');
   const selectedIds = new Set(bank.map(q => q.id));
   assert(!bank.some(q => q.id.startsWith('catalogue-')), 'Retired angle-based prompts must stay out of the bank');
   const topics = E.PARTY_CATEGORIES.slice(1).flatMap(category => E.themedQuestions(mode, language, category))
@@ -61,3 +66,43 @@ cmd(w,{type:'autoPause',roundId:r});const phase=w.phase;E.tickShow(w,90000);asse
 cmd(w,{type:'score',roundId:r});E.tickShow(w,100000);assert.equal(w.phase,'scoreboard');cmd(w,{type:'autoPause',roundId:r},H,100001);E.tickShow(w,100001);E.tickShow(w,105002);assert.equal(w.phase,'finished');
 const authority=new E.ShowAuthority('host_key_1234567890');const screen=authority.join({protocol:1,role:'screen',key:'screen_key_1234567890'});assert(!screen.error);assert.equal(authority.view(H).audienceScreens,1);authority.leave(screen.actor);assert.equal(authority.view(H).audienceScreens,0);
 console.log('PASS '+total+' available prompts, 30+ per mode/category/level, unique on-air text, bounded randomized packs, automatic choice validation and broadcast privacy.');
+
+const trivia = E.varietyQuestions('STANDARD', 'JAPANESE');
+const school = trivia.find(q => q.id === 'party-trivia-1-SCHOOL');
+const invoice = trivia.find(q => q.id === 'party-clue-2-MONEY');
+assert(school.audiences.includes('ELEMENTARY') && !school.audiences.includes('ADULT'));
+assert.deepEqual(invoice.audiences, ['ADULT']);
+for (const audiences of [[], ['ALL'], ['ADULT', 'ADULT'], ['UNKNOWN']]) {
+ assert(!E.validQuestion({...school, audiences}));
+}
+const plan = {order:'SEQUENTIAL', partyCategory:'WORK', partyLevel:'HARD', partyAudience:'ADULT'};
+const filtered = E.varietyPack(trivia, plan);
+assert(filtered.length > 1 && filtered.every(q=>q.category==='WORK' && q.difficulty==='HARD' && q.audiences.includes('ADULT')));
+const audienceWorld = E.createShow();
+E.addAnswerer(audienceWorld, 'a', 'A');
+cmd(audienceWorld, {type:'plan',limit:2});
+assert.equal(E.act(audienceWorld,H,{type:'bank',questions:[school],variety:plan}), 'QUESTION');
+assert.equal(E.act(audienceWorld,H,{type:'plan',partyAudience:'UNKNOWN'}), 'QUESTION');
+cmd(audienceWorld, {type:'bank',questions:[],variety:{...plan,partyAudience:'ELEMENTARY'}});
+assert.equal(E.viewFor(audienceWorld,H).questionCount,0);
+audienceWorld.players.a.score = 10;
+assert.equal(E.act(audienceWorld,H,{type:'start'}), 'QUESTION');
+assert.equal(audienceWorld.players.a.score,10);
+cmd(audienceWorld, {type:'bank',questions:filtered,variety:plan});
+assert.equal(audienceWorld.plan.partyAudience,'ADULT');
+assert.equal(E.viewFor(audienceWorld,H).questionCount,2);
+cmd(audienceWorld, {type:'start'});
+assert.deepEqual(audienceWorld.queue,[0,1]);
+assert.equal(audienceWorld.round.question.id,filtered[0].id);
+
+const previousRoom = structuredClone(authority.save());
+delete previousRoom.world.plan.partyAudience;
+const restored = new E.ShowAuthority('host_key_1234567890',undefined,previousRoom);
+assert.equal(restored.view(H).plan.partyAudience,'ALL');
+const lesson = {id:'learning',prompt:'2 + 2?',answer:'4',aliases:[],options:['3','4'],format:'CHOICE',seconds:30,points:100};
+E.addAnswerer(restored.world, 'a', 'A');
+assert.equal(restored.command(H,{type:'bank',questions:[lesson],source:'Addition'}),null);
+assert.equal(restored.command(H,{type:'plan',partyAudience:'ADULT'}),null);
+assert.equal(restored.command(H,{type:'start'}),null);
+assert.equal(restored.world.round.question.id,'learning');
+console.log('PASS four audience selections in every mode and language, matching packs, zero-result safety, old room saves and unchanged learning selections.');

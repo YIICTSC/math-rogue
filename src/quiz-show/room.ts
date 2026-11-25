@@ -1,7 +1,7 @@
 import Peer, { type DataConnection, type PeerOptions } from 'peerjs';
 import { DedicatedConnection } from '../services/dedicatedConnection';
 import { ShowAuthority, type Hello } from './authority';
-import { validBank, validInk } from './engine';
+import { validBankUpdate, validInk } from './engine';
 import { QUIZ_PROTOCOL, type Actor, type InkStroke, type Role, type ShowAction, type ShowError, type ShowView } from './types';
 import { addressText, type RoomAddress } from './invite';
 
@@ -218,7 +218,7 @@ export class QuizShowRoom {
   }
   send(action: ShowAction) {
     if (this.closed) return false;
-    if (action.type === 'bank' && !validBank(action.questions)) { this.status('QUESTION'); return false; }
+    if (action.type === 'bank' && !validBankUpdate(action)) { this.status('QUESTION'); return false; }
     if (this.authority) { const error = this.authority.command(HOST, action); if (error) { this.status(error); return false; } this.status(null); this.emit(); this.persist(); return true; }
     // A bank exceeds the shared socket's 16 KiB backpressure threshold.
     // Preserve following settings in order instead of silently dropping them.

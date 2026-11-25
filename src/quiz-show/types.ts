@@ -5,6 +5,10 @@ export const MAX_ANSWERERS = 40;
 export const MAX_SHOW_QUESTIONS = 320;
 export const PARTY_CATEGORIES = ['ALL','ANIMALS','FOOD','LOVE','DAILY','WORLD','NATURE','CULTURE','FANTASY','SPORTS','GAMES','SCHOOL','WORK','HISTORY','TECH','MYSTERY','MONEY','SEASONS','TRANSPORT','HEALTH','SPACE'] as const;
 export type PartyCategory = typeof PARTY_CATEGORIES[number];
+export const QUIZ_AUDIENCES = ['ALL', 'ELEMENTARY', 'MIDDLE', 'HIGH', 'ADULT'] as const;
+export type QuizAudience = typeof QUIZ_AUDIENCES[number];
+export type RecommendedAudience = Exclude<QuizAudience, 'ALL'>;
+export type PartyLevel = 'ALL' | 'EASY' | 'NORMAL' | 'HARD';
 export const MODES = ['STANDARD', 'BUZZER', 'SURVIVAL', 'TEAMS', 'CONSENSUS', 'MAJORITY', 'NEAREST', 'DRAW', 'VOTE', 'WOLF'] as const;
 export type ShowMode = typeof MODES[number];
 export const minimumAnswerers = (mode: ShowMode) => mode === 'WOLF' ? 3 : ['DRAW','CONSENSUS','MAJORITY','VOTE','NEAREST'].includes(mode) ? 2 : 1;
@@ -25,6 +29,7 @@ export interface ShowQuestion {
   visual?: KartQuestion['visual'];
   party?: boolean; difficulty?: 'EASY'|'NORMAL'|'HARD'; opinion?: boolean; freeDraw?: boolean;
   category?: Exclude<PartyCategory,'ALL'>;
+  audiences?: readonly RecommendedAudience[];
   audioPrompt?: KartQuestion['audioPrompt'];
 }
 /** Normalized vector ink: coordinates in [0,1000], fixed palette and bounded points. */
@@ -54,10 +59,11 @@ export interface ShowWorld {
   accepting: boolean; hostConnected: boolean; createdAt: number;
   wolf: WolfGame | null;
   overview: boolean;
-  plan: { order: 'SEQUENTIAL' | 'RANDOM'; limit: number; shuffleChoices: boolean; autoAdvance?: boolean; partyFormat?: AnswerFormat; partyLevel?: 'ALL'|'EASY'|'NORMAL'|'HARD'; partyCategory?: PartyCategory; drawFree?: boolean };
+  plan: { order: 'SEQUENTIAL' | 'RANDOM'; limit: number; shuffleChoices: boolean; autoAdvance?: boolean; partyFormat?: AnswerFormat; partyLevel?: PartyLevel; partyCategory?: PartyCategory; partyAudience?: QuizAudience; drawFree?: boolean };
   queue: number[];
   autoProgress?: { phase: Phase; roundId: string; at: number };
 }
+export type VarietySelection = Pick<ShowWorld['plan'], 'partyCategory' | 'partyLevel' | 'partyAudience' | 'order'>;
 export interface AnswerTile {
   id: string; submitted: boolean; revealed: boolean; visible: boolean; text?: string;
   inkRevision: number; hasInk: boolean; correct?: boolean; award?: number; votes?: number;
@@ -86,7 +92,7 @@ export interface ShowView {
 }
 export type ShowAction =
   | { type: 'configure'; title: string; mode: ShowMode; teamCount: number }
-  | { type: 'bank'; questions: ShowQuestion[]; source?: string }
+  | { type: 'bank'; questions: ShowQuestion[]; source?: string; variety?: VarietySelection }
   | ({ type: 'plan' } & Partial<ShowWorld['plan']>)
   | { type: 'autoPause'; roundId?: string }
   | { type: 'start' | 'open' | 'close' | 'pause' | 'autoJudge' | 'score' | 'next' | 'finish' | 'voting' | 'revealAnswer' | 'revealAll' | 'publish' | 'balance'; roundId?: string }
