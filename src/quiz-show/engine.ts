@@ -302,6 +302,14 @@ export function act(w: ShowWorld, actor: Actor, raw: unknown, now = Date.now(), 
         if (w.phase !== 'lobby' || !w.bank.length || Object.values(w.players).filter(p => p.connected).length < minimumAnswerers(w.mode)) return 'PHASE';
         const all = w.bank.map((_, i) => i).filter(i=>matchesPartyPlan(w.bank[i],w.plan)), ordered = w.plan.order === 'RANDOM' ? shuffle(all) : all;
         if (!ordered.length) return 'QUESTION';
+        if (w.plan.order === 'RANDOM' && w.plan.partyCategory && w.plan.partyCategory !== 'ALL' &&
+          w.plan.partyAudience && w.plan.partyAudience !== 'ALL') {
+          const first = ordered.findIndex(index => {
+            const q = w.bank[index];
+            return q.party && q.audiences?.length === 1 && q.audiences[0] === w.plan.partyAudience;
+          });
+          if (first > 0) ordered.unshift(...ordered.splice(first, 1));
+        }
         if (w.mode === 'WOLF') {
           const ids = Object.values(w.players).filter(p => p.connected).map(p => p.id); if (ids.length < 3) return 'PHASE';
           w.wolf = startWolves(ids); w.accepting = false;

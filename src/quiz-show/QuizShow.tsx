@@ -7,7 +7,7 @@ import { supportsLearningUnits, MODES, QUIZ_AUDIENCES, type QuizAudience, type S
 import { copy, ERRORS, MODE_COPY } from './copy';
 import { addressText, clearQuizLocation, invitationFromLocation, markHost, parseAddress, type RoomAddress } from './invite';
 import { QuizShowRoom, quizShowServerUrl, savedHost } from './room';
-import { starterQuestions, varietyQuestions, varietyPack, CATEGORY_COPY, type VarietySelection } from './questions';
+import { starterQuestions, varietyQuestions, varietyPack, isLegacyVarietyId, CATEGORY_COPY, type VarietySelection } from './questions';
 import { AUDIENCE_COPY } from './catalogue/audiences';
 import InvitePanel from './InvitePanel';
 import HostDesk from './HostDesk';
@@ -80,10 +80,20 @@ export default function QuizShow({ languageMode = 'JAPANESE', onBack, direct = f
     if (!active || !view || view.role !== 'host' || view.phase !== 'lobby' ||
         refreshedCatalogue.current === session.current) return;
     const bank = view.host?.bank;
-    if (!bank?.some(q => q.id.startsWith('catalogue-')) || !bank.every(q => q.party)) return;
+    if (!bank?.length || !bank.every(q => q.party)) return;
+    const catalogue = varietyQuestions(view.mode, language);
+    const latest = new Map(catalogue.map(q => [q.id, q]));
+    if (!bank.every(q => latest.has(q.id) || isLegacyVarietyId(view.mode, q.id))) return;
+    const stale = bank.some(q => {
+      const current = latest.get(q.id);
+      return !current || current.difficulty !== q.difficulty || current.audiences?.join() !== q.audiences?.join();
+    });
+    if (!stale) return;
     const { order, partyCategory, partyLevel, partyAudience } = view.plan;
     const selection: VarietySelection = { order, partyCategory, partyLevel, partyAudience: audience };
-    const questions = varietyPack(varietyQuestions(view.mode, language), selection);
+    const isStarter = !view.questionSource && (!partyCategory || partyCategory === 'ALL') &&
+      (!partyLevel || partyLevel === 'ALL') && audience === 'ALL' && bank.length === 60;
+    const questions = isStarter ? starterQuestions(view.mode, language) : varietyPack(catalogue, selection);
     const variety = partyAudience === undefined ? undefined : selection;
     if ((variety || questions.length) && room.current?.send({ type: 'bank', questions, source: view.questionSource, variety })) {
       refreshedCatalogue.current = session.current;

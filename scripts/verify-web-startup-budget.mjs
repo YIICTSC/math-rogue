@@ -25,7 +25,7 @@ const boot = dependencies(entry);
 const appKey = Object.keys(manifest).find(key => manifest[key].name === 'App' && manifest[key].isDynamicEntry);
 assert(appKey, 'game must load separately from the startup shell');
 const title = dependencies(appKey, new Set(boot));
-for (const key of title) assert(!/subjectData|GeneralChallengeScreen|KanjiChallengeScreen|EnglishChallengeScreen|MiniGameRouter|DebugMenuScreen/.test(key), `not needed on title: ${key}`);
+for (const key of title) assert(!/subjectData|GeneralChallengeScreen|KanjiChallengeScreen|EnglishChallengeScreen|MiniGameRouter|DebugMenuScreen|quiz-show-core/.test(key), `not needed on title: ${key}`);
 const result = { shell: await size(boot), title: await size(title) };
 assert(result.shell.gzipBytes < 300_000, 'startup shell must stay under 300 KB gzip');
 assert(result.title.gzipBytes < 4_800_000, 'title JS must be at least 20% below the previous ~6 MB gzip entry');

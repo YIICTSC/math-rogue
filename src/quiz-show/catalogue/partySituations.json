@@ -1,0 +1,1512 @@
+{
+  "ANIMALS": [
+    {
+      "id": "pet-bed-box", "kind": "OPINION", "level": "EASY",
+      "text": ["新しいベッドを置いたのに、ペットが結局寝る場所は？", "You buy your pet a new bed. Where does it end up sleeping?", "あたらしいベッドを おいたのに、ペットがけっきょく ねるばしょは？"],
+      "options": [
+        ["届いた段ボール", "The box it came in", "とどいた ダンボール"],
+        ["人の枕の上", "Someone’s pillow", "ひとの まくらのうえ"],
+        ["洗いたての服の上", "On fresh laundry", "あらいたての ふくのうえ"],
+        ["前からある毛布", "The old blanket", "まえからある もうふ"]
+      ]
+    },
+    {
+      "id": "zoo-second-look", "kind": "OPINION", "level": "NORMAL",
+      "text": ["動物園で帰る前にもう一度だけ見られるなら、どの場面に戻る？", "You can go back to see just one more moment before leaving the zoo. Which would you revisit?", "どうぶつえんで かえるまえに もういちどだけ みられるなら、どのばめんに もどる？"],
+      "options": [
+        ["水に飛びこむところ", "An animal leaping into the water", "みずに とびこむところ"],
+        ["ごはんの時間", "Feeding time", "ごはんのじかん"],
+        ["親子でくっつく姿", "A parent and baby snuggling", "おやこで くっつくすがた"],
+        ["ゆっくり昼寝する姿", "A very relaxed nap", "ゆっくり ひるねするすがた"]
+      ]
+    },
+    {
+      "id": "penguin-zoo-announcement", "kind": "VOTE", "level": "EASY",
+      "text": ["動物園の案内放送をペンギンが担当。最初の一言は？", "A penguin takes over the zoo announcements. What is its opening line?", "どうぶつえんの あんないほうそうを ペンギンがたんとう。さいしょの ひとことは？"],
+      "options": [
+        ["本日もすべり込みで出勤しました", "Once again, I slid in just in time", "ほんじつも すべりこみで しゅっきんしました"],
+        ["泳いでお越しの方は左へ", "Visitors who swam here, please keep left", "およいでおこしのかたは ひだりへ"],
+        ["お魚の持ち込みは大歓迎", "We welcome outside fish", "おさかなの もちこみは だいかんげい"],
+        ["走るときはおなかから", "If you run, lead with your belly", "はしるときは おなかから"]
+      ]
+    },
+    {
+      "id": "pet-picture-limit", "kind": "NEAREST", "level": "NORMAL",
+      "text": ["「ペットの写真、見せて」と言われたら、何枚くらい見せたい？", "Someone asks to see photos of your pet. How many would you want to show?", "「ペットのしゃしん、みせて」といわれたら、なんまいくらい みせたい？"]
+    },
+    {
+      "id": "rabbit-ears-box", "kind": "DRAW", "level": "EASY",
+      "text": ["段ボール箱から耳だけ出したウサギ", "A rabbit with only its ears sticking out of a cardboard box", "ダンボールばこから みみだけだした ウサギ"],
+      "aliases": [
+        ["箱に入ったウサギ", "Rabbit in a box", "はこにはいった ウサギ"],
+        ["ウサギの耳", "Rabbit ears", "ウサギのみみ"]
+      ]
+    },
+    {
+      "id": "pet-camera-parade", "kind": "DISCUSSION", "level": "HARD",
+      "text": ["留守番カメラに真夜中だけペットの行列。餌は残ったまま、扉も閉まっている。何の行列だと説明する？", "The pet camera sees a midnight parade. The food is untouched and the door is shut. How do you explain the queue?", "るすばんカメラに まよなかだけ ペットのぎょうれつ。エサは のこったまま、とびらも しまっている。なんのぎょうれつだと せつめいする？"],
+      "options": [
+        ["いちばん暖かい毛布の順番待ち", "They are waiting for the warmest blanket", "いちばんあたたかい もうふの じゅんばんまち"],
+        ["次の昼寝場所の内見", "A tour of possible nap spots", "つぎのひるねばしょの ないけん"],
+        ["飼い主がいない間の点呼", "A roll call while their human is away", "かいぬしが いないあいだの てんこ"],
+        ["影を追いかけるパレード", "A parade chasing their shadows", "かげをおいかける パレード"]
+      ]
+    }
+  ],
+  "FOOD": [
+    {
+      "id": "last-fry-on-plate", "kind": "OPINION", "level": "EASY",
+      "text": ["みんなで食べたポテトが残り一本。見つけたら、ついどうする？", "There is one fry left on the shared plate. What do you instinctively do?", "みんなでたべた ポテトが のこりいっぽん。みつけたら、つい どうする？"],
+      "options": [
+        ["「食べる？」と聞く", "Ask, “Anyone want it?”", "「たべる？」ときく"],
+        ["しばらく様子を見る", "Wait for a moment", "しばらく ようすをみる"],
+        ["半分に分ける", "Split it in half", "はんぶんに わける"],
+        ["最後の一本を宣言する", "Announce that it is the last one", "さいごのいっぽんを せんげんする"]
+      ]
+    },
+    {
+      "id": "buffet-first-plate", "kind": "OPINION", "level": "NORMAL",
+      "text": ["食べ放題の最初のお皿。つい取りすぎるのはどれ？", "On your first trip to a buffet, what do you tend to take too much of?", "たべほうだいの さいしょのおさら。つい とりすぎるのは どれ？"],
+      "options": [
+        ["揚げ物", "Fried food", "あげもの"],
+        ["パン", "Bread", "パン"],
+        ["主食のごはんや麺", "Rice or noodles", "ごはんや めん"],
+        ["デザート", "Dessert", "デザート"]
+      ]
+    },
+    {
+      "id": "lunchbox-rice-note", "kind": "VOTE", "level": "NORMAL",
+      "text": ["お弁当を開けたら白ごはんの上におかずからの手紙。なんて書いてある？", "You open your lunchbox and find a note from the side dishes on your rice. What does it say?", "おべんとうをあけたら しろごはんのうえに おかずからの てがみ。なんて かいてある？"],
+      "options": [
+        ["今日の主役は私たちです", "We are the stars of this meal", "きょうのしゅやくは わたしたちです"],
+        ["梅干しさん、真ん中を空けて", "Pickled plum, please clear the center", "うめぼしさん、まんなかを あけて"],
+        ["隣のからあげがいい匂いです", "The fried chicken next door smells great", "となりのからあげが いいにおいです"],
+        ["ごはんさん、今日も支えてね", "Rice, thanks for holding us up again", "ごはんさん、きょうも ささえてね"]
+      ]
+    },
+    {
+      "id": "share-ten-snacks", "kind": "NEAREST", "level": "EASY",
+      "text": ["大好きなおやつが10個。誰かと分けるなら、自分に何個残したい？", "You have ten of your favorite snacks to share. How many would you keep for yourself?", "だいすきな おやつが 10こ。だれかとわけるなら、じぶんに なんこ のこしたい？"]
+    },
+    {
+      "id": "rice-ball-plum", "kind": "DRAW", "level": "EASY",
+      "text": ["梅干しが顔を出す大きなおにぎり", "A big rice ball with a pickled plum poking out", "うめぼしが かおをだす おおきな おにぎり"],
+      "aliases": [
+        ["梅干しおにぎり", "Pickled-plum rice ball", "うめぼしおにぎり"],
+        ["おにぎり", "Rice ball", "おにぎり"]
+      ]
+    },
+    {
+      "id": "last-caramel-split", "kind": "DISCUSSION", "level": "HARD",
+      "text": ["プリンを二人で半分にしたら、カラメルが片方に集中。お皿を増やせないとき、二人が笑って納得する分け方は？", "You split a pudding and all the caramel goes to one side. With one plate, how do you divide it so both people get a laugh and agree?", "プリンをふたりではんぶんにしたら、カラメルがかたほうに しゅうちゅう。おさらを ふやせないとき、ふたりが わらってなっとくする わけかたは？"],
+      "options": [
+        ["皿を回して一口ずつ交代", "Rotate the plate and alternate bites", "さらをまわして ひとくちずつ こうたい"],
+        ["次のプリンはカラメル優先券つき", "Give the other person first pick on the next pudding", "つぎのプリンは カラメルゆうせんけんつき"],
+        ["二人でカラメルの境目を作り直す", "Redraw the caramel border together", "ふたりで カラメルのさかいめを つくりなおす"],
+        ["じゃんけんで好きな一口を選ぶ", "Play rock-paper-scissors for the first bite", "じゃんけんで すきなひとくちを えらぶ"]
+      ]
+    },
+    {
+      "id": "ice-cream-handoff", "kind": "DRAW", "level": "HARD",
+      "text": ["溶け始めたアイスを下から支えながら、二人でコーンを受け渡す", "Two people passing a melting ice cream cone while supporting it from below", "とけはじめたアイスをしたから ささえながら、ふたりで コーンをうけわたす"],
+      "aliases": [
+        ["溶けるアイスの受け渡し", "Passing melting ice cream", "とけるアイスの うけわたし"],
+        ["アイスを渡す二人", "Two people passing ice cream", "アイスをわたすふたり"]
+      ]
+    }
+  ],
+  "LOVE": [
+    {
+      "id": "same-group", "kind": "OPINION", "level": "EASY", "audiences": ["ELEMENTARY"],
+      "text": ["気になる子と同じ班に。気づいた瞬間、ついやりそうなのは？", "You get put in a group with your crush. What do you do the instant you notice?", "きになるこ と おなじはんに。きづいたしゅんかん、ついやりそうなのは？"],
+      "options": [
+        ["友だちを見る", "Look at your friend", "ともだちを みる"],
+        ["知らないふり", "Pretend you did not notice", "しらないふり"],
+        ["すぐ机を運ぶ", "Move your desk right away", "すぐ つくえをはこぶ"],
+        ["係を引き受ける", "Volunteer for a job", "かかりを ひきうける"]
+      ]
+    },
+    {
+      "id": "borrowed-eraser", "kind": "OPINION", "level": "EASY", "audiences": ["ELEMENTARY"],
+      "text": ["気になる子が消しゴムを貸してくれた。返すとき、何を言いがち？", "Your crush lends you an eraser. What comes out when you give it back?", "きになるこが けしゴムを かしてくれた。かえすとき、なにを いいがち？"],
+      "options": [
+        ["ありがとう！", "Thanks!", "ありがとう！"],
+        ["すごく消えるね", "It works really well", "すごく きえるね"],
+        ["今度は貸すね", "You can borrow mine next time", "こんどは かすね"],
+        ["助かった、宿題も終わった", "You saved me. I finished my work!", "たすかった、しゅくだいも おわった"]
+      ]
+    },
+    {
+      "id": "choosing-seats", "kind": "OPINION", "level": "NORMAL", "audiences": ["ELEMENTARY"],
+      "text": ["席替えの紙が貼られた。自分の席を見つけたあと、こっそり見るのは？", "The new seating chart goes up. After finding your seat, where do you sneak a peek?", "せきがえのかみが はられた。じぶんのせきを みつけたあと、こっそりみるのは？"],
+      "options": [
+        ["となりの名前", "The name next to yours", "となりの なまえ"],
+        ["気になる子の席", "Your crush’s seat", "きになるこの せき"],
+        ["仲良しの席", "Your best friend’s seat", "なかよしの せき"],
+        ["窓からの距離", "How close you are to the window", "まどからの きょり"]
+      ]
+    },
+    {
+      "id": "walk-home-invite", "kind": "OPINION", "level": "NORMAL", "audiences": ["ELEMENTARY"],
+      "text": ["「一緒に帰ろう」と声をかけるなら、どのタイミングが言いやすい？", "When is it easiest to say, “Want to walk home together?”", "「いっしょに かえろう」と こえをかけるなら、どのタイミングが いいやすい？"],
+      "options": [
+        ["帰りの支度中", "While packing up", "かえりの したくちゅう"],
+        ["下駄箱で", "At the shoe cubbies", "げたばこで"],
+        ["校門で", "At the school gate", "こうもんで"],
+        ["帰る方向が同じとき", "When you are headed the same way", "かえるほうこうが おなじとき"]
+      ]
+    },
+    {
+      "id": "library-book", "kind": "DISCUSSION", "level": "HARD", "audiences": ["ELEMENTARY"],
+      "text": ["図書室で気になる子に本をすすめたい。相手は絵が好きで、読む時間は休み時間だけ。どこを見せる？", "You want to recommend a book to your crush. They love pictures and only have recess to read. What do you show them?", "としょしつで きになるこに ほんをすすめたい。あいては えがすきで、よむじかんは やすみじかんだけ。どこをみせる？"],
+      "options": [
+        ["好きな絵", "Your favorite illustration", "すきな え"],
+        ["最初の一ページ", "The first page", "さいしょの いちページ"],
+        ["好きな登場人物", "Your favorite character", "すきな とうじょうじんぶつ"],
+        ["読むのが楽しみな場面", "The bit you cannot wait to read", "よむのが たのしみな ばめん"]
+      ]
+    },
+    {
+      "id": "sticker-gift", "kind": "OPINION", "level": "EASY", "audiences": ["ELEMENTARY"],
+      "text": ["シールを一枚おすそ分け。気になる子にどれを選ぶ？", "You get to share one sticker. Which do you choose for your crush?", "シールを いちまい おすそわけ。きになるこに どれをえらぶ？"],
+      "options": [
+        ["その子が好きな色", "Their favorite color", "そのこが すきな いろ"],
+        ["自分とおそろい", "One that matches yours", "じぶんと おそろい"],
+        ["いちばん光るもの", "The shiniest one", "いちばん ひかるもの"],
+        ["見たら笑いそうなもの", "One that will make them laugh", "みたら わらいそうなもの"]
+      ]
+    },
+    {
+      "id": "pencil-case-secret", "kind": "VOTE", "level": "EASY", "audiences": ["ELEMENTARY"],
+      "text": ["となりの席が気になる。しゃべる筆箱が、ばれないように助言するなら？", "You are curious about the person next to you. What sneaky advice does your talking pencil case give?", "となりのせきが きになる。しゃべるふでばこが、ばれないように アドバイスするなら？"],
+      "options": [
+        ["私を落とすのは一回までね", "You get one “accidental” pencil case drop", "わたしを おとすのは いっかいまでね"],
+        ["消しゴムを貸そう、私もついて行く", "Lend them an eraser. I am coming too", "けしゴムを かそう、わたしも ついていく"],
+        ["先に鉛筆の向きをそろえよう", "Let us line up the pencils first", "さきに えんぴつのむきを そろえよう"],
+        ["その練習、もう三回聞いたよ", "I have heard that rehearsal three times", "そのれんしゅう、もう さんかい きいたよ"]
+      ]
+    },
+    {
+      "id": "recess-bell-voice", "kind": "VOTE", "level": "NORMAL", "audiences": ["ELEMENTARY"],
+      "text": ["気になる子に遊ぼうと言う直前、チャイムが鳴った。チャイムに一言だけ言えるなら？", "The bell rings just before you ask your crush to play. What do you say to the bell?", "きになるこに あそぼうというちょくぜん、チャイムが なった。チャイムに ひとことだけ いえるなら？"],
+      "options": [
+        ["あと「ぼう」だけ！", "I only had one word left!", "あと「ぼう」だけ！"],
+        ["今日だけ早くない？", "Are you early today?", "きょうだけ はやくない？"],
+        ["今のは聞いてないことに", "Pretend you did not hear that", "いまのは きいてないことに"],
+        ["次の休み時間に続く！", "To be continued next recess!", "つぎの やすみじかんに つづく！"]
+      ]
+    },
+    {
+      "id": "extra-recess", "kind": "NEAREST", "level": "EASY", "audiences": ["ELEMENTARY"],
+      "text": ["仲良くなりたい子と遊べるなら、休み時間をあと何分長くしてほしい？", "If you could play with someone you want to be friends with, how many extra minutes of recess would you want?", "なかよくなりたいこと あそべるなら、やすみじかんを あとなんぷん ながくしてほしい？"]
+    },
+    {
+      "id": "desk-note", "kind": "DRAW", "level": "NORMAL", "audiences": ["ELEMENTARY"],
+      "text": ["机の向こうにお礼のメモを渡す人", "Passing a thank-you note across a desk", "つくえのむこうに おれいのメモを わたすひと"],
+      "aliases": [
+        ["メモを渡す", "Passing a note", "メモを わたす"],
+        ["お礼の手紙", "Thank-you note", "おれいのてがみ"]
+      ]
+    },
+    {
+      "id": "after-club-route", "kind": "OPINION", "level": "EASY", "audiences": ["MIDDLE"],
+      "text": ["部活帰り、気になる相手と帰る方向が同じ。きっかけにしやすい一言は？", "After practice, you and your crush head the same way. Which opener is easiest?", "ぶかつがえり、きになるあいてと かえるほうこうが おなじ。きっかけにしやすい ひとことは？"],
+      "options": [
+        ["今日の練習長かったね", "Practice ran long today, huh?", "きょうのれんしゅう ながかったね"],
+        ["駅まで一緒に行く？", "Want to walk to the station together?", "えきまで いっしょにいく？"],
+        ["途中まで一緒だ", "We are going the same way for a bit", "とちゅうまで いっしょだ"],
+        ["明日も早いね", "Another early start tomorrow", "あしたも はやいね"]
+      ]
+    },
+    {
+      "id": "club-message", "kind": "OPINION", "level": "EASY", "audiences": ["MIDDLE"],
+      "text": ["気になる人から「部活おつかれ！」。返事に一つだけ足すなら？", "Your crush texts, “Nice work at practice!” What one thing goes in your reply?", "きになるひとから「ぶかつおつかれ！」。へんじに ひとつだけ たすなら？"],
+      "options": [
+        ["相手にもおつかれ", "A “you too”", "あいてにも おつかれ"],
+        ["笑顔の絵文字", "A smiley emoji", "えがおの えもじ"],
+        ["今日の練習の話", "A bit about practice", "きょうのれんしゅうの はなし"],
+        ["明日の予定を聞く", "Ask about tomorrow", "あしたのよていを きく"]
+      ]
+    },
+    {
+      "id": "class-committee", "kind": "OPINION", "level": "NORMAL", "audiences": ["MIDDLE"],
+      "text": ["好きな人と委員会の当番が一緒。用事が終わったあと何を言いがち？", "You share a committee shift with your crush. What do you say when the work is done?", "すきなひとと いいんかいのとうばんが いっしょ。ようじが おわったあと なにをいいがち？"],
+      "options": [
+        ["次もよろしくね", "See you at the next shift", "つぎも よろしくね"],
+        ["片づけも手伝うよ", "I can help clean up too", "かたづけも てつだうよ"],
+        ["どっちから帰る？", "Which way are you headed?", "どっちから かえる？"],
+        ["意外と早く終わったね", "That went faster than I thought", "いがいと はやく おわったね"]
+      ]
+    },
+    {
+      "id": "test-end", "kind": "OPINION", "level": "NORMAL", "audiences": ["MIDDLE"],
+      "text": ["期末テストが終わって、気になる人と廊下で会った。話題にしやすいのは？", "Exams are over and you pass your crush in the hall. What topic is easiest to bring up?", "きまつテストが おわって、きになるひとと ろうかであった。わだいにしやすいのは？"],
+      "options": [
+        ["いちばん難しかった教科", "The hardest subject", "いちばん むずかしかった きょうか"],
+        ["今日の放課後", "Plans after school", "きょうの ほうかご"],
+        ["部活の再開", "Practice starting up again", "ぶかつの さいかい"],
+        ["テスト明けのごほうび", "A post-exam treat", "テストあけの ごほうび"]
+      ]
+    },
+    {
+      "id": "group-photo-position", "kind": "OPINION", "level": "NORMAL", "audiences": ["MIDDLE"],
+      "text": ["行事の集合写真。「好きな場所に並んで」と言われたら、何を先に考える？", "For the group photo, you can stand wherever you like. What do you think about first?", "ぎょうじの しゅうごうしゃしん。「すきなばしょに ならんで」と いわれたら、なにを さきにかんがえる？"],
+      "options": [
+        ["気になる人の近く", "Near your crush", "きになるひとの ちかく"],
+        ["仲のいい友だちの隣", "Next to a close friend", "なかのいい ともだちのとなり"],
+        ["顔が隠れない場所", "A spot where your face shows", "かおが かくれない ばしょ"],
+        ["先生から遠い場所", "A spot away from the teacher", "せんせいから とおい ばしょ"]
+      ]
+    },
+    {
+      "id": "trip-shop", "kind": "DISCUSSION", "level": "HARD", "audiences": ["MIDDLE"],
+      "text": ["修学旅行のおみやげ屋で気になる人に会った。集合まで2分、相手はまだ買い物中。どんな話なら始めやすい？", "You bump into your crush in a school-trip gift shop. There are two minutes left and they are still shopping. What is the easiest conversation starter?", "しゅうがくりょこうの おみやげやで きになるひとにあった。しゅうごうまで2ふん、あいてはまだ かいものちゅう。どんなはなしなら はじめやすい？"],
+      "options": [
+        ["変なご当地キーホルダー", "A weird local keychain", "へんな ごとうちキーホルダー"],
+        ["おすすめのお菓子", "A snack they recommend", "おすすめの おかし"],
+        ["集合時間の確認", "Checking the meeting time", "しゅうごうじかんの かくにん"],
+        ["同じものを見ていた話", "Noticing you were looking at the same thing", "おなじものを みていたはなし"]
+      ]
+    },
+    {
+      "id": "chat-draft-commentary", "kind": "VOTE", "level": "NORMAL", "audiences": ["MIDDLE"],
+      "text": ["気になる人への返事を打っては消す。スマホが実況したら何と言う？", "You keep typing and deleting your reply to your crush. What would your phone’s play-by-play say?", "きになるひとへの へんじを うってはけす。スマホが じっきょうしたら なにという？"],
+      "options": [
+        ["「了解」の候補が七つ出ました", "We have seven versions of “Got it”", "「りょうかい」のこうほが ななつでました"],
+        ["送信ボタン、今日もベンチです", "The Send button is on the bench again", "そうしんボタン、きょうも ベンチです"],
+        ["句読点が一つ増えて大接戦", "One extra comma. It is a close match!", "くとうてんが ひとつふえて だいせっせん"],
+        ["ここでまさかのスタンプ", "And out of nowhere, a sticker!", "ここで まさかの スタンプ"]
+      ]
+    },
+    {
+      "id": "club-bag-complaint", "kind": "VOTE", "level": "NORMAL", "audiences": ["MIDDLE"],
+      "text": ["帰り道に話しかける練習をする中学生。部活バッグは何とツッコむ？", "A middle schooler rehearses an opener on the way home. How does their sports bag roast the rehearsal?", "かえりみちに はなしかける れんしゅうをする ちゅうがくせい。ぶかつバッグは なんと ツッコむ？"],
+      "options": [
+        ["その台詞はアップで聞きました", "I heard that line during warm-up", "そのセリフは アップで ききました"],
+        ["私にもおつかれって言って", "Tell me “good practice” too", "わたしにも おつかれっていって"],
+        ["歩幅まで合わせる練習は初耳です", "Practicing your stride is a new one", "ほはばまで あわせるれんしゅうは はつみみです"],
+        ["いいから先に水筒を出して", "Just take the water bottle out first", "いいから さきに すいとうをだして"]
+      ]
+    },
+    {
+      "id": "club-stop-minutes", "kind": "NEAREST", "level": "NORMAL", "audiences": ["MIDDLE"],
+      "text": ["部活帰りに気になる人と立ち話。予定がなければ何分くらい話したい？", "You stop to chat with your crush after practice. With no plans, how many minutes would you talk?", "ぶかつがえりに きになるひとと たちばなし。よていがなければ なんぷんくらい はなしたい？"]
+    },
+    {
+      "id": "share-umbrella", "kind": "DRAW", "level": "EASY", "audiences": ["MIDDLE"],
+      "text": ["帰り道で一本の傘に二人が入る", "Two people sharing an umbrella on the way home", "かえりみちで いっぽんのかさに ふたりがはいる"],
+      "aliases": [
+        ["相合傘", "Sharing an umbrella", "あいあいがさ"],
+        ["二人で傘をさす", "Two people under an umbrella", "ふたりで かさをさす"]
+      ]
+    },
+    {
+      "id": "festival-last-job", "kind": "OPINION", "level": "EASY", "audiences": ["HIGH"],
+      "text": ["文化祭の準備で気になる相手と最後の二人に。自然に続けられる話は？", "You and your crush are the last two setting up for the school festival. What is easiest to talk about?", "ぶんかさいの じゅんびで きになるあいてと さいごのふたりに。しぜんに つづけられるはなしは？"],
+      "options": [
+        ["明日どの店を見る？", "Which stall should we see tomorrow?", "あした どのみせをみる？"],
+        ["この看板うまくできたね", "This sign turned out nicely", "このかんばん うまくできたね"],
+        ["帰りに何か食べる？", "Want to grab food on the way home?", "かえりに なにかたべる？"],
+        ["他のクラスはどうかな", "How are the other classes doing?", "ほかのクラスは どうかな"]
+      ]
+    },
+    {
+      "id": "station-wait", "kind": "OPINION", "level": "EASY", "audiences": ["HIGH"],
+      "text": ["放課後に待ち合わせ。少し早く着いたら、何をして待つ？", "You are meeting your crush after school and arrive a little early. How do you wait?", "ほうかごに まちあわせ。すこし はやくついたら、なにをしてまつ？"],
+      "options": [
+        ["改札を見る", "Watch the ticket gates", "かいさつを みる"],
+        ["飲み物を選ぶ", "Pick a drink", "のみものを えらぶ"],
+        ["先に着いたと連絡", "Send “I’m here”", "さきについたと れんらく"],
+        ["スマホを見ているふり", "Pretend to look at your phone", "スマホを みているふり"]
+      ]
+    },
+    {
+      "id": "study-break", "kind": "OPINION", "level": "NORMAL", "audiences": ["HIGH"],
+      "text": ["気になる人と自習。休憩を切り出すとき、言いがちなのは？", "You are studying with your crush. How do you suggest a break?", "きになるひとと じしゅう。きゅうけいを きりだすとき、いいがちなのは？"],
+      "options": [
+        ["このページまでやろう", "Let us finish this page first", "このページまで やろう"],
+        ["ちょっと飲み物買う？", "Want to go get a drink?", "ちょっと のみものかう？"],
+        ["目が疲れてきた", "My eyes are getting tired", "めが つかれてきた"],
+        ["今、何時？", "What time is it now?", "いま、なんじ？"]
+      ]
+    },
+    {
+      "id": "spare-ticket", "kind": "OPINION", "level": "NORMAL", "audiences": ["HIGH"],
+      "text": ["観たい映画が同じと分かった。誘うきっかけを作るなら何から？", "You find out you both want to see the same movie. How do you turn it into an invitation?", "みたいえいがが おなじとわかった。さそうきっかけを つくるなら なにから？"],
+      "options": [
+        ["予告編を送る", "Send the trailer", "よこくへんを おくる"],
+        ["いつ公開か話す", "Mention the release date", "いつこうかいか はなす"],
+        ["上映時間を一緒に見る", "Look up showtimes together", "じょうえいじかんを いっしょにみる"],
+        ["その場で誘う", "Ask right then", "そのばで さそう"]
+      ]
+    },
+    {
+      "id": "graduation-contact", "kind": "DISCUSSION", "level": "HARD", "audiences": ["HIGH"],
+      "text": ["卒業後は別々の進路。気になる人にまた会いたい気持ちを伝えつつ、返事を急がせない誘い方は？", "You are headed different ways after graduation. How do you say you would like to see your crush again while giving them time to answer?", "そつぎょうごは べつべつのしんろ。きになるひとに またあいたいきもちをつたえつつ、へんじを いそがせない さそいかたは？"],
+      "options": [
+        ["春休みの予定を聞く", "Ask about spring break plans", "はるやすみの よていをきく"],
+        ["行きたい店を話す", "Mention a place you would like to go", "いきたいみせを はなす"],
+        ["写真を送る約束をする", "Promise to send a photo", "しゃしんを おくるやくそくをする"],
+        ["みんなで集まる話から", "Start with meeting up as a group", "みんなで あつまるはなしから"]
+      ]
+    },
+    {
+      "id": "seat-on-train", "kind": "OPINION", "level": "NORMAL", "audiences": ["HIGH"],
+      "text": ["通学電車で気になる相手と偶然同じ車両に。気づいたらどの距離で話す？", "You spot your crush in the same train car on the way to school. Where do you start chatting?", "つうがくでんしゃで きになるあいてと ぐうぜんおなじしゃりょうに。きづいたら どのきょりではなす？"],
+      "options": [
+        ["近くで軽くあいさつ", "Go closer for a quick hello", "ちかくで かるくあいさつ"],
+        ["目が合ったらその場で", "Right where you are, if you make eye contact", "めがあったら そのばで"],
+        ["降りてホームで", "On the platform after getting off", "おりて ホームで"],
+        ["学校に着いてから", "After arriving at school", "がっこうに ついてから"]
+      ]
+    },
+    {
+      "id": "festival-mic-slip", "kind": "VOTE", "level": "NORMAL", "audiences": ["HIGH"],
+      "text": ["文化祭のマイクで「気になる人、集合！」と言い間違えた。次の一言でごまかすなら？", "At the school festival you accidentally announce, “Will my crush report here?” What do you say next to recover?", "ぶんかさいのマイクで「きになるひと、しゅうごう！」と いいまちがえた。つぎのひとことで ごまかすなら？"],
+      "options": [
+        ["展示が気になる方でした", "I meant anyone curious about the exhibit", "てんじが きになるかたでした"],
+        ["今のは新企画の予告です", "That was a teaser for our next event", "いまのは しんきかくの よこくです"],
+        ["ピンマイクが勝手に", "The microphone has a mind of its own", "ピンマイクが かってに"],
+        ["係の人、私はマイクから離れます", "Staff, I’m stepping away from the mic", "かかりのひと、わたしは マイクから はなれます"]
+      ]
+    },
+    {
+      "id": "extra-train-stop", "kind": "VOTE", "level": "NORMAL", "audiences": ["HIGH"],
+      "text": ["話に夢中で一駅乗り過ごした。車内アナウンスが二人に一言だけ付け足すなら？", "You were so busy chatting that you missed your stop. What would the train announcement add just for you two?", "はなしに むちゅうで ひとえき のりすごした。しゃないアナウンスが ふたりに ひとことだけ つけたすなら？"],
+      "options": [
+        ["お話は折り返し便でもどうぞ", "You may continue your conversation on the return train", "おはなしは おりかえしびんでも どうぞ"],
+        ["今の駅、降りる人はいました", "There were people getting off back there", "いまのえき、おりるひとは いました"],
+        ["延長料金はおしゃべり一回分", "The extension costs one more chat", "えんちょうりょうきんは おしゃべり いっかいぶん"],
+        ["仲良くなった駅に到着です", "We have arrived at Getting Closer Station", "なかよくなったえきに とうちゃくです"]
+      ]
+    },
+    {
+      "id": "after-school-buffer", "kind": "NEAREST", "level": "NORMAL", "audiences": ["HIGH"],
+      "text": ["気になる人と放課後の待ち合わせ。約束より何分早く着くのがちょうどいい？", "You are meeting your crush after school. How many minutes early feels just right?", "きになるひとと ほうかごの まちあわせ。やくそくより なんぷんはやく つくのが ちょうどいい？"]
+    },
+    {
+      "id": "festival-photo", "kind": "DRAW", "level": "NORMAL", "audiences": ["HIGH"],
+      "text": ["文化祭の看板の前で二人でピース", "Two people making peace signs by a school festival sign", "ぶんかさいの かんばんのまえで ふたりで ピース"],
+      "aliases": [
+        ["文化祭の記念写真", "A school festival photo", "ぶんかさいの きねんしゃしん"],
+        ["ピースで写真", "Posing with peace signs", "ピースで しゃしん"]
+      ]
+    },
+    {
+      "id": "calendar-tetris", "kind": "OPINION", "level": "EASY", "audiences": ["ADULT"],
+      "text": ["二人の予定がなかなか合わない。次の約束を決めるなら最初に提案するのは？", "Your schedules never seem to line up. What meeting plan do you suggest first?", "ふたりのよていが なかなかあわない。つぎのやくそくを きめるなら さいしょに ていあんするのは？"],
+      "options": [
+        ["仕事帰りに短く会う", "Meet briefly after work", "しごとがえりに みじかくあう"],
+        ["来月の休日を押さえる", "Book a free day next month", "らいげつの きゅうじつを おさえる"],
+        ["朝のカフェにする", "Meet at a cafe in the morning", "あさの カフェにする"],
+        ["三つ候補日を送る", "Send three possible dates", "みっつ こうほびをおくる"]
+      ]
+    },
+    {
+      "id": "dinner-decision", "kind": "OPINION", "level": "EASY", "audiences": ["ADULT"],
+      "text": ["仕事帰りの夕食デート。「何食べたい？」に、答えやすいのは？", "On a dinner date after work, what is the easiest way to answer “What do you feel like eating?”", "しごとがえりの ゆうしょくデート。「なにたべたい？」に、こたえやすいのは？"],
+      "options": [
+        ["今いる駅の近くがいい", "Somewhere close to this station", "いまいる えきのちかくがいい"],
+        ["温かいものが食べたい", "Something warm", "あたたかいものが たべたい"],
+        ["この二軒ならどっち？", "Which of these two places?", "このにけんなら どっち？"],
+        ["次は私が決める", "I’ll choose next time", "つぎは わたしがきめる"]
+      ]
+    },
+    {
+      "id": "message-during-work", "kind": "OPINION", "level": "NORMAL", "audiences": ["ADULT"],
+      "text": ["気になる人からお誘いが来たけど仕事中。落ち着いたら最初に返すのは？", "An invitation from someone you like arrives while you are working. What do you reply once things calm down?", "きになるひとから おさそいが きたけど しごとちゅう。おちついたら さいしょにかえすのは？"],
+      "options": [
+        ["誘ってくれてありがとう", "Thanks for asking!", "さそってくれて ありがとう"],
+        ["空いている日を二つ", "Two dates you are free", "あいているひを ふたつ"],
+        ["どこに行くか聞く", "Ask where they want to go", "どこにいくか きく"],
+        ["今日中に予定を見ると伝える", "Say you will check your schedule today", "きょうじゅうに よていをみると つたえる"]
+      ]
+    },
+    {
+      "id": "shared-fries", "kind": "OPINION", "level": "EASY", "audiences": ["ADULT"],
+      "text": ["相手が「ポテト一口ちょうだい」。次にやりがちなのは？", "Your date asks for a bite of your fries. What tends to happen next?", "あいてが「ポテトひとくち ちょうだい」。つぎに やりがちなのは？"],
+      "options": [
+        ["お皿を真ん中に置く", "Put the plate in the middle", "おさらを まんなかにおく"],
+        ["一本どうぞと差し出す", "Offer a single fry", "いっぽんどうぞと さしだす"],
+        ["相手の料理も気になる", "Get curious about what they ordered", "あいてのりょうりも きになる"],
+        ["追加で一皿頼む", "Order another plate", "ついかで ひとさらたのむ"]
+      ]
+    },
+    {
+      "id": "rainy-date-plan", "kind": "DISCUSSION", "level": "HARD", "audiences": ["ADULT"],
+      "text": ["予約した屋外デートに雨予報。予約の変更は今日まで、相手は仕事で夜まで連絡できない。何を先に決めておく？", "Rain is forecast for your booked outdoor date. Changes are due today and your date is at work until evening. What do you decide ahead of time?", "よやくした おくがいデートに あめよほう。よやくのへんこうは きょうまで、あいては しごとでよるまで れんらくできない。なにを さきにきめておく？"],
+      "options": [
+        ["屋内の行き先", "An indoor destination", "おくないの いきさき"],
+        ["待ち合わせ場所", "Where to meet", "まちあわせばしょ"],
+        ["別の日に移すか", "Whether to reschedule", "べつのひに うつすか"],
+        ["短いコースにするか", "Whether to shorten the outing", "みじかいコースに するか"]
+      ]
+    },
+    {
+      "id": "second-date-topic", "kind": "OPINION", "level": "NORMAL", "audiences": ["ADULT"],
+      "text": ["二回目に会って会話が一瞬止まった。次の話題につながりやすいのは？", "On a second date, the conversation goes quiet for a moment. What gets it moving again?", "にかいめに あって かいわが いっしゅんとまった。つぎのわだいに つながりやすいのは？"],
+      "options": [
+        ["前に聞いた趣味の続き", "Follow up on a hobby they mentioned", "まえにきいた しゅみのつづき"],
+        ["同じ店の好きなメニュー", "Favorite things on the menu", "おなじみせの すきなメニュー"],
+        ["最近のちょっとした失敗", "A small recent mishap", "さいきんの ちょっとしたしっぱい"],
+        ["次の休日にしたいこと", "What you want to do on your next day off", "つぎのきゅうじつに したいこと"]
+      ]
+    },
+    {
+      "id": "date-scheduler", "kind": "VOTE", "level": "NORMAL", "audiences": ["ADULT"],
+      "text": ["休日が半年ぶりにぴったり重なった。二人の予定表が祝う通知は？", "Your days off line up perfectly for the first time in six months. What celebratory notification do the calendars send?", "きゅうじつが はんとしぶりに ぴったりかさなった。ふたりのよていひょうが いわうつうちは？"],
+      "options": [
+        ["空白が仕事をしました", "A blank square really pulled its weight", "くうはくが しごとをしました"],
+        ["年間最高の空き枠です", "Our best open slot of the year", "ねんかんさいこうの あきわくです"],
+        ["予定を入れない会議を開始します", "Starting the meeting about not booking meetings", "よていをいれない かいぎを かいしします"],
+        ["通知はここで静かに退場", "Notifications will quietly excuse themselves now", "つうちは ここで しずかにたいじょう"]
+      ]
+    },
+    {
+      "id": "reservation-alias", "kind": "VOTE", "level": "NORMAL", "audiences": ["ADULT"],
+      "text": ["初めての食事で予約名を言うはずが、緊張して店名を名乗った。店員さんの優しい返しは？", "Nervous on a first dinner date, you give the restaurant’s name as your reservation name. How does the server gently save you?", "はじめてのしょくじで よやくのなまえをいうはずが、きんちょうして みせのなまえをなのった。てんいんさんの やさしいかえしは？"],
+      "options": [
+        ["当店を代表してありがとうございます", "Thank you for representing us", "とうてんを だいひょうして ありがとうございます"],
+        ["お二人分でお取りしますね", "I take it that is a table for two", "おふたりぶんで おとりしますね"],
+        ["その名前、こちらでもよく聞きます", "We hear that name around here a lot", "そのなまえ、こちらでも よくききます"],
+        ["それは私どもです。お名前をもう一度", "That one is ours. May I try your name again?", "それは わたくしどもです。おなまえを もういちど"]
+      ]
+    },
+    {
+      "id": "first-dinner-duration", "kind": "NEAREST", "level": "NORMAL", "audiences": ["ADULT"],
+      "text": ["仕事帰りの初めての食事。お互い翌朝も早いなら、何分過ごせたら満足？", "For a first dinner after work, how many minutes together feels satisfying if you both have an early morning?", "しごとがえりの はじめてのしょくじ。おたがい よくあさもはやいなら、なんぷん すごせたらまんぞく？"]
+    },
+    {
+      "id": "two-calendars", "kind": "DRAW", "level": "NORMAL", "audiences": ["ADULT"],
+      "text": ["二人で予定表を広げて空いている日に丸をつける", "Two people circling a free day on a calendar", "ふたりでよていひょうを ひろげて あいているひに まるをつける"],
+      "aliases": [
+        ["予定を合わせる", "Matching schedules", "よていを あわせる"],
+        ["カレンダーに丸をつける", "Circling a date on a calendar", "カレンダーに まるをつける"]
+      ]
+    }
+  ],
+  "DAILY": [
+    {
+      "id": "missing-sock", "kind": "OPINION", "level": "EASY",
+      "text": ["洗濯したら片方の靴下が消えた。最初にどこを探す？", "One sock disappears in the wash. Where do you look first?", "せんたくしたら かたほうのくつしたが きえた。さいしょに どこをさがす？"],
+      "options": [
+        ["洗濯機の中", "Inside the washer", "せんたくきの なか"],
+        ["服の袖の中", "Inside a sleeve", "ふくのそでの なか"],
+        ["洗濯かごの底", "At the bottom of the hamper", "せんたくかごの そこ"],
+        ["干した場所の下", "Below the drying rack", "ほしたばしょの した"]
+      ]
+    },
+    {
+      "id": "get-up-again", "kind": "OPINION", "level": "NORMAL",
+      "text": ["布団に入ったのに、思い出して起き上がることが多いのは？", "You are already in bed. What is most likely to make you get up again?", "ふとんに はいったのに、おもいだして おきあがることが おおいのは？"],
+      "options": [
+        ["目覚ましのセット", "Setting the alarm", "めざましの セット"],
+        ["明日の持ち物", "Packing for tomorrow", "あしたの もちもの"],
+        ["飲み物を用意する", "Getting something to drink", "のみものを よういする"],
+        ["電気がついたまま", "A light left on", "でんきが ついたまま"]
+      ]
+    },
+    {
+      "id": "washing-machine-speech", "kind": "VOTE", "level": "EASY",
+      "text": ["洗濯機が回り終わって、音の代わりに一言しゃべった。何と言った？", "Your washer finishes and says something instead of beeping. What does it say?", "せんたくきが まわりおわって、おとのかわりに ひとことしゃべった。なんといった？"],
+      "options": [
+        ["靴下は二人組で来てください", "Socks, please arrive in pairs", "くつしたは ふたりぐみで きてください"],
+        ["ただいま目が回っております", "I am currently very dizzy", "ただいま めが まわっております"],
+        ["次は干す係の出番です", "Over to the drying team", "つぎは ほすかかりの でばんです"],
+        ["ポケットから小銭をお返しします", "Here is the change from your pockets", "ポケットから こぜにを おかえしします"]
+      ]
+    },
+    {
+      "id": "extra-snooze-minutes", "kind": "NEAREST", "level": "EASY",
+      "text": ["一回だけ二度寝できるなら、目覚ましにあと何分追加したい？", "If you could snooze once, how many extra minutes would you set on your alarm?", "いっかいだけ にどねできるなら、めざましに あとなんぷん ついかしたい？"]
+    },
+    {
+      "id": "slipper-under-sofa", "kind": "DRAW", "level": "NORMAL",
+      "text": ["ソファの下に片方のスリッパを探す人", "Looking under a sofa for a missing slipper", "ソファのしたに かたほうの スリッパをさがすひと"],
+      "aliases": [
+        ["スリッパを探す", "Looking for a slipper", "スリッパをさがす"],
+        ["片方のスリッパ", "Missing slipper", "かたほうのスリッパ"]
+      ]
+    },
+    {
+      "id": "guest-before-tidying", "kind": "DISCUSSION", "level": "HARD",
+      "text": ["友だちが10分後に来る。玄関と机が散らかっているけれど、一人で片づけられるのは片方だけ。先にどうする？", "A friend arrives in ten minutes. Both the entryway and your desk are messy, and you can only tackle one alone. What do you do first?", "ともだちが10ぷんごにくる。げんかんとつくえが ちらかっているけれど、ひとりでかたづけられるのは かたほうだけ。さきにどうする？"],
+      "options": [
+        ["足元を空けて玄関で出迎える", "Clear the walkway and greet them at the door", "あしもとをあけて げんかんででむかえる"],
+        ["机を直してすぐ一緒に遊べるように", "Clear the desk so you can start playing", "つくえをなおして すぐいっしょにあそべるように"],
+        ["二人で片づける遊びを用意する", "Turn cleanup into a game for two", "ふたりでかたづける あそびをよういする"],
+        ["先に外で会う場所を決める", "Pick a spot to meet outside first", "さきにそとで あうばしょをきめる"]
+      ]
+    },
+    {
+      "id": "laundry-basket-elbow-door", "kind": "DRAW", "level": "HARD",
+      "text": ["傾いた洗濯かごを肩で支えながら、ひじでドアを開ける", "Opening a door with an elbow while steadying a tilted laundry basket", "かたむいたせんたくかごを かたでささえながら、ひじでドアをあける"],
+      "aliases": [
+        ["洗濯かごを持ってドアを開ける", "Opening a door while holding a laundry basket", "せんたくかごをもって ドアをあける"],
+        ["ひじでドアを開ける", "Opening a door with an elbow", "ひじでドアをあける"]
+      ]
+    }
+  ],
+  "WORLD": [
+    {
+      "id": "last-travel-breakfast", "kind": "OPINION", "level": "NORMAL",
+      "text": ["旅先の朝ごはん、出発まで10分。これだけは取っておきたいのは？", "There are ten minutes left for breakfast on your trip. What do you make sure to grab?", "たびさきの あさごはん、しゅっぱつまで 10ぷん。これだけは とっておきたいのは？"],
+      "options": [
+        ["その土地の名物", "A local specialty", "そのとちの めいぶつ"],
+        ["すぐ食べられるパン", "Bread you can eat quickly", "すぐたべられる パン"],
+        ["温かい飲み物", "A hot drink", "あたたかい のみもの"],
+        ["最後に果物", "Some fruit for the road", "さいごに くだもの"]
+      ]
+    },
+    {
+      "id": "souvenir-shopping-habit", "kind": "OPINION", "level": "EASY",
+      "text": ["旅のおみやげ。店を何軒見ても、結局選びがちなのは？", "You visit several souvenir shops. What kind of souvenir do you keep coming back to?", "たびの おみやげ。みせを なんけんみても、けっきょく えらびがちなのは？"],
+      "options": [
+        ["分けやすいお菓子", "Snacks you can share", "わけやすい おかし"],
+        ["小さいキーホルダー", "A little keychain", "ちいさい キーホルダー"],
+        ["きれいな絵はがき", "A pretty postcard", "きれいな えはがき"],
+        ["名前だけで笑える品", "Something with a funny name", "なまえだけで わらえるしな"]
+      ]
+    },
+    {
+      "id": "tourist-sign-three-minutes", "kind": "VOTE", "level": "NORMAL",
+      "text": ["観光案内の看板「ここから徒歩3分」。続きに書いてあった意外な行き先は？", "A tourist sign says “Only a three-minute walk to…” What unexpected destination is listed next?", "かんこうあんないの かんばん「ここから とほ3ぷん」。つづきに かいてあった いがいな いきさきは？"],
+      "options": [
+        ["さっきの分かれ道", "The fork you just passed", "さっきの わかれみち"],
+        ["写真を撮るための待ち列", "The queue for the photo spot", "しゃしんをとるための まちれつ"],
+        ["もう一枚、徒歩3分の看板", "Another three-minute-walk sign", "もういちまい、とほ3ぷんの かんばん"],
+        ["坂道の本番", "The part where the hill really starts", "さかみちの ほんばん"]
+      ]
+    },
+    {
+      "id": "panorama-stop", "kind": "NEAREST", "level": "NORMAL",
+      "text": ["旅先で景色がきれいな展望台に着いた。何分くらい眺めていたい？", "You reach a scenic lookout on a trip. How many minutes would you spend enjoying the view?", "たびさきで けしきがきれいな てんぼうだいに ついた。なんぷんくらい ながめていたい？"]
+    },
+    {
+      "id": "upside-down-travel-map", "kind": "DRAW", "level": "NORMAL",
+      "text": ["地図を逆さまに持って立ち止まる旅行者", "A traveler stopping with a map held upside down", "ちずを さかさまにもって たちどまる りょこうしゃ"],
+      "aliases": [
+        ["逆さまの地図", "Upside-down map", "さかさまのちず"],
+        ["地図を読む旅行者", "Traveler reading a map", "ちずをよむ りょこうしゃ"]
+      ]
+    },
+    {
+      "id": "bus-souvenir-photo", "kind": "DISCUSSION", "level": "HARD",
+      "text": ["旅先で帰りのバスまで20分。全員の写真も撮りたいし、最後のお土産も見たい。一つ提案するなら？", "Your bus leaves in 20 minutes. Everyone wants both a group photo and one last look for souvenirs. What would you suggest?", "たびさきで かえりのバスまで20ぷん。ぜんいんのしゃしんもとりたいし、さいごのおみやげもみたい。ひとつていあんするなら？"],
+      "options": [
+        ["バス停近くのお店にしぼる", "Pick a shop right by the bus stop", "バスていちかくの おみせにしぼる"],
+        ["先に一枚撮ってから買い物", "Take one group photo, then shop", "さきにいちまいとってから かいもの"],
+        ["店の前でお土産を持って撮る", "Take the group photo with your finds outside the shop", "みせのまえで おみやげをもってとる"],
+        ["おすすめだけ聞いて次の旅の楽しみに", "Ask for a recommendation to save for next time", "おすすめだけきいて つぎのたびのたのしみに"]
+      ]
+    }
+  ],
+  "NATURE": [
+    {
+      "id": "walk-puddle", "kind": "OPINION", "level": "EASY",
+      "text": ["散歩道に横いっぱいの水たまり。どうやって進みたくなる？", "A puddle stretches across your walking path. How are you tempted to get past it?", "さんぽみちに よこいっぱいの みずたまり。どうやって すすみたくなる？"],
+      "options": [
+        ["端をそっと歩く", "Walk carefully along the edge", "はしを そっとあるく"],
+        ["一歩でまたぐ", "Step over it in one stride", "いっぽで またぐ"],
+        ["別の道を選ぶ", "Take another path", "べつのみちを えらぶ"],
+        ["浅そうなところを渡る", "Cross where it looks shallow", "あさそうなところを わたる"]
+      ]
+    },
+    {
+      "id": "rain-start-clue", "kind": "OPINION", "level": "NORMAL",
+      "text": ["雨が降り出しそう。散歩中にいちばん先に気づきそうな合図は？", "Rain is about to start. Which sign would you most likely notice first on a walk?", "あめが ふりだしそう。さんぽちゅうに いちばんさきに きづきそうな あいずは？"],
+      "options": [
+        ["空の色が暗くなる", "The sky darkens", "そらのいろが くらくなる"],
+        ["空気のにおいが変わる", "The smell of the air changes", "くうきのにおいが かわる"],
+        ["風が冷たくなる", "The wind gets cooler", "かぜが つめたくなる"],
+        ["手に一滴落ちる", "A drop lands on your hand", "てに いってきおちる"]
+      ]
+    },
+    {
+      "id": "rain-cloud-goodbye", "kind": "VOTE", "level": "NORMAL",
+      "text": ["梅雨明けの日、雨雲が別れぎわに一言。何と言った？", "The rainy season ends and one last cloud says goodbye. What does it say?", "つゆあけのひ、あまぐもが わかれぎわにひとこと。なんといった？"],
+      "options": [
+        ["傘のみなさん、お世話になりました", "To all the umbrellas, thank you for your service", "かさのみなさん、おせわになりました"],
+        ["水たまりに引き継ぎました", "I handed things over to the puddles", "みずたまりに ひきつぎました"],
+        ["来年も同じ時間に集合", "Same time next year", "らいねんも おなじじかんに しゅうごう"],
+        ["洗濯物に空を返します", "I am returning the sky to the laundry", "せんたくものに そらをかえします"]
+      ]
+    },
+    {
+      "id": "park-insect-watch", "kind": "NEAREST", "level": "EASY",
+      "text": ["公園で初めて見る虫を見つけた。そっと観察するなら何分くらい？", "You spot an insect you have never seen in the park. How many minutes would you quietly watch it?", "こうえんで はじめてみるむしを みつけた。そっとかんさつするなら なんぷんくらい？"]
+    },
+    {
+      "id": "wind-flips-umbrella", "kind": "DRAW", "level": "EASY",
+      "text": ["風で傘が裏返る人", "A person whose umbrella flips inside out in the wind", "かぜで かさが うらがえるひと"],
+      "aliases": [
+        ["裏返った傘", "Inside-out umbrella", "うらがえったかさ"],
+        ["傘が風にあおられる", "An umbrella blown by the wind", "かさが かぜにあおられる"]
+      ]
+    },
+    {
+      "id": "sun-then-rain-exhibit", "kind": "DISCUSSION", "level": "HARD",
+      "text": ["公園の自然観察会で雨が降り出した。子どもも大人もいて、屋根は狭い。雨の音も楽しむなら、次に何をする？", "It begins raining on a nature walk with children and adults, and the only shelter is small. What would you do to make the most of the sound of rain?", "こうえんの しぜんかんさつかいで あめがふりだした。こどももおとなもいて、やねはせまい。あめのおともたのしむなら、つぎになにをする？"],
+      "options": [
+        ["順番に屋根で耳をすます", "Take turns listening under the shelter", "じゅんばんに やねでみみをすます"],
+        ["入口へ戻りながら音を数える", "Count sounds as you walk back to the entrance", "いりぐちへもどりながら おとをかぞえる"],
+        ["雨粒の音をみんなでまねる", "Imitate the raindrops together", "あまつぶのおとを みんなでまねる"],
+        ["雨が止んだあと感想を一言ずつ", "Share one thought each when the rain stops", "あめがやんだあと かんそうをひとことずつ"]
+      ]
+    },
+    {
+      "id": "dew-on-clear-night", "kind": "TRIVIA", "level": "HARD", "audiences": ["MIDDLE", "HIGH", "ADULT"],
+      "text": ["風が弱く晴れた夜のあと、草に露がついた。曇りの日より地面近くが冷えやすい現象は？", "Dew forms after a clear, calm night. What process lets the ground cool more than on a cloudy night?", "かぜがよわく はれたよるのあと、くさにつゆがついた。くもりのひより じめんちかくがひえやすい げんしょうは？"],
+      "answer": ["放射冷却", "Radiative cooling", "ほうしゃれいきゃく"],
+      "options": [
+        ["毛細管現象", "Capillary action", "もうさいかんげんしょう"],
+        ["放射冷却", "Radiative cooling", "ほうしゃれいきゃく"],
+        ["地熱の上昇", "Rising geothermal heat", "ちねつのじょうしょう"],
+        ["海風の発生", "A sea breeze forming", "うみかぜのはっせい"]
+      ]
+    },
+    {
+      "id": "fish-ripples-moon", "kind": "DRAW", "level": "HARD",
+      "text": ["池に映った月が、魚が跳ねてできた波でゆれる", "The Moon’s reflection rippling after a fish jumps in a pond", "いけにうつったつきが、さかながはねてできた なみでゆれる"],
+      "aliases": [
+        ["池の月と魚の波", "Moon reflection and fish ripples", "いけのつきとさかなのなみ"],
+        ["水面に映る月がゆれる", "Rippling Moon reflection", "みなもにうつる つきがゆれる"]
+      ]
+    }
+  ],
+  "CULTURE": [
+    {
+      "id": "movie-credits-habit", "kind": "OPINION", "level": "NORMAL",
+      "text": ["映画のエンドロールが始まった。座ったまま、つい何をする？", "The movie credits roll. What do you naturally do while you are still in your seat?", "えいがの エンドロールが はじまった。すわったまま、つい なにをする？"],
+      "options": [
+        ["曲を最後まで聴く", "Listen to the whole song", "きょくを さいごまで きく"],
+        ["知っている名前を探す", "Look for a name you know", "しっているなまえを さがす"],
+        ["続きの映像を待つ", "Wait for an extra scene", "つづきの えいぞうをまつ"],
+        ["好きな場面を思い返す", "Think back to your favorite scene", "すきなばめんを おもいかえす"]
+      ]
+    },
+    {
+      "id": "karaoke-opening-song", "kind": "OPINION", "level": "NORMAL", "audiences": ["MIDDLE", "HIGH", "ADULT"],
+      "text": ["カラオケで一番手。最初の曲をどう決める？", "You are first up at karaoke. How do you choose your opening song?", "カラオケで いちばんて。さいしょのきょくを どうきめる？"],
+      "options": [
+        ["みんなが知っている曲", "A song everyone knows", "みんながしっている きょく"],
+        ["短くて歌いやすい曲", "Something short and easy to sing", "みじかくて うたいやすいきょく"],
+        ["最近よく聴く曲", "A song you have played a lot lately", "さいきんよくきく きょく"],
+        ["最初から自分の十八番", "Go straight to your signature song", "さいしょから じぶんのおはこ"]
+      ]
+    },
+    {
+      "id": "stage-forgotten-first-line", "kind": "VOTE", "level": "NORMAL",
+      "text": ["劇の主役が最初の台詞を忘れた。「えーと」の次になんと言えば劇が続く？", "The lead actor forgets the opening line. What can they say after “Uh…” to keep the play going?", "げきのしゅやくが さいしょのセリフを わすれた。「えーと」のつぎに なんといえば げきがつづく？"],
+      "options": [
+        ["この物語、今日から無言劇です", "As of today, this play is a mime show", "このものがたり、きょうから むごんげきです"],
+        ["私の台詞を探す旅に出ます", "I set out on a quest to find my line", "わたしのセリフを さがすたびにでます"],
+        ["ここは大切な間です", "This is a very important dramatic pause", "ここは たいせつな まです"],
+        ["どうぞ、先に話して", "Please, you go first", "どうぞ、さきに はなして"]
+      ]
+    },
+    {
+      "id": "favorite-song-on-repeat", "kind": "NEAREST", "level": "EASY",
+      "text": ["曲が一度で気に入った。見つけた日に何回くらい繰り返して聴く？", "You love a song on the first listen. How many times would you replay it that day?", "きょくが いちどで きにいった。みつけたひに なんかいくらい くりかえしてきく？"]
+    },
+    {
+      "id": "pop-up-castle-book", "kind": "DRAW", "level": "NORMAL",
+      "text": ["ページを開くとお城が飛び出す絵本", "A pop-up book with a castle rising from the page", "ページをひらくと おしろが とびだすえほん"],
+      "aliases": [
+        ["飛び出す絵本", "Pop-up book", "とびだすえほん"],
+        ["絵本のお城", "Storybook castle", "えほんのおしろ"]
+      ]
+    },
+    {
+      "id": "actor-late-opening", "kind": "DISCUSSION", "level": "HARD",
+      "text": ["劇の開演まで2分なのに主役が遅れている。客席を楽しませつつ物語の結末を隠すなら、舞台で何をする？", "The play starts in two minutes and its star is late. How do you entertain the audience without giving away the ending?", "げきのかいえんまで2ふんなのに しゅやくがおくれている。きゃくせきをたのしませつつ ものがたりのけつまつをかくすなら、ぶたいでなにをする？"],
+      "options": [
+        ["小道具に主役のものまねをさせる", "Make the props impersonate the lead", "こどうぐに しゅやくのものまねをさせる"],
+        ["客席と登場の合図を練習", "Practice the entrance cue with the audience", "きゃくせきと とうじょうのあいずをれんしゅう"],
+        ["脇役の一日を即興で演じる", "Improvise a day in the life of a side character", "わきやくのいちにちを そっきょうでえんじる"],
+        ["影だけで登場人物を紹介する", "Introduce the characters with their shadows", "かげだけで とうじょうじんぶつをしょうかいする"]
+      ]
+    },
+    {
+      "id": "clarinet-written-c", "kind": "TRIVIA", "level": "HARD", "audiences": ["MIDDLE", "HIGH", "ADULT"],
+      "text": ["吹奏楽で変ロ調のクラリネットが楽譜の「ド」を吹く。ピアノで同じ高さになる音は？", "A B-flat clarinet plays a written C. Which note on a piano matches the sounding pitch?", "すいそうがくで へんロちょうのクラリネットが がくふの「ド」をふく。ピアノで おなじたかさになるおとは？"],
+      "answer": ["シのフラット", "B-flat", "シのフラット"],
+      "options": [
+        ["ドのシャープ", "C-sharp", "ドのシャープ"],
+        ["シのフラット", "B-flat", "シのフラット"],
+        ["ラ", "A", "ラ"],
+        ["レ", "D", "レ"]
+      ]
+    },
+    {
+      "id": "conductor-stop-solo", "kind": "DRAW", "level": "HARD",
+      "text": ["指揮者は止めたのに、一人だけトランペットを吹き続けている", "The conductor has stopped, but one trumpeter is still playing", "しきしゃはとめたのに、ひとりだけトランペットを ふきつづけている"],
+      "aliases": [
+        ["指揮者と一人だけの演奏", "Conductor with one player still performing", "しきしゃと ひとりだけのえんそう"],
+        ["止まらないトランペット", "The trumpet keeps playing", "とまらないトランペット"]
+      ]
+    }
+  ],
+  "FANTASY": [
+    {
+      "id": "one-chore-magic", "kind": "OPINION", "level": "EASY",
+      "text": ["一つだけ魔法におまかせできる家の用事。何をお願いする？", "You can use magic for one chore at home. What do you ask it to do?", "ひとつだけ まほうに おまかせできる いえのようじ。なにを おねがいする？"],
+      "options": [
+        ["皿洗い", "Do the dishes", "さらあらい"],
+        ["洗濯物をたたむ", "Fold the laundry", "せんたくものを たたむ"],
+        ["床の掃除", "Clean the floor", "ゆかの そうじ"],
+        ["靴をそろえる", "Line up the shoes", "くつを そろえる"]
+      ]
+    },
+    {
+      "id": "treasure-chest-teamwork", "kind": "OPINION", "level": "NORMAL",
+      "text": ["宝箱がとつぜん「私を笑わせたら開きます」。仲間にどの役を頼む？", "A treasure chest says, “Make me laugh and I will open.” Which member of the group do you ask to try?", "たからばこが とつぜん「わたしを わらわせたら ひらきます」。なかまに どのやくを たのむ？"],
+      "options": [
+        ["一発ギャグが得意な人", "The one who tells quick jokes", "いっぱつギャグが とくいなひと"],
+        ["顔まねが得意な人", "The one who makes great faces", "かおまねが とくいなひと"],
+        ["まじめな話が逆におもしろい人", "The one whose serious stories end up funny", "まじめなはなしが ぎゃくにおもしろいひと"],
+        ["二人で漫才をする人たち", "A pair who can do a comedy routine", "ふたりで まんざいをするひとたち"]
+      ]
+    },
+    {
+      "id": "magic-carpet-delay", "kind": "VOTE", "level": "NORMAL",
+      "text": ["空飛ぶじゅうたんが遅延。待っている人へのアナウンスは？", "The flying carpet is delayed. What announcement do the waiting passengers hear?", "そらとぶ じゅうたんが ちえん。まっているひとへの アナウンスは？"],
+      "options": [
+        ["空の右折待ちです", "We are waiting to turn right in the sky", "そらの うせつまちです"],
+        ["先に洗濯表示を確認します", "First we need to check the washing instructions", "さきに せんたくひょうじを かくにんします"],
+        ["雲に毛玉が引っかかりました", "A loose thread got snagged on a cloud", "くもに けだまが ひっかかりました"],
+        ["お客さま、靴下を脱いでください", "Passengers, please remove your socks", "おきゃくさま、くつしたを ぬいでください"]
+      ]
+    },
+    {
+      "id": "magical-snack-shower", "kind": "NEAREST", "level": "EASY",
+      "text": ["好きなおやつが空から降る魔法。拾う時間が何分あれば満足？", "Magic makes your favorite snack rain from the sky. How many minutes of gathering would leave you satisfied?", "すきな おやつが そらからふる まほう。ひろうじかんが なんぷんあれば まんぞく？"]
+    },
+    {
+      "id": "wizard-hat-long-scarf", "kind": "DRAW", "level": "NORMAL",
+      "text": ["とんがり帽子から長いマフラーを引っぱり出す魔法使い", "A wizard pulling a long scarf out of a pointed hat", "とんがりぼうしから ながいマフラーを ひっぱりだす まほうつかい"],
+      "aliases": [
+        ["帽子からマフラーを出す", "Pulling a scarf out of a hat", "ぼうしから マフラーをだす"],
+        ["魔法の帽子", "Magic hat", "まほうのぼうし"]
+      ]
+    },
+    {
+      "id": "magic-key-one-use", "kind": "DISCUSSION", "level": "HARD",
+      "text": ["魔法の鍵は一度しか使えない。橋の先に忘れ物があり、帰りの扉も閉まりそう。魔法使い仲間に何を頼む？", "A magic key works only once. Something was left across the bridge and the exit door is about to shut. What do you ask a wizard friend to do?", "まほうのかぎは いちどしかつかえない。はしのさきにわすれものがあり、かえりのとびらもしまりそう。まほうつかいなかまに なにをたのむ？"],
+      "options": [
+        ["忘れ物だけを呼び寄せてもらう", "Summon just the forgotten item", "わすれものだけを よびよせてもらう"],
+        ["扉を押さえてもらって取りに行く", "Ask them to hold the door while you grab it", "とびらをおさえてもらって とりにいく"],
+        ["橋の短い近道を聞く", "Ask for a shortcut over the bridge", "はしの みじかいちかみちをきく"],
+        ["扉の向こうで待ち合わせを決める", "Plan where to meet on the other side", "とびらのむこうで まちあわせをきめる"]
+      ]
+    },
+    {
+      "id": "oz-original-shoes", "kind": "TRIVIA", "level": "HARD",
+      "text": ["童話『オズの魔法使い』の原作で、ドロシーが履く魔法の靴は何色？", "In the original book The Wonderful Wizard of Oz, what color are Dorothy’s magic shoes?", "どうわ『オズのまほうつかい』のげんさくで、ドロシーがはく まほうのくつは なんいろ？"],
+      "answer": ["銀色", "Silver", "ぎんいろ"],
+      "options": [
+        ["赤色", "Red", "あかいろ"],
+        ["銀色", "Silver", "ぎんいろ"],
+        ["金色", "Gold", "きんいろ"],
+        ["緑色", "Green", "みどりいろ"]
+      ]
+    },
+    {
+      "id": "umbrella-grows-over-bridge", "kind": "DRAW", "level": "HARD",
+      "text": ["魔法で橋の向こうから傘を引き寄せると、傘が大きくなる", "A wizard draws an umbrella across a bridge and makes it grow", "まほうではしのむこうから かさをひきよせると、かさがおおきくなる"],
+      "aliases": [
+        ["魔法で大きくなる傘", "An umbrella growing with magic", "まほうでおおきくなるかさ"],
+        ["魔法の大きな傘", "A giant magic umbrella", "まほうのおおきなかさ"]
+      ]
+    }
+  ],
+  "SPORTS": [
+    {
+      "id": "spectators-same-reaction", "kind": "OPINION", "level": "NORMAL",
+      "text": ["スポーツを見ていて、隣の人と同時に声が出そうなのは？", "At a sports match, when would you and the spectator next to you both shout at once?", "スポーツを みていて、となりのひとと どうじにこえが でそうなのは？"],
+      "options": [
+        ["終了間際の得点", "A last-second score", "しゅうりょうまぎわの とくてん"],
+        ["ラインぎりぎりの判定", "A call right on the line", "ラインぎりぎりの はんてい"],
+        ["すごいセーブ", "An incredible save", "すごい セーブ"],
+        ["大差からの追いつき", "A comeback from far behind", "おおきなさからの おいつき"]
+      ]
+    },
+    {
+      "id": "sports-day-commentator", "kind": "OPINION", "level": "EASY",
+      "text": ["運動会を実況するなら、選手以外で真っ先に注目するのは？", "If you commentated on a school sports day, what would you notice first besides the competitors?", "うんどうかいを じっきょうするなら、せんしゅいがいで まっさきに ちゅうもくするのは？"],
+      "options": [
+        ["本気の応援係", "The super-serious cheer squad", "ほんきの おうえんがかり"],
+        ["ゴール近くの先生", "The teacher near the finish line", "ゴールちかくの せんせい"],
+        ["風で動く旗", "Flags flapping in the wind", "かぜで うごくはた"],
+        ["次の競技の待機列", "The line for the next event", "つぎのきょうぎの たいきれつ"]
+      ]
+    },
+    {
+      "id": "comeback-microphone", "kind": "VOTE", "level": "NORMAL",
+      "text": ["大逆転した選手にインタビュー。マイクを向けられて最初に言ったのは？", "A player just pulled off a huge comeback. What do they say first when a microphone appears?", "だいぎゃくてんした せんしゅに インタビュー。マイクをむけられて さいしょにいったのは？"],
+      "options": [
+        ["後半から靴ひもが本気でした", "My shoelaces got serious in the second half", "こうはんから くつひもが ほんきでした"],
+        ["心臓はまだ前半を走っています", "My heart is still running the first half", "しんぞうは まだぜんはんを はしっています"],
+        ["得点板、もう一度見てもいいですか", "May I look at the scoreboard one more time?", "とくてんばん、もういちど みてもいいですか"],
+        ["喜ぶポーズ、練習してません", "I never practiced a celebration pose", "よろこぶポーズ、れんしゅうしてません"]
+      ]
+    },
+    {
+      "id": "overtime-watch-more", "kind": "NEAREST", "level": "NORMAL",
+      "text": ["応援している試合が延長に。予定の終了時刻を何分過ぎても見届けたい？", "The game you are following goes into overtime. How many minutes past its scheduled finish would you stay to see it through?", "おうえんしているしあいが えんちょうに。よていの しゅうりょうじこくを なんぷんすぎても みとどけたい？"]
+    },
+    {
+      "id": "scorer-knee-slide", "kind": "DRAW", "level": "NORMAL",
+      "text": ["ゴールを決めて、ひざで滑って喜ぶ選手", "A player celebrating a goal with a knee slide", "ゴールをきめて、ひざですべって よろこぶせんしゅ"],
+      "aliases": [
+        ["ゴールの膝スライディング", "Goal celebration knee slide", "ゴールの ひざスライディング"],
+        ["ひざで滑る", "Knee slide", "ひざですべる"]
+      ]
+    },
+    {
+      "id": "scoreboard-no-sound", "kind": "DISCUSSION", "level": "HARD",
+      "text": ["決勝の残り10秒に得点板が止まり、会場のマイクも使えない。客席と選手に残り時間を伝えるなら？", "The scoreboard stops with ten seconds left in a final, and the mic is out too. How do you tell players and spectators the time?", "けっしょうの のこり10びょうに とくてんばんがとまり、かいじょうのマイクもつかえない。きゃくせきとせんしゅに のこりじかんをつたえるなら？"],
+      "options": [
+        ["両手でカウントダウン", "Count down on both hands", "りょうてで カウントダウン"],
+        ["選手と客席に向けて残り時間の札", "Hold up a card for both sides", "せんしゅときゃくせきにむけて のこりじかんのふだ"],
+        ["係が二方向へ同時に合図", "Have staff signal both sides at once", "かかりが にほうこうへどうじにあいず"],
+        ["観客と一緒に大きく数える", "Count down out loud with the crowd", "かんきゃくといっしょに おおきくかぞえる"]
+      ]
+    }
+  ],
+  "GAMES": [
+    {
+      "id": "not-serious-yet", "kind": "OPINION", "level": "NORMAL",
+      "text": ["対戦ゲームで「まだ本気出してない」と言いたくなるのは？", "In a versus game, when are you most tempted to say, “I am not even trying yet”?", "たいせんゲームで「まだ ほんきだしてない」と いいたくなるのは？"],
+      "options": [
+        ["練習で負けたとき", "After losing the practice round", "れんしゅうで まけたとき"],
+        ["相手が連勝しているとき", "When your opponent is on a streak", "あいてが れんしょうしているとき"],
+        ["新しい操作を試したとき", "When trying new controls", "あたらしいそうさを ためしたとき"],
+        ["もう一回だけ遊びたいとき", "When you want one more round", "もういっかいだけ あそびたいとき"]
+      ]
+    },
+    {
+      "id": "teammate-goes-quiet", "kind": "OPINION", "level": "NORMAL",
+      "text": ["協力ゲームで、よく話す仲間が急に黙った。まず何が起きたと思う？", "In a co-op game, your chatty teammate suddenly goes quiet. What do you think happened first?", "きょうりょくゲームで、よくはなす なかまが きゅうにだまった。まず なにが おきたとおもう？"],
+      "options": [
+        ["ボスに集中", "They are focused on a boss", "ボスに しゅうちゅう"],
+        ["道に迷った", "They got lost", "みちに まよった"],
+        ["レアなものを見つけた", "They found something rare", "レアなものを みつけた"],
+        ["マイクが消えている", "Their microphone is muted", "マイクが きえている"]
+      ]
+    },
+    {
+      "id": "boss-asks-for-moment", "kind": "VOTE", "level": "EASY",
+      "text": ["ラスボスの部屋に入ったら「ちょっと待って」。ラスボスの理由は？", "You walk into the final boss room. “Give me a minute,” says the boss. What is the excuse?", "ラスボスのへやに はいったら「ちょっとまって」。ラスボスの りゆうは？"],
+      "options": [
+        ["まだ登場の曲が来てない", "My entrance music has not started", "まだ とうじょうのきょくが きてない"],
+        ["台詞の紙を落とした", "I dropped the script", "セリフのかみを おとした"],
+        ["今のが最終形態じゃない", "This is not my final form yet", "いまのが さいしゅうけいたいじゃない"],
+        ["宝箱の中身を詰めている", "I am still filling the treasure chest", "たからばこのなかみを つめている"]
+      ]
+    },
+    {
+      "id": "one-more-round-again", "kind": "NEAREST", "level": "EASY",
+      "text": ["対戦で負けて「あと一回！」。そのあと実際に何回くらい続けたい？", "You lose a game and say, “One more!” How many more rounds would you actually play?", "たいせんで まけて「あといっかい！」。そのあと じっさいに なんかいくらい つづけたい？"]
+    },
+    {
+      "id": "dice-table-edge", "kind": "DRAW", "level": "NORMAL",
+      "text": ["机の端で止まったサイコロをのぞきこむ人", "Someone leaning in to inspect a die on the edge of a table", "つくえのはしで とまったサイコロを のぞきこむひと"],
+      "aliases": [
+        ["机の端のサイコロ", "Die on the edge of a table", "つくえのはしの サイコロ"],
+        ["サイコロをのぞく", "Inspecting a die", "サイコロを のぞく"]
+      ]
+    },
+    {
+      "id": "shared-game-last-move", "kind": "DISCUSSION", "level": "HARD",
+      "text": ["協力ゲームは残り一手。お宝を拾うとゴールが遠のき、急ぐと仲間一人が追いつけない。チームに何を言う？", "One move remains in a co-op game. Grabbing the treasure delays the finish, but rushing leaves a friend behind. What do you tell the team?", "きょうりょくゲームは のこりいって。おたからをひろうと ゴールがとおのき、いそぐとなかまひとりが おいつけない。チームに なにをいう？"],
+      "options": [
+        ["お宝は次の周、全員で帰ろう", "Treasure next run. Let us all get out", "おたからはつぎのしゅう、ぜんいんでかえろう"],
+        ["先に仲間へ残りを知らせよう", "Tell our friend how much time is left", "さきになかまへ のこりをしらせよう"],
+        ["鍵だけ拾って道を作ろう", "Grab just the key and open a route", "かぎだけひろって みちをつくろう"],
+        ["作戦名は「全員で反省会」", "Operation: Everyone Makes It to the Debrief", "さくせんめいは「ぜんいんではんせいかい」"]
+      ]
+    },
+    {
+      "id": "chess-no-legal-move", "kind": "TRIVIA", "level": "HARD",
+      "text": ["チェスで自分の番。キングは王手を受けていないが、どの駒も合法手がない。この結末は？", "It is your turn in chess. Your king is not in check, but you have no legal move. What is the result?", "チェスでじぶんのばん。キングはおうてをうけていないが、どのこまも ごうほうしゅがない。どうおわる？"],
+      "answer": ["ステイルメイトで引き分け", "A draw by stalemate", "ステイルメイトでひきわけ"],
+      "options": [
+        ["チェックメイトで負け", "A loss by checkmate", "チェックメイトでまけ"],
+        ["ステイルメイトで引き分け", "A draw by stalemate", "ステイルメイトでひきわけ"],
+        ["一度だけ手番を飛ばす", "Skip your turn once", "いちどだけ てばんをとばす"],
+        ["キングをもう一度初期位置へ", "Return the king to its starting square", "キングをもういちど しょきいちへ"]
+      ]
+    },
+    {
+      "id": "steady-tower-remove-block", "kind": "DRAW", "level": "HARD",
+      "text": ["崩れそうな積み木の塔を二人が支えて、もう一人が積み木を抜く", "Two people steady a teetering tower as a third pulls out a block", "くずれそうな つみきのとうを ふたりがささえて、もうひとりが つみきをぬく"],
+      "aliases": [
+        ["崩れそうな積み木の塔", "A teetering block tower", "くずれそうな つみきのとう"],
+        ["塔から積み木を抜く", "Pulling a block from a tower", "とうから つみきをぬく"]
+      ]
+    }
+  ],
+  "SCHOOL": [
+    {
+      "id": "teacher-finishes-early", "kind": "OPINION", "level": "EASY",
+      "text": ["先生が「今日は少し早く終わります」。教室で先に起きそうなのは？", "The teacher says, “We will finish a little early today.” What happens first in the classroom?", "せんせいが「きょうは すこしはやくおわります」。きょうしつで さきにおきそうなのは？"],
+      "options": [
+        ["筆箱が閉まる", "Pencil cases snap shut", "ふでばこが しまる"],
+        ["友だちと目が合う", "Friends catch each other’s eyes", "ともだちと めがあう"],
+        ["時計を見る人が増える", "More people look at the clock", "とけいをみるひとが ふえる"],
+        ["早く終わる理由を聞く", "Someone asks why it is ending early", "はやくおわる りゆうをきく"]
+      ]
+    },
+    {
+      "id": "festival-cleanup-last-item", "kind": "OPINION", "level": "NORMAL",
+      "text": ["文化祭の片づけ。終わりかけの教室に最後まで残りがちなものは？", "Cleanup is nearly done after the school festival. What is most likely still in the classroom?", "ぶんかさいの かたづけ。おわりかけの きょうしつに さいごまで のこりがちなものは？"],
+      "options": [
+        ["天井近くの飾り", "A decoration near the ceiling", "てんじょうちかくの かざり"],
+        ["机の裏のテープ", "Tape stuck to the underside of a desk", "つくえのうらの テープ"],
+        ["誰のか分からないペン", "A pen nobody claims", "だれのか わからないペン"],
+        ["思い出に残したい看板", "A sign someone wants to keep", "おもいでに のこしたいかんばん"]
+      ]
+    },
+    {
+      "id": "school-lunch-commentary", "kind": "VOTE", "level": "EASY",
+      "text": ["給食の放送が急にスポーツ実況に。何が始まった？", "The school lunch broadcast suddenly turns into sports commentary. What event just started?", "きゅうしょくのほうそうが きゅうに スポーツじっきょうに。なにが はじまった？"],
+      "options": [
+        ["最後のプリン争奪戦", "The battle for the last pudding", "さいごのプリン そうだつせん"],
+        ["静かな牛乳パック開封選手権", "The silent milk carton opening championship", "しずかな ぎゅうにゅうパック かいふうせんしゅけん"],
+        ["おかわり列の先頭争い", "The race to lead the line for seconds", "おかわりれつの せんとうあらそい"],
+        ["パンの袋を一発で開ける挑戦", "The one-try bread bag opening challenge", "パンのふくろを いっぱつであける ちょうせん"]
+      ]
+    },
+    {
+      "id": "school-early-seat", "kind": "NEAREST", "level": "NORMAL",
+      "text": ["次の授業の準備が終わった。チャイムの何分前に席に着くのがちょうどいい？", "You are ready for the next class. How many minutes before the bell is the right time to take your seat?", "つぎのじゅぎょうの じゅんびがおわった。チャイムの なんぷんまえに せきにつくのが ちょうどいい？"]
+    },
+    {
+      "id": "tiptoe-chalkboard", "kind": "DRAW", "level": "EASY",
+      "text": ["黒板の上の方に背伸びして書く人", "Writing high on a chalkboard while standing on tiptoe", "こくばんの うえのほうに せのびして かくひと"],
+      "aliases": [
+        ["黒板に背伸び", "Reaching up to the chalkboard", "こくばんに せのび"],
+        ["黒板に書く", "Writing on a chalkboard", "こくばんに かく"]
+      ]
+    },
+    {
+      "id": "festival-sign-mix-up", "kind": "DISCUSSION", "level": "HARD",
+      "text": ["文化祭の案内板が入れ替わり、お客さんと係が別の教室へ。放送で一言だけ直せるなら、どう伝える？", "Festival signs have been swapped, sending guests and staff to different rooms. How do you fix it with one announcement?", "ぶんかさいの あんないばんがいれかわり、おきゃくさんとかかりが べつのきょうしつへ。ほうそうでひとことだけなおせるなら、どうつたえる？"],
+      "options": [
+        ["お客さんは入口へ、係が案内します", "Guests, return to the entrance and staff will guide you", "おきゃくさんはいりぐちへ、かかりがあんないします"],
+        ["入れ替わった看板ごと教室名を読み直す", "Read out both room names with the swapped signs", "いれかわったかんばんごと きょうしつめいをよみなおす"],
+        ["迷子の看板を回収中です", "We are rounding up our lost signs", "まいごのかんばんを かいしゅうちゅうです"],
+        ["係は廊下で手を振ってください", "Staff, please wave from the hall", "かかりはろうかで てをふってください"]
+      ]
+    },
+    {
+      "id": "half-past-three-clock-angle", "kind": "TRIVIA", "level": "HARD",
+      "text": ["算数の時計が3時半を示している。短い針と長い針が作る小さい方の角は何度？", "An analog clock shows 3:30. What is the smaller angle between its two hands?", "さんすうのとけいが3じはんをしめしている。みじかいはりと ながいはりがつくる ちいさいほうのかくは なんど？"],
+      "answer": ["75度", "75 degrees", "75ど"],
+      "options": [
+        ["90度", "90 degrees", "90ど"],
+        ["75度", "75 degrees", "75ど"],
+        ["60度", "60 degrees", "60ど"],
+        ["105度", "105 degrees", "105ど"]
+      ]
+    }
+  ],
+  "WORK": [
+    {
+      "id": "printer-jam-first-move", "kind": "OPINION", "level": "NORMAL", "audiences": ["ADULT"],
+      "text": ["職場のコピー機が紙づまり。近くにいたらまず何をする？", "The office copier jams. What do you do first if you are standing nearby?", "しょくばの コピーきが かみづまり。ちかくにいたら まずなにをする？"],
+      "options": [
+        ["画面の図を読む", "Read the diagram on the screen", "がめんのずを よむ"],
+        ["紙の入れ方を確認", "Check how the paper was loaded", "かみの いれかたをかくにん"],
+        ["詳しい人を呼ぶ", "Call someone who knows it well", "くわしいひとを よぶ"],
+        ["残りを別の機械で刷る", "Print the rest on another machine", "のこりを べつのきかいでする"]
+      ]
+    },
+    {
+      "id": "desk-problem-invention", "kind": "OPINION", "level": "EASY",
+      "text": ["机まわりの困りごとを一つだけ発明で解決。何を直す？", "You can invent one thing to fix a desk problem. What would you solve?", "つくえまわりの こまりごとを ひとつだけ はつめいでかいけつ。なにをなおす？"],
+      "options": [
+        ["物が奥に落ちる", "Things fall behind it", "ものが おくにおちる"],
+        ["コードが絡まる", "Cords get tangled", "コードが からまる"],
+        ["必要な紙が見つからない", "You cannot find the right sheet of paper", "ひつような かみが みつからない"],
+        ["消しゴムのかすが残る", "Eraser crumbs linger", "けしゴムのかすが のこる"]
+      ]
+    },
+    {
+      "id": "unlosable-pen-flaw", "kind": "VOTE", "level": "NORMAL",
+      "text": ["絶対になくならないペンを発明。ただし欠点が一つ。どんな欠点？", "You invent a pen that can never be lost. It has one catch. What is it?", "ぜったいに なくならないペンを はつめい。ただし けってんがひとつ。どんなけってん？"],
+      "options": [
+        ["持たずに出ると家までついてくる", "It follows you home if you leave it behind", "もたずにでると いえまで ついてくる"],
+        ["探すと大声で返事をする", "It shouts back when you look for it", "さがすと おおごえで へんじをする"],
+        ["貸すたびに持ち主を名乗る", "It announces its owner every time it is lent out", "かすたびに もちぬしをなのる"],
+        ["机から離すと寂しがる", "It gets lonely away from the desk", "つくえから はなすと さびしがる"]
+      ]
+    },
+    {
+      "id": "meeting-opening-minutes", "kind": "NEAREST", "level": "NORMAL", "audiences": ["ADULT"],
+      "text": ["仕事で短い打ち合わせ。最初の説明は何分くらいだと聞きやすい？", "At a short work meeting, how many minutes would you give the opening explanation?", "しごとで みじかいうちあわせ。さいしょのせつめいは なんぷんくらいだと ききやすい？"]
+    },
+    {
+      "id": "measuring-desk", "kind": "DRAW", "level": "EASY",
+      "text": ["メジャーを伸ばして机の長さを測る人", "Someone measuring a desk with a retractable tape measure", "メジャーをのばして つくえのながさを はかるひと"],
+      "aliases": [
+        ["机を測る", "Measuring a desk", "つくえを はかる"],
+        ["メジャーで測る", "Using a tape measure", "メジャーで はかる"]
+      ]
+    },
+    {
+      "id": "broken-demo-robot", "kind": "DISCUSSION", "level": "HARD",
+      "text": ["発明の展示まで5分。案内ロボットは質問を逆に聞き取り、直す時間がない。見学者を楽しませる見せ方は？", "A showcase opens in five minutes. The guide robot hears requests backward and there is no time to fix it. How would you entertain the visitors?", "はつめいのてんじまで5ふん。あんないロボットは しつもんをさかさまに うけとめ、なおすじかんがない。けんがくしゃを たのしませるみせかたは？"],
+      "options": [
+        ["逆さま案内ツアーと名づける", "Call it the back-to-front tour", "さかさまあんないツアーと なづける"],
+        ["ロボットの返事を当てるクイズに", "Make it a quiz about the robot’s replies", "ロボットのへんじをあてる クイズに"],
+        ["子どもが通訳役をしてみる", "Let a child interpret for it", "こどもがつうやくやくを してみる"],
+        ["その場で「反対の言葉」を教室にする", "Turn the stand into an Opposite Words lesson", "そのばで「はんたいのことば」を きょうしつにする"]
+      ]
+    }
+  ],
+  "HISTORY": [
+    {
+      "id": "try-old-tools", "kind": "OPINION", "level": "EASY",
+      "text": ["昔の暮らしを一日体験。まず自分の手で試したい道具は？", "You can spend a day living as people did long ago. Which tool do you want to try first?", "むかしのくらしを いちにちたいけん。まず じぶんのてで ためしたいどうぐは？"],
+      "options": [
+        ["石うす", "A stone hand mill", "いしうす"],
+        ["羽根ペン", "A quill pen", "はねペン"],
+        ["織り機", "A loom", "おりき"],
+        ["天びん", "Balance scales", "てんびん"]
+      ]
+    },
+    {
+      "id": "retro-room-first-touch", "kind": "OPINION", "level": "NORMAL",
+      "text": ["昔の茶の間を再現した部屋。動かしてみたい物は？", "You enter a recreated old-fashioned living room. Which object would you like to try using?", "むかしの ちゃのまを さいげんしたへや。うごかしてみたいものは？"],
+      "options": [
+        ["回してかける電話", "A rotary phone", "まわしてかける でんわ"],
+        ["チャンネルつまみのあるテレビ", "A TV with a channel dial", "チャンネルつまみのある テレビ"],
+        ["ゼンマイの時計", "A wind-up clock", "ゼンマイの とけい"],
+        ["レコードプレーヤー", "A record player", "レコードプレーヤー"]
+      ]
+    },
+    {
+      "id": "edo-express-courier", "kind": "VOTE", "level": "NORMAL",
+      "text": ["江戸の早飛脚が、手紙を届けて一言。玄関で何と言った？", "An Edo-period courier runs up to deliver a letter. What do they say at the door?", "えどの はやびきゃくが、てがみをとどけて ひとこと。げんかんで なんといった？"],
+      "options": [
+        ["足の充電が切れそうです", "My feet are almost out of battery", "あしの じゅうでんが きれそうです"],
+        ["差出人より先に着きました", "I beat the sender here", "さしだしにんより さきにつきました"],
+        ["返信は帰り道に受け付けます", "I take replies on the way back", "へんしんは かえりみちに うけつけます"],
+        ["今日の歩数、数えきれません", "I lost count of my steps for today", "きょうのほすう、かぞえきれません"]
+      ]
+    },
+    {
+      "id": "historical-house-visit", "kind": "NEAREST", "level": "NORMAL",
+      "text": ["昔の家を自由に見学できる。台所や道具をじっくり見るなら、何分ほしい？", "You can explore an old house at your own pace. How many minutes would you want to look around its kitchen and tools?", "むかしのいえを じゆうにけんがくできる。だいどころや どうぐを じっくりみるなら、なんぷんほしい？"]
+    },
+    {
+      "id": "walking-on-bamboo-stilts", "kind": "DRAW", "level": "EASY",
+      "text": ["昔のおもちゃの竹馬に乗って歩く人", "A person walking on traditional bamboo stilts", "むかしの おもちゃの たけうまに のってあるくひと"],
+      "aliases": [
+        ["竹馬", "Bamboo stilts", "たけうま"],
+        ["竹馬で歩く", "Walking on stilts", "たけうまで あるく"]
+      ]
+    },
+    {
+      "id": "old-tool-without-touching", "kind": "DISCUSSION", "level": "HARD",
+      "text": ["歴史の展示で昔の道具を紹介する。道具には触れられず、説明を聞く子は名前を知らない。最初に何をして伝える？", "You are showing an old tool to children who do not know its name. No one can touch it. How do you get the idea across first?", "れきしのてんじで むかしのどうぐをしょうかいする。どうぐにはふれられず、せつめいをきくこは なまえをしらない。さいしょになにをしてつたえる？"],
+      "options": [
+        ["使い方を手ぶりで見せる", "Mime how it was used", "つかいかたを てぶりでみせる"],
+        ["今の似た道具を絵にする", "Draw a modern tool like it", "いまのにたどうぐを えにする"],
+        ["使っていた人の一日を語る", "Tell a day in its user’s life", "つかっていたひとの いちにちをかたる"],
+        ["道具が語る自己紹介を考える", "Give the tool its own funny introduction", "どうぐがかたる じこしょうかいをかんがえる"]
+      ]
+    }
+  ],
+  "TECH": [
+    {
+      "id": "one-percent-battery", "kind": "OPINION", "level": "EASY",
+      "text": ["外出先でスマホの電池が1％。残りの時間で何を優先する？", "Your phone has 1% battery while you are out. What do you do first?", "がいしゅつさきで スマホの でんちが1パーセント。のこりのじかんで なにをゆうせんする？"],
+      "options": [
+        ["今いる場所をメモ", "Make a note of where you are", "いまいるばしょを メモ"],
+        ["必要な連絡を一通", "Send one important message", "ひつような れんらくを いっつう"],
+        ["画面を暗くする", "Dim the screen", "がめんを くらくする"],
+        ["充電できる場所を探す", "Look for somewhere to charge it", "じゅうでんできる ばしょをさがす"]
+      ]
+    },
+    {
+      "id": "video-call-first-fix", "kind": "OPINION", "level": "NORMAL", "audiences": ["MIDDLE", "HIGH", "ADULT"],
+      "text": ["ビデオ通話で「声が聞こえないよ」。まず確認するのは？", "Someone on a video call says they cannot hear you. What do you check first?", "ビデオつうわで「こえが きこえないよ」。まず かくにんするのは？"],
+      "options": [
+        ["マイクの絵に斜め線があるか", "Whether the mic icon is crossed out", "マイクのえに ななめせんがあるか"],
+        ["イヤホンがつながっているか", "Whether the headphones are connected", "イヤホンが つながっているか"],
+        ["通話の設定で入力先を見る", "Which mic the call is using in settings", "つうわのせっていで にゅうりょくさきをみる"],
+        ["相手も聞こえないか文字で聞く", "Ask in chat if others can hear you", "あいても きこえないか もじできく"]
+      ]
+    },
+    {
+      "id": "autocorrect-retraction", "kind": "VOTE", "level": "NORMAL", "audiences": ["MIDDLE", "HIGH", "ADULT"],
+      "text": ["自動変換で変な文を送った。取り消した理由をスマホが勝手に選ぶなら？", "Autocorrect mangles a message you have sent. What reason would your phone pick for you when you unsend it?", "じどうへんかんで へんなぶんをおくった。とりけしたりゆうを スマホがかってにえらぶなら？"],
+      "options": [
+        ["私の変換候補が出しゃばりました", "My suggestions got carried away", "わたしのへんかんこうほが でしゃばりました"],
+        ["これは公開前の試作品です", "That was a pre-release prototype", "これは こうかいまえの しさくひんです"],
+        ["指が先に帰宅しました", "Your finger clocked out early", "ゆびが さきにきたくしました"],
+        ["未来の自分から差し戻し", "Sent back for revision by your future self", "みらいのじぶんから さしもどし"]
+      ]
+    },
+    {
+      "id": "wifi-reconnect-patience", "kind": "NEAREST", "level": "NORMAL",
+      "text": ["動画の途中でWi-Fiが切れた。つなぎ直す前に、何秒待つ？", "Wi-Fi drops halfway through a video. How many seconds do you wait before trying to reconnect?", "どうがのとちゅうで Wi-Fiがきれた。つなぎなおすまえに、なんびょう まつ？"]
+    },
+    {
+      "id": "charging-cable-tangle", "kind": "DRAW", "level": "EASY",
+      "text": ["からまった充電ケーブルをほどく人", "A person untangling a charging cable", "からまった じゅうでんケーブルを ほどくひと"],
+      "aliases": [
+        ["からまったコード", "Tangled cord", "からまったコード"],
+        ["充電ケーブルをほどく", "Untangling a charger", "じゅうでんケーブルをほどく"]
+      ]
+    },
+    {
+      "id": "last-photo-sent-one-way", "kind": "DISCUSSION", "level": "HARD",
+      "text": ["集合写真が二枚。片方は全員が写り、もう片方は表情がいい。電波が弱く一枚しか送れないなら、どう決める？", "One group photo has everyone; the other has better expressions. Your signal can send just one. How do you decide?", "しゅうごうしゃしんが2まい。かたほうは ぜんいんがうつり、もうかたほうは ひょうじょうがいい。でんぱがよわく いちまいしかおくれないなら、どうきめる？"],
+      "options": [
+        ["全員が入った写真を真っ先に", "Send the photo with everyone first", "ぜんいんがはいった しゃしんをまっさきに"],
+        ["表情のいい方に全員の名前を添える", "Send the better expressions with everyone’s names", "ひょうじょうのいいほうに ぜんいんのなまえをそえる"],
+        ["二枚を小さくまとめて一枚に", "Make a small collage out of both", "2まいをちいさくまとめて いちまいに"],
+        ["一言だけ送り、写真は電波が戻ってから", "Send a quick note and wait on the photos", "ひとことだけおくり、しゃしんはでんぱがもどってから"]
+      ]
+    }
+  ],
+  "MYSTERY": [
+    {
+      "id": "clue-notebook-margin", "kind": "OPINION", "level": "NORMAL",
+      "text": ["探偵役になった。友だちの机に暗号メモが一枚。どこから調べる？", "You are playing detective. There is a coded note on a friend’s desk. What do you inspect first?", "たんていやくになった。ともだちのつくえに あんごうメモがいちまい。どこから しらべる？"],
+      "options": [
+        ["文字の並び", "The order of the letters", "もじの ならび"],
+        ["ページの裏", "The back of the page", "ページのうら"],
+        ["数字だけの部分", "The part with only numbers", "すうじだけの ぶぶん"],
+        ["紙を折った跡", "Creases in the paper", "かみをおった あと"]
+      ]
+    },
+    {
+      "id": "surprise-party-tell", "kind": "OPINION", "level": "NORMAL",
+      "text": ["内緒の誕生日会を準備中。バレそうになるのはどの瞬間？", "You are preparing a surprise birthday party. Which moment is most likely to give the game away?", "ないしょの たんじょうびかいを じゅんびちゅう。バレそうになるのは どのしゅんかん？"],
+      "options": [
+        ["日付を何度も確認する", "Someone keeps checking the date", "ひづけを なんどもかくにんする"],
+        ["お菓子を普段より多く買う", "Someone buys more snacks than usual", "おかしを ふだんより おおくかう"],
+        ["合図がきて吹き出す", "Someone laughs at the secret signal", "あいずがきて ふきだす"],
+        ["部屋を見せないよう急ぐ", "Someone rushes to hide the room", "へやを みせないよう いそぐ"]
+      ]
+    },
+    {
+      "id": "detective-room-comeback", "kind": "VOTE", "level": "NORMAL",
+      "text": ["ドラマで探偵が「犯人はこの中に！」。居合わせた人の予想外の返事は？", "In a TV mystery the detective says, “The culprit is in this room!” What unexpected reply comes from the crowd?", "ドラマで たんていが「はんにんは このなかに！」。いあわせたひとの よそうがいのへんじは？"],
+      "options": [
+        ["外で待ち直してきます", "I will go wait outside again", "そとで まちなおしてきます"],
+        ["その台詞、さっき練習してましたね", "I heard you rehearse that line earlier", "そのセリフ、さっき れんしゅうしてましたね"],
+        ["部屋の人数から数え直しましょう", "Let us start by counting who is here", "へやのにんずうから かぞえなおしましょう"],
+        ["先に私の傘を探してくれませんか", "Could you find my umbrella first?", "さきにわたしのかさを さがしてくれませんか"]
+      ]
+    },
+    {
+      "id": "riddle-hint-wait", "kind": "NEAREST", "level": "EASY",
+      "text": ["難しいなぞなぞ。みんなで考えて、何秒たったらヒントがほしい？", "The riddle has everyone stumped. How many seconds should the group think before asking for a hint?", "むずかしい なぞなぞ。みんなでかんがえて、なんびょうたったら ヒントがほしい？"]
+    },
+    {
+      "id": "magnifier-footprint-trail", "kind": "DRAW", "level": "EASY",
+      "text": ["虫めがねで足あとを一つずつ追う探偵", "A detective following footprints with a magnifying glass", "むしめがねで あしあとを ひとつずつおうたんてい"],
+      "aliases": [
+        ["足あとを追う", "Following footprints", "あしあとをおう"],
+        ["虫めがねの探偵", "Detective with a magnifying glass", "むしめがねのたんてい"]
+      ]
+    },
+    {
+      "id": "wet-footprints-dry-door", "kind": "DISCUSSION", "level": "HARD",
+      "text": ["閉まった玄関の中にぬれた足あと。でも扉の外は乾いている。探偵が最初にたしかめるのは？", "There are wet footprints inside a closed front door, but it is dry outside. What should a detective check first?", "しまったげんかんのなかに ぬれたあしあと。でもとびらのそとは かわいている。たんていがさいしょに たしかめるのは？"],
+      "options": [
+        ["足あとが始まった場所", "Where the footprints begin", "あしあとが はじまったばしょ"],
+        ["雨の日の傘立て", "The umbrella stand", "あめのひのかさたて"],
+        ["玄関につながる別の部屋", "Another room linked to the entryway", "げんかんにつながる べつのへや"],
+        ["犬の水皿と家族の靴", "The dog’s water bowl and the family’s shoes", "イヌのみずざらと かぞくのくつ"]
+      ]
+    }
+  ],
+  "MONEY": [
+    {
+      "id": "checkout-search-small-change", "kind": "OPINION", "level": "EASY",
+      "text": ["レジで端数の小銭を出したい。見つからないとき、どうする？", "At checkout you cannot find exact change. What do you do?", "レジで はすうのこぜにを だしたい。みつからないとき、どうする？"],
+      "options": [
+        ["小銭入れをひっくり返す", "Tip out the coin pouch", "こぜにいれを ひっくりかえす"],
+        ["大きいお金で払う", "Pay with a larger coin or bill", "おおきい おかねではらう"],
+        ["財布の別のポケットを見る", "Check another pocket of the wallet", "さいふの べつのポケットをみる"],
+        ["貯まったポイントを使う", "Use reward points", "たまったポイントをつかう"]
+      ]
+    },
+    {
+      "id": "sale-sticker-first-check", "kind": "OPINION", "level": "NORMAL",
+      "text": ["気になるものに割引シール。買う前に、つい隣で何を見比べる？", "Something you like has a discount sticker. What do you compare before buying?", "きになるものに わりびきシール。かうまえに、ついとなりで なにをみくらべる？"],
+      "options": [
+        ["元の値段", "The original price", "もとのねだん"],
+        ["近くの似た商品の価格", "The price of a similar item nearby", "ちかくの にたしょうひんの かかく"],
+        ["どれくらい使うか", "How much you would use it", "どれくらい つかうか"],
+        ["同じ商品で別のサイズ", "A different size of the same item", "おなじしょうひんで べつのサイズ"]
+      ]
+    },
+    {
+      "id": "shiny-change-speech", "kind": "VOTE", "level": "EASY",
+      "text": ["自販機のおつりに、ぴかぴかの硬貨が一枚。その硬貨の第一声は？", "One shiny coin comes out of a vending machine. What is the first thing it says?", "じはんきの おつりに、ぴかぴかのこうかが いちまい。そのこうかの だいいっせいは？"],
+      "options": [
+        ["お財布まで送ってください", "Please escort me to the wallet", "おさいふまで おくってください"],
+        ["今日が初めての外出です", "This is my first day out", "きょうが はじめてのがいしゅつです"],
+        ["貯金箱の席、空いてますか", "Is there room in the piggy bank?", "ちょきんばこのせき、あいてますか"],
+        ["ほかのおつりと記念写真を", "Can we take a photo with the rest of the change?", "ほかのおつりと きねんしゃしんを"]
+      ]
+    },
+    {
+      "id": "unplanned-snack-price", "kind": "NEAREST", "level": "NORMAL",
+      "text": ["買い物の帰り、予定外だけど欲しいおやつを見つけた。いくらまでなら買う？（円）", "On your way back from shopping, you spot a snack you had not planned to buy. What is the most you would pay, in yen?", "かいもののかえり、よていがいだけど ほしいおやつをみつけた。いくらまでならかう？（えん）"]
+    },
+    {
+      "id": "piggy-bank-upside-down", "kind": "DRAW", "level": "NORMAL",
+      "text": ["貯金箱を逆さにして小銭を出そうとする人", "A person turning a piggy bank upside down to get coins out", "ちょきんばこを さかさにして こぜにをだそうとするひと"],
+      "aliases": [
+        ["逆さの貯金箱", "Upside-down piggy bank", "さかさのちょきんばこ"],
+        ["貯金箱から小銭を出す", "Getting coins out of a piggy bank", "ちょきんばこから こぜにをだす"]
+      ]
+    },
+    {
+      "id": "party-booth-budget", "kind": "DISCUSSION", "level": "HARD",
+      "text": ["みんなで使える予算は2,000円。人数分の記念品も欲しいし、一つだけ会場を目立たせたい。最初に決めるのは？", "Your group has 2,000 yen. You want a keepsake for everyone and one thing that makes the booth stand out. What do you decide first?", "みんなでつかえる よさんは2000えん。にんずうぶんのきねんひんもほしいし、ひとつだけかいじょうをめだたせたい。さいしょにきめるのは？"],
+      "options": [
+        ["全員分の小さい記念品を確保", "Budget for a small keepsake for everyone", "ぜんいんぶんのちいさい きねんひんをかくほ"],
+        ["目立つ物を手作りして残りを使う", "Make the centerpiece yourselves and spend the rest", "めだつものをてづくりして のこりをつかう"],
+        ["写真を記念品にして飾りへ予算を", "Use photos as keepsakes and fund the decorations", "しゃしんをきねんひんにして かざりへよさんを"],
+        ["半分ずつの予算で候補を出す", "Split the budget and suggest options for each half", "はんぶんずつのよさんで こうほをだす"]
+      ]
+    }
+  ],
+  "SEASONS": [
+    {
+      "id": "festival-one-last-stall", "kind": "OPINION", "level": "EASY",
+      "text": ["夏祭りで使える時間があと少し。最後に寄りたくなる屋台は？", "Your time at the summer festival is nearly up. Which stall do you make one last stop at?", "なつまつりで つかえるじかんが あとすこし。さいごに よりたくなるやたいは？"],
+      "options": [
+        ["かき氷", "Shaved ice", "かきごおり"],
+        ["焼きそば", "Fried noodles", "やきそば"],
+        ["輪投げ", "Ring toss", "わなげ"],
+        ["光るおもちゃ", "Light-up toys", "ひかる おもちゃ"]
+      ]
+    },
+    {
+      "id": "kotatsu-cannot-get-up", "kind": "OPINION", "level": "NORMAL",
+      "text": ["冬のこたつ。そろそろ出ようと思ったのに、また座ってしまう理由は？", "You are about to leave the warm kotatsu. What makes you sit back down?", "ふゆのこたつ。そろそろでようと おもったのに、またすわってしまう りゆうは？"],
+      "options": [
+        ["足だけもう少し温めたい", "Your feet could use another minute", "あしだけ もうすこし あたためたい"],
+        ["お茶がまだ残っている", "There is still tea left", "おちゃが まだ のこっている"],
+        ["ちょうど話が盛り上がった", "The conversation just got interesting", "ちょうど はなしが もりあがった"],
+        ["立つ前にみかんを一つ", "One more mandarin before you stand", "たつまえに みかんをひとつ"]
+      ]
+    },
+    {
+      "id": "snowman-scarf-letter", "kind": "VOTE", "level": "EASY",
+      "text": ["雪だるまにマフラーを巻いた。翌朝、雪だるまの伝言は？", "You give a snowman a scarf. What note does the snowman leave for you the next morning?", "ゆきだるまに マフラーをまいた。よくあさ、ゆきだるまの でんごんは？"],
+      "options": [
+        ["おかげで鼻だけ冷たいです", "Thanks. Now only my nose is cold", "おかげで はなだけ つめたいです"],
+        ["次は手袋もお願いします", "Gloves next, please", "つぎは てぶくろも おねがいします"],
+        ["ほどき方が分かりません", "I cannot work out how to untie this", "ほどきかたが わかりません"],
+        ["写真を撮るなら今のうち", "Take a photo while you still can", "しゃしんをとるなら いまのうち"]
+      ]
+    },
+    {
+      "id": "blossom-pictures", "kind": "NEAREST", "level": "EASY",
+      "text": ["満開の桜を見に行ったら、帰るまでに写真を何枚撮りたい？", "You go to see cherry blossoms in full bloom. How many photos would you take before leaving?", "まんかいのさくらを みにいったら、かえるまでに しゃしんを なんまいとりたい？"]
+    },
+    {
+      "id": "waving-to-carp-streamer", "kind": "DRAW", "level": "NORMAL",
+      "text": ["風になびくこいのぼりに手を振る人", "Waving to a carp windsock fluttering in the wind", "かぜに なびく こいのぼりに てをふるひと"],
+      "aliases": [
+        ["こいのぼり", "Carp windsock", "こいのぼり"],
+        ["こいのぼりに手を振る", "Waving at a carp streamer", "こいのぼりに てをふる"]
+      ]
+    },
+    {
+      "id": "fireworks-first-rain", "kind": "DISCUSSION", "level": "HARD",
+      "text": ["花火の直前に雨が来た。見える屋根は小さく、帰る友だちもいる。みんなに最初に何を提案する？", "It rains just before the fireworks. The shelter with a view is small and some friends need to leave. What would you suggest first?", "はなびのちょくぜんに あめがきた。みえるやねはちいさく、かえるともだちもいる。みんなにさいしょに なにをていあんする？"],
+      "options": [
+        ["帰る人と屋根のある道まで行く", "Walk those leaving to a covered path", "かえるひとと やねのあるみちまでいく"],
+        ["駅近くの見える場所を探す", "Find a viewing spot by the station", "えきちかくの みえるばしょをさがす"],
+        ["残る人が写真を一枚送る", "Have the people staying send one photo", "のこるひとが しゃしんをいちまいおくる"],
+        ["屋根の下で空の音を聞く会にする", "Make it a listening party under cover", "やねのしたで そらのおとをきくかいにする"]
+      ]
+    },
+    {
+      "id": "sekki-after-equinox", "kind": "TRIVIA", "level": "HARD", "audiences": ["MIDDLE", "HIGH", "ADULT"],
+      "text": ["季節を24に分ける二十四節気。春分のすぐ次に来るのは？", "The traditional calendar divides the year into 24 solar terms. Which one follows the spring equinox?", "きせつを24にわける にじゅうしせっき。しゅんぶんのすぐつぎにくるのは？"],
+      "answer": ["清明", "Seimei (Clear and Bright)", "せいめい"],
+      "options": [
+        ["啓蟄", "Keichitsu (Awakening of Insects)", "けいちつ"],
+        ["清明", "Seimei (Clear and Bright)", "せいめい"],
+        ["穀雨", "Kokuu (Grain Rain)", "こくう"],
+        ["立夏", "Rikka (Start of Summer)", "りっか"]
+      ]
+    }
+  ],
+  "TRANSPORT": [
+    {
+      "id": "empty-train-seat", "kind": "OPINION", "level": "EASY",
+      "text": ["空いている電車に乗ったら、つい選んでしまう場所は？", "You board a nearly empty train. Where do you tend to sit?", "すいている でんしゃにのったら、つい えらんでしまう ばしょは？"],
+      "options": [
+        ["はしの席", "The end of a bench", "はしのせき"],
+        ["車両の真ん中", "The middle of the carriage", "しゃりょうの まんなか"],
+        ["降りる側のドア近く", "Near the exit door", "おりるがわの ドアちかく"],
+        ["景色がよく見える窓のそば", "By a window with a good view", "けしきが よくみえる まどのそば"]
+      ]
+    },
+    {
+      "id": "bus-stop-just-in-time", "kind": "OPINION", "level": "NORMAL",
+      "text": ["出発間近のバス停に着いた。乗る前に一番気になりがちなのは？", "You reach the bus stop just before departure. What are you most likely to double-check before boarding?", "しゅっぱつまぎわの バスていについた。のるまえに いちばん きになりがちなのは？"],
+      "options": [
+        ["行き先が合っているか", "Whether it is going to the right place", "いきさきが あっているか"],
+        ["乗るドアはどっちか", "Which door to board through", "のるドアは どっちか"],
+        ["支払いの準備", "Getting ready to pay", "しはらいの じゅんび"],
+        ["降りる停留所の名前", "The name of the stop where you get off", "おりる ていりゅうじょの なまえ"]
+      ]
+    },
+    {
+      "id": "train-lost-property-oddity", "kind": "VOTE", "level": "NORMAL",
+      "text": ["電車の放送「車内に落とし物がありました」。続いて読み上げた品は？", "The train announcement says, “An item was left on board.” What item does it name?", "でんしゃのほうそう「しゃないに おとしものが ありました」。つづいてよみあげた しなは？"],
+      "options": [
+        ["片足分だけの縄跳びのやる気", "Half a person’s enthusiasm for jump rope", "かたあしぶんだけの なわとびのやるき"],
+        ["名前が書いてある大きな雲", "A large cloud with a name on it", "なまえが かいてある おおきなくも"],
+        ["持ち主を探す弁当箱", "A lunchbox looking for its owner", "もちぬしをさがす べんとうばこ"],
+        ["来週の乗車券と昨日の宿題", "Next week’s ticket and yesterday’s homework", "らいしゅうの じょうしゃけんと きのうのしゅくだい"]
+      ]
+    },
+    {
+      "id": "unfamiliar-station-transfer", "kind": "NEAREST", "level": "NORMAL",
+      "text": ["初めての駅で電車を乗り換える。次の列車まで何分あれば安心？", "You have to change trains at an unfamiliar station. How many minutes between trains would feel comfortable?", "はじめてのえきで でんしゃを のりかえる。つぎのれっしゃまで なんぷんあれば あんしん？"]
+    },
+    {
+      "id": "press-bus-stop-button", "kind": "DRAW", "level": "EASY",
+      "text": ["バスの降車ボタンを押す人", "A person pressing the stop button on a bus", "バスの こうしゃボタンを おすひと"],
+      "aliases": [
+        ["バスの降車ボタン", "Bus stop button", "バスのこうしゃボタン"],
+        ["バスのボタンを押す", "Pressing a button on a bus", "バスのボタンをおす"]
+      ]
+    },
+    {
+      "id": "missed-train-group-route", "kind": "DISCUSSION", "level": "HARD",
+      "text": ["乗る予定の電車が止まった。別の路線は乗り換えが多く、バスは座れそうだが遅い。みんなに何を先に聞く？", "Your train is stopped. The alternate route has many transfers, while the bus is slower but probably has seats. What would you ask your group first?", "のるよていのでんしゃがとまった。べつのろせんはのりかえがおおく、バスはすわれそうだが おそい。みんなに なにをさきにきく？"],
+      "options": [
+        ["何時までに着きたいか", "What time everyone needs to arrive", "なんじまでに つきたいか"],
+        ["荷物を持って歩ける距離", "How far people can walk with their bags", "にもつをもって あるけるきょり"],
+        ["別々の便でもよいか", "Whether taking separate routes is OK", "べつべつのびんでも よいか"],
+        ["座って休む時間が必要か", "Whether anyone needs time to sit and rest", "すわってやすむじかんが ひつようか"]
+      ]
+    }
+  ],
+  "HEALTH": [
+    {
+      "id": "before-bed-last-task", "kind": "OPINION", "level": "EASY",
+      "text": ["そろそろ寝ようと思った夜、眠る直前にやりがちなことは？", "You are ready to turn in. What is usually the last thing you do before falling asleep?", "そろそろねようと おもったよる、ねむるちょくぜんに やりがちなことは？"],
+      "options": [
+        ["軽くストレッチ", "A quick stretch", "かるく ストレッチ"],
+        ["水を一口飲む", "Take a sip of water", "みずを ひとくちのむ"],
+        ["明日の予定を見る", "Check tomorrow’s plans", "あしたの よていをみる"],
+        ["まくらの位置を直す", "Adjust the pillow", "まくらの いちをなおす"]
+      ]
+    },
+    {
+      "id": "radio-exercise-forgotten-step", "kind": "OPINION", "level": "NORMAL",
+      "text": ["みんなで体操中、次の動きを忘れた。とっさに何をしがち？", "You forget the next move in a group exercise routine. What do you do without thinking?", "みんなで たいそうちゅう、つぎのうごきをわすれた。とっさに なにをしがち？"],
+      "options": [
+        ["隣の人の手を見る", "Look at the hands of the person beside you", "となりのひとの てをみる"],
+        ["前の動きをもう一回", "Repeat the previous move", "まえのうごきを もういっかい"],
+        ["一瞬だけ止まる", "Freeze for a moment", "いっしゅんだけ とまる"],
+        ["音楽の合図を待つ", "Wait for the musical cue", "おんがくの あいずをまつ"]
+      ]
+    },
+    {
+      "id": "toothbrush-interview", "kind": "VOTE", "level": "EASY",
+      "text": ["歯みがきが終わったところで、歯ブラシがマイクを向けてきた。何と質問された？", "After brushing, your toothbrush points a microphone at you. What does it ask?", "はみがきが おわったところで、はブラシが マイクをむけてきた。なんと しつもんされた？"],
+      "options": [
+        ["今日の奥歯の調子は？", "How did the back teeth do today?", "きょうの おくばの ちょうしは？"],
+        ["仕上げのうがいに自信は？", "How confident are you about that final rinse?", "しあげの うがいに じしんは？"],
+        ["右側と左側、今日の勝者は？", "Left side or right side, who won today?", "みぎがわと ひだりがわ、きょうの しょうしゃは？"],
+        ["明日の朝も同じ時間で？", "Same time tomorrow morning?", "あしたのあさも おなじじかんで？"]
+      ]
+    },
+    {
+      "id": "break-during-busy-afternoon", "kind": "NEAREST", "level": "NORMAL",
+      "text": ["忙しい午後に一回だけ休憩を取れる。ひと息つくのに何分ほしい？", "You can take one break on a busy afternoon. How many minutes would you like to catch your breath?", "いそがしい ごごに いっかいだけ きゅうけいをとれる。ひといきつくのに なんぷんほしい？"]
+    },
+    {
+      "id": "tiptoe-reaching-stretch", "kind": "DRAW", "level": "EASY",
+      "text": ["つま先立ちで両手を上に伸ばしてストレッチ", "Stretching both hands upward while standing on tiptoe", "つまさきだちで りょうてをうえに のばして ストレッチ"],
+      "aliases": [
+        ["背伸びのストレッチ", "Reaching stretch", "せのびの ストレッチ"],
+        ["両手で背伸び", "Stretching up with both arms", "りょうてで せのび"]
+      ]
+    },
+    {
+      "id": "rest-space-one-chair", "kind": "DISCUSSION", "level": "HARD",
+      "text": ["体操の合図が止まり、みんなで休憩に。椅子は一つで、すぐ再開する予定。短く気分転換するなら？", "The exercise music stops for a quick break. There is one chair and the group restarts soon. What is a good way to refresh everyone?", "たいそうのあいずがとまり、みんなできゅうけいに。いすはひとつで、すぐさいかいするよてい。みじかくきぶんてんかんするなら？"],
+      "options": [
+        ["椅子は必要な人へ、残りは水を一口", "Offer the chair to whoever needs it and take a sip", "いすはひつようなひとへ、のこりはみずをひとくち"],
+        ["外の景色を見ながら静かに待つ", "Look outdoors and wait quietly", "そとのけしきをみながら しずかにまつ"],
+        ["できる人だけ肩を軽く回す", "Anyone who wants to gently rolls their shoulders", "できるひとだけ かたをかるくまわす"],
+        ["一言ずつ今日の気分を伝える", "Say how you feel today in one sentence each", "ひとことずつ きょうのきぶんをつたえる"]
+      ]
+    }
+  ],
+  "SPACE": [
+    {
+      "id": "first-space-window-photo", "kind": "OPINION", "level": "EASY",
+      "text": ["宇宙旅行で窓側の席。最初に写真を撮りたくなる景色は？", "You have a window seat on a space trip. Which view do you want to photograph first?", "うちゅうりょこうで まどがわのせき。さいしょに しゃしんを とりたくなるけしきは？"],
+      "options": [
+        ["青い地球", "The blue Earth", "あおい ちきゅう"],
+        ["近くに見える月", "The Moon looking so close", "ちかくに みえるつき"],
+        ["真っ暗な空の星", "Stars in the black sky", "まっくらな そらのほし"],
+        ["地球から昇る太陽", "The Sun rising behind Earth", "ちきゅうから のぼるたいよう"]
+      ]
+    },
+    {
+      "id": "earth-taste-in-space", "kind": "OPINION", "level": "NORMAL",
+      "text": ["宇宙船の食堂に「ふるさとの味」一品を加えられる。何を選ぶ？", "You can put one taste of home on a spaceship menu. What do you add?", "うちゅうせんの しょくどうに「ふるさとのあじ」ひとしなを くわえられる。なにをえらぶ？"],
+      "options": [
+        ["おにぎり", "Rice balls", "おにぎり"],
+        ["具だくさんのスープ", "A hearty soup", "ぐだくさんの スープ"],
+        ["カレー", "Curry", "カレー"],
+        ["焼きたてのパン", "Fresh-baked bread", "やきたての パン"]
+      ]
+    },
+    {
+      "id": "moon-hotel-review", "kind": "VOTE", "level": "NORMAL",
+      "text": ["月面ホテルの口コミは星4つ。あと星一つを引いた理由は？", "A hotel on the Moon gets four stars. Why did the guest take away the last star?", "げつめんホテルの くちコミは ほしよっつ。あとほしひとつを ひいたりゆうは？"],
+      "options": [
+        ["ベッドまで一跳びで行きすぎた", "One hop took me right past the bed", "ベッドまで ひととびで いきすぎた"],
+        ["朝食のパンが天井にいた", "My breakfast bread was on the ceiling", "ちょうしょくのパンが てんじょうにいた"],
+        ["海側の部屋に海がなかった", "There was no sea in my sea-view room", "うみがわのへやに うみがなかった"],
+        ["カーテンを開けても夜だった", "It was still night when I opened the curtains", "カーテンを あけても よるだった"]
+      ]
+    },
+    {
+      "id": "favorite-planet-telescope-time", "kind": "NEAREST", "level": "EASY",
+      "text": ["天体観察会で好きな惑星が見えた。望遠鏡を一人で何分使えたら満足？", "At a stargazing event, your favorite planet comes into view. How many minutes on the telescope would satisfy you?", "てんたいかんさつかいで すきなわくせいが みえた。ぼうえんきょうを ひとりで なんぷんつかえたら まんぞく？"]
+    },
+    {
+      "id": "saturn-ring-hula-hoop", "kind": "DRAW", "level": "NORMAL",
+      "text": ["土星の輪をフラフープにする宇宙人", "An alien using Saturn’s ring as a hula hoop", "どせいのわを フラフープにする うちゅうじん"],
+      "aliases": [
+        ["土星のフラフープ", "Saturn hula hoop", "どせいのフラフープ"],
+        ["宇宙人がフラフープ", "An alien hula hooping", "うちゅうじんが フラフープ"]
+      ]
+    },
+    {
+      "id": "telescope-cloud-last-round", "kind": "DISCUSSION", "level": "HARD",
+      "text": ["望遠鏡が一台。雲が近づく前に全員が月を見たいけれど、写真を撮ると時間がかかる。何を優先する？", "There is one telescope. Everyone wants to see the Moon before clouds arrive, and photos take extra time. What comes first?", "ぼうえんきょうがいちだい。くもがちかづくまえに ぜんいんがつきをみたいけれど、しゃしんをとると じかんがかかる。なにをゆうせんする？"],
+      "options": [
+        ["全員が短くのぞいてから撮影", "Give everyone a quick look, then take photos", "ぜんいんがみじかくのぞいてから さつえい"],
+        ["写真を一枚だけ撮って全員に送る", "Take one photo and share it with everyone", "しゃしんをいちまいだけとって ぜんいんにおくる"],
+        ["肉眼で見ながら順番を決める", "Watch with the naked eye while choosing the order", "にくがんでみながら じゅんばんをきめる"],
+        ["月の形を一人ずつ言って記録する", "Record what each person sees in the Moon’s shape", "つきのかたちをひとりずついって きろくする"]
+      ]
+    }
+  ]
+}

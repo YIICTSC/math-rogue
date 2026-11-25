@@ -1,11 +1,12 @@
 import type { LanguageMode } from '../../types';
-import { supportsLearningUnits, type ShowMode, type ShowQuestion } from '../types';
+import { QUIZ_AUDIENCES, supportsLearningUnits, type RecommendedAudience, type ShowMode, type ShowQuestion } from '../types';
 import subjects from './subjects.json';
 import drawingMotifs from './drawingMotifs.json';
 import nightPrompts from './nightPrompts.json';
 import triviaPrompts from './triviaPrompts.json';
 import numberPrompts from './numberPrompts.json';
-import { estimateScenario } from './estimateScenarios';
+import partySituations from './partySituations.json';
+import { keptNumericPrompts, numberSituations } from './numberSituations';
 
 export const VARIETY_LEVELS = ['EASY', 'NORMAL', 'HARD'] as const;
 export type Level = typeof VARIETY_LEVELS[number];
@@ -15,11 +16,28 @@ type Topic = readonly [name: Text, clue: Text];
 type Group = readonly [label: Text, entries: readonly Topic[]];
 type WrittenCard = readonly [theme: string, prompt: Text, options: readonly Text[]];
 type NumberCard = readonly [theme: string, prompt: Text, options: readonly string[]];
+type Situation = {
+  id: string;
+  level: Level;
+  audiences?: readonly RecommendedAudience[];
+  text: Text;
+} & (
+  | { kind: 'OPINION' | 'VOTE' | 'DISCUSSION'; options: readonly Text[] }
+  | { kind: 'NEAREST' }
+  | { kind: 'DRAW'; aliases: readonly Text[] }
+  | { kind: 'TRIVIA'; options: readonly Text[]; answer: Text }
+);
 const original = subjects as unknown as Record<Category, readonly Group[]>;
 const recent = triviaPrompts as unknown as Record<Category, readonly Topic[]>;
 const party = nightPrompts as unknown as Partial<Record<Category, readonly WrittenCard[]>>;
 const numbers = numberPrompts as unknown as Partial<Record<Category, readonly NumberCard[]>>;
 const drawings: Record<Category, readonly Text[]> = drawingMotifs;
+const situations = partySituations as unknown as Record<Category, readonly Situation[]>;
+const situationKind: Record<ShowMode, Situation['kind']> = {
+  STANDARD: 'TRIVIA', BUZZER: 'TRIVIA', SURVIVAL: 'TRIVIA', TEAMS: 'TRIVIA',
+  CONSENSUS: 'OPINION', MAJORITY: 'OPINION', WOLF: 'OPINION', VOTE: 'VOTE', NEAREST: 'NEAREST', DRAW: 'DRAW',
+};
+const allAudiences = QUIZ_AUDIENCES.filter(audience => audience !== 'ALL');
 
 export interface ThemedQuestion {
   theme: string;
@@ -29,6 +47,7 @@ export interface ThemedQuestion {
 export const topicKey = (value: string) => value.normalize('NFKC').toLowerCase().replace(/[\p{P}\p{Z}\s]/gu, '');
 
 const languageIndex = (lang: LanguageMode) => lang === 'ENGLISH' ? 1 : lang === 'HIRAGANA' ? 2 : 0;
+const drawingPrompt = (answer: string, locale: number) => [`絵で伝えよう：${answer}`, `Draw: ${answer}`, `えでつたえよう：${answer}`][locale];
 
 function objectiveChoices(pool: readonly Topic[], index: number, locale: number) {
   const answer = pool[index][0][locale];
@@ -56,6 +75,28 @@ function card(mode: ShowMode, category: Category, theme: string, id: string, pro
   } };
 }
 
+export function situationQuestions(mode: ShowMode, lang: LanguageMode, category: Category) {
+  const locale = languageIndex(lang);
+  const kind = situationKind[mode];
+  const authored = situations[category].filter(situation => situation.kind === kind ||
+    (situation.kind === 'DISCUSSION' && (kind === 'OPINION' || kind === 'VOTE'))).map(situation => {
+    const text = situation.text[locale];
+    const isDrawing = situation.kind === 'DRAW';
+    const answer = isDrawing ? text : situation.kind === 'TRIVIA' ? situation.answer[locale] : '';
+    const options = 'options' in situation ? situation.options.map(choice => choice[locale]) : [];
+    const alternateAnswers = isDrawing ? [...situation.text, ...situation.aliases.flat()] : situation.kind === 'TRIVIA' ? situation.answer : [];
+    const aliases = [...new Set(alternateAnswers)].filter(alias => alias !== answer);
+    const { theme, question } = card(mode, category, isDrawing ? situation.text[0] : situation.id, `situation-${situation.id}`,
+      isDrawing ? drawingPrompt(text, locale) : text, options, answer, aliases);
+    return { theme, question: { ...question, difficulty: situation.level, audiences: situation.audiences ?? allAudiences } };
+  });
+  if (mode !== 'NEAREST') return authored;
+  return [...authored, ...numberSituations(category, locale).map(({ id, text, level, audiences }) => {
+    const { theme, question } = card(mode, category, id, id, text);
+    return { theme, question: { ...question, difficulty: level, audiences: audiences ?? allAudiences } };
+  })];
+}
+
 /** Each topic appears at most once in a mode. Difficulty is assigned to that single card. */
 export function themedQuestions(mode: ShowMode, lang: LanguageMode, category: Category): ThemedQuestion[] {
   const locale = languageIndex(lang);
@@ -75,9 +116,8 @@ export function themedQuestions(mode: ShowMode, lang: LanguageMode, category: Ca
   if (mode === 'DRAW') {
     const make = (name: Text, id: string) => {
       const answer = name[locale];
-      return card(mode, category, name[0], id, [
-        `絵で伝えよう：${answer}`, `Draw: ${answer}`, `えでつたえよう：${answer}`,
-      ][locale], [], answer, [...new Set(name.filter(term => term !== answer))]);
+      return card(mode, category, name[0], id, drawingPrompt(answer, locale), [], answer,
+        [...new Set(name.filter(term => term !== answer))]);
     };
     return [
       ...drawings[category].map((name, i) => make(name, `sketch-${i}`)),
@@ -85,16 +125,16 @@ export function themedQuestions(mode: ShowMode, lang: LanguageMode, category: Ca
       ...core.map(([name], i) => make(name, `sketch-clue-${i}`)),
     ];
   }
-  const writtenEstimates = (numbers[category] ?? []).map(([theme, text, options], i) =>
-    card(mode, category, theme, `estimate-${i}`, text[locale], mode === 'NEAREST' ? [] : [...options]));
+  const numericRows = numbers[category] ?? [];
   if (mode === 'NEAREST') {
-    const scenes = [...drawings[category], ...extras.map(([name]) => name), ...core.map(([name]) => name)];
-    return [...writtenEstimates, ...scenes.map((scene, i) =>
-      card(mode, category, scene[0], `estimate-scene-${i}`, estimateScenario(scene, i, locale)))];
+    return keptNumericPrompts[category].map(i => {
+      const [theme, text] = numericRows[i];
+      return card(mode, category, theme, `estimate-${i}`, text[locale]);
+    });
   }
   return [
     ...(party[category] ?? []).map(([theme, text, options], i) =>
       card(mode, category, theme, `night-${i}`, text[locale], options.map(choice => choice[locale]))),
-    ...writtenEstimates,
+    ...numericRows.map(([theme, text, options], i) => card(mode, category, theme, `estimate-${i}`, text[locale], [...options])),
   ];
 }

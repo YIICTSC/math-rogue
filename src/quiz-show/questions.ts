@@ -1,7 +1,8 @@
 import type { LanguageMode } from '../types';
 import { PARTY_CATEGORIES, supportsLearningUnits, type PartyCategory, type ShowMode, type ShowQuestion, type VarietySelection } from './types';
-import { themedQuestions, topicKey, VARIETY_LEVELS } from './catalogue/partyTopics';
+import { situationQuestions, themedQuestions, topicKey, VARIETY_LEVELS, type Level } from './catalogue/partyTopics';
 import { recommendedAudiences } from './catalogue/audiences';
+import { reviewedDifficulty } from './catalogue/difficulty';
 import { matchesPartyPlan, shuffle } from './engine';
 import { onAirPrompt } from './prompt';
 import prompts from './partyPrompts.json';
@@ -90,7 +91,7 @@ function authoredQuestions(mode:ShowMode,language:LanguageMode):ShowQuestion[]{
 
 const locales = ['JAPANESE', 'ENGLISH', 'HIRAGANA'] as const;
 const catalogues = new Map<ShowMode, ShowQuestion[][]>();
-export const MIN_VARIETY_PER_LEVEL = 30;
+const BASE_VARIETY_PER_LEVEL = 30;
 export const MAX_VARIETY_PACK = 240;
 export type { VarietySelection } from './types';
 
@@ -98,6 +99,13 @@ const promptKey = (mode: ShowMode, q: ShowQuestion) =>
  topicKey(mode === 'DRAW' ? q.answer : onAirPrompt({mode, prompt:q.prompt}));
 
 const partyModes = ['CONSENSUS', 'MAJORITY', 'VOTE', 'WOLF'] as const;
+// A few legacy surveys asked for an abstract count or carried a theme from another category.
+const retiredSurveyText = /ペットのドラゴン|秘密基地の広さ|夢のお城の部屋数|透明になれる時間|大切な人と一年に何個、新しい思い出|自然の中で何日過ごしたい|空飛ぶ町には何人|月面基地に一度に何人|一つの料理を極めるなら/u;
+
+// Older rooms can still contain cards from a previous catalogue.
+export function isLegacyVarietyId(mode: ShowMode, id: string) {
+ return id.startsWith('catalogue-') || (mode === 'NEAREST' && /^(?:party-estimate-|(?:starter|variety|reviewed|expanded)-NEAREST-)/u.test(id));
+}
 
 /** Keep the same catalogue IDs and selection in all three languages. */
 export function varietyQuestions(mode: ShowMode, language: LanguageMode): ShowQuestion[] {
@@ -105,27 +113,36 @@ export function varietyQuestions(mode: ShowMode, language: LanguageMode): ShowQu
  if (!banks) {
   banks = locales.map(() => []);
   const own = locales.map(locale => authoredQuestions(mode, locale));
+  const retiredSurveys = mode === 'NEAREST' ? new Set(own[0].filter(q =>
+    q.id.startsWith('expanded-') || retiredSurveyText.test(q.prompt)).map(q => q.id)) : new Set<string>();
   const sharedModes = partyModes.includes(mode as typeof partyModes[number]) ? partyModes.filter(m => m !== mode) : [];
   const shared = locales.map(locale => sharedModes.flatMap(m => authoredQuestions(m, locale)));
   const visibleKeys = locales.map(() => new Set<string>());
   const menuTopics = new Set<string>();
+  const append = (rows: ShowQuestion[], theme: string, level: Level = reviewedDifficulty(mode, rows[0])) => {
+   const keys = rows.map(q => promptKey(mode, q));
+   if (menuTopics.has(theme) || keys.some((key, locale) => visibleKeys[locale].has(key))) return false;
+   menuTopics.add(theme);
+   const audiences = rows[0].audiences ?? recommendedAudiences(rows[0]);
+   for (const [locale, q] of rows.entries()) {
+    visibleKeys[locale].add(keys[locale]);
+    banks![locale].push({ ...q, audiences, difficulty: level, seconds: mode === 'VOTE' ? 90 : q.seconds });
+   }
+   return true;
+  };
   for (const category of PARTY_CATEGORIES) {
    if (category === 'ALL') continue;
    const counts = { EASY: 0, NORMAL: 0, HARD: 0 };
    const add = (rows: ShowQuestion[], theme: string) => {
-    const keys = rows.map(q => promptKey(mode, q));
-    if (menuTopics.has(theme) || keys.some((key, locale) => visibleKeys[locale].has(key))) return;
+    if (mode === 'NEAREST') {
+     if (!retiredSurveys.has(rows[0].id)) append(rows, theme);
+     return;
+    }
+    // Preserve the selection and order of existing cards. The displayed level is reviewed separately.
     const least = VARIETY_LEVELS.reduce((a, b) => counts[a] <= counts[b] ? a : b);
     const preferred = rows[0].difficulty;
-    const level = preferred && counts[preferred] < MIN_VARIETY_PER_LEVEL ? preferred : least;
-    if (counts[level] >= MIN_VARIETY_PER_LEVEL) return;
-    counts[level]++;
-    menuTopics.add(theme);
-    const audiences = recommendedAudiences(rows[0], level);
-    for (const [locale, q] of rows.entries()) {
-     visibleKeys[locale].add(keys[locale]);
-     banks![locale].push({ ...q, audiences, difficulty: level, seconds: mode === 'VOTE' ? 90 : q.seconds });
-    }
+    const originalLevel = preferred && counts[preferred] < BASE_VARIETY_PER_LEVEL ? preferred : least;
+    if (counts[originalLevel] < BASE_VARIETY_PER_LEVEL && append(rows, theme)) counts[originalLevel]++;
    };
    const addAuthored = (source: ShowQuestion[][]) => {
     for (const [i, q] of source[0].entries()) {
@@ -148,6 +165,13 @@ export function varietyQuestions(mode: ShowMode, language: LanguageMode): ShowQu
     }
    }
   }
+  for (const category of PARTY_CATEGORIES) {
+   if (category === 'ALL') continue;
+   const additions = locales.map(locale => situationQuestions(mode, locale, category));
+   for (const [i, { theme, question }] of additions[0].entries()) {
+    append(additions.map(items => items[i].question), theme, question.difficulty);
+   }
+  }
   catalogues.set(mode, banks);
  }
  return banks[language === 'ENGLISH' ? 1 : language === 'HIRAGANA' ? 2 : 0].slice();
@@ -159,15 +183,12 @@ export function varietyPack(catalogue: ShowQuestion[], selection: VarietySelecti
  return (selection.order === 'RANDOM' ? shuffle(eligible) : eligible).slice(0, MAX_VARIETY_PACK);
 }
 
-/** A fresh room starts with one random prompt from each category and level. */
+/** A fresh room starts with three random prompts per category, mixing available levels. */
 export function starterQuestions(mode: ShowMode, language: LanguageMode): ShowQuestion[] {
- const choices = new Map<string, ShowQuestion>();
- for (const q of shuffle(varietyQuestions(mode, language))) {
-  const key = `${q.category}:${q.difficulty}`;
-  if (!choices.has(key)) choices.set(key, q);
- }
- return VARIETY_LEVELS.flatMap(level => PARTY_CATEGORIES.flatMap(category => {
-  const q = choices.get(`${category}:${level}`);
-  return q ? [q] : [];
- }));
+ const shuffled = shuffle(varietyQuestions(mode, language));
+ return PARTY_CATEGORIES.flatMap(category => {
+  const prompts = shuffled.filter(q => q.category === category);
+  const mixed = VARIETY_LEVELS.flatMap(level => prompts.find(q => q.difficulty === level) ?? []);
+  return [...mixed, ...prompts.filter(q => !mixed.includes(q))].slice(0, 3);
+ });
 }

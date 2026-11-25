@@ -7,7 +7,8 @@ const E={...original,createShow:(...args)=>{const w=original.createShow(...args)
 const social=['VOTE','CONSENSUS','MAJORITY','WOLF','NEAREST'];
 for(const language of ['JAPANESE','ENGLISH','HIRAGANA'])for(const mode of E.MODES){
  const pack=E.starterQuestions(mode,language);assert.equal(pack.length,60);assert(E.validBank(pack),`${mode}/${language} is playable`);assert.equal(new Set(pack.map(q=>q.id)).size,60);assert.equal(new Set(pack.map(q=>q.prompt+'|'+q.answer)).size,60);
- for(const q of pack){assert(q.prompt.trim());assert.equal(q.format,mode==='DRAW'?'FLIP':'TEXT');assert.equal(q.answer==='',social.includes(mode));if(!['DRAW','NEAREST'].includes(mode))assert.equal(q.options.length,4);assert.equal(pack.filter(x=>x.difficulty===q.difficulty).length,20);}
+ for(const category of E.PARTY_CATEGORIES.slice(1))assert.equal(pack.filter(q=>q.category===category).length,3);
+ for(const q of pack){assert(q.prompt.trim());assert.equal(q.format,mode==='DRAW'?'FLIP':'TEXT');assert.equal(q.answer==='',social.includes(mode));if(!['DRAW','NEAREST'].includes(mode))assert.equal(q.options.length,4);}
 }
 // Real scoring still works with the new entertainment packs in every objective mode.
 const H={id:'host',role:'host'};

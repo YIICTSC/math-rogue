@@ -6,14 +6,14 @@ const assetVersion = process.env.VITE_ASSET_VERSION || new Date().toISOString().
 
 // A shared icon or audio helper must not pull the entire main game into a name-only invite.
 function quizChunks() {
-  let quiz: Set<string> | null = null, audio: Set<string> | null = null, bootstrap: Set<string> | null = null;
+  let quiz: Set<string> | null = null, audio: Set<string> | null = null, bootstrap: Set<string> | null = null, title: Set<string> | null = null;
   return (id: string, graph: {getModuleIds: () => IterableIterator<string>; getModuleInfo: (id: string) => {importedIds: readonly string[]; isExternal: boolean} | null}) => {
     const closure = (root: string | undefined) => {
       const found = new Set<string>();
       const visit = (next: string) => { if (found.has(next)) return; const info = graph.getModuleInfo(next); if (!info || info.isExternal) return; found.add(next); info.importedIds.forEach(visit); };
       if (root) visit(root); return found;
     };
-    if (!quiz || !audio || !bootstrap) {
+    if (!quiz || !audio || !bootstrap || !title) {
       const ids = [...graph.getModuleIds()];
       quiz = closure(ids.find(p => p.replaceAll('\\', '/').endsWith('/src/quiz-show/QuizShow.tsx')));
       // Keep code shared with the tiny invite/startup loader out of the large
@@ -21,9 +21,11 @@ function quizChunks() {
       // made the HTML entry download all quiz logic before the app could start.
       const bootstrapEntry = ids.find(p => p.replaceAll('\\', '/').endsWith('/index.tsx') && !p.replaceAll('\\', '/').includes('/src/') && !p.includes('/node_modules/'));
       bootstrap = closure(bootstrapEntry);
+      title = closure(ids.find(p => p.replaceAll('\\', '/').endsWith('/src/App.tsx')));
       audio = closure(ids.find(p => p.replaceAll('\\', '/').endsWith('/src/services/audioService.ts')));
     }
-    if (quiz.has(id) && !bootstrap.has(id)) return 'quiz-show-core';
+    // The title can load shared UI modules without downloading the quiz catalogue.
+    if (quiz.has(id) && !bootstrap.has(id)) return title.has(id) ? 'quiz-show-shared' : 'quiz-show-core';
     if (audio.has(id) && !bootstrap.has(id)) return 'game-audio';
   };
 }

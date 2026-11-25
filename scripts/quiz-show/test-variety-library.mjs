@@ -1,17 +1,25 @@
 import assert from 'node:assert/strict';
 import {build} from 'esbuild';
-const result=await build({stdin:{contents:"export * from './src/quiz-show/engine';export * from './src/quiz-show/questions';export * from './src/quiz-show/types';export * from './src/quiz-show/authority';export * from './src/quiz-show/prompt';export {themedQuestions} from './src/quiz-show/catalogue/partyTopics';",resolveDir:process.cwd()},bundle:true,format:'esm',platform:'node',write:false});
+const result=await build({stdin:{contents:"export * from './src/quiz-show/engine';export * from './src/quiz-show/questions';export * from './src/quiz-show/types';export * from './src/quiz-show/authority';export * from './src/quiz-show/prompt';export {themedQuestions,situationQuestions} from './src/quiz-show/catalogue/partyTopics';",resolveDir:process.cwd()},bundle:true,format:'esm',platform:'node',write:false});
 const E=await import('data:text/javascript;base64,'+Buffer.from(result.outputFiles[0].text).toString('base64'));
 const H={id:'host',role:'host'},S={id:'screen',role:'screen'},P=id=>({id,role:'player'});
 const cmd=(w,a,actor=H,now=1000)=>assert.equal(E.act(w,actor,a,now),null,JSON.stringify(a));
 const patchWorld=E.createShow();cmd(patchWorld,{type:'plan',partyCategory:'ANIMALS'});cmd(patchWorld,{type:'plan',partyFormat:'CHOICE'});cmd(patchWorld,{type:'plan',limit:2});assert.equal(patchWorld.plan.partyCategory,'ANIMALS');assert.equal(patchWorld.plan.partyFormat,'CHOICE');assert.equal(patchWorld.plan.limit,2);
 let total=0;
 const allowedStarterLimit={STANDARD:12,BUZZER:12,SURVIVAL:12,TEAMS:12,CONSENSUS:20,WOLF:0,VOTE:0,MAJORITY:0,DRAW:20,NEAREST:20};
+const addedByMode={STANDARD:6,BUZZER:6,SURVIVAL:6,TEAMS:6,CONSENSUS:81,MAJORITY:81,NEAREST:623,DRAW:29,VOTE:50,WOLF:81};
 for(const language of ['JAPANESE','ENGLISH','HIRAGANA'])for(const mode of E.MODES){
  const bank=E.varietyQuestions(mode,language);
  assert(bank.every(E.validQuestion),mode+language);
  assert.equal(new Set(bank.map(q=>q.id)).size,bank.length);
- assert.deepEqual(bank.map(q=>[q.id,q.audiences]),E.varietyQuestions(mode,'JAPANESE').map(q=>[q.id,q.audiences]));
+ assert.deepEqual(bank.map(q=>[q.id,q.difficulty,q.audiences]),E.varietyQuestions(mode,'JAPANESE').map(q=>[q.id,q.difficulty,q.audiences]));
+ const newQuestions=E.PARTY_CATEGORIES.slice(1).flatMap(category=>E.situationQuestions(mode,language,category).map(row=>row.question));
+ const included=new Map(bank.map(q=>[q.id,q]));
+ assert.equal(newQuestions.length,addedByMode[mode]);
+ for(const question of newQuestions){
+  assert.deepEqual(included.get(question.id),question,'Every new prompt is eligible with its edited level and audience');
+  if(language==='HIRAGANA')assert(!/\p{Script=Han}/u.test([question.prompt,question.answer,...question.options].join(' ')),question.id);
+ }
  const largestQuestions=bank.map(q=>Buffer.byteLength(JSON.stringify(q))+1).sort((a,b)=>b-a);
  assert(largestQuestions.slice(0,E.MAX_VARIETY_PACK).reduce((a,b)=>a+b,1024)<256000,'Largest possible pack must fit the existing transport');
  const onAir=bank.map(q=>(mode==='DRAW'?q.answer:E.onAirPrompt({mode,prompt:q.prompt})).normalize('NFKC').toLowerCase().replace(/\s|[？?。]/g,''));
@@ -38,7 +46,8 @@ for(const language of ['JAPANESE','ENGLISH','HIRAGANA'])for(const mode of E.MODE
  for(const category of E.PARTY_CATEGORIES)for(const level of ['ALL','EASY','NORMAL','HARD']){
   const matching = bank.filter(q => E.matchesPartyPlan(q, { partyCategory:category, partyLevel:level }));
   const pack = E.varietyPack(bank,{partyCategory:category,partyLevel:level,order:'RANDOM'});
-  if (category!=='ALL' && level!=='ALL') assert(matching.length >= 30, 'Sparse category '+mode+'/'+category+'/'+level);
+  assert(matching.length > 0, 'Each category and level remains playable '+mode+'/'+category+'/'+level);
+  if (category!=='ALL' && level==='ALL') assert(matching.length>= (mode==='NEAREST'?40:90), 'Sparse category '+mode+'/'+category);
   assert(E.validBankForMode(mode,pack),mode+'/'+category+'/'+level+'/'+language);
   const w=E.createShow();for(const id of ['a','b','c'])E.addAnswerer(w,id,id);cmd(w,{type:'configure',title:'Test',mode,teamCount:2});cmd(w,{type:'bank',questions:pack,source:'Variety '+category});cmd(w,{type:'plan',...w.plan,partyCategory:category,partyLevel:level,partyFormat:'CHOICE'});cmd(w,{type:'start'});
   assert.equal(w.queue.length,Math.min(matching.length,E.MAX_VARIETY_PACK),mode+category+level);
@@ -48,7 +57,7 @@ for(const language of ['JAPANESE','ENGLISH','HIRAGANA'])for(const mode of E.MODE
   if(!['DRAW','NEAREST'].includes(mode)){assert.equal(w.round.question.options.length,4);assert.equal(new Set(w.round.question.options).size,4);if(!w.round.question.opinion)assert(w.round.question.options.includes(w.round.question.answer));}
  }
 }
-assert.equal(total,18000,'Expanded catalogue size');
+assert.equal(total,17470,'Reviewed catalogue size');
 const pool = E.varietyQuestions('CONSENSUS','JAPANESE');
 assert.deepEqual(E.varietyPack(pool,{order:'SEQUENTIAL'}),pool.slice(0,E.MAX_VARIETY_PACK));
 const rounds = Array.from({length:5},()=>E.varietyPack(pool,{order:'RANDOM'}));
@@ -65,13 +74,16 @@ cmd(w,{type:'close',roundId:r});assert.equal(E.viewFor(w,S).round.tiles[0].visib
 cmd(w,{type:'autoPause',roundId:r});const phase=w.phase;E.tickShow(w,90000);assert.equal(w.phase,phase);assert.equal(w.autoProgress,undefined);assert.equal(E.act(w,P('a'),{type:'autoPause',roundId:r}),'AUTH');
 cmd(w,{type:'score',roundId:r});E.tickShow(w,100000);assert.equal(w.phase,'scoreboard');cmd(w,{type:'autoPause',roundId:r},H,100001);E.tickShow(w,100001);E.tickShow(w,105002);assert.equal(w.phase,'finished');
 const authority=new E.ShowAuthority('host_key_1234567890');const screen=authority.join({protocol:1,role:'screen',key:'screen_key_1234567890'});assert(!screen.error);assert.equal(authority.view(H).audienceScreens,1);authority.leave(screen.actor);assert.equal(authority.view(H).audienceScreens,0);
-console.log('PASS '+total+' available prompts, 30+ per mode/category/level, unique on-air text, bounded randomized packs, automatic choice validation and broadcast privacy.');
+console.log('PASS '+total+' available prompts, each mode/category/level playable, unique on-air text, bounded randomized packs, automatic choice validation and broadcast privacy.');
 
 const trivia = E.varietyQuestions('STANDARD', 'JAPANESE');
 const school = trivia.find(q => q.id === 'party-trivia-1-SCHOOL');
 const invoice = trivia.find(q => q.id === 'party-clue-2-MONEY');
 assert(school.audiences.includes('ELEMENTARY') && !school.audiences.includes('ADULT'));
 assert.deepEqual(invoice.audiences, ['ADULT']);
+assert.equal(trivia.find(q=>q.prompt==='バナナの「ナ」は何個？').difficulty,'EASY');
+assert.equal(trivia.find(q=>q.answer==='ケラチン').difficulty,'HARD');
+assert.equal(trivia.find(q=>q.id==='party-situation-half-past-three-clock-angle-SCHOOL').answer,'75度');
 for (const audiences of [[], ['ALL'], ['ADULT', 'ADULT'], ['UNKNOWN']]) {
  assert(!E.validQuestion({...school, audiences}));
 }
@@ -106,3 +118,29 @@ assert.equal(restored.command(H,{type:'plan',partyAudience:'ADULT'}),null);
 assert.equal(restored.command(H,{type:'start'}),null);
 assert.equal(restored.world.round.question.id,'learning');
 console.log('PASS four audience selections in every mode and language, matching packs, zero-result safety, old room saves and unchanged learning selections.');
+
+const romance=E.varietyQuestions('CONSENSUS','JAPANESE');
+for(const [partyAudience, topic] of [['ELEMENTARY','library-book'],['MIDDLE','trip-shop'],['HIGH','graduation-contact'],['ADULT','rainy-date-plan']]){
+ const plan={order:'RANDOM',partyCategory:'LOVE',partyLevel:'HARD',partyAudience};
+ const pack=E.varietyPack(romance,plan);
+ const scenario=pack.find(q=>q.id===`party-situation-${topic}-LOVE`);
+ assert.deepEqual(scenario.audiences,[partyAudience]);
+ assert(pack.every(q=>q.audiences.includes(partyAudience)));
+ assert.equal(romance.filter(q=>q.category==='LOVE'&&q.id.startsWith('party-situation-')&&q.audiences.length===1&&q.audiences[0]===partyAudience).length,6);
+ const world=E.createShow();for(const id of ['a','b'])E.addAnswerer(world,id,id);
+ cmd(world,{type:'configure',title:'Party',mode:'CONSENSUS',teamCount:2});
+ cmd(world,{type:'bank',questions:pack,variety:plan});
+ cmd(world,{type:'plan',limit:1});
+ cmd(world,{type:'start'});
+ assert.equal(world.round.question.id,scenario.id,'Short games start with a question written for the selected audience');
+}
+
+const surveys=E.varietyQuestions('NEAREST','JAPANESE');
+assert.equal(surveys.length,924);
+assert(surveys.every(q=>q.opinion&&q.format==='TEXT'&&!q.answer&&q.options.length===0));
+assert(!surveys.some(q=>q.id.startsWith('party-estimate-scene-')||q.id.startsWith('expanded-')));
+const surveysByCategory = surveys.filter(q=>q.id.startsWith('party-number-'));
+assert.equal(surveysByCategory.length,600);
+assert(surveysByCategory.every(q=>/何(?:[分秒円回個枚冊人日時曲軒]|種類|ページ|か所|メートル)|(?:いくら.*円)|いくつの鉢/u.test(q.prompt)));
+assert(E.isLegacyVarietyId('NEAREST','party-estimate-scene-31-LOVE'));
+console.log('PASS concrete number scenarios, independent difficulty and age labels, and an audience-specific first question for each age.');

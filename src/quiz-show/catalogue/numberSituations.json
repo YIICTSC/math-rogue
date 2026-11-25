@@ -1,0 +1,1042 @@
+{
+  "ANIMALS": [
+    ["zoo-watch", "EASY",
+      ["動物園で{scene}がよく見える。何分くらい立ち止まって見たい？", "You have a great view of {scene} at the zoo. How many minutes would you stop to watch?", "どうぶつえんで {scene}が よくみえる。なんぷんくらい たちどまって みたい？"],
+      [
+        ["ペンギン", "the penguins", "ペンギン"],
+        ["キリン", "the giraffes", "キリン"],
+        ["ゾウ", "the elephants", "ゾウ"],
+        ["アザラシ", "the seals", "アザラシ"],
+        ["レッサーパンダ", "the red pandas", "レッサーパンダ"],
+        ["カピバラ", "the capybaras", "カピバラ"]
+      ]],
+    ["animal-album", "EASY",
+      ["{scene}の写真が30枚ある。家族にまず何枚見せる？", "You have 30 photos of {scene}. How many do you show your family first?", "{scene}の しゃしんが30まいある。かぞくに まずなんまいみせる？"],
+      [
+        ["眠そうな猫", "a sleepy cat", "ねむそうな ネコ"],
+        ["走っている犬", "a running dog", "はしっている イヌ"],
+        ["牧場のヒツジ", "sheep on a farm", "ぼくじょうの ヒツジ"],
+        ["浜辺のカモメ", "gulls on the beach", "はまべの カモメ"],
+        ["池のカモ", "ducks in a pond", "いけの カモ"],
+        ["並んだ子ヤギ", "baby goats in a row", "ならんだ コヤギ"]
+      ]],
+    ["animal-exhibit-queue", "NORMAL",
+      ["{scene}を近くで見られる列。何分までなら並ぶ？", "There is a queue for a close look at {scene}. How many minutes would you wait?", "{scene}を ちかくでみられる れつ。なんぷんまでなら ならぶ？"],
+      [
+        ["クラゲの光る水槽", "a glowing jellyfish tank", "クラゲの ひかるすいそう"],
+        ["大きな水槽のエイ", "a ray in a large tank", "おおきなすいそうの エイ"],
+        ["子どものサル", "a young monkey", "こどもの サル"],
+        ["昼寝中のライオン", "a napping lion", "ひるねちゅうの ライオン"],
+        ["フクロウの飛行展示", "an owl flight show", "フクロウの ひこうてんじ"],
+        ["ひよこのふれあい広場", "a chick encounter", "ひよこの ふれあいひろば"]
+      ]],
+    ["animal-favorites", "NORMAL",
+      ["{scene}の図鑑から、特に気になったものを何種類まで覚えて帰りたい？", "You are looking through a guide to {scene}. How many favorites would you try to remember by the time you leave?", "{scene}の ずかんから、とくに きになったものを なんしゅるいまで おぼえてかえりたい？"],
+      [
+        ["海の魚", "ocean fish", "うみのさかな"],
+        ["身近な野鳥", "local birds", "みぢかなやちょう"],
+        ["里山の昆虫", "woodland insects", "さとやまのこんちゅう"],
+        ["牧場の動物", "farm animals", "ぼくじょうのどうぶつ"],
+        ["動物の赤ちゃん", "baby animals", "どうぶつの あかちゃん"],
+        ["いろいろな犬", "dog breeds", "いろいろなイヌ"]
+      ]],
+    ["animals-closing-time", "HARD",
+      ["閉園まで20分、出口まで歩いて5分。最後に{scene}を見るためなら、列に何分まで並ぶ？", "The zoo closes in 20 minutes and the exit is a five-minute walk. How many minutes would you queue to see {scene} before leaving?", "へいえんまで20ぷん、でぐちまで あるいて5ふん。さいごに{scene}を みるためなら、れつになんぷんまで ならぶ？"],
+      [
+        ["カワウソのおやつ", "otter feeding time", "カワウソの おやつ"],
+        ["水を飲むシマウマ", "a zebra drinking", "みずをのむ シマウマ"],
+        ["走るミーアキャット", "meerkats running", "はしる ミーアキャット"],
+        ["アシカのショー", "a sea lion show", "アシカの ショー"],
+        ["歩くカメ", "a turtle walking", "あるく カメ"],
+        ["鳥が巣に戻る様子", "birds returning to their nests", "とりが すに もどるようす"]
+      ]]
+  ],
+  "FOOD": [
+    ["favorite-warm-food", "EASY",
+      ["屋台でできたての{scene}を待つ。何分までなら待ちたい？", "A stall is making fresh {scene}. How many minutes would you wait for it?", "やたいで できたての{scene}をまつ。なんぷんまでなら まちたい？"],
+      [
+        ["たこ焼き", "takoyaki", "たこやき"],
+        ["焼きとうもろこし", "grilled corn", "やきとうもろこし"],
+        ["大判焼き", "filled pancakes", "おおばんやき"],
+        ["焼きそば", "fried noodles", "やきそば"],
+        ["じゃがバター", "a buttered potato", "じゃがバター"],
+        ["焼き団子", "grilled rice dumplings", "やきだんご"]
+      ]],
+    ["snack-plate", "EASY",
+      ["みんなでつまむ{scene}。おかわり一回ぶんなら、何個ほしい？", "You are sharing {scene}. How many pieces would you want for one extra helping?", "みんなで つまむ{scene}。おかわりいっかいぶんなら、なんこほしい？"],
+      [
+        ["からあげ", "fried chicken", "からあげ"],
+        ["ミニおにぎり", "mini rice balls", "ミニおにぎり"],
+        ["クッキー", "cookies", "クッキー"],
+        ["一口チョコ", "bite-size chocolates", "ひとくちチョコ"],
+        ["一口のり巻き", "bite-size sushi rolls", "ひとくち のりまき"],
+        ["肉まん", "steamed buns", "にくまん"]
+      ]],
+    ["tasting-plate", "NORMAL",
+      ["{scene}の食べ比べ。舌が疲れる前に、何種類くらい試したい？", "You can sample different kinds of {scene}. How many would you try before taking a break?", "{scene}の たべくらべ。したが つかれるまえに、なんしゅるいくらい ためしたい？"],
+      [
+        ["アイス", "ice cream", "アイス"],
+        ["焼きたてパン", "fresh bread", "やきたてパン"],
+        ["カレー", "curry", "カレー"],
+        ["おせんべい", "rice crackers", "おせんべい"],
+        ["フルーツ", "fruit", "フルーツ"],
+        ["チーズ", "cheese", "チーズ"]
+      ]],
+    ["favorite-toppings", "NORMAL",
+      ["{scene}を好きに作れる。自分の分に具やトッピングを何種類入れたい？", "You can customize your own {scene}. How many toppings or fillings would you add?", "{scene}を すきにつくれる。じぶんのぶんに ぐやトッピングを なんしゅるいいれたい？"],
+      [
+        ["ピザ", "pizza", "ピザ"],
+        ["クレープ", "a crepe", "クレープ"],
+        ["お茶づけ", "tea rice", "おちゃづけ"],
+        ["サンドイッチ", "a sandwich", "サンドイッチ"],
+        ["かき氷", "shaved ice", "かきごおり"],
+        ["お好み焼き", "okonomiyaki", "おこのみやき"]
+      ]],
+    ["lunch-dessert-budget", "HARD",
+      ["昼食とデザートで予算は1,200円。{scene}を昼食に選ぶなら、デザート用にいくら残しておく？（円）", "Your lunch and dessert budget is 1,200 yen. If lunch is {scene}, how many yen would you save for dessert?", "ちゅうしょくとデザートで よさんは1200えん。{scene}を ちゅうしょくにえらぶなら、デザートように いくらのこしておく？（えん）"],
+      [
+        ["ラーメン", "ramen", "ラーメン"],
+        ["うどん", "udon", "うどん"],
+        ["ハンバーガー", "a burger", "ハンバーガー"],
+        ["パンとスープ", "bread and soup", "パンとスープ"],
+        ["おにぎりのセット", "a rice-ball set", "おにぎりのセット"],
+        ["定食", "a set meal", "ていしょく"]
+      ]]
+  ],
+  "LOVE": [
+    ["elementary-share-recess", "EASY",
+      ["気になる子と休み時間に{scene}で遊べる。何分いっしょに遊べたらうれしい？", "You get to play {scene} with your crush at recess. How many minutes together would make you happy?", "きになること やすみじかんに{scene}であそべる。なんぷん いっしょにあそべたら うれしい？"],
+      [
+        ["おにごっこ", "tag", "おにごっこ"],
+        ["なわとび", "jump rope", "なわとび"],
+        ["ドッジボール", "dodgeball", "ドッジボール"],
+        ["しりとり", "a word-chain game", "しりとり"],
+        ["お絵かき", "drawing", "おえかき"],
+        ["折り紙", "origami", "おりがみ"]
+      ], ["ELEMENTARY"]],
+    ["middle-pre-message", "NORMAL",
+      ["{scene}のあと、気になる人に「おつかれ！」と連絡したい。落ち着いて送るなら、何分後くらい？", "After {scene}, you want to text your crush “Nice work!” How many minutes later would you send it?", "{scene}のあと、きになるひとに「おつかれ！」と れんらくしたい。おちついて おくるなら、なんぷんごくらい？"],
+      [
+        ["部活の試合", "a club match", "ぶかつのしあい"],
+        ["委員会の当番", "a committee shift", "いいんかいのとうばん"],
+        ["体育祭の練習", "sports-day practice", "たいいくさいのれんしゅう"],
+        ["合唱の発表", "a choir concert", "がっしょうのはっぴょう"],
+        ["掃除当番", "classroom cleanup duty", "そうじとうばん"],
+        ["遠足の班行動", "the group part of a school trip", "えんそくの はんこうどう"]
+      ], ["MIDDLE"]],
+    ["high-date-split-after-school", "HARD",
+      ["放課後に気になる人と{scene}へ。使える時間は45分、駅まで歩いて10分。何分くらい一緒に過ごしたい？", "After school, you and your crush go to {scene}. You have 45 minutes and the station is a ten-minute walk away. How many minutes would you spend together there?", "ほうかごに きになるひとと{scene}へ。つかえるじかんは45ふん、えきまであるいて10ぷん。なんぷんくらい いっしょにすごしたい？"],
+      [
+        ["図書室", "the library", "としょしつ"],
+        ["パン屋", "a bakery", "パンや"],
+        ["本屋", "a bookshop", "ほんや"],
+        ["公園", "the park", "こうえん"],
+        ["雑貨屋", "a gift shop", "ざっかや"],
+        ["帰り道のカフェ", "a cafe on the way home", "かえりみちのカフェ"]
+      ], ["HIGH"]],
+    ["adult-gift-budget", "NORMAL",
+      ["仕事で忙しい相手に、{scene}をちょっとした贈り物に。いくらくらいなら気軽に渡せる？（円）", "You want to give someone who has been busy at work a small gift of {scene}. About how many yen would feel right for a casual gift?", "しごとで いそがしいあいてに、{scene}をちょっとした おくりものに。いくらくらいなら きがるにわたせる？（えん）"],
+      [
+        ["焼き菓子", "baked treats", "やきがし"],
+        ["コーヒー豆", "coffee beans", "コーヒーまめ"],
+        ["入浴剤", "bath salts", "にゅうよくざい"],
+        ["小さな花束", "a little bouquet", "ちいさなはなたば"],
+        ["紅茶のセット", "a tea set", "こうちゃのセット"],
+        ["ハンカチ", "a handkerchief", "ハンカチ"]
+      ], ["ADULT"]],
+    ["friends-first-meetup", "EASY",
+      ["久しぶりの友だちと{scene}で待ち合わせ。何分前に着くと落ち着く？", "You are meeting an old friend at {scene}. How many minutes early would you arrive to feel relaxed?", "ひさしぶりの ともだちと{scene}で まちあわせ。なんぷんまえに つくと おちつく？"],
+      [
+        ["駅前", "the station entrance", "えきまえ"],
+        ["本屋の入口", "a bookshop entrance", "ほんやのいりぐち"],
+        ["公園のベンチ", "a park bench", "こうえんのベンチ"],
+        ["映画館", "the cinema", "えいがかん"],
+        ["商店街の広場", "the shopping-street square", "しょうてんがいのひろば"],
+        ["図書館の入口", "the library entrance", "としょかんのいりぐち"]
+      ]]
+  ],
+  "DAILY": [
+    ["gather-before-leaving", "EASY",
+      ["{scene}へ出かける日。着替えを始めてから、家を何分で出られそう？", "You are going to {scene}. How many minutes from getting dressed to leaving the house?", "{scene}に でかけるひ。きがえをはじめてから、いえをなんぷんで でられそう？"],
+      [
+        ["近所の店", "a nearby shop", "きんじょのみせ"],
+        ["遊びの約束", "a playdate", "あそびのやくそく"],
+        ["公園", "the park", "こうえん"],
+        ["習い事", "an after-school lesson", "ならいごと"],
+        ["家族との外食", "a family meal out", "かぞくとのがいしょく"],
+        ["朝の散歩", "a morning walk", "あさのさんぽ"]
+      ]],
+    ["tidy-break", "EASY",
+      ["{scene}の片づけを始めた。一度も休まず何分くらい続けられそう？", "You start tidying {scene}. How many minutes would you keep going before a break?", "{scene}の かたづけをはじめた。いちどもやすまず なんぷんくらい つづけられそう？"],
+      [
+        ["机の上", "your desk", "つくえのうえ"],
+        ["本棚", "a bookshelf", "ほんだな"],
+        ["玄関", "the entryway", "げんかん"],
+        ["おもちゃ箱", "a toy box", "おもちゃばこ"],
+        ["洋服だんす", "a chest of drawers", "ようふくだんす"],
+        ["台所", "the kitchen", "だいどころ"]
+      ]],
+    ["lost-at-home-search", "NORMAL",
+      ["家の中で{scene}が見つからない。誰かに聞くまで自分で何分探す？", "You cannot find {scene} at home. How many minutes do you look before asking someone?", "いえのなかで{scene}が みつからない。だれかにきくまで じぶんでなんぷんさがす？"],
+      [
+        ["お気に入りのペン", "your favorite pen", "おきにいりのペン"],
+        ["鍵", "your keys", "かぎ"],
+        ["リモコン", "the remote", "リモコン"],
+        ["片方のイヤホン", "one earbud", "かたほうのイヤホン"],
+        ["充電器", "a charger", "じゅうでんき"],
+        ["明日使う水筒", "the bottle you need tomorrow", "あしたつかう すいとう"]
+      ]],
+    ["replace-household-item", "NORMAL",
+      ["よく使う{scene}が一つ壊れた。買い直すまで、代用品で何日しのげそう？", "Your usual {scene} breaks. How many days would you get by with a substitute before replacing it?", "よくつかう{scene}が ひとつこわれた。かいなおすまで、だいようひんで なんにちしのげそう？"],
+      [
+        ["傘", "umbrella", "かさ"],
+        ["時計", "clock", "とけい"],
+        ["マグカップ", "mug", "マグカップ"],
+        ["洗濯ばさみ", "clothes peg", "せんたくばさみ"],
+        ["スリッパ", "slippers", "スリッパ"],
+        ["スマホ立て", "phone stand", "スマホたて"]
+      ]],
+    ["rainy-morning-time-budget", "HARD",
+      ["朝食も荷物もまだ準備前で、{scene}に出るまで25分。朝食に何分使いたい？", "You still need breakfast and have to pack. You have 25 minutes before leaving for {scene}. How many minutes would you spend on breakfast?", "ちょうしょくも にもつも まだじゅんびまえで、{scene}にでるまで25ふん。ちょうしょくに なんぷんつかいたい？"],
+      [
+        ["日帰り旅行", "a day trip", "ひがえりりょこう"],
+        ["家族の用事", "a family errand", "かぞくのようじ"],
+        ["イベント", "an event", "イベント"],
+        ["通院", "an appointment", "つういん"],
+        ["映画", "a movie", "えいが"],
+        ["朝のスポーツ", "a morning sports session", "あさのスポーツ"]
+      ]]
+  ],
+  "WORLD": [
+    ["travel-one-extra-stop", "EASY",
+      ["旅先で{scene}に寄れる。遠回りが何分までなら寄ってみたい？", "On a trip you could visit {scene}. How many extra minutes would make the detour worthwhile?", "たびさきで{scene}によれる。とおまわりが なんぷんまでなら よってみたい？"],
+      [
+        ["展望台", "a lookout", "てんぼうだい"],
+        ["朝市", "a morning market", "あさいち"],
+        ["古い街並み", "a historic neighborhood", "ふるいまちなみ"],
+        ["海辺の遊歩道", "a seaside path", "うみべのゆうほどう"],
+        ["地元のパン屋", "a local bakery", "じもとのパンや"],
+        ["小さな美術館", "a small art museum", "ちいさなびじゅつかん"]
+      ]],
+    ["city-postcards", "EASY",
+      ["旅先の{scene}の絵はがき。家に持ち帰るなら何枚選ぶ？", "How many postcards of {scene} would you choose to bring home from a trip?", "たびさきの{scene}の えはがき。いえに もちかえるなら なんまいえらぶ？"],
+      [
+        ["港町", "a harbor town", "みなとまち"],
+        ["山の町", "a mountain town", "やまのまち"],
+        ["夜の街並み", "the town at night", "よるのまちなみ"],
+        ["雪景色", "a snowy landscape", "ゆきげしき"],
+        ["公園の花", "the park flowers", "こうえんのはな"],
+        ["橋のある風景", "a scenic bridge", "はしのあるふうけい"]
+      ]],
+    ["local-guided-tour", "NORMAL",
+      ["旅先で{scene}の案内ツアーに参加する。何分のコースがちょうどいい？", "You can take a guided tour of {scene} on your trip. How many minutes would be the right length?", "たびさきで{scene}の あんないツアーに さんかする。なんぷんのコースが ちょうどいい？"],
+      [
+        ["古いお城", "an old castle", "ふるいおしろ"],
+        ["港の市場", "a port market", "みなとのいちば"],
+        ["町の公園", "a city park", "まちのこうえん"],
+        ["温泉街", "a hot-spring town", "おんせんがい"],
+        ["山の集落", "a mountain village", "やまのしゅうらく"],
+        ["街道沿いの宿場", "an old post town", "かいどうぞいのしゅくば"]
+      ]],
+    ["guesthouse-check-in", "NORMAL",
+      ["{scene}で泊まることに。チェックインより何分早く着けば、荷物を置いてから散歩に出られてうれしい？", "You are staying at {scene}. How many minutes before check-in would you aim to arrive so there is time to drop your bags and go for a walk?", "{scene}で とまることに。チェックインより なんぷんはやくつけば、にもつをおいてから さんぽにでられて うれしい？"],
+      [
+        ["海辺の宿", "a seaside inn", "うみべのやど"],
+        ["山小屋", "a mountain lodge", "やまごや"],
+        ["駅前のホテル", "a hotel near a station", "えきまえのホテル"],
+        ["古い町家", "a traditional townhouse", "ふるいまちや"],
+        ["島の民宿", "an island guesthouse", "しまのみんしゅく"],
+        ["湖のそばの宿", "an inn by a lake", "みずうみのそばのやど"]
+      ]],
+    ["rain-and-bus-return", "HARD",
+      ["旅先で雨。帰りのバスまで35分、停留所まで10分ある。{scene}で雨宿りするなら何分まで？", "It rains on your trip. The bus leaves in 35 minutes and the stop is a ten-minute walk away. How many minutes would you shelter at {scene}?", "たびさきであめ。かえりのバスまで35ふん、ていりゅうじょまで10ぷんある。{scene}で あまやどりするなら なんぷんまで？"],
+      [
+        ["駅の喫茶店", "the station cafe", "えきのきっさてん"],
+        ["街角の本屋", "a corner bookshop", "まちかどのほんや"],
+        ["屋根のある市場", "a covered market", "やねのあるいちば"],
+        ["おみやげ屋", "a souvenir shop", "おみやげや"],
+        ["川沿いの休憩所", "a riverside rest stop", "かわぞいのきゅうけいじょ"],
+        ["観光案内所", "a tourist information center", "かんこうあんないじょ"]
+      ]]
+  ],
+  "NATURE": [
+    ["nature-stop-look", "EASY",
+      ["散歩中に{scene}に出会った。何分くらい足を止めて見たい？", "On a walk you come across {scene}. How many minutes would you stop to watch?", "さんぽちゅうに{scene}に であった。なんぷんくらい あしをとめて みたい？"],
+      [
+        ["川の浅瀬を泳ぐ魚", "fish in a shallow stream", "かわのあさせをおよぐさかな"],
+        ["花にとまるチョウ", "a butterfly on a flower", "はなにとまるチョウ"],
+        ["大きな虹", "a large rainbow", "おおきなにじ"],
+        ["風に舞う種", "seeds drifting in the wind", "かぜにまうたね"],
+        ["水を飲む小鳥", "a small bird drinking", "みずをのむことり"],
+        ["岩から落ちる小さな滝", "a little waterfall spilling off a rock", "いわからおちる ちいさなたき"]
+      ]],
+    ["home-garden-plan", "EASY",
+      ["{scene}を初めて育てる。まずいくつの鉢から始めたい？", "You are growing {scene} for the first time. How many pots would you start with?", "{scene}を はじめてそだてる。まずいくつの はちからはじめたい？"],
+      [
+        ["朝顔", "morning glories", "あさがお"],
+        ["バジル", "basil", "バジル"],
+        ["ひまわり", "sunflowers", "ひまわり"],
+        ["いちご", "strawberries", "いちご"],
+        ["ミニトマト", "cherry tomatoes", "ミニトマト"],
+        ["ミント", "mint", "ミント"]
+      ]],
+    ["look-for-changes", "NORMAL",
+      ["{scene}を観察してノートに書く。毎日何回なら無理なく続けられそう？", "You are keeping a notebook about {scene}. How many checks a day could you comfortably keep up?", "{scene}を かんさつして ノートにかく。まいにちなんかいなら むりなく つづけられそう？"],
+      [
+        ["芽が伸びる様子", "new shoots growing", "めがのびるようす"],
+        ["つぼみが開く様子", "flower buds opening", "つぼみがひらくようす"],
+        ["朝と夜の空", "the sky morning and evening", "あさとよるのそら"],
+        ["植木鉢の土の乾き具合", "how dry a pot of soil is", "うえきばちの つちのかわきぐあい"],
+        ["日なたの影の形", "how a shadow changes in the sun", "ひなたのかげのかたち"],
+        ["庭に来る鳥", "birds visiting the garden", "にわにくるとり"]
+      ]],
+    ["science-demo-repeat", "NORMAL",
+      ["科学館で{scene}を試せる。変化が分かるまで、何回やってみたい？", "At the science museum you can try {scene}. How many times would you try it to see what changes?", "かがくかんで{scene}を ためせる。へんかがわかるまで、なんかい やってみたい？"],
+      [
+        ["磁石を近づける実験", "a magnet experiment", "じしゃくをちかづけるじっけん"],
+        ["水の流れを変える実験", "redirecting a stream of water", "みずのながれをかえるじっけん"],
+        ["輪の大きさを変えたシャボン玉", "making bubbles with different size loops", "わのおおきさをかえた シャボンだま"],
+        ["紙をくるくる落とす実験", "testing how paper spins as it falls", "かみをくるくるおとすじっけん"],
+        ["空気で動く車", "a car powered by air", "くうきでうごくくるま"],
+        ["色を混ぜるライト", "a colored-light mixing exhibit", "いろをまぜるライト"]
+      ]],
+    ["weather-limited-trail", "HARD",
+      ["雨が降り出すまであと30分の予報。{scene}まで往復15分なら、着いてから何分観察に使いたい？", "Rain is forecast in 30 minutes. The round trip to {scene} takes 15 minutes. How many minutes would you spend observing once there?", "あめがふりだすまで あと30ぷんのよほう。{scene}まで おうふく15ふんなら、ついてから なんぷん かんさつにつかいたい？"],
+      [
+        ["池", "the pond", "いけ"],
+        ["花畑", "the flower meadow", "はなばたけ"],
+        ["浜辺", "the beach", "はまべ"],
+        ["雑木林", "the grove", "ぞうきばやし"],
+        ["川沿いの草地", "the riverside meadow", "かわぞいのくさち"],
+        ["干潟の見晴らし台", "the tidal-flat viewpoint", "ひがたのみはらしだい"]
+      ]]
+  ],
+  "CULTURE": [
+    ["try-book-pages", "EASY",
+      ["{scene}の本を店で手に取った。買うか決めるまで何ページ試し読みしたい？", "You pick up {scene} in a shop. How many pages would you sample before deciding whether to buy it?", "{scene}のほんを みせでてにとった。かうかきめるまで なんページ ためしよみしたい？"],
+      [
+        ["探偵もの", "a detective story", "たんていもの"],
+        ["動物の絵本", "an animal picture book", "どうぶつのえほん"],
+        ["冒険漫画", "an adventure comic", "ぼうけんまんが"],
+        ["料理の本", "a cookbook", "りょうりのほん"],
+        ["写真集", "a photo book", "しゃしんしゅう"],
+        ["短いお話", "a book of short stories", "みじかいおはなし"]
+      ]],
+    ["learn-song-during-event", "EASY",
+      ["{scene}で好きな曲を見つけた。帰ってから何回なら続けて聴きたい？", "You hear a song you love {scene}. How many times would you play it in a row when you get home?", "{scene}で すきなきょくをみつけた。かえってから なんかいなら つづけてききたい？"],
+      [
+        ["映画", "at the movies", "えいが"],
+        ["音楽会", "at a concert", "おんがくかい"],
+        ["文化祭", "at a school festival", "ぶんかさい"],
+        ["友だちの家", "at a friend’s place", "ともだちのいえ"],
+        ["ラジオ", "on the radio", "ラジオ"],
+        ["ダンスの発表会", "at a dance show", "ダンスのはっぴょうかい"]
+      ]],
+    ["listen-before-choosing", "NORMAL",
+      ["{scene}を聞き比べて、いちばん好きな曲を選ぶ。何曲くらいなら決めやすい？", "You are choosing a favorite from {scene}. How many tracks would be a manageable number to compare?", "{scene}を ききくらべて、いちばんすきなきょくをえらぶ。なんきょくくらいなら きめやすい？"],
+      [
+        ["ピアノ曲", "piano pieces", "ピアノきょく"],
+        ["映画の主題歌", "movie theme songs", "えいがのしゅだいか"],
+        ["ゲームの音楽", "game soundtracks", "ゲームのおんがく"],
+        ["ダンス曲", "dance tracks", "ダンスきょく"],
+        ["アニメの曲", "animated show themes", "アニメのきょく"],
+        ["雨の日の音楽", "rainy-day music", "あめのひのおんがく"]
+      ]],
+    ["show-opening-buffers", "NORMAL",
+      ["客席が指定された{scene}。開始の何分前までに座っておきたい？", "You have an assigned seat for {scene}. How many minutes before it starts would you like to be seated?", "きゃくせきが きまっている{scene}。かいしのなんぷんまえまでに すわっておきたい？"],
+      [
+        ["演奏会", "a concert", "えんそうかい"],
+        ["劇", "a play", "げき"],
+        ["映画", "a movie", "えいが"],
+        ["ミュージカル", "a musical", "ミュージカル"],
+        ["落語", "rakugo storytelling", "らくご"],
+        ["人形劇", "a puppet show", "にんぎょうげき"]
+      ]],
+    ["exhibit-time-split", "HARD",
+      ["展覧会にいられるのは30分。見たい展示は二つあり、まず{scene}を見る。そちらに何分かけたい？", "You have 30 minutes at an exhibition and want to see two displays. How many minutes would you give the first display, {scene}?", "てんらんかいにいられるのは30ぷん。みたいてんじはふたつあり、まず{scene}をみる。そちらに なんぷんかけたい？"],
+      [
+        ["写真", "photography", "しゃしん"],
+        ["絵画", "paintings", "かいが"],
+        ["衣装", "costumes", "いしょう"],
+        ["楽器", "instruments", "がっき"],
+        ["絵本の原画", "picture-book artwork", "えほんのげんが"],
+        ["漫画の下書き", "comic sketches", "まんがのしたがき"]
+      ]]
+  ],
+  "FANTASY": [
+    ["borrow-tiny-magic", "EASY",
+      ["一日だけ魔法で{scene}を手伝ってもらえる。何回使えたら満足？", "For one day, magic can help you with {scene}. How many uses would make you happy?", "いちにちだけ まほうで{scene}を てつだってもらえる。なんかい つかえたら まんぞく？"],
+      [
+        ["片づけ", "tidying up", "かたづけ"],
+        ["皿洗い", "doing the dishes", "さらあらい"],
+        ["荷物運び", "carrying your bags", "にもつはこび"],
+        ["お弁当づくり", "making lunch", "おべんとうづくり"],
+        ["絵の色ぬり", "coloring a picture", "えのいろぬり"],
+        ["畑の水やり", "watering vegetables", "はたけのみずやり"]
+      ]],
+    ["magic-shop-return", "EASY",
+      ["魔法のお店で{scene}を借りられる。何分使ってから返したい？", "A magic shop rents out {scene}. How many minutes would you use it before returning it?", "まほうの おみせで{scene}を かりられる。なんぷんつかってから かえしたい？"],
+      [
+        ["空飛ぶほうき", "a flying broom", "そらとぶほうき"],
+        ["雨をよけるマント", "a rain-repelling cloak", "あめをよけるマント"],
+        ["暗い道を照らす杖", "a wand that lights dark paths", "くらいみちをてらすつえ"],
+        ["絵が動く本", "a book with moving pictures", "えがうごくほん"],
+        ["水の上を歩ける靴", "shoes that walk on water", "みずのうえをあるけるくつ"],
+        ["話すカバン", "a talking bag", "はなすカバン"]
+      ]],
+    ["ticket-magic-ride", "NORMAL",
+      ["遊園地に{scene}ができた。1回乗るなら、いくらまで払う？（円）", "An amusement park opens {scene}. How many yen would you pay for one ride?", "ゆうえんちに{scene}ができた。いっかいのるなら、いくらまではらう？（えん）"],
+      [
+        ["空飛ぶじゅうたん便", "a flying-carpet service", "そらとぶじゅうたんびん"],
+        ["月まで飛ぶ観覧車", "a Ferris wheel that reaches the Moon", "つきまでとぶかんらんしゃ"],
+        ["雲のすべり台", "a cloud slide", "くものすべりだい"],
+        ["竜の背の散歩コース", "a ride on a dragon’s back", "りゅうのせのさんぽコース"],
+        ["星をくぐるゴンドラ", "a gondola that threads between stars", "ほしをくぐるゴンドラ"],
+        ["水のトンネルを進む船", "a boat through a tunnel of water", "みずのトンネルをすすむふね"]
+      ]],
+    ["snack-give-companion", "NORMAL",
+      ["冒険の途中で{scene}にごちそうしたい。持っているおやつ6個のうち、何個渡す？", "On an adventure you want to treat {scene}. Out of your six snacks, how many would you offer?", "ぼうけんの とちゅうで{scene}に ごちそうしたい。もっている おやつ6このうち、なんこわたす？"],
+      [
+        ["人なつこい小さな竜", "a friendly little dragon", "ひとなつこいちいさなりゅう"],
+        ["働き者の小人", "a hardworking gnome", "はたらきもののこびと"],
+        ["迷子の妖精", "a lost fairy", "まいごのようせい"],
+        ["地図を貸した魔法使い", "the wizard who lent you a map", "ちずをかしたまほうつかい"],
+        ["疲れた冒険仲間", "a tired adventure companion", "つかれたぼうけんなかま"],
+        ["道案内をしたしゃべるキツネ", "the talking fox who showed the way", "みちあんないをしたしゃべるキツネ"]
+      ]],
+    ["limited-transformation", "HARD",
+      ["変身の魔法は20分だけ。着替えと片づけで合計6分かかる。{scene}の姿で何分遊びたい？", "The transformation lasts 20 minutes. Changing and tidying take six minutes in total. How many minutes would you like to play as {scene}?", "へんしんのまほうは20ぷんだけ。きがえと かたづけで ごうけい6ぷんかかる。{scene}のすがたで なんぷんあそびたい？"],
+      [
+        ["ネコ", "a cat", "ネコ"],
+        ["小さな竜", "a little dragon", "ちいさなりゅう"],
+        ["ペンギン", "a penguin", "ペンギン"],
+        ["雪だるま", "a snowman", "ゆきだるま"],
+        ["大きなクマ", "a large bear", "おおきなクマ"],
+        ["しゃべる木", "a talking tree", "しゃべるき"]
+      ]]
+  ],
+  "SPORTS": [
+    ["warmup-at-start", "EASY",
+      ["友だちと{scene}をする前に、何分くらい準備運動したい？", "Before playing {scene} with friends, how many minutes would you warm up?", "ともだちと{scene}をするまえに、なんぷんくらい じゅんびうんどうしたい？"],
+      [
+        ["サッカー", "soccer", "サッカー"],
+        ["バスケ", "basketball", "バスケ"],
+        ["バレー", "volleyball", "バレー"],
+        ["ドッジボール", "dodgeball", "ドッジボール"],
+        ["テニス", "tennis", "テニス"],
+        ["バドミントン", "badminton", "バドミントン"]
+      ]],
+    ["streak-pride", "EASY",
+      ["練習で{scene}に挑戦。連続で何回成功したらうれしい？", "You practice {scene}. How many successes in a row would make you proud?", "れんしゅうで{scene}に ちょうせん。れんぞくで なんかいせいこうしたら うれしい？"],
+      [
+        ["フリースロー", "free throws", "フリースロー"],
+        ["リフティング", "keep-ups with a soccer ball", "リフティング"],
+        ["縄跳び", "jump rope", "なわとび"],
+        ["バレーのサーブ", "volleyball serves", "バレーのサーブ"],
+        ["的当て", "target throws", "まとあて"],
+        ["卓球のラリー", "table tennis rallies", "たっきゅうのラリー"]
+      ]],
+    ["games-sideline-arrival", "NORMAL",
+      ["{scene}を会場で観戦する。いい場所を取るために開始の何分前に着きたい？", "You are watching {scene} in person. How many minutes before it starts would you arrive for a good spot?", "{scene}を かいじょうで かんせんする。いいばしょをとるために かいしのなんぷんまえにつきたい？"],
+      [
+        ["リレー", "the relay", "リレー"],
+        ["野球の試合", "a baseball game", "やきゅうのしあい"],
+        ["テニスの決勝", "a tennis final", "テニスのけっしょう"],
+        ["バレーの大会", "a volleyball tournament", "バレーのたいかい"],
+        ["マラソンのゴール", "the finish of a marathon", "マラソンのゴール"],
+        ["サッカーの試合", "a soccer match", "サッカーのしあい"]
+      ]],
+    ["failed-practice-tries", "NORMAL",
+      ["{scene}の練習がなかなか成功しない。ひと息つくまであと何回挑戦する？", "Your practice at {scene} is not going well. How many more tries would you take before a breather?", "{scene}のれんしゅうが なかなか せいこうしない。ひといきつくまで あとなんかいちょうせんする？"],
+      [
+        ["遠くへのパス", "long passes", "とおくへのパス"],
+        ["走り幅跳び", "the long jump", "はしりはばとび"],
+        ["逆手でのシュート", "shooting with your other hand", "ぎゃくてでのシュート"],
+        ["野球のバント", "bunting", "やきゅうのバント"],
+        ["バドミントンのスマッシュ", "badminton smashes", "バドミントンのスマッシュ"],
+        ["ボールを的に当てる投球", "pitching at a target", "ボールをまとにあてるとうきゅう"]
+      ]],
+    ["sports-court-time-share", "HARD",
+      ["{scene}のコートを50分借りた。準備と片づけは合計10分。試合に入る前の練習に何分使う？", "You have a {scene} court for 50 minutes. Setup and cleanup take ten minutes in total. How many minutes would you practice before the match?", "{scene}のコートを50ぷんかりた。じゅんびとかたづけは ごうけい10ぷん。しあいにはいるまえの れんしゅうになんぷんつかう？"],
+      [
+        ["バスケ", "basketball", "バスケ"],
+        ["テニス", "tennis", "テニス"],
+        ["バドミントン", "badminton", "バドミントン"],
+        ["バレー", "volleyball", "バレー"],
+        ["フットサル", "futsal", "フットサル"],
+        ["卓球", "table tennis", "たっきゅう"]
+      ]]
+  ],
+  "GAMES": [
+    ["teach-new-rules", "EASY",
+      ["{scene}を初めて遊ぶ友だちに説明する。始める前の説明は何分くらいが遊びやすい？", "You are teaching a friend {scene}. How many minutes of explanation would be right before playing?", "{scene}を はじめてあそぶともだちに せつめいする。はじめるまえの せつめいは なんぷんくらいがあそびやすい？"],
+      [
+        ["かるた", "karuta", "かるた"],
+        ["トランプの神経衰弱", "Memory with playing cards", "トランプのしんけいすいじゃく"],
+        ["すごろく", "a roll-and-move game", "すごろく"],
+        ["お絵かき伝言ゲーム", "a drawing telephone game", "おえかきでんごんゲーム"],
+        ["協力型のパズル", "a cooperative puzzle game", "きょうりょくがたのパズル"],
+        ["陣取りゲーム", "a territory game", "じんとりゲーム"]
+      ]],
+    ["party-rematch", "EASY",
+      ["友だちと{scene}をして一勝一敗。帰る前に何回続けて遊びたい？", "You and a friend are one win each in {scene}. How many more rounds would you play before going home?", "ともだちと{scene}をして いっしょういっぱい。かえるまえに なんかいつづけてあそびたい？"],
+      [
+        ["じゃんけん", "rock-paper-scissors", "じゃんけん"],
+        ["オセロ", "Reversi", "オセロ"],
+        ["レースゲーム", "a racing game", "レースゲーム"],
+        ["トランプの大富豪", "President with cards", "トランプのだいふごう"],
+        ["ミニゲーム対決", "a minigame contest", "ミニゲームたいけつ"],
+        ["カードのスピード", "Speed with cards", "カードのスピード"]
+      ]],
+    ["choose-group-size", "NORMAL",
+      ["{scene}をみんなでする。待ち時間も考えると、何人チームがちょうどいい？", "You are playing {scene} as a group. Considering wait times, how many players make a good team?", "{scene}をみんなでする。まちじかんもかんがえると、なんにんチームが ちょうどいい？"],
+      [
+        ["ジェスチャークイズ", "charades", "ジェスチャークイズ"],
+        ["ことば当て", "a word-guessing game", "ことばあて"],
+        ["しりとり", "a word-chain game", "しりとり"],
+        ["謎解き", "a puzzle challenge", "なぞとき"],
+        ["リレー形式のゲーム", "a relay-style game", "リレーけいしきのゲーム"],
+        ["早押しクイズ", "a buzzer quiz", "はやおしクイズ"]
+      ]],
+    ["arcade-tutorial-tries", "NORMAL",
+      ["初めての{scene}。ルールを見直すまで、先に何回プレイしてみたい？", "You are new to {scene}. How many tries would you take before looking at the rules again?", "はじめての{scene}。ルールをみなおすまで、さきに なんかいプレイしてみたい？"],
+      [
+        ["音ゲー", "a rhythm game", "おとゲー"],
+        ["対戦パズル", "a versus puzzle game", "たいせんパズル"],
+        ["釣りゲーム", "a fishing game", "つりゲーム"],
+        ["サッカーゲーム", "a soccer game", "サッカーゲーム"],
+        ["ピンボール", "pinball", "ピンボール"],
+        ["玉転がしゲーム", "a ball-rolling game", "たまころがしゲーム"]
+      ]],
+    ["rental-game-final-match", "HARD",
+      ["遊べる残り時間は30分で、帰り支度に5分。最後に{scene}をするなら、一試合は何分以内にしたい？", "You have 30 minutes left and need five minutes to pack up. If you finish with {scene}, how many minutes should the last match take at most?", "あそべる のこりじかんは30ぷんで、かえりじたくに5ふん。さいごに{scene}をするなら、いっしあいは なんぷんいないにしたい？"],
+      [
+        ["ドミノ", "dominoes", "ドミノ"],
+        ["ボードゲーム", "a board game", "ボードゲーム"],
+        ["トランプ", "playing cards", "トランプ"],
+        ["チームクイズ", "a team quiz", "チームクイズ"],
+        ["将棋", "shogi", "しょうぎ"],
+        ["ブロック積み", "a block-stacking game", "ブロックつみ"]
+      ]]
+  ],
+  "SCHOOL": [
+    ["school-practice-before-class", "EASY",
+      ["次は{scene}。始まる前に見直しができるなら、何分ほしい？", "{scene} is next. How many minutes of review would you want before it starts?", "つぎは{scene}。はじまるまえに みなおしができるなら、なんぷんほしい？"],
+      [
+        ["九九の発表", "A times-table recitation", "くくのはっぴょう"],
+        ["英語の小テスト", "An English quiz", "えいごのしょうテスト"],
+        ["漢字の書き取り", "A kanji quiz", "かんじのかきとり"],
+        ["合唱の発表", "A choir performance", "がっしょうのはっぴょう"],
+        ["理科の実験", "A science experiment", "りかのじっけん"],
+        ["読書の感想発表", "A book report", "どくしょのかんそうはっぴょう"]
+      ], ["ELEMENTARY", "MIDDLE", "HIGH"]],
+    ["school-event-photos", "EASY",
+      ["{scene}の思い出を写真に残す。あとで見返すなら何枚くらい選びたい？", "You are saving memories of {scene}. How many photos would you choose to keep?", "{scene}のおもいでを しゃしんにのこす。あとで みかえすなら なんまいくらいえらびたい？"],
+      [
+        ["運動会", "sports day", "うんどうかい"],
+        ["文化祭", "the school festival", "ぶんかさい"],
+        ["遠足", "a field trip", "えんそく"],
+        ["合唱コンクール", "a choir competition", "がっしょうコンクール"],
+        ["卒業式", "graduation", "そつぎょうしき"],
+        ["球技大会", "a school ball-game tournament", "きゅうぎたいかい"]
+      ], ["ELEMENTARY", "MIDDLE", "HIGH"]],
+    ["class-team-size", "NORMAL",
+      ["{scene}を班で行う。一人ずつ出番があるようにするなら何人組がいい？", "Your group is doing {scene}. How many people would give everyone a turn?", "{scene}を はんでおこなう。ひとりずつ でばんがあるようにするなら なんにんぐみがいい？"],
+      [
+        ["教室の飾りつけ", "classroom decorating", "きょうしつの かざりつけ"],
+        ["学校紹介の発表", "a presentation about your school", "がっこうしょうかいの はっぴょう"],
+        ["野外での観察", "field observation", "やがいでの かんさつ"],
+        ["家庭科の調理実習", "a cooking lesson", "かていかの ちょうりじっしゅう"],
+        ["体育館の用具の片づけ", "putting away gym equipment", "たいいくかんの ようぐのかたづけ"],
+        ["学校新聞づくり", "making a school newspaper", "がっこうしんぶんづくり"]
+      ], ["ELEMENTARY", "MIDDLE", "HIGH"]],
+    ["assignment-extra-time", "NORMAL",
+      ["{scene}がもうすぐ提出。少し手直しできるならあと何分ほしい？", "Your {scene} is almost due. How many extra minutes would you want for a final check?", "{scene}が もうすぐていしゅつ。すこし てなおしできるなら あとなんぷんほしい？"],
+      [
+        ["自由研究", "independent project", "じゆうけんきゅう"],
+        ["作文", "essay", "さくぶん"],
+        ["学校のポスター", "school poster", "がっこうのポスター"],
+        ["図工の作品", "art project", "ずこうのさくひん"],
+        ["体育のふり返りノート", "PE reflection", "たいいくのふりかえりノート"],
+        ["実験レポート", "lab report", "じっけんレポート"]
+      ], ["ELEMENTARY", "MIDDLE", "HIGH"]],
+    ["club-festival-timetable", "HARD",
+      ["{scene}の準備にあと40分。片づけに10分かかるとして、全員で合わせる練習に何分使う？", "There are 40 minutes left to prepare for {scene}, and cleanup takes ten minutes. How many minutes would you spend rehearsing together?", "{scene}の じゅんびにあと40ぷん。かたづけに10ぷんかかるとして、ぜんいんであわせる れんしゅうになんぷんつかう？"],
+      [
+        ["文化祭の劇", "the school festival play", "ぶんかさいのげき"],
+        ["合唱発表", "the choir performance", "がっしょうはっぴょう"],
+        ["体育祭のダンス", "the sports day dance", "たいいくさいのダンス"],
+        ["委員会の発表", "the committee presentation", "いいんかいのはっぴょう"],
+        ["放送部の公開収録", "the broadcasting club’s live recording", "ほうそうぶのこうかいしゅうろく"],
+        ["吹奏楽の本番", "the band concert", "すいそうがくのほんばん"]
+      ], ["MIDDLE", "HIGH"]]
+  ],
+  "WORK": [
+    ["craft-experience-minutes", "EASY",
+      ["お仕事体験で{scene}を教えてもらえる。最初に何分くらいやってみたい？", "At a hands-on job day, you can learn {scene}. How many minutes would you want to try it for?", "おしごとたいけんで{scene}を おしえてもらえる。さいしょに なんぷんくらい やってみたい？"],
+      [
+        ["パンを丸める作業", "how to shape bread dough", "パンをまるめるさぎょう"],
+        ["花を包む作業", "how to wrap flowers", "はなをつつむさぎょう"],
+        ["看板を書く作業", "how to paint a shop sign", "かんばんをかくさぎょう"],
+        ["おもちゃの組み立て", "how to assemble a toy", "おもちゃのくみたて"],
+        ["図書の整理", "how to sort books in a library", "としょのせいり"],
+        ["荷物の仕分け", "how to sort parcels", "にもつのしわけ"]
+      ]],
+    ["invention-use-count", "EASY",
+      ["{scene}をすぐ片づけてくれる道具を発明。一週間に何回使いそう？", "You invent a tool that can quickly tidy {scene}. How many times a week would you use it?", "{scene}をすぐ かたづけてくれるどうぐをはつめい。いっしゅうかんに なんかいつかいそう？"],
+      [
+        ["机の上", "your desk", "つくえのうえ"],
+        ["カバンの中", "your bag", "カバンのなか"],
+        ["玄関", "your entryway", "げんかん"],
+        ["台所", "the kitchen", "だいどころ"],
+        ["おもちゃ箱", "the toy box", "おもちゃばこ"],
+        ["引き出し", "a drawer", "ひきだし"]
+      ]],
+    ["shop-opening-crew", "NORMAL",
+      ["小さな{scene}がもうすぐ開店。注文受けや片づけも含めて、何人いれば動きやすそう？", "A small {scene} is about to open. How many people would help order-taking and cleanup run smoothly?", "ちいさな{scene}が もうすぐかいてん。ちゅうもんうけや かたづけもふくめて、なんにんいれば うごきやすそう？"],
+      [
+        ["パン屋", "bakery", "パンや"],
+        ["花屋", "flower shop", "はなや"],
+        ["カフェ", "cafe", "カフェ"],
+        ["文房具店", "stationery shop", "ぶんぼうぐてん"],
+        ["お弁当屋", "lunch shop", "おべんとうや"],
+        ["雑貨屋", "gift shop", "ざっかや"]
+      ]],
+    ["office-demo-tries", "NORMAL",
+      ["職場で新しい{scene}を使う。手順を教えてもらったあと、何回練習したら一人でできそう？", "A new {scene} arrives at work. After a demonstration, how many practice runs would you want before using it on your own?", "しょくばで あたらしい{scene}をつかう。てじゅんをおしえてもらったあと、なんかいれんしゅうしたら ひとりでできそう？"],
+      [
+        ["コピー機", "copier", "コピーき"],
+        ["レジ", "register", "レジ"],
+        ["勤怠アプリ", "timekeeping app", "きんたいアプリ"],
+        ["ラベル印刷機", "label printer", "ラベルいんさつき"],
+        ["予約システム", "booking system", "よやくシステム"],
+        ["宅配受付端末", "shipping terminal", "たくはいうけつけたんまつ"]
+      ], ["ADULT"]],
+    ["office-deadline-budget", "HARD",
+      ["仕事の{scene}を30分後に出す。修正も必要で、上司の確認に5分かかる。自分で見直す時間は何分取りたい？", "Your {scene} is due at work in 30 minutes. It needs fixes and your manager needs five minutes to check it. How many minutes would you reserve for your own review?", "しごとの{scene}を30ぷんごにだす。しゅうせいもひつようで、じょうしのかくにんに5ふんかかる。じぶんでみなおすじかんは なんぷん とりたい？"],
+      [
+        ["報告書", "report", "ほうこくしょ"],
+        ["見積もり", "quote", "みつもり"],
+        ["案内メール", "announcement email", "あんないメール"],
+        ["発表資料", "presentation slides", "はっぴょうしりょう"],
+        ["会議メモ", "meeting notes", "かいぎメモ"],
+        ["お知らせの原稿", "notice draft", "おしらせのげんこう"]
+      ], ["ADULT"]]
+  ],
+  "HISTORY": [
+    ["old-life-experience", "EASY",
+      ["昔の暮らしの体験で{scene}に挑戦できる。何分やってみたい？", "At a living-history event, you can try {scene}. How many minutes would you spend on it?", "むかしのくらしのたいけんで{scene}にちょうせんできる。なんぷん やってみたい？"],
+      [
+        ["竹馬", "stilt walking", "たけうま"],
+        ["石うすで粉ひき", "grinding grain with a stone mill", "いしうすで こなひき"],
+        ["そろばん", "using an abacus", "そろばん"],
+        ["糸車", "spinning thread", "いとぐるま"],
+        ["手すき和紙", "making paper by hand", "てすきわし"],
+        ["昔の着物で写真を撮ること", "taking photos in period clothing", "むかしのきもので しゃしんをとること"]
+      ]],
+    ["history-album-compare", "EASY",
+      ["図書館で昔の{scene}の写真を見つけた。今と比べるために何枚くらい見たい？", "At the library you find old photos of {scene}. How many would you look at to compare it with today?", "としょかんで むかしの{scene}のしゃしんをみつけた。いまとくらべるために なんまいくらいみたい？"],
+      [
+        ["通っている学校", "your school", "かよっているがっこう"],
+        ["よく使う駅", "your usual station", "よくつかうえき"],
+        ["商店街", "the shopping street", "しょうてんがい"],
+        ["地元の祭り", "the local festival", "じもとのまつり"],
+        ["港", "the harbor", "みなと"],
+        ["公園", "the park", "こうえん"]
+      ]],
+    ["historic-tool-demo", "NORMAL",
+      ["博物館で{scene}の使い方を見せてもらえる。自分で試す前に、何回お手本を見たい？", "A museum demonstrator shows you how to use {scene}. How many demonstrations would you watch before trying it yourself?", "はくぶつかんで{scene}のつかいかたを みせてもらえる。じぶんでためすまえに、なんかいおてほんをみたい？"],
+      [
+        ["黒電話", "a rotary phone", "くろでんわ"],
+        ["手回しの洗濯機", "a hand-cranked washer", "てまわしのせんたくき"],
+        ["手回しオルガン", "a hand organ", "てまわしオルガン"],
+        ["昔の映写機", "an early film projector", "むかしのえいしゃき"],
+        ["木の活字の印刷機", "a letterpress with wooden type", "きのかつじのいんさつき"],
+        ["ゼンマイの目覚まし", "a wind-up alarm clock", "ゼンマイのめざまし"]
+      ]],
+    ["old-practical-alternative", "NORMAL",
+      ["昔の暮らしを体験して、{scene}。週末だけなら、何日続けてみたい？", "You can try living with {scene} as people did long ago, on weekends only. How many days would you try it for?", "むかしのくらしを たいけんして、{scene}。しゅうまつだけなら、なんにちつづけてみたい？"],
+      [
+        ["手紙だけで連絡する", "letters as your way of keeping in touch", "てがみだけで れんらくする"],
+        ["井戸の水を使う", "water drawn from a well", "いどのみずをつかう"],
+        ["かまどでごはんを炊く", "meals cooked on a wood stove", "かまどでごはんをたく"],
+        ["ろうそくで部屋を照らす", "candlelight", "ろうそくでへやをてらす"],
+        ["洗濯物を手で洗う", "laundry washed by hand", "せんたくものをてであらう"],
+        ["買い物は歩いて行く", "shopping trips on foot", "かいものはあるいていく"]
+      ]],
+    ["history-museum-time-share", "HARD",
+      ["昔の道具の展示と実演が両方ある。滞在40分のうち移動に10分なら、{scene}の実演に何分使う？", "There is a history exhibition and a live demonstration. You have 40 minutes and need ten to move between areas. How many minutes would you spend watching {scene}?", "むかしのどうぐのてんじと じつえんがりょうほうある。たいざい40ぷんのうち いどうに10ぷんかかるなら、{scene}のじつえんに なんぷんつかう？"],
+      [
+        ["機織り", "weaving", "はたおり"],
+        ["からくり人形", "mechanical puppets", "からくりにんぎょう"],
+        ["紙すき", "papermaking", "かみすき"],
+        ["そろばん", "abacus calculation", "そろばん"],
+        ["木の桶づくり", "making a wooden tub", "きのおけづくり"],
+        ["昔の印刷", "old-style printing", "むかしのいんさつ"]
+      ]]
+  ],
+  "TECH": [
+    ["tech-photo-storage", "EASY",
+      ["{scene}で撮った写真がたくさん。スマホに残すお気に入りは何枚くらい？", "You took lots of photos {scene}. How many favorites would you keep on your phone?", "{scene}でとった しゃしんがたくさん。スマホにのこす おきにいりは なんまいくらい？"],
+      [
+        ["運動会", "on sports day", "うんどうかい"],
+        ["遠足", "on a school trip", "えんそく"],
+        ["旅行", "on a trip", "りょこう"],
+        ["犬の散歩", "on a dog walk", "イヌのさんぽ"],
+        ["パーティー", "at a party", "パーティー"],
+        ["花火大会", "at a fireworks show", "はなびたいかい"]
+      ]],
+    ["app-reaction-wait", "EASY",
+      ["スマホで{scene}を開いたら止まった。閉じて開き直すまで何秒待つ？", "You open {scene} on your phone and it freezes. How many seconds do you wait before reopening it?", "スマホで{scene}をひらいたら とまった。とじてひらきなおすまで なんびょうまつ？"],
+      [
+        ["動画", "video", "どうが"],
+        ["地図", "maps", "ちず"],
+        ["写真", "photos", "しゃしん"],
+        ["メッセージ", "messages", "メッセージ"],
+        ["ゲーム", "a game", "ゲーム"],
+        ["乗り換え案内", "the train planner", "のりかえあんない"]
+      ]],
+    ["soundless-download", "NORMAL",
+      ["{scene}を送りたいけれど回線が遅い。送信完了まで何分なら待てる？", "You want to send {scene}, but the connection is slow. How many minutes would you wait for it to finish sending?", "{scene}をおくりたいけれど かいせんがおそい。そうしんがおわるまで なんぷんなら まてる？"],
+      [
+        ["集合写真", "a group photo", "しゅうごうしゃしん"],
+        ["旅行動画", "a travel video", "りょこうどうが"],
+        ["工作の説明動画", "a craft tutorial", "こうさくのせつめいどうが"],
+        ["練習で撮った録音", "a recording from practice", "れんしゅうでとったろくおん"],
+        ["写真を並べたアルバム", "a photo album", "しゃしんをならべたアルバム"],
+        ["発表資料", "your presentation", "はっぴょうしりょう"]
+      ]],
+    ["first-use-trial", "NORMAL",
+      ["初めての{scene}。説明を探す前に、何分くらい自分で触ってみたい？", "You are trying {scene} for the first time. How many minutes would you experiment before looking for instructions?", "はじめての{scene}。せつめいをさがすまえに、なんぷんくらい じぶんでさわってみたい？"],
+      [
+        ["写真加工アプリ", "a photo editor", "しゃしんかこうアプリ"],
+        ["音楽アプリ", "a music app", "おんがくアプリ"],
+        ["電子書籍リーダー", "an e-reader", "でんししょせきリーダー"],
+        ["スマートウォッチ", "a smartwatch", "スマートウォッチ"],
+        ["地図アプリ", "a map app", "ちずアプリ"],
+        ["お絵かきタブレット", "a drawing tablet", "おえかきタブレット"]
+      ]],
+    ["low-charge-outing", "HARD",
+      ["{scene}に出かけるまで20分、スマホの電池は8％。先に用事もあるなら、出発まで何分充電しておきたい？", "You leave for {scene} in 20 minutes and your phone is at 8%. You also need to finish something before leaving. How long would you charge it, in minutes?", "{scene}にでかけるまで20ぷん、スマホのでんちは8パーセント。さきにようじもあるなら、しゅっぱつまで なんぷんじゅうでんしておきたい？"],
+      [
+        ["買い物", "shopping", "かいもの"],
+        ["駅", "the station", "えき"],
+        ["遠足の集合場所", "the field trip meeting point", "えんそくのしゅうごうばしょ"],
+        ["習い事", "a lesson", "ならいごと"],
+        ["友だちと遊ぶ場所", "a meetup with friends", "ともだちとあそぶばしょ"],
+        ["近所の祭り", "a neighborhood festival", "きんじょのまつり"]
+      ]]
+  ],
+  "MYSTERY": [
+    ["one-hint-when", "EASY",
+      ["{scene}で出された謎が解けない。ヒントを頼むまで、あと何秒考える？", "You are stuck on a puzzle {scene}. How many more seconds would you think before asking for a hint?", "{scene}でだされた なぞが とけない。ヒントをたのむまで、あとなんびょう かんがえる？"],
+      [
+        ["給食のあと", "after lunch", "きゅうしょくのあと"],
+        ["友だちの誕生日会", "at a friend’s birthday party", "ともだちのたんじょうびかい"],
+        ["遠足のバス", "on the field trip bus", "えんそくのバス"],
+        ["お店の待ち時間", "while waiting in a shop", "おみせのまちじかん"],
+        ["クイズ番組", "on a quiz show", "クイズばんぐみ"],
+        ["公園の宝探し", "on a park treasure hunt", "こうえんのたからさがし"]
+      ]],
+    ["check-lost-object", "NORMAL",
+      ["{scene}をなくしたと思ったとき、自分で探すのは最大何か所くらい？", "You think you misplaced {scene}. How many places would you look before asking someone?", "{scene}をなくしたとおもったとき、じぶんでさがすのは さいだいなんかしょくらい？"],
+      [
+        ["片方の手袋", "one glove", "かたほうのてぶくろ"],
+        ["家の鍵", "your key", "いえのかぎ"],
+        ["図書館のカード", "your library card", "としょかんのカード"],
+        ["お気に入りの消しゴム", "your favorite eraser", "おきにいりのけしゴム"],
+        ["おみやげの袋", "a souvenir bag", "おみやげのふくろ"],
+        ["宿題のノート", "your homework notebook", "しゅくだいのノート"]
+      ]],
+    ["party-difference-time", "EASY",
+      ["{scene}の写真を使った間違い探し。一つ見つけるまで、何秒ほしい？", "A spot-the-difference puzzle uses photos of {scene}. How many seconds would you want to find one difference?", "{scene}のしゃしんをつかった まちがいさがし。ひとつみつけるまで、なんびょうほしい？"],
+      [
+        ["教室", "a classroom", "きょうしつ"],
+        ["公園の遊具", "playground equipment", "こうえんのゆうぐ"],
+        ["お弁当", "a lunchbox", "おべんとう"],
+        ["机の上", "a desktop", "つくえのうえ"],
+        ["本棚", "a bookshelf", "ほんだな"],
+        ["遠足で見た風景", "a view from a field trip", "えんそくでみたふうけい"]
+      ]],
+    ["puzzle-team-clues", "NORMAL",
+      ["{scene}の謎解きに挑戦。答え合わせの前に、手がかりを何個まで集めたい？", "You take on a mystery at {scene}. How many clues would you gather before checking your answer?", "{scene}のなぞときにちょうせん。こたえあわせのまえに、てがかりを なんこまであつめたい？"],
+      [
+        ["学校の文化祭", "the school festival", "がっこうのぶんかさい"],
+        ["図書館", "the library", "としょかん"],
+        ["駅前のイベント", "a station-front event", "えきまえのイベント"],
+        ["遊園地", "an amusement park", "ゆうえんち"],
+        ["家での宝探し", "a treasure hunt at home", "いえでのたからさがし"],
+        ["バスのレクリエーション", "a bus-trip game", "バスのレクリエーション"]
+      ]],
+    ["mystery-few-minutes-left", "HARD",
+      ["{scene}の宝探しで残り8分。最後の場所まで歩いて3分かかる。最後の暗号を考えるのは何分まで？", "Your treasure hunt at {scene} has eight minutes left and the last stop is a three-minute walk. How many minutes would you spend on the final code?", "{scene}のたからさがしで のこり8ふん。さいごのばしょまで あるいて3ぷんかかる。さいごのあんごうを かんがえるのは なんぷんまで？"],
+      [
+        ["公園", "the park", "こうえん"],
+        ["校庭", "the schoolyard", "こうてい"],
+        ["博物館", "the museum", "はくぶつかん"],
+        ["商店街", "the shopping street", "しょうてんがい"],
+        ["遊園地", "the amusement park", "ゆうえんち"],
+        ["野外広場", "an outdoor plaza", "やがいひろば"]
+      ]]
+  ],
+  "MONEY": [
+    ["small-treat-spend", "EASY",
+      ["お小遣いで{scene}を一つ買う。いくらまでなら気軽に買う？（円）", "You are using pocket money to buy {scene}. How many yen would you feel comfortable spending?", "おこづかいで{scene}をひとつかう。いくらまでなら きがるにかう？（えん）"],
+      [
+        ["シール", "stickers", "シール"],
+        ["小さなノート", "a small notebook", "ちいさいノート"],
+        ["好きなおやつ", "a favorite snack", "すきなおやつ"],
+        ["鉛筆一本", "a pencil", "えんぴついっぽん"],
+        ["友だちへの小さなプレゼント", "a little gift for a friend", "ともだちへの ちいさなプレゼント"],
+        ["キーホルダー", "a keychain", "キーホルダー"]
+      ]],
+    ["compare-store-count", "EASY",
+      ["{scene}を買う前、値段を比べるため何軒くらいお店を見たい？", "Before buying {scene}, how many shops would you check to compare prices?", "{scene}をかうまえ、ねだんをくらべるため なんけんくらいおみせをみたい？"],
+      [
+        ["水筒", "a water bottle", "すいとう"],
+        ["傘", "an umbrella", "かさ"],
+        ["ポーチ", "a pouch", "ポーチ"],
+        ["カレンダー", "a calendar", "カレンダー"],
+        ["おみやげのお菓子", "souvenir snacks", "おみやげのおかし"],
+        ["手袋", "gloves", "てぶくろ"]
+      ]],
+    ["wait-for-sale", "NORMAL",
+      ["欲しい{scene}がもうすぐセールになるらしい。何日までなら待って買う？", "You hear {scene} you want will go on sale soon. How many days would you wait to buy it?", "ほしい{scene}が もうすぐ セールになるらしい。なんにちまでなら まってかう？"],
+      [
+        ["運動靴", "new sneakers", "うんどうぐつ"],
+        ["リュック", "a backpack", "リュック"],
+        ["パーカー", "a hoodie", "パーカー"],
+        ["マグカップ", "a mug", "マグカップ"],
+        ["イヤホン", "headphones", "イヤホン"],
+        ["おもちゃ", "a toy", "おもちゃ"]
+      ]],
+    ["outing-pocket-budget", "NORMAL",
+      ["{scene}に行く。交通費と食事代を除くと、自由に使う分はいくら持っていきたい？（円）", "You are going to {scene}. Apart from travel and food, how many yen would you take to spend freely?", "{scene}にいく。こうつうひと しょくじだいをのぞくと、じゆうにつかうぶんは いくらもっていきたい？（えん）"],
+      [
+        ["夏祭り", "a summer festival", "なつまつり"],
+        ["フリーマーケット", "a flea market", "フリーマーケット"],
+        ["映画館", "the movie theater", "えいがかん"],
+        ["動物園", "the zoo", "どうぶつえん"],
+        ["水族館", "the aquarium", "すいぞくかん"],
+        ["遊園地", "an amusement park", "ゆうえんち"]
+      ]],
+    ["reserve-for-ride-home", "HARD",
+      ["{scene}に2,000円持っていく。帰りの交通費600円は必要で、飲み物も買う。自由に使う金額はいくらまで？（円）", "You have 2,000 yen for {scene}. You need 600 yen to get home and will also buy a drink. How many yen can you comfortably spend on anything else?", "{scene}に2000えんもっていく。かえりのこうつうひ600えんは ひつようで、のみものもかう。じゆうにつかう きんがくは いくらまで？（えん）"],
+      [
+        ["商店街", "the shopping street", "しょうてんがい"],
+        ["友だちとの買い物", "shopping with friends", "ともだちとのかいもの"],
+        ["公園のイベント", "a park event", "こうえんのイベント"],
+        ["お祭り", "a festival", "おまつり"],
+        ["日帰りの見学", "a day trip", "ひがえりのけんがく"],
+        ["駅の周辺", "the station area", "えきのしゅうへん"]
+      ]]
+  ],
+  "SEASONS": [
+    ["seasonal-day-outing", "EASY",
+      ["{scene}に出かける。着いてから何時間くらい過ごしたい？", "You are going out for {scene}. How many hours would you like to spend there?", "{scene}にでかける。ついてから なんじかんくらい すごしたい？"],
+      [
+        ["お花見", "cherry-blossom viewing", "おはなみ"],
+        ["紅葉狩り", "fall color viewing", "もみじがり"],
+        ["初詣", "a New Year shrine visit", "はつもうで"],
+        ["夏の花火", "fireworks in summer", "なつのはなび"],
+        ["冬のイルミネーション", "a winter light show", "ふゆのイルミネーション"],
+        ["秋祭り", "an autumn festival", "あきまつり"]
+      ]],
+    ["decorate-a-room", "EASY",
+      ["季節に合わせて{scene}を部屋に飾る。何個くらい置くと楽しい？", "You are decorating your room for the season with {scene}. How many would you put up?", "きせつにあわせて{scene}を へやにかざる。なんこくらい おくとたのしい？"],
+      [
+        ["折り紙の花", "origami flowers", "おりがみのはな"],
+        ["小さいこいのぼり", "mini carp streamers", "ちいさいこいのぼり"],
+        ["七夕の短冊", "Tanabata wish strips", "たなばたのたんざく"],
+        ["紙の雪の結晶", "paper snowflakes", "かみのゆきのけっしょう"],
+        ["松ぼっくり", "pine cones", "まつぼっくり"],
+        ["風鈴", "wind chimes", "ふうりん"]
+      ]],
+    ["season-food-for-guests", "NORMAL",
+      ["季節の集まりで{scene}を友だち4人と食べる。予備も入れると、何個用意したい？", "Four friends are joining you for {scene} at a seasonal get-together. How many portions would you get, including extras?", "きせつのあつまりで{scene}を ともだち4にんとたべる。よびもいれると、なんこよういしたい？"],
+      [
+        ["桜もち", "cherry-blossom rice cakes", "さくらもち"],
+        ["月見だんご", "moon-viewing dumplings", "つきみだんご"],
+        ["焼きいも", "roasted sweet potatoes", "やきいも"],
+        ["かしわもち", "oak-leaf rice cakes", "かしわもち"],
+        ["クリスマスクッキー", "Christmas cookies", "クリスマスクッキー"],
+        ["みかん", "mandarins", "みかん"]
+      ]],
+    ["season-limited-shopping", "NORMAL",
+      ["{scene}が今年は今日まで。売り場に並ぶなら何分まで待てる？", "Today is the last day this year for {scene}. How many minutes would you wait in line?", "{scene}が ことしはきょうまで。うりばにならぶなら なんぷんまでまてる？"],
+      [
+        ["季節限定のアイス", "a seasonal ice cream", "きせつげんていのアイス"],
+        ["正月のお菓子", "New Year sweets", "しょうがつのおかし"],
+        ["祭りのくじ", "a festival prize draw", "まつりのくじ"],
+        ["春だけの文房具", "spring-only stationery", "はるだけのぶんぼうぐ"],
+        ["秋の果物の詰め合わせ", "an autumn fruit box", "あきのくだもののつめあわせ"],
+        ["冬のあったかスープ", "a winter soup", "ふゆのあったかスープ"]
+      ]],
+    ["weather-cut-short", "HARD",
+      ["{scene}に行く日、雨まで25分で駅まで最後に10分歩く。雨の前に現地で何分くらい楽しみたい？", "You are going out for {scene}. Rain is due in 25 minutes and the walk to the station at the end takes ten. How many minutes would you spend there first?", "{scene}にいくひ、あめまで25ふんで えきまでさいごに10ぷんあるく。あめのまえに げんちでなんぷんくらい たのしみたい？"],
+      [
+        ["花見", "cherry-blossom viewing", "はなみ"],
+        ["秋の散歩", "an autumn walk", "あきのさんぽ"],
+        ["屋外の冬市", "an outdoor winter market", "おくがいのふゆいち"],
+        ["紅葉の撮影", "photographing fall leaves", "こうようのさつえい"],
+        ["夏祭りの屋台", "summer festival stalls", "なつまつりのやたい"],
+        ["春の花畑", "a spring flower field", "はるのはなばたけ"]
+      ]]
+  ],
+  "TRANSPORT": [
+    ["boarding-time", "EASY",
+      ["初めて{scene}に乗る。乗り場には出発の何分前に着きたい？", "You are taking {scene} for the first time. How many minutes before departure would you get to the boarding point?", "はじめて{scene}にのる。のりばには しゅっぱつのなんぷんまえに つきたい？"],
+      [
+        ["新幹線", "a bullet train", "しんかんせん"],
+        ["高速バス", "a highway bus", "こうそくバス"],
+        ["フェリー", "a ferry", "フェリー"],
+        ["ロープウェイ", "a cable car", "ロープウェイ"],
+        ["観光列車", "a sightseeing train", "かんこうれっしゃ"],
+        ["路面電車", "a tram", "ろめんでんしゃ"]
+      ]],
+    ["vehicle-seat-wait", "EASY",
+      ["{scene}で座れる便を選べる。次の便まで何分なら待ちたい？", "On {scene}, you could wait for a service with a seat. How many minutes would you wait?", "{scene}で すわれるびんをえらべる。つぎのびんまで なんぷんなら まちたい？"],
+      [
+        ["通学電車", "the train to school", "つうがくでんしゃ"],
+        ["帰りのバス", "the bus home", "かえりのバス"],
+        ["観光バス", "a sightseeing bus", "かんこうバス"],
+        ["連絡船", "a connecting ferry", "れんらくせん"],
+        ["空港への電車", "the airport train", "くうこうへのでんしゃ"],
+        ["遊園地へのバス", "the bus to the amusement park", "ゆうえんちへのバス"]
+      ]],
+    ["outing-trip-walking", "NORMAL",
+      ["{scene}に向かうとき、乗り換えを一回減らせるなら何分余計に歩ける？", "On the way to {scene}, how many extra minutes would you walk to avoid one transfer?", "{scene}にむかうとき、のりかえをいっかいへらせるなら なんぷんよけいにあるける？"],
+      [
+        ["学校", "school", "がっこう"],
+        ["図書館", "the library", "としょかん"],
+        ["駅前の店", "a shop by the station", "えきまえのみせ"],
+        ["試合会場", "the match venue", "しあいかいじょう"],
+        ["公園", "the park", "こうえん"],
+        ["親戚の家", "a relative’s home", "しんせきのいえ"]
+      ]],
+    ["ride-choice-detour", "NORMAL",
+      ["{scene}の車窓がきれいな遠回り路線。普段より何分長くても乗ってみたい？", "There is a scenic route by {scene}. How many minutes longer than usual would you ride to see the view?", "{scene}のしゃそうが きれいな とおまわりろせん。ふだんより なんぷん ながくても のってみたい？"],
+      [
+        ["電車", "train", "でんしゃ"],
+        ["バス", "bus", "バス"],
+        ["フェリー", "ferry", "フェリー"],
+        ["観光列車", "sightseeing train", "かんこうれっしゃ"],
+        ["車", "car", "くるま"],
+        ["路面電車", "tram", "ろめんでんしゃ"]
+      ]],
+    ["scheduled-change-shortcut", "HARD",
+      ["{scene}に乗るまで25分。乗り場まで歩いて10分で、切符もこれから買う。途中で買い物に使うなら何分まで？", "You board {scene} in 25 minutes. The boarding point is a ten-minute walk and you still need a ticket. How many minutes would you spend shopping on the way?", "{scene}にのるまで25ふん。のりばまであるいて10ぷんで、きっぷもこれからかう。とちゅうでかいものにつかうなら なんぷんまで？"],
+      [
+        ["急行電車", "an express train", "きゅうこうでんしゃ"],
+        ["観光船", "a sightseeing boat", "かんこうせん"],
+        ["長距離バス", "a long-distance bus", "ちょうきょりバス"],
+        ["連絡フェリー", "a connecting ferry", "れんらくフェリー"],
+        ["特急列車", "a limited express", "とっきゅうれっしゃ"],
+        ["山のケーブルカー", "a mountain funicular", "やまのケーブルカー"]
+      ]]
+  ],
+  "HEALTH": [
+    ["light-after-activity", "EASY",
+      ["{scene}を終えてちょっと疲れた。次のことを始める前に何分休みたい？", "You feel a little tired after {scene}. How many minutes would you rest before doing something else?", "{scene}をおえて ちょっとつかれた。つぎのことを はじめるまえに なんぷんやすみたい？"],
+      [
+        ["散歩", "a walk", "さんぽ"],
+        ["ラジオ体操", "a group exercise routine", "ラジオたいそう"],
+        ["片づけ", "tidying up", "かたづけ"],
+        ["買い物", "shopping", "かいもの"],
+        ["階段の上り下り", "climbing stairs", "かいだんののぼりおり"],
+        ["ダンスの練習", "dance practice", "ダンスのれんしゅう"]
+      ]],
+    ["bedtime-routine", "EASY",
+      ["寝る前の{scene}に、何分あれば気持ちよく終えられそう？", "How many minutes would you give yourself for {scene} before bed?", "ねるまえの{scene}に、なんぷんあれば きもちよくおえられそう？"],
+      [
+        ["軽いストレッチ", "light stretching", "かるいストレッチ"],
+        ["読書", "reading", "どくしょ"],
+        ["歯みがき", "brushing your teeth", "はみがき"],
+        ["明日の準備", "getting ready for tomorrow", "あしたのじゅんび"],
+        ["温かい飲み物を飲む時間", "a warm drink", "あたたかいのみものをのむじかん"],
+        ["音楽を静かに聞く時間", "listening to quiet music", "おんがくをしずかにきくじかん"]
+      ]],
+    ["rest-threshold", "NORMAL",
+      ["{scene}で集中して座っている。何分くらいで一度立って伸びをしたい？", "You have been sitting and concentrating on {scene}. After how many minutes would you want to stand up and stretch?", "{scene}でしゅうちゅうして すわっている。なんぷんくらいで いちどたって のびをしたい？"],
+      [
+        ["宿題", "homework", "しゅくだい"],
+        ["パズル", "a puzzle", "パズル"],
+        ["読書", "a book", "どくしょ"],
+        ["絵を描くこと", "drawing", "えをかくこと"],
+        ["細かい工作", "detailed craftwork", "こまかいこうさく"],
+        ["パソコンの作業", "working on a computer", "パソコンのさぎょう"]
+      ]],
+    ["walk-break-daily", "NORMAL",
+      ["{scene}で短く歩く習慣を始めたい。一週間に何日なら無理なく続けられそう？", "You want to start taking a short walk {scene}. How many days a week could you comfortably keep it up?", "{scene}でみじかくあるく しゅうかんをはじめたい。いっしゅうかんに なんにちなら むりなくつづけられそう？"],
+      [
+        ["昼休み", "during lunch break", "ひるやすみ"],
+        ["夕食のあと", "after dinner", "ゆうしょくのあと"],
+        ["朝食の前", "before breakfast", "ちょうしょくのまえ"],
+        ["おやつのあと", "after snack time", "おやつのあと"],
+        ["家に帰ってから", "after getting home", "いえにかえってから"],
+        ["買い物帰り", "on your way home from shopping", "かいものがえり"]
+      ]],
+    ["time-for-rest-in-busy-day", "HARD",
+      ["{scene}を始めるまで20分。着替えと水分補給にも合計5分使う。座って休む時間を何分取りたい？", "You have 20 minutes before {scene}, with five minutes needed to change and get a drink. How many minutes would you sit and rest?", "{scene}をはじめるまで20ぷん。きがえと すいぶんほきゅうにも ごうけい5ふんつかう。すわってやすむじかんを なんぷんとりたい？"],
+      [
+        ["次の試合", "the next match", "つぎのしあい"],
+        ["次のダンス練習", "the next dance rehearsal", "つぎのダンスれんしゅう"],
+        ["友だちとの散歩", "a walk with friends", "ともだちとのさんぽ"],
+        ["学校の体育", "PE class", "がっこうのたいいく"],
+        ["地域の体操会", "a community exercise session", "ちいきのたいそうかい"],
+        ["公園のレクリエーション", "a park activity", "こうえんのレクリエーション"]
+      ]]
+  ],
+  "SPACE": [
+    ["night-sky-wait", "EASY",
+      ["晴れた夜に{scene}を見たい。何分くらい空を探してみる？", "On a clear night you want to see {scene}. How many minutes would you spend looking?", "はれたよるに{scene}をみたい。なんぷんくらい そらをさがしてみる？"],
+      [
+        ["流れ星", "a shooting star", "ながれぼし"],
+        ["三日月", "the crescent Moon", "みかづき"],
+        ["明るい惑星", "a bright planet", "あかるいわくせい"],
+        ["オリオン座", "Orion", "オリオンざ"],
+        ["天の川", "the Milky Way", "あまのがわ"],
+        ["人工衛星", "a satellite", "じんこうえいせい"]
+      ]],
+    ["space-food-first-taste", "EASY",
+      ["宇宙食売り場で{scene}を見つけた。体験で試すなら何個くらい買いたい？", "At a space-food shop you find {scene}. How many portions would you buy to try it out?", "うちゅうしょくうりばで{scene}をみつけた。たいけんでためすなら なんこくらいかいたい？"],
+      [
+        ["宇宙食のアイス", "space ice cream", "うちゅうしょくのアイス"],
+        ["乾燥フルーツ", "dried fruit", "かんそうフルーツ"],
+        ["一口ケーキ", "bite-size cake", "ひとくちケーキ"],
+        ["宇宙食のおにぎり", "space rice balls", "うちゅうしょくのおにぎり"],
+        ["袋入りのカレー", "curry in pouches", "ふくろいりのカレー"],
+        ["長持ちするパン", "long-life bread", "ながもちするパン"]
+      ]],
+    ["planetarium-film-length", "NORMAL",
+      ["プラネタリウムで{scene}の番組を見るなら、何分くらいの上映がちょうどいい？", "You are choosing a planetarium show about {scene}. How many minutes would be a good length?", "プラネタリウムで{scene}のばんぐみをみるなら、なんぷんくらいのじょうえいが ちょうどいい？"],
+      [
+        ["月の形", "the phases of the Moon", "つきのかたち"],
+        ["土星の輪", "Saturn’s rings", "どせいのわ"],
+        ["季節の星座", "seasonal constellations", "きせつのせいざ"],
+        ["宇宙船の一日", "a day on a spacecraft", "うちゅうせんのいちにち"],
+        ["火星探査", "Mars exploration", "かせいたんさ"],
+        ["地球の夜景", "Earth at night", "ちきゅうのやけい"]
+      ]],
+    ["station-photo-limit", "NORMAL",
+      ["宇宙旅行では写真を20枚だけ持ち帰れる。{scene}の写真を何枚選ぶ？", "You can bring back only 20 photos from a space trip. How many would you choose of {scene}?", "うちゅうりょこうでは しゃしんを20まいだけもちかえれる。{scene}のしゃしんを なんまいえらぶ？"],
+      [
+        ["地球の雲", "Earth’s clouds", "ちきゅうのくも"],
+        ["船内の食事", "meals on the spacecraft", "せんないのしょくじ"],
+        ["窓から見た月", "the Moon through your window", "まどからみたつき"],
+        ["出発前の仲間", "your crew before launch", "しゅっぱつまえのなかま"],
+        ["浮かぶ飲み物", "a floating drink", "うかぶのみもの"],
+        ["宇宙船の明かり", "the spacecraft’s lights", "うちゅうせんのあかり"]
+      ]],
+    ["telescope-shared-slot", "HARD",
+      ["観察会の残りは20分で、望遠鏡を調整するのに5分。他の人にも譲るなら、{scene}を見る自分の時間は何分にする？", "There are 20 minutes left at a stargazing event and telescope setup takes five. How many minutes would you take to view {scene}, leaving time for others?", "かんさつかいの のこりは20ぷんで、ぼうえんきょうを ちょうせいするのに5ふん。ほかのひとにもゆずるなら、{scene}をみるじぶんのじかんは なんぷんにする？"],
+      [
+        ["月のクレーター", "craters on the Moon", "つきのクレーター"],
+        ["木星とその衛星", "Jupiter and its moons", "もくせいとそのえいせい"],
+        ["土星", "Saturn", "どせい"],
+        ["明るい星", "a bright star", "あかるいほし"],
+        ["火星", "Mars", "かせい"],
+        ["すばる", "the Pleiades", "すばる"]
+      ]]
+  ]
+}
