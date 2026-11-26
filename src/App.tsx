@@ -9521,9 +9521,13 @@ const App: React.FC = () => {
                             const multiplier = 2 + actMultiplier;
                             baseHp = Math.ceil(maxAtkDmg * multiplier);
                         }
-                        // Regular and elite encounters use 1.2x in every mode;
-                        // endless bosses retain their existing 1.5x bonus.
-                        baseHp += maxAtkDmg * (node.type !== NodeType.BOSS ? 1.2 : nextState.isEndless ? 1.5 : 0);
+                        // Standard-mode regular encounters keep their original base HP.
+                        // Elites and endless regular encounters use 1.2x; endless bosses use 1.5x.
+                        if (node.type === NodeType.BOSS) {
+                            if (nextState.isEndless) baseHp += maxAtkDmg * 1.5;
+                        } else if (node.type === NodeType.ELITE || nextState.isEndless) {
+                            baseHp += maxAtkDmg * 1.2;
+                        }
                         baseHp *= enemyHpMultiplier;
                         // 複数体出現時は個体ごとにHP差を付ける
                         const hpStep = Math.max(2, Math.floor(baseHp * 0.08));
