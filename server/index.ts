@@ -1,3 +1,4 @@
+import { closeSecretMissionRooms, secretMissionUpgrade } from './secretMissionRooms';
 import{basketballUpgrade,closeBasketRooms}from'./basketballRooms';
 import {quizShowUpgrade,closeQuizShowRooms} from './quizShowRooms';
 import{dodgeballUpgrade,closeDodgeRooms}from'./dodgeballRooms';
@@ -22,10 +23,10 @@ const allowed = new Set((process.env.ALLOWED_ORIGINS || '').split(',').map(s=>s.
 const server = createServer((req,res)=>{
   res.setHeader('Content-Type','application/json');
   res.writeHead(req.url === '/health' ? 200 : 404);
-  res.end(JSON.stringify(req.url === '/health' ? {ok:true,service:'learning-rogue',protocol:1,rooms:rooms.size,features:{quizShow:1}} : {error:'not found'}));
+  res.end(JSON.stringify(req.url === '/health' ? {ok:true,service:'learning-rogue',protocol:1,rooms:rooms.size,features:{quizShow:1,secretMission:1}} : {error:'not found'}));
 });
 const sockets = new WebSocketServer({noServer:true,maxPayload:512*1024,perMessageDeflate:false});
-server.on('upgrade',(req,socket,head)=>{if(quizShowUpgrade(req,socket,head,allowed))return;if(vrUpgrade(req,socket,head,allowed))return;if(miniUpgrade(req,socket,head,allowed))return;if(golfUpgrade(req,socket,head,allowed))return;if(tennisUpgrade(req,socket,head,allowed))return;if(dodgeballUpgrade(req,socket,head,allowed))return;if(basketballUpgrade(req,socket,head,allowed))return;if(req.url!=='/online'){socket.destroy();return;}sockets.handleUpgrade(req,socket,head,ws=>sockets.emit('connection',ws,req));});
+server.on('upgrade',(req,socket,head)=>{if(secretMissionUpgrade(req,socket,head,allowed))return;if(quizShowUpgrade(req,socket,head,allowed))return;if(vrUpgrade(req,socket,head,allowed))return;if(miniUpgrade(req,socket,head,allowed))return;if(golfUpgrade(req,socket,head,allowed))return;if(tennisUpgrade(req,socket,head,allowed))return;if(dodgeballUpgrade(req,socket,head,allowed))return;if(basketballUpgrade(req,socket,head,allowed))return;if(req.url!=='/online'){socket.destroy();return;}sockets.handleUpgrade(req,socket,head,ws=>sockets.emit('connection',ws,req));});
 function send(m: Member, packet: unknown) {
   if(m.socket.readyState !== WebSocket.OPEN) return;
   m.socket.send(JSON.stringify(packet));
@@ -117,4 +118,4 @@ const tick=setInterval(()=>{
 },100);
 const heartbeat=setInterval(()=>{for(const socket of sockets.clients){const m=[...rooms.values()].flatMap(r=>[...r.members.values()]).find(m=>m.socket===socket);if(!m)continue;if(!m.alive){socket.terminate();continue;}m.alive=false;socket.ping();}},30000);
 server.listen(Number(process.env.PORT||10000),'0.0.0.0',()=>console.log('Learning Rogue game server ready'));
-process.on('SIGTERM',()=>{clearInterval(tick);clearInterval(heartbeat);closeQuizShowRooms();closeMiniRooms();closeGolfRooms();closeTennisRooms();closeDodgeRooms();closeBasketRooms();closeVrRooms();for(const s of sockets.clients)s.close(1001,'Server restarting');server.close(()=>process.exit(0));setTimeout(()=>process.exit(0),5000).unref();});
+process.on('SIGTERM',()=>{clearInterval(tick);clearInterval(heartbeat);closeSecretMissionRooms();closeQuizShowRooms();closeMiniRooms();closeGolfRooms();closeTennisRooms();closeDodgeRooms();closeBasketRooms();closeVrRooms();for(const s of sockets.clients)s.close(1001,'Server restarting');server.close(()=>process.exit(0));setTimeout(()=>process.exit(0),5000).unref();});
