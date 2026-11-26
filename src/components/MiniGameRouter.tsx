@@ -11,6 +11,7 @@ const PokerGameScreen = deferredScreen(() => import('./PokerGameScreen'));
 const TraditionalGames = deferredScreen(() => import('../mini-games/traditional-games/TraditionalGames'));
 const CardClub = deferredScreen(() => import('../mini-games/card-club/CardClub'));
 const AfterSchoolRush = deferredScreen(() => import('../mini-games/after-school-rush/AfterSchoolRush'));
+const PixelRpg = deferredScreen(() => import('../mini-games/pixel-rpg/PixelRpg'));
 const SchoolyardSurvivorScreen = deferredScreen(() => import('./SchoolyardSurvivorScreen'));
 const LanternWar = deferredScreen(() => import('../mini-games/lantern-war/LanternWar'));
 const StarTide = deferredScreen(() => import('../mini-games/star-tide/StarTide'));
@@ -75,6 +76,7 @@ const MINI_GAME_MAP: Partial<Record<GameScreen, React.ComponentType<MiniGameComp
     [GameScreen.MINI_GAME_CARD_CLUB]: CardClub,
     [GameScreen.MINI_GAME_TRADITIONAL]: TraditionalGames,
     [GameScreen.MINI_GAME_AFTER_SCHOOL_RUSH]: AfterSchoolRush,
+    [GameScreen.MINI_GAME_PIXEL_RPG]: PixelRpg,
     [GameScreen.MINI_GAME_SURVIVOR]: SchoolyardSurvivorScreen,
     [GameScreen.MINI_GAME_STAR_TIDE]: StarTide,
     [GameScreen.MINI_GAME_LANTERN_WAR]: LanternWar,

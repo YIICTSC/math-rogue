@@ -5,7 +5,7 @@ import { ENGLISH_DATA } from '../../data/englishData';
 import { assignmentFilterForMode, matchesAssignmentRangeFilter, matchesKanjiAssignmentRangeFilter } from '../../utils/assignmentRangeFilters';
 import { arithmeticPool } from './arithmetic';
 import { validLesson, type KartLesson, type KartQuestion } from './learning';
-export interface LessonSelection { mode: GameMode; modes?: string[]; assignment?: AssignmentPayload; title?: string }
+export interface LessonSelection { mode: GameMode; modes?: string[]; assignment?: AssignmentPayload; title?: string; includeHints?: boolean }
 type Candidate = GeneralProblem & { mode: string; problemId?: string };
 const arithmeticModes: string[] = [GameMode.ADDITION, GameMode.SUBTRACTION, GameMode.MULTIPLICATION, GameMode.DIVISION, GameMode.MIXED, GameMode.ADD_1DIGIT, GameMode.ADD_1DIGIT_CARRY, GameMode.SUB_1DIGIT, GameMode.SUB_1DIGIT_BORROW];
 function shuffle<T>(values: T[]): T[] {
@@ -55,7 +55,7 @@ export function buildLesson(selection: LessonSelection, count = 3, history: stri
     const p = remaining[0]; history.push(key(p));
     const correct = p.options[0].trim();
     const options = fourOptions(correct, p.options, usable.filter(q => q.mode === p.mode).map(q => q.options[0]));
-    return { id: `${i}:${p.mode}:${p.problemId || p.question}`.slice(0, 300), mode: p.mode, question: p.question, options, correct: options.indexOf(correct), passage: p.passage, visual: p.visual, audioPrompt: p.audioPrompt, problemId: p.problemId, unitName: assignment?.units.find(u => u.modes.includes(p.mode))?.name };
+    return { id: `${i}:${p.mode}:${p.problemId || p.question}`.slice(0, 300), mode: p.mode, question: p.question, options, correct: options.indexOf(correct), passage: p.passage, visual: p.visual, audioPrompt: p.audioPrompt, hint: selection.includeHints ? p.hint?.slice(0, 2400) : undefined, problemId: p.problemId, unitName: assignment?.units.find(u => u.modes.includes(p.mode))?.name };
   });
   const lesson = { title: (assignment?.title || selection.title || modes.join(' / ')).slice(0, 160), questions };
   if (!validLesson(lesson,Math.max(15,count)) || JSON.stringify(lesson).length > 100000 * (count / 3)) throw new Error('問題データが大きすぎます。別の範囲を選んでください。');

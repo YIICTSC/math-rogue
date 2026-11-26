@@ -986,6 +986,7 @@ const LAUNCH_LOCK_DEFERRED_SCREEN_SET = new Set<GameScreen>([
     GameScreen.BASKETBALL_LAYUP,
     GameScreen.MINI_GAME_POKER,
     GameScreen.MINI_GAME_AFTER_SCHOOL_RUSH,
+    GameScreen.MINI_GAME_PIXEL_RPG,
     GameScreen.MINI_GAME_FLIGHT_SCHOOL,
     GameScreen.MINI_GAME_CARD_CLUB,
     GameScreen.MINI_GAME_TRADITIONAL,
@@ -7401,7 +7402,7 @@ const App: React.FC = () => {
         }
         audioService.playSound('select');
         setPendingMiniGameScreen(screen);
-        if (screen === GameScreen.MINI_GAME_GAKUROGEAR || screen === GameScreen.MINI_GAME_CARD_CLUB || screen === GameScreen.MINI_GAME_TRADITIONAL) {
+        if (screen === GameScreen.MINI_GAME_GAKUROGEAR || screen === GameScreen.MINI_GAME_CARD_CLUB || screen === GameScreen.MINI_GAME_TRADITIONAL || screen === GameScreen.MINI_GAME_PIXEL_RPG) {
             setPendingMiniGameScreen(null);
             setGameState(prev => ({ ...prev, screen }));
             return;
@@ -19328,6 +19329,7 @@ const App: React.FC = () => {
         // These campaigns size their fields and reserve their own mobile control insets.
         GameScreen.MINI_GAME_STAR_TIDE,
         GameScreen.MINI_GAME_LANTERN_WAR,
+        GameScreen.MINI_GAME_PIXEL_RPG,
         GameScreen.MINI_GAME_KOTOBA_LIFE,
         GameScreen.MINI_GAME_FLIGHT_SCHOOL,
     ].includes(gameState.screen);
@@ -21440,7 +21442,7 @@ const App: React.FC = () => {
                                     window.history.replaceState(null, '', url.toString());
                                 }
                                 setGameState(prev => ({...prev, screen: GameScreen.MINI_GAME_SELECT}));
-                            } : gameState.screen === GameScreen.MINI_GAME_AFTER_SCHOOL_RUSH || gameState.screen === GameScreen.MINI_GAME_FLIGHT_SCHOOL
+                            } : gameState.screen === GameScreen.MINI_GAME_AFTER_SCHOOL_RUSH || gameState.screen === GameScreen.MINI_GAME_FLIGHT_SCHOOL || gameState.screen === GameScreen.MINI_GAME_PIXEL_RPG
                                 ? () => setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_SELECT }))
                                 : gameState.screen === GameScreen.MINI_GAME_CRANE ? handleCraneGameBack : ()=>{if(gameState.screen===GameScreen.MINI_GAME_CARD_CLUB){setCardClubInviteOpen(false);const url=new URL(window.location.href);url.searchParams.delete(CARD_CLUB_ROOM_PARAM);window.history.replaceState(null,'',url.toString());}if(gameState.screen===GameScreen.MINI_GAME_GAKUROGEAR){setVrInviteOpen(false);const url=new URL(window.location.href);url.searchParams.delete(VR_ROOM_PARAM);window.history.replaceState(null,'',url.toString());}returnToTitle();}}
                             inviteCode={vrInviteOpen?vrCode:''}

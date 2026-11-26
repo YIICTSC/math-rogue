@@ -35,6 +35,7 @@ import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 import {MEDIA_ENGLISH,MEDIA_HIRAGANA} from '../components/miniGameMediaCopy';
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  "知識の旅人と失われた世界": "Knowledge Travelers and the Lost World",
   "敵キャラ": "Enemies",
   "ビルダー": "Builder",
   "もう一度試す": "Try again",
@@ -465,6 +466,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  "知識の旅人と失われた世界": "ちしきの たびびとと うしなわれた せかい",
   "敵キャラ": "てきキャラ",
   "ビルダー": "ビルダー",
   "もう一度試す": "もういちどためす",

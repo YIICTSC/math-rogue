@@ -50,6 +50,10 @@ export const ENGLISH_MINIGAME_EXACT: Readonly<Record<string, string>> = Object.f
   "秘宝を回収": "Recover relic",
   "泉で補給": "Resupply at spring",
 
+  '知識の旅人と失われた世界': 'Knowledge Travelers and the Lost World',
+  '知識の旅人と': 'Knowledge Travelers',
+  '失われた世界': 'and the Lost World',
+  '四人の仲間と、デッキとジョブを育てながら記憶を失う世界を旅するピクセルRPG。': 'Travel a world losing its memory with four companions, personalized decks, and jobs.',
   'ことば日和': 'Kotoba Days',
   '5人の小さなともだちと、言葉を教えてのんびり暮らす。8つの部屋と町で育つ会話の生活ゲーム。': 'Teach words and share slow days with five little friends. A cozy conversation life sim with eight rooms and a town to explore.',
   '風と火を活かし、島々を自由に巡る探索・料理・学びの2DアクションRPG。': 'Explore islands freely with wind, fire, cooking and learning in a 2D action RPG.',

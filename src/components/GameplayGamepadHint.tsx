@@ -1,6 +1,7 @@
 import React from 'react';
 import type { GameplayMode } from '../hooks/useGameplayGamepad';
 const hints: Record<GameplayMode, string> = {
+  'pixel-rpg': 'LS / D-pad: Move · A: Interact · B / Y: Journal · X: World map · LB / RB: Dash',
   'flight-school': 'LS / D-pad: Steer and pitch · A: Primary · B: Brake / Hover · X: View · Menu: Pause',
   'mini-rush': 'D-pad: Move / Aim · A / B: Actions · Menu: Pause',
   'academy-sports': 'LS / D-pad: Move · A: Main action / Hold shot · B: Defend · X: Pass / Item · Y: Jump · LB: Switch · RB: Signature · RT: Dash · Menu: Pause',

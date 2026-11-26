@@ -1057,6 +1057,7 @@ export const useXboxControllerNavigation = () => {
     const handleKeyboardEmulation = (event: KeyboardEvent) => {
       const debugPreviewActive = Boolean(document.querySelector('.app-shell.gamepad-shortcuts-debug'));
       if (!debugPreviewActive || !event.isTrusted) return;
+      if (liveGamepadSurface()?.dataset.gamepadLive === 'pixel-rpg' || document.querySelector('.pixel-rpg .pr-combat') && !getTopmostVisibleGamepadModal()) return;
       if (isTextEditingElement(event.target instanceof Element ? event.target : document.activeElement)) return;
 
       const key = event.key.toLowerCase();

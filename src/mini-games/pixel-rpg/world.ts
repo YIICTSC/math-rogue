@@ -1,0 +1,283 @@
+import { FEATURES, REGIONS, SERVICES, type Climate, type Copy, type Feature, type Service, type Vehicle } from './campaign';
+
+export type Point = { x: number; y: number };
+export type Direction = 'up' | 'down' | 'left' | 'right';
+export const OFFSETS: Record<Direction, Point> = { up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0} };
+export const add = (a: Point, b: Point) => ({ x: a.x+b.x, y: a.y+b.y });
+export const distance = (a: Point, b: Point) => Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
+export const same = (a: Point, b: Point) => a.x===b.x && a.y===b.y;
+export const coordinate = (p: Point) => `${p.x},${p.y}`;
+export function noise(x: number,y: number,seed = 0) {
+  let n = Math.imul(x+51,0x45d9f3b) ^ Math.imul(y+93,0x119de1f3) ^ Math.imul(seed+1,0x27d4eb2d);
+  n = Math.imul(n ^ (n >>> 16), 0x45d9f3b);
+  return ((n ^ (n >>> 16)) >>> 0) / 4294967296;
+}
+
+export const enum Tile { Deep, Sea, Shallow, Sand, Grass, Flowers, Forest, Rock, Hill, Path, Wood, Stone, Wall, Cave, Bridge, Ice, Water, Trap, Void, Hidden, Carpet, Rotor, Waterfall }
+export type Kind = 'site' | 'door' | 'exit' | 'keeper' | 'resident' | 'recruit' | 'service' | 'chest' | 'seal' | 'feature' | 'gate' | 'stairs' | 'enemy' | 'boss' | 'shortcut' | 'rock' | 'plate' | 'secret' | 'trial' | 'camp' | 'sign';
+export type Landmark = Point & { id: string; label: Copy; kind: Kind; link?: string; feature?: Feature; service?: Service; variant?: number };
+export type Area = {
+  id: string; region: number; name: Copy; climate: Climate; place: 'world'|'town'|'indoors'|'wild'|'dungeon';
+  width: number; height: number; tiles: Uint8Array; start: Point; points: Landmark[];
+};
+const EXIT: Copy = ['外へ出る','Leave'];
+const CAMP: Copy = ['道中の灯火','Wayfarer’s Lamp'];
+export const mapId = (region: number, site: number, floor=0) => `r${region}-s${site}-f${floor}`;
+export const floors = (region: number, site: number) => site===4 && region !== 2 ? (region>=5?3:2) : 1;
+export const WORLD_ID = 'world';
+const PALETTES: Climate[] = REGIONS.map(r=>r.climate);
+const SITE_OFFSETS: Point[] = [{x:-4,y:2},{x:0,y:5},{x:-4,y:-5},{x:4,y:1},{x:3,y:-5}];
+export function regionAt(p: Point): number {
+  let region=0, best=Infinity;
+  for (const [index, r] of REGIONS.entries()) {
+    const d = Math.hypot(r.place[0]-p.x,r.place[1]-p.y);
+    if(d<best) {region=index;best=d;}
+  }
+  return region;
+}
+export function sitePoint(region: number, site: number): Point {
+  const [x,y] = REGIONS[region].place;
+  if(region===3 && site===4) return {x:x-12,y:y+5};
+  return add({x,y},SITE_OFFSETS[site]);
+}
+export const climateAt = (area: Area, p: Point) => area.id===WORLD_ID ? PALETTES[regionAt(p)] : area.climate;
+
+function createArea(id: string, region: number, name: Copy, place: Area['place'], width: number, height: number, initial: Tile, start: Point): Area {
+  return { id,region,name,place,climate:REGIONS[region]?.climate??'meadow',width,height,tiles:new Uint8Array(width*height).fill(initial),start,points:[] };
+}
+export const tileAt = (a: Area, p: Point): Tile => p.x>=0&&p.y>=0&&p.x<a.width&&p.y<a.height ? a.tiles[p.y*a.width+p.x] : Tile.Void;
+function stamp(area: Area, p: Point,tile:Tile) { if (p.x>=0 && p.y>=0 && p.x<area.width && p.y<area.height) area.tiles[p.y*area.width+p.x]=tile; }
+function rectangle(area: Area,left: number,top: number,width: number,height: number,tile: Tile) {
+  for(let y=top;y<top+height;y++) for(let x=left;x<left+width;x++) stamp(area,{x,y},tile);
+}
+function route(area: Area,a: Point,b: Point,tile: Tile,width=1) {
+  for(let x=Math.min(a.x,b.x);x<=Math.max(a.x,b.x);x++) rectangle(area,x,a.y,width,width,tile);
+  for(let y=Math.min(a.y,b.y);y<=Math.max(a.y,b.y);y++) rectangle(area,b.x,y,width,width,tile);
+}
+function thing(area:Area,key:string,kind:Kind,x:number,y:number,label:Copy,extra:Partial<Landmark> = {}) {
+  area.points.push({id:`${area.id}:${key}`,kind,x,y,label,...extra});
+}
+
+function makeWorld(): Area {
+  const a=createArea(WORLD_ID,0,['旅人の世界地図','Travelers’ World Chart'],'world',125,82,Tile.Sea,sitePoint(0,0));
+  for(let y=0;y<a.height;y++) for(let x=0;x<a.width;x++){
+    const r=regionAt({x,y}), [cx,cy]=REGIONS[r].place;
+    const d=Math.hypot((x-cx)*.9,y-cy) + 1.65*Math.sin(x*.43+y*.31)+.9*Math.sin(y+cx);
+    const texture=noise(x,y,r*3);
+    let t=Tile.Deep;
+    if(d<17) t=Tile.Sea;
+    if(d<14.7 || (r<2 && x>21 && x<37 && y>=12 && y<=21)) t=Tile.Shallow;
+    if(d<11.1) t=Tile.Sand;
+    if(d<9.8) t=texture<.14?Tile.Forest:texture>.9?Tile.Flowers:Tile.Grass;
+    if(d<7 && texture>.79) t=Tile.Hill;
+    if(d<5 && texture<.11) t=Tile.Rock;
+    if(r===0 && Math.abs(x-(18+Math.sin(y*.29)*2))<.8 && y>11&&y<25 && t>=Tile.Sand) t=y===14?Tile.Waterfall:Tile.Water;
+    if(r>=2 && r!==3 && Math.abs(y-(cy+Math.sin(x*.3)*2.1))<.64 && x>cx-6 && x<cx+7 && t>=Tile.Grass) t=Tile.Water;
+    stamp(a,{x,y},t);
+  }
+  REGIONS.forEach((region,r) => {
+    const center={x:region.place[0],y:region.place[1]};
+    if (r!==3) for(const [s,site] of region.sites.entries()){
+      const p=sitePoint(r,s);
+      route(a,p,center,Tile.Path);
+      stamp(a,p,Tile.Path);
+      thing(a,`site-${r}-${s}`,'site',p.x,p.y,site.name,{link:mapId(r,s),variant:s});
+    } else {
+      for(const [s,site] of region.sites.entries()){
+        const p=sitePoint(r,s);
+        if(s===4) stamp(a,p,Tile.Deep);
+        else { route(a,p,center,Tile.Path); stamp(a,p,Tile.Path); }
+        thing(a,`site-${r}-${s}`,'site',p.x,p.y,site.name,{link:mapId(r,s),variant:s});
+      }
+    }
+  });
+  // A natural shoal at the first channel is the skiff route; ocean vessels can sail around it.
+  for(let y=14;y<=20;y++) for(let x=24;x<=35;x++) {
+    if(tileAt(a,{x,y})<=Tile.Shallow) stamp(a,{x,y},Tile.Shallow);
+  }
+  // Waterways that intersect an established trail get a timber crossing.
+  for(const [x,y] of [[17,12],[19,17],[19,18],[17,22],[42,16],[75,16],[77,59],[39,58]]) {
+    if(tileAt(a,{x,y})===Tile.Path && (tileAt(a,{x:x-1,y})===Tile.Water||tileAt(a,{x:x+1,y})===Tile.Water)) stamp(a,{x,y},Tile.Bridge);
+  }
+  return a;
+}
+
+const TOWN_SERVICES: Service[] = ['inn','armory','cards','items','library','guild','forge','tavern','notice','home'];
+function makeTown(region: number,site: number,id: string,name:Copy) {
+  const start={x:17,y:21};
+  const a=createArea(id,region,name,'town',35,25,Tile.Grass,start);
+  for(let y=0;y<a.height;y++) for(let x=0;x<a.width;x++){
+    const n=noise(x,y,region);
+    if(x<2||x>32||y<2) stamp(a,{x,y},n>.77?Tile.Hill:Tile.Forest);
+    else if(n<.17) stamp(a,{x,y},Tile.Flowers);
+  }
+  rectangle(a,16,3,3,21,Tile.Path);
+  for(const y of [8,15,22]) rectangle(a,2,y,31,2,Tile.Path);
+  if (region===1 || region===4 || site===3) rectangle(a,13,10,9,4,Tile.Stone);
+  if (region===3) rectangle(a,2,21,7,2,Tile.Bridge);
+  TOWN_SERVICES.forEach((service,index)=>{
+    const cols=[5,11,23,29], row=Math.floor(index/4), cx=cols[index%4], cy=5+row*7;
+    rectangle(a,cx-2,cy-2,5,4,Tile.Wall);
+    stamp(a,{x:cx,y:cy+1},Tile.Wood);
+    stamp(a,{x:cx,y:cy+2},Tile.Path);
+    thing(a,service,'door',cx,cy+1,SERVICES[service],{link:`${id}/${service}`,service,variant:index});
+  });
+  const r=REGIONS[region];
+  thing(a,'keeper','keeper',17,17,r.keeper);
+  thing(a,'resident','resident',19,21,['広場の住人','Square resident']);
+  thing(a,'camp','camp',15,16,CAMP);
+  thing(a,'exit','exit',17,23,EXIT,{link:WORLD_ID});
+  thing(a,'sign','sign',19,18,['街道の案内板','Road sign']);
+  if(region===6) thing(a,'rush','trial',19,10,['番人の記憶試練','Trial of the Guardians']);
+  return a;
+}
+
+function makeInterior(region: number,site: number,id: string, service: Service): Area {
+  const a=createArea(id,region,SERVICES[service],'indoors',17,12,Tile.Wall,{x:8,y:9});
+  rectangle(a,2,2,13,8,service==='library'||service==='guild'||service==='armory'?Tile.Stone:Tile.Wood);
+  rectangle(a,6,4,5,4,Tile.Carpet);
+  thing(a,service,'service',8,4,SERVICES[service],{service});
+  thing(a,'resident','resident',12,5,['腰掛けた旅人','Seated traveler'],{variant:2});
+  thing(a,'exit','exit',8,10,EXIT,{link:mapId(region,site)});
+  stamp(a,{x:8,y:10},Tile.Wood);
+  for(const x of [3,13]) { stamp(a,{x,y:3},Tile.Wall);stamp(a,{x,y:7},Tile.Wall); }
+  if(service==='guild')thing(a,'job-trial','trial',12,7,['奥の演習場','Guild training ground'],{variant:2});
+  if(service==='home') thing(a,'cupboard','secret',3,3,['鏡台の脇の小箱','Box beside the dresser']);
+  return a;
+}
+
+function makeWild(region: number,site: number,id: string,name: Copy,feature?:Feature) {
+  const a=createArea(id,region,name,'wild',33,23,Tile.Grass,{x:16,y:20});
+  for(let y=0;y<a.height;y++) for(let x=0;x<a.width;x++){
+    const n=noise(x,y,region*9+site);
+    if(x<2||x>a.width-3||y<2||y>=a.height-1) stamp(a,{x,y},Tile.Forest);
+    else if(n<.15) stamp(a,{x,y},Tile.Flowers);
+    else if(n>.80) stamp(a,{x,y},Tile.Forest);
+    if(region===2 && x>21 && y>4&&y<15 && Math.abs(x-(26+Math.sin(y*.5)*2))<1.1) stamp(a,{x,y},y===9?Tile.Waterfall:Tile.Water);
+    if(region===4 && x<11 && y<9 && n>.4) stamp(a,{x,y},Tile.Ice);
+  }
+  for(const end of [{x:5,y:14},{x:25,y:13},{x:24,y:5},{x:8,y:6}]) route(a,{x:16,y:19},end,Tile.Path,2);
+  route(a,{x:8,y:6},{x:25,y:13},Tile.Path,1);
+  route(a,{x:16,y:19},{x:16,y:9},Tile.Path);
+  route(a,{x:16,y:13},{x:25,y:13},Tile.Path);
+  route(a,{x:8,y:8},{x:13,y:8},Tile.Path);
+  rectangle(a,14,17,6,4,Tile.Path);
+  thing(a,'exit','exit',16,21,EXIT,{link:WORLD_ID});
+  thing(a,'sign','sign',15,18,['石の道しるべ','Stone milestone']);
+  thing(a,'chest','chest',8,6,REGIONS[region].book,{variant:site});
+  thing(a,'lesson','seal',24,5,['知識の宝箱','Lore chest']);
+  thing(a,'secret','secret',5,14,['草に隠れた小径','Grass-hidden trail']);
+  thing(a,'foe-0','enemy',23,13,['徘徊する魔物','Roaming creature'],{variant:0});
+  thing(a,'foe-1','enemy',13,8,['徘徊する魔物','Roaming creature'],{variant:1});
+  thing(a,'travelers','recruit',16,11,['道を探す旅人','Travelers seeking a road'],{variant:site});
+  rectangle(a,15,9,3,4,Tile.Grass);
+  if(feature) placeFeature(a,feature,'wild');
+  return a;
+}
+
+function placeFeature(a:Area,f:Feature, variant:'wild'|'main'|'side') {
+  const x=16,y=variant==='wild'?15:14;
+  const tile = a.place==='wild'?Tile.Path:Tile.Cave;
+  if(f==='rock'){
+    rectangle(a,x-5,y-1,6,3,tile);
+    thing(a,'rock','rock',x-3,y,FEATURES.rock,{feature:f});
+    thing(a,'plate','plate',x-1,y,['重しを載せる床','Counterweight plate'],{feature:f});
+  } else {
+    const p={x:f==='warp'?25:x+1,y:f==='warp'?y+1:y+1};
+    stamp(a,p,tile);
+    thing(a,'feature','feature',p.x,p.y,FEATURES[f],{feature:f});
+  }
+  if(variant==='wild') return;
+  if(f==='water') rectangle(a,14,10,5,3,Tile.Water);
+  if(f==='ice') rectangle(a,14,9,5,4,Tile.Stone);
+  if(f==='rotor') rectangle(a,15,10,4,3,Tile.Rotor);
+  if(f==='pit') rectangle(a,12,11,4,2,Tile.Trap);
+  if(f==='warp'){
+    rectangle(a,24,4,4,3,tile);
+    thing(a,'warp-return','feature',25,6,FEATURES.warp,{feature:f,variant:1});
+  }
+}
+
+function makeDungeon(region: number,site: number,floor: number,id: string,name: Copy,feature: Feature): Area {
+  const a=createArea(id,region,floor?[name[0]+` 地下${floor+1}層`, name[1]+` · B${floor+1}`]:name,'dungeon',35,25,Tile.Wall,{x:16,y:22});
+  const fill=region===1||region===5?Tile.Stone:Tile.Cave;
+  for(const room of [[12,17,9,6],[3,11,8,7],[12,10,10,7],[24,11,8,8],[13,3,8,5],[4,3,7,5],[24,3,7,5]]){
+    for(let y=room[1];y<room[1]+room[3];y++)for(let x=room[0];x<room[0]+room[2];x++){
+      const edge=(x===room[0]||x===room[0]+room[2]-1)&&(y===room[1]||y===room[1]+room[3]-1);
+      if(!edge || noise(x,y,region+floor)>.7) stamp(a,{x,y},fill);
+    }
+  }
+  route(a,{x:6,y:14},{x:28,y:17},fill,2);
+  route(a,{x:6,y:16},{x:16,y:20},fill,2);
+  route(a,{x:16,y:14},{x:16,y:5},fill);
+  route(a,{x:7,y:5},{x:28,y:5},fill);
+  route(a,{x:28,y:18},{x:16,y:20},fill);
+  stamp(a,{x:16,y:23},fill);
+  thing(a,'exit','exit',16,23,floor?['上の層へ戻る','Stairs up']:EXIT,{link:floor?mapId(region,site,floor-1):WORLD_ID});
+  thing(a,'gate','gate',16,8,['奥の間への扉','Inner gate'],{feature});
+  stamp(a,{x:7,y:8},Tile.Hidden);
+  stamp(a,{x:7,y:9},Tile.Hidden);
+  stamp(a,{x:7,y:10},Tile.Hidden);
+  thing(a,'passage','secret',7,10,['傷のある壁','Cracked wall']);
+  thing(a,'camp','camp',15,21,CAMP);
+  thing(a,'sign','sign',15,18,['探索の石碑','Exploration tablet']);
+  thing(a,'cache','chest',6,12,REGIONS[region].book,{variant:site+floor});
+  thing(a,'seal','seal',26,13,['知識の封印','Seal of Lore']);
+  thing(a,'minor','enemy',6,16,['番犬の影','A guardian’s shadow'],{variant:(floor+1)%3});
+  thing(a,'minor2','enemy',21,14,['巣を守る魔物','Nest guardian'],{variant:(floor+2)%3});
+  thing(a,'shortcut','shortcut',26,5,['帰還の転移石','Returnstone']);
+  thing(a,'north-cache','chest',7,5,['奥の隠し宝箱','Hidden inner chest'],{variant:5+floor});
+  if(site===2||site===3){
+    thing(a,'hidden-foe','trial',27,5,['裏道の強敵','Guardian of the side passage'],{variant:1});
+  }
+  if(site===4){
+    if(floor+1<floors(region,site)) thing(a,'down','stairs',17,4,['深層へ進む','Stairs down'],{link:mapId(region,site,floor+1)});
+    else thing(a,'boss','boss',17,4,REGIONS[region].boss);
+  } else {
+    thing(a,'recruit','recruit',17,4,['閉じ込められた旅人','Trapped traveler'],{variant:site});
+  }
+  placeFeature(a,feature,site===4?'main':'side');
+  return a;
+}
+
+const CACHE=new Map<string,Area>();
+export function area(id: string): Area {
+  const saved=CACHE.get(id); if(saved) return saved;
+  if(id===WORLD_ID) { const a=makeWorld();CACHE.set(id,a);return a; }
+  const found=/^r(\d)-s(\d)-f(\d)(?:\/([a-z]+))?$/.exec(id);
+  if(!found) return area(WORLD_ID);
+  const [,r,s,f,room]=found, region=Number(r),site=Number(s),floor=Number(f);
+  const location=REGIONS[region]?.sites[site];
+  if(!location || floor>=floors(region,site) || room&&(!(room in SERVICES)||location.type!=='town')) return area(WORLD_ID);
+  const a=room?makeInterior(region,site,id,room as Service):location.type==='town'?makeTown(region,site,id,location.name)
+    :location.type==='wild'?makeWild(region,site,id,location.name,location.feature)
+    :makeDungeon(region,site,floor,id,location.name,floor===2?'mirror':floor===1?(region>=5?'rock':region%2===0?'rotor':'pit'):location.feature??'lever');
+  CACHE.set(id,a);
+  return a;
+}
+
+export const isAir = (v:Vehicle)=>v==='airship'||v==='skyship';
+export const isWater = (t:Tile)=>t===Tile.Deep||t===Tile.Sea||t===Tile.Shallow||t===Tile.Water||t===Tile.Waterfall;
+export const isSolid = (t:Tile)=>t===Tile.Void||t===Tile.Wall||t===Tile.Forest||t===Tile.Rock||t===Tile.Hidden;
+export function canTravel(tile: Tile, vehicle: Vehicle, onWorld: boolean) {
+  if(!onWorld) return !isSolid(tile) && !isWater(tile);
+  if(isAir(vehicle)) return tile!==Tile.Void;
+  if(!isWater(tile)) return !isSolid(tile);
+  if(vehicle==='foot') return false;
+  if(vehicle==='canoe') return tile===Tile.Shallow||tile===Tile.Water;
+  return vehicle==='ship'||vehicle==='submarine';
+}
+export function isShore(a: Area,p:Point) {
+  return !isWater(tileAt(a,p))&&Object.values(OFFSETS).some(o=>isWater(tileAt(a,add(p,o))));
+}
+export function areaSite(id:string) {const m=/^r(\d)-s(\d)-f(\d)/.exec(id);return m?[Number(m[1]),Number(m[2]),Number(m[3])] as const:null;}
+export function nearbyLandmark(a:Area,at:Point,facing:Direction, visible:(l:Landmark)=>boolean) {
+  const ahead=add(at,OFFSETS[facing]);
+  const priority=(type:Kind)=>type==='enemy'||type==='boss'||type==='site'||type==='door'||type==='stairs'?0:1;
+  return a.points.filter(l=>visible(l)&&(same(at,l)||same(ahead,l)||distance(at,l)===1&&!['site','door','exit','gate','rock','enemy','boss'].includes(l.kind)))
+    .sort((x,y)=>distance(at,x)-distance(at,y)||priority(x.kind)-priority(y.kind))[0];
+}
+export function headline(a:Area,p:Point) {
+  return a.id===WORLD_ID?REGIONS[regionAt(p)].name:a.name;
+}
+export function isRoad(tile:Tile) { return tile===Tile.Path||tile===Tile.Bridge; }

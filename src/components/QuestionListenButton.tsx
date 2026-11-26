@@ -3,15 +3,16 @@ import type { QuestionAudioPrompt } from '../services/questionSpeech';
 import type { LanguageMode } from '../types';
 import { questionSpeechMessage, useQuestionPronunciation } from '../utils/useQuestionPronunciation';
 
-export default function QuestionListenButton({ prompt, questionKey, languageMode = 'JAPANESE', disabled = false, autoPlay = false, translate }: {
+export default function QuestionListenButton({ prompt, questionKey, languageMode = 'JAPANESE', disabled = false, autoPlay = false, translate, muteBgm }: {
   prompt?: QuestionAudioPrompt;
   questionKey: string;
   languageMode?: LanguageMode;
   disabled?: boolean;
   autoPlay?: boolean;
+  muteBgm?: boolean;
   translate?: (text: string) => string;
 }) {
-  const { play, status } = useQuestionPronunciation(audioService, prompt, questionKey, { enabled: !disabled, autoPlay });
+  const { play, status } = useQuestionPronunciation(audioService, prompt, questionKey, { enabled: !disabled, autoPlay, muteBgm });
   const message = questionSpeechMessage(status, languageMode);
   const label = translate?.('聞く') ?? (languageMode === 'ENGLISH' ? 'Listen' : languageMode === 'HIRAGANA' ? 'きく' : '聞く');
   if (!prompt) return null;

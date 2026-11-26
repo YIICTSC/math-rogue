@@ -14,6 +14,8 @@
     "test:secret-mission": "node scripts/test-secret-mission.mjs",
     "test:secret-mission:online": "pnpm run server:build && node scripts/test-secret-mission-online.mjs",
     "test:secret-mission:browser": "pnpm run server:build && node scripts/test-secret-mission-browser.mjs",
+    "test:pixel-rpg": "node scripts/test-pixel-rpg.mjs",
+    "test:pixel-rpg:browser": "node scripts/test-pixel-rpg-browser.mjs",
     "test:after-school-rush": "node scripts/test-after-school-rush.mjs",
     "test:after-school-rush:browser": "node scripts/test-after-school-rush-browser.mjs",
     "test:after-school-rush:audio": "node scripts/test-after-school-rush-audio.mjs",
