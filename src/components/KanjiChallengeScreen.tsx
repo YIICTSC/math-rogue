@@ -1,5 +1,5 @@
 import {awardAnswer} from '../point-exchange/store';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { AnswerMode, AssignmentAnswerResult, AssignmentReviewProblem, AssignmentUnit, GameMode, LanguageMode } from '../types';
@@ -12,6 +12,7 @@ import { trans } from '../utils/textUtils';
 import { assignmentFilterForMode, matchesKanjiAssignmentRangeFilter } from '../utils/assignmentRangeFilters';
 import { getProblemCycleScope, selectProblemsForCycle } from '../utils/problemCycle';
 import { matchesSchoolAnswer } from '../utils/schoolAnswer';
+import { useSchoolAnswerInput } from '../utils/useSchoolAnswerInput';
 
 interface KanjiChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -145,14 +146,16 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
     setProblems(shuffled);
   }, [mode, debugSkip, isChallenge, reviewProblem, assignmentUnits, resolvedAnswerMode]);
 
+  const submittedProblem = useRef<ExtendedKanjiProblem | undefined>(undefined);
   const handleAnswer = (option: string) => {
-    if (isAnswered) return;
+    const currentProblem = problems[currentProblemIndex];
+    if (!currentProblem || isAnswered || submittedProblem.current === currentProblem) return;
+    submittedProblem.current = currentProblem;
     
     setSelectedOption(option);
     setIsAnswered(true);
     
     // 「書き」では読みではなく、送り仮名を含む元の表記全体を正解とする。
-    const currentProblem = problems[currentProblemIndex];
     const expectedAnswer = resolvedAnswerMode === 'WRITING'
       ? currentProblem.actualWrittenAnswer
       : currentProblem.actualCorrectAnswer;
@@ -219,9 +222,13 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
     }, 1000);
   };
 
+  const { isComposing, ...inputEvents } = useSchoolAnswerInput(setInputAnswer, (value) => {
+    const problem = problems[currentProblemIndex];
+    if (problem && matchesSchoolAnswer(value, problem.actualCorrectAnswer)) handleAnswer(value);
+  });
   const handleInputSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!inputAnswer.trim()) return;
+    if (isComposing() || !inputAnswer.trim()) return;
     handleAnswer(inputAnswer);
   };
 
@@ -305,7 +312,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
                 <input
                   ref={inputRef}
                   value={inputAnswer}
-                  onChange={(event) => setInputAnswer(event.target.value)}
+                  {...inputEvents}
                   disabled={isAnswered}
                   autoFocus
                   className={`w-full rounded-lg border-4 bg-white px-4 py-4 text-center text-2xl font-black text-slate-950 outline-none transition-colors ${isAnswered ? 'border-slate-400 opacity-80' : 'border-cyan-500 focus:border-yellow-300'}`}

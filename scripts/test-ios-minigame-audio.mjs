@@ -160,7 +160,17 @@ try {
   assert.ok(mp3Files.length>=100,'packaged SFX assets must be checked out');
   const decodeFailures=await page.evaluate(async files=>{
     const a=window.audio,names=files.map(file=>file.replace(/\\/g,'/').replace(/\.mp3$/,''));
-    await a.preloadSfx(names);return names.filter(name=>!a.sfxBuffers[name]);
+    const failures=[];
+    // Keep the full archive check within the browser's request and decode limits.
+    for(let i=0;i<names.length;i+=24){
+      const batch=names.slice(i,i+24);
+      await a.preloadSfx(batch);
+      for(const name of batch){
+        if(!a.sfxBuffers[name])failures.push(name);
+        delete a.sfxBuffers[name];
+      }
+    }
+    return failures;
   },mp3Files.map(file=>file.split(path.sep).join('/')));
   assert.deepEqual(decodeFailures,[],'all packaged MP3 effects decode successfully');
   console.log(`✓ ${mp3Files.length} packaged MP3 effects decoded`);

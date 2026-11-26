@@ -14,6 +14,7 @@ import { trans } from '../utils/textUtils';
 import { assignmentFilterForMode } from '../utils/assignmentRangeFilters';
 import { getProblemCycleScope, selectProblemsForCycle } from '../utils/problemCycle';
 import { normalizeSchoolNumber } from '../utils/schoolAnswer';
+import { useSchoolAnswerInput } from '../utils/useSchoolAnswerInput';
 import { arithmeticPool } from '../mini-games/gakuro-kart/arithmetic';
 
 interface MathProblem {
@@ -110,8 +111,11 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
     questionStartedAtRef.current = Date.now();
   }, [currentProblemIndex]);
 
+  const submittedProblem = useRef<MathProblem | undefined>(undefined);
   const handleAnswer = (option: number) => {
-    if (isAnswered) return;
+    const problem = problems[currentProblemIndex];
+    if (!problem || isAnswered || submittedProblem.current === problem) return;
+    submittedProblem.current = problem;
     
     setSelectedOption(option);
     setIsAnswered(true);
@@ -164,10 +168,14 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
     }, 1000);
   };
 
+  const { isComposing, ...inputEvents } = useSchoolAnswerInput(setInputAnswer, (value) => {
+    const problem = problems[currentProblemIndex];
+    if (problem && normalizeSchoolNumber(value) === String(problem.answer)) handleAnswer(problem.answer);
+  });
   const handleInputSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const problem = problems[currentProblemIndex];
-    if (!problem || !inputAnswer.trim()) return;
+    if (isComposing() || !problem || !inputAnswer.trim()) return;
     handleAnswer(normalizeSchoolNumber(inputAnswer) === String(problem.answer) ? problem.answer : Number.NaN);
   };
 
@@ -220,7 +228,7 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
                 <input
                   ref={inputRef}
                   value={inputAnswer}
-                  onChange={(event) => setInputAnswer(event.target.value)}
+                  {...inputEvents}
                   disabled={isAnswered}
                   autoFocus
                   inputMode="numeric"

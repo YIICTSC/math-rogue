@@ -3,7 +3,8 @@ import academyBroadcastVoices from '../mini-games/academy-sports/broadcastVoices
 import {ACADEMY_VOICES} from '../mini-games/academy-sports/voiceCatalog';
 import {readPoints} from '../point-exchange/store';
 import {techniqueVoiceParts,dungeonTechniqueKey,type TechniqueSpeechMode,type VoicePart} from '../components/school-dungeon/techniques/voiceParts';
-import {prepareWebAudioSession, registerGameAudio, resumeGameAudio} from './webAudioSession';
+import {isGameAudioInterrupted, prepareWebAudioSession, registerGameAudio, resumeGameAudio} from './webAudioSession';
+import { stopQuestionSpeech } from './questionSpeech';
 import lanternVoiceManifest from '../mini-games/lantern-war/voiceManifest.json';
 import {crossGameBattleClips} from '../mini-games/lantern-war/battleVoiceBank';
 import {sportsVoicePath,sportsVoiceDuration,sportsVoiceAvailable} from '../mini-games/shared/sportsVoices';
@@ -42,6 +43,7 @@ const APP_ASSET_VERSION = typeof __APP_ASSET_VERSION__ === 'string' ? __APP_ASSE
 const versionBgmPath = (path: string) =>
     `${path}${path.includes('?') ? '&' : '?'}v=${encodeURIComponent(APP_ASSET_VERSION)}`;
 const IS_IOS_BUILD = String(import.meta.env.VITE_APP_PLATFORM || '').trim().toLowerCase() === 'ios';
+const MASTER_PLAYBACK_GAIN = 0.4;
 const WEB_OPUS_AUDIO_MIME = 'audio/ogg; codecs="opus"';
 const THEMED_BGM_TYPES = new Set([
     'battle', 'mid_boss', 'boss', 'final_boss', 'menu', 'map', 'shop', 'event',
@@ -103,6 +105,16 @@ const SHOGI_GIMMICK_SOUND_PROFILES: Readonly<Record<string, ShogiGimmickSoundPro
 const MINI_RUSH_VOICE = 'mini-rush-voice';
 const MINI_RUSH_FOLEY = 'mini-rush-foley';
 const MINI_RUSH_JINGLE = 'mini-rush-jingle';
+
+function setMediaElementVolume(audio: HTMLAudioElement, volume: number) {
+    try {
+        if (Math.abs(audio.volume - volume) > 0.001) audio.volume = volume;
+        // Some mobile WebKit versions ignore the setter and keep volume at 1.
+        return Math.abs(audio.volume - volume) <= 0.001;
+    } catch {
+        return false;
+    }
+}
 
 class AudioService {
   private traditionalSoundGeneration = 0;
@@ -196,7 +208,8 @@ class AudioService {
   constructor() {}
 
   private getEffectiveBgmVolume() {
-      return this.bgmSilencers.size ? 0 : this.bgmVolume * this.bgmDuckMultiplier * (this.flightRadioChannel ? 0.55 : 1);
+      if (this.bgmSilencers.size || (this.isBgmPaused && !this.pausedForAppBackground)) return 0;
+      return this.bgmVolume * this.bgmDuckMultiplier * (this.flightRadioChannel ? 0.55 : 1);
   }
 
   /** Independent scopes keep preview/gameplay silent even if another scene resets ducking. */
@@ -207,24 +220,38 @@ class AudioService {
       return () => { this.bgmSilencers.delete(token); this.applyBgmVolume(); };
   }
 
-  private applyBgmVolume() {
+  private isPlaybackActive(allowBackground = false) {
+      return this.appIsActive && !isGameAudioInterrupted()
+          && (allowBackground || typeof document === 'undefined' || !document.hidden);
+  }
+
+  private setBusGain(bus: GainNode | null, volume: number, immediate = false) {
+      if (!bus || !this.ctx) return;
+      const time = this.ctx.currentTime;
+      bus.gain.cancelScheduledValues(time);
+      if (immediate || volume === 0) bus.gain.value = volume;
+      else bus.gain.setTargetAtTime(volume, time, 0.05);
+  }
+
+  private applyHtmlBgmVolume(audio: HTMLAudioElement) {
       const effectiveVolume = this.getEffectiveBgmVolume();
-      if (this.bgmGain && this.ctx) {
-          if (effectiveVolume === 0) {
-              this.bgmGain.gain.cancelScheduledValues(this.ctx.currentTime);
-              this.bgmGain.gain.setValueAtTime(0, this.ctx.currentTime);
-          } else this.bgmGain.gain.setTargetAtTime(effectiveVolume, this.ctx.currentTime, 0.05);
-      }
-      if (this.currentHtmlAudio) {
-          this.currentHtmlAudio.muted = this.isMuted || effectiveVolume === 0;
-          this.currentHtmlAudio.volume = this.bgmMediaSources.has(this.currentHtmlAudio)
-              ? 1
-              : Math.min(1, effectiveVolume);
-      }
-      this.activeBgmHtmlAudios.forEach(audio => {
-          audio.muted = this.isMuted || effectiveVolume === 0;
-          audio.volume = this.bgmMediaSources.has(audio) ? 1 : Math.min(1, effectiveVolume);
-      });
+      const routed = this.bgmMediaSources.has(audio);
+      const volumeSet = setMediaElementVolume(audio, routed ? 1 : effectiveVolume * MASTER_PLAYBACK_GAIN);
+      const muted = this.isMuted || effectiveVolume === 0 || !volumeSet || !this.isPlaybackActive(this.backgroundPlaybackEnabled);
+      if (audio.muted !== muted) audio.muted = muted;
+      return volumeSet;
+  }
+
+  private applyBgmVolume(immediate = false) {
+      this.setBusGain(this.bgmGain, this.getEffectiveBgmVolume(), immediate);
+      for (const audio of this.activeBgmHtmlAudios) this.applyHtmlBgmVolume(audio);
+  }
+
+  private restorePlaybackLevels() {
+      this.setBusGain(this.masterGain, !this.isMuted && this.isPlaybackActive(this.backgroundPlaybackEnabled) ? MASTER_PLAYBACK_GAIN : 0, true);
+      this.applyBgmVolume(true);
+      this.applySfxVolume(true);
+      this.applyVoiceVolume(true);
   }
 
   private parseBgmSequenceEntry(entry: string): { theme?: BgmThemeId; type: string } {
@@ -279,12 +306,16 @@ class AudioService {
     const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
     if (!AudioContextClass) return;
 
-    this.ctx = new AudioContextClass();
-    this.unregisterAudio = registerGameAudio(this.ctx!, () => this.appIsActive && !this.foregroundRecoveryPromise);
+    const context: AudioContext = new AudioContextClass();
+    this.ctx = context;
+    this.unregisterAudio = registerGameAudio(context, () => this.appIsActive && !this.foregroundRecoveryPromise);
+    context.addEventListener('statechange', () => {
+        if (this.ctx === context && context.state === 'running') this.restorePlaybackLevels();
+    });
     
     // Master Chain
     this.masterGain = this.ctx.createGain();
-    this.masterGain.gain.value = this.isMuted ? 0 : 0.4;
+    this.masterGain.gain.value = !this.isMuted && this.isPlaybackActive(this.backgroundPlaybackEnabled) ? MASTER_PLAYBACK_GAIN : 0;
     
     // Simple Delay/Reverb Effect (Echo)
     const delay = this.ctx.createDelay();
@@ -325,6 +356,7 @@ class AudioService {
   private async resumeAudioContext(attempts = 1) {
       const retryCount = Math.max(1, attempts);
       for (let attempt = 0; attempt < retryCount; attempt++) {
+          if (!this.isPlaybackActive(this.backgroundPlaybackEnabled)) return false;
           this.init();
           if (!this.ctx) return false;
           if ((this.ctx.state as AudioContextState) === 'running') return true;
@@ -377,7 +409,7 @@ class AudioService {
   }
 
   public async unlockAudio() {
-      if (!this.appIsActive || (typeof document !== 'undefined' && document.hidden)) return;
+      if (!this.isPlaybackActive()) return;
       const lifecycleGeneration = this.appLifecycleGeneration;
       this.init();
       if (this.ctx) void resumeGameAudio(this.ctx, true, () => this.appIsActive);
@@ -386,9 +418,8 @@ class AudioService {
       // iOS backgrounds the app. Never let that stale gesture restart BGM after
       // the background pause has won.
       if (
-          !this.appIsActive
+          !this.isPlaybackActive()
           || lifecycleGeneration !== this.appLifecycleGeneration
-          || (typeof document !== 'undefined' && document.hidden)
       ) return;
       if (!this.ctx) return;
       const needsPlaybackRetry = (
@@ -411,17 +442,18 @@ class AudioService {
   }
 
   public handleAppBackground() {
+      if (!this.backgroundPlaybackEnabled && this.appIsActive) {
+          this.appIsActive = false;
+          this.appLifecycleGeneration += 1;
+          this.restorePlaybackLevels();
+      }
       if(typeof window!=='undefined')window.dispatchEvent(new Event('learning-rogue:sports-voice-muted'));
       this.stopFlightRadio(); this.stopStarTideVoices(); this.stopLanternWarVoices(); this.stopSportsVoices();
       this.stopKochoVoices();
       this.stopCardClubVoices(); this.stopPaperPlaneVoices();
       this.stopMiniRushAudio();
       if (this.backgroundPlaybackEnabled) return;
-      if (this.appIsActive) {
-          this.appIsActive = false;
-          this.appLifecycleGeneration += 1;
-      }
-      this.pausedForAppBackground = this.pausedForAppBackground || this.isPlayingBGM;
+      this.pausedForAppBackground ||= this.isPlayingBGM && !this.isBgmPaused;
       const previousSuspend = this.backgroundSuspendPromise;
       const currentSuspend = this.pauseBGM();
       // Both Capacitor and document visibility can report the same transition.
@@ -438,33 +470,34 @@ class AudioService {
   }
 
   public async handleAppForeground() {
-      if (!this.appIsActive) {
+      if (isGameAudioInterrupted() || (typeof document !== 'undefined' && document.hidden)) return;
+      const becameActive = !this.appIsActive;
+      if (becameActive) {
           this.appIsActive = true;
           this.appLifecycleGeneration += 1;
       }
-      if (this.foregroundRecoveryPromise) return this.foregroundRecoveryPromise;
       const lifecycleGeneration = this.appLifecycleGeneration;
+      const stillActive = () => this.isPlaybackActive() && this.appLifecycleGeneration === lifecycleGeneration;
+      if (this.foregroundRecoveryPromise) {
+          await this.foregroundRecoveryPromise;
+          // A second interruption can arrive before the first resume settles.
+          if (becameActive && stillActive()) await this.handleAppForeground();
+          return;
+      }
       const recovery = (async () => {
           const playbackGeneration = this.playbackGeneration;
-          const shouldRestartBgm = (
-              this.pausedForAppBackground
-              && this.isPlayingBGM
-              && Boolean(this.currentBgmType)
-              && (this.currentBgmModeOverride ?? this.bgmMode) !== 'STUDY'
-          );
-          this.pausedForAppBackground = false;
           // Wait for the background suspend request before asking iOS to resume.
           // Without this ordering, suspend() can win the race and silence both
           // Web Audio SE and MP3 BGM after returning to the app.
           await this.backgroundSuspendPromise.catch(() => undefined);
+          if (!stillActive()) return;
+          this.restorePlaybackLevels();
           await this.resumeAudioContext(IS_IOS_BUILD ? 4 : 1);
-          if (
-              shouldRestartBgm
-              && playbackGeneration === this.playbackGeneration
-              && this.appIsActive
-              && lifecycleGeneration === this.appLifecycleGeneration
-              && (typeof document === 'undefined' || !document.hidden)
-          ) {
+          if (!stillActive() || playbackGeneration !== this.playbackGeneration) return;
+          const needsControlledOutput = this.currentHtmlAudio && !this.applyHtmlBgmVolume(this.currentHtmlAudio);
+          const shouldRestartBgm = this.pausedForAppBackground || (!this.isBgmPaused && needsControlledOutput);
+          this.pausedForAppBackground = false;
+          if (shouldRestartBgm) {
               this.isBgmPaused = false;
               await this.restartCurrentBGM();
           }
@@ -537,8 +570,7 @@ class AudioService {
       const audio = document.createElement('audio');
       audio.preload = 'auto';
       audio.loop = true;
-      audio.volume = Math.min(1, this.getEffectiveBgmVolume());
-      audio.muted = this.isMuted || this.getEffectiveBgmVolume() === 0;
+      this.applyHtmlBgmVolume(audio);
       (audio as HTMLAudioElement & { fetchPriority?: 'high' | 'low' | 'auto' }).fetchPriority = 'high';
       audio.src = path;
       this.preparedBgmHtmlAudios.set(path, audio);
@@ -562,15 +594,25 @@ class AudioService {
 
   public setSfxVolume(volume: number) {
       this.sfxVolume = Math.max(0, Math.min(1.5, volume));
-      if (this.sfxGain && this.ctx) {
-          this.sfxGain.gain.setTargetAtTime(this.sfxVolume, this.ctx.currentTime, 0.05);
-      }
+      this.applySfxVolume();
+  }
+
+  private applyHtmlSfxVolume(name: string, audio: HTMLAudioElement) {
+      const level = Math.min(1, Math.max(0, this.htmlSfxLevels.get(audio) ?? 1));
+      const volume = this.isVoiceSfxName(name)
+          ? Math.min(1, this.voiceVolume * level)
+          : this.sfxVolume * level * MASTER_PLAYBACK_GAIN;
+      const volumeSet = setMediaElementVolume(audio, volume);
+      const muted = this.isMuted || volume === 0 || !volumeSet || !this.isPlaybackActive();
+      if (audio.muted !== muted) audio.muted = muted;
+      return volumeSet;
+  }
+
+  private applySfxVolume(immediate = false) {
+      this.setBusGain(this.sfxGain, this.sfxVolume, immediate);
       this.activeHtmlSfx.forEach((audios, name) => {
           if (this.isVoiceSfxName(name)) return;
-          audios.forEach(audio => {
-              audio.volume = Math.min(1, this.sfxVolume * (this.htmlSfxLevels.get(audio) ?? 1));
-              audio.muted = this.isMuted || this.sfxVolume <= 0;
-          });
+          for (const audio of audios) this.applyHtmlSfxVolume(name, audio);
       });
   }
 
@@ -579,7 +621,7 @@ class AudioService {
   }
 
   public getRhythmAudioState() {
-      return { active: this.appIsActive && (typeof document === 'undefined' || !document.hidden),
+      return { active: this.isPlaybackActive(),
           volume: this.isMuted ? 0 : Math.min(1, this.bgmVolume),
           sfxVolume: this.isMuted ? 0 : Math.min(1, this.sfxVolume) };
   }
@@ -646,24 +688,29 @@ class AudioService {
   public stopQuizShowSound(cue: QuizShowCue) { const name = `quiz-show/${cue}`; this.sfxPlaybackGenerations.set(name, (this.sfxPlaybackGenerations.get(name) ?? 0) + 1); this.stopActiveSfx(name); }
 
   public canPlayConversationVoice() {
-      return this.appIsActive && !this.isMuted && this.voiceVolume > 0 && (typeof document === 'undefined' || !document.hidden);
+      return this.isPlaybackActive() && this.isVoiceEnabled();
+  }
+
+  public isVoiceEnabled() {
+      return !this.isMuted && this.voiceVolume > 0;
   }
 
   public setVoiceVolume(volume: number) {
       this.voiceVolume = Math.max(0, Math.min(1.5, volume));
+      if (this.voiceVolume === 0) stopQuestionSpeech();
       if (this.voiceVolume === 0) { if(typeof window!=='undefined')window.dispatchEvent(new Event('learning-rogue:sports-voice-muted'));this.stopFlightRadio(); this.stopStarTideVoices(); this.stopLanternWarVoices(); this.stopSportsVoices(); this.stopDungeonChronicleVoices(); this.stopKochoVoices(); this.stopCardClubVoices(); this.stopPaperPlaneVoices(); this.stopMiniRushVoice(); }
-      const voiceGain = Math.min(1, this.voiceVolume);
+      this.applyVoiceVolume();
+  }
+
+  private applyVoiceVolume(immediate = false) {
+      const voiceGain = this.canPlayConversationVoice() ? Math.min(1, this.voiceVolume) : 0;
       this.activeSfxSourceGains.forEach((gains, name) => {
-          if (!this.isVoiceSfxName(name) || !this.ctx) return;
-          gains.forEach(gain => {
-              gain.gain.setTargetAtTime(voiceGain, this.ctx!.currentTime, 0.05);
-          });
+          if (!this.isVoiceSfxName(name)) return;
+          for (const gain of gains) this.setBusGain(gain, voiceGain, immediate);
       });
       this.activeHtmlSfx.forEach((audios, name) => {
           if (!this.isVoiceSfxName(name)) return;
-          audios.forEach(audio => {
-              audio.volume = Math.min(1, this.voiceVolume);
-          });
+          for (const audio of audios) this.applyHtmlSfxVolume(name, audio);
       });
   }
 
@@ -1301,12 +1348,19 @@ class AudioService {
       this.currentBgmThemeOverride = themeOverride;
       this.isPlayingBGM = true;
       this.isBgmPaused = false;
+      this.pausedForAppBackground = false;
       this.isLooping = loop;
       const playbackGeneration = this.playbackGeneration;
       this.swing = 0; 
       const playbackMode = modeOverride ?? this.bgmMode;
       const playbackTheme = themeOverride ?? this.bgmTheme;
       if (playbackMode === 'STUDY') return;
+      if (!this.isPlaybackActive(this.backgroundPlaybackEnabled)) {
+          this.isBgmPaused = true;
+          this.pausedForAppBackground = true;
+          return;
+      }
+      this.applyBgmVolume(true);
 
       if (playbackMode === 'NEW' || playbackMode === 'OLD') {
           await this.playMp3(type, loop, playbackGeneration, playbackMode, playbackTheme);
@@ -1500,16 +1554,16 @@ class AudioService {
                   } catch {}
               }
               audio.loop = loop;
-              audio.muted = this.isMuted || this.getEffectiveBgmVolume() === 0;
-              audio.volume = Math.min(1, this.getEffectiveBgmVolume());
               (audio as HTMLAudioElement & { fetchPriority?: 'high' | 'low' | 'auto' }).fetchPriority = 'high';
-              // Keep iOS BGM on the media element's native playback path. Routing
-              // it through WKWebView's AudioContext makes the stream repeatedly
-              // detach and rebuffer when iOS changes output routes (CarPlay,
-              // Bluetooth, AirPlay), which sounds like short chopped fragments.
-              // SFX/voices can remain on Web Audio; BGM volume is applied directly.
-              const routedThroughWebAudio = !IS_IOS_BUILD && this.connectHtmlBgmToGain(audio);
-              audio.volume = routedThroughWebAudio ? 1 : Math.min(1, this.getEffectiveBgmVolume());
+              // Prefer native streaming on iOS for route changes such as CarPlay.
+              // If the element ignores software volume, use a controlled Web Audio
+              // path (including the decoded fallback) before exposing it to playback.
+              if (!IS_IOS_BUILD || !this.applyHtmlBgmVolume(audio)) this.connectHtmlBgmToGain(audio);
+              if (!this.applyHtmlBgmVolume(audio)) {
+                  this.retireHtmlBgm(audio);
+                  return false;
+              }
+              audio.onvolumechange = () => this.applyHtmlBgmVolume(audio);
               audio.onended = () => {
                   if (this.isCurrentPlayback(type, playbackGeneration) && !loop) {
                       if (this.bgmAdvanceMode === 'sorted') {
@@ -1544,6 +1598,8 @@ class AudioService {
   private retireHtmlBgm(audio: HTMLAudioElement) {
       this.bgmHtmlOwners.delete(audio);
       audio.onended = null;
+      audio.onvolumechange = null;
+      audio.muted = true;
       try { audio.pause(); audio.currentTime = 0; } catch {}
       this.disconnectHtmlBgm(audio);
       this.activeBgmHtmlAudios.delete(audio);
@@ -1554,12 +1610,12 @@ class AudioService {
   }
 
   private connectHtmlBgmToGain(audio: HTMLAudioElement) {
-      // A media element routed into a suspended WKWebView AudioContext is silent.
-      // Keep it on the native media path until Web Audio has actually recovered;
-      // the element's own volume still observes the in-game BGM setting.
-      if (!this.ctx || !this.bgmGain || this.ctx.state !== 'running') return false;
+      const existing = this.bgmMediaSources.get(audio);
+      // An element already associated with a media source must be reconnected,
+      // even if the context has not yet finished resuming.
+      if (!this.ctx || !this.bgmGain || (!existing && this.ctx.state !== 'running')) return false;
       try {
-          const source = this.bgmMediaSources.get(audio) || this.ctx.createMediaElementSource(audio);
+          const source = existing ?? this.ctx.createMediaElementSource(audio);
           source.connect(this.bgmGain);
           this.bgmMediaSources.set(audio, source);
           return true;
@@ -1584,7 +1640,8 @@ class AudioService {
   private isCurrentPlayback(type: string, playbackGeneration: number) {
       return this.isPlayingBGM
           && this.currentBgmType === type
-          && this.playbackGeneration === playbackGeneration;
+          && this.playbackGeneration === playbackGeneration
+          && this.isPlaybackActive(this.backgroundPlaybackEnabled);
   }
 
   private silenceCurrentBgmPreservingSelection() {
@@ -1622,6 +1679,7 @@ class AudioService {
       for (const audio of Array.from(this.activeBgmHtmlAudios)) this.retireHtmlBgm(audio);
       this.isPlayingBGM = false;
       this.isBgmPaused = false;
+      this.pausedForAppBackground = false;
       this.currentBgmType = null;
       this.currentBgmModeOverride = null;
       this.currentBgmThemeOverride = null;
@@ -1629,32 +1687,33 @@ class AudioService {
 
   public pauseBGM(): Promise<void> {
       if (!this.isPlayingBGM || this.isBgmPaused) return Promise.resolve();
+      this.isBgmPaused = true;
+      this.applyBgmVolume(true);
       this.activeBgmHtmlAudios.forEach(audio => {
           try {
               audio.pause();
           } catch {}
       });
-      this.isBgmPaused = true;
       if (!this.ctx) return Promise.resolve();
       return this.ctx.suspend().then(() => undefined).catch(() => undefined);
   }
 
   public async resumeBGM() {
-      if (!this.ctx || !this.isPlayingBGM || !this.isBgmPaused) return;
+      if (!this.ctx || !this.isPlayingBGM || !this.isBgmPaused || !this.isPlaybackActive()) return;
       const generation = this.playbackGeneration;
+      this.restorePlaybackLevels();
       await this.resumeAudioContext();
-      if (generation !== this.playbackGeneration || !this.isPlayingBGM || !this.isBgmPaused) return;
+      if (generation !== this.playbackGeneration || !this.isPlayingBGM || !this.isBgmPaused || !this.isPlaybackActive()) return;
+      this.isBgmPaused = false;
+      this.applyBgmVolume(true);
       const audio = this.currentHtmlAudio;
       if (audio) {
-          const resumed = await audio.play().then(() => true).catch(() => false);
-          if (generation !== this.playbackGeneration) return;
+          const resumed = this.applyHtmlBgmVolume(audio) && await audio.play().then(() => true).catch(() => false);
+          if (generation !== this.playbackGeneration || !this.isPlaybackActive()) return;
           if (!resumed && this.currentBgmType) {
-              this.isBgmPaused = false;
               await this.restartCurrentBGM();
-              return;
           }
       }
-      this.isBgmPaused = false;
   }
 
   public stopAllAudio() {
@@ -1680,11 +1739,9 @@ class AudioService {
 
   public toggleMute() {
       this.isMuted = !this.isMuted;
-      this.applyBgmVolume();
+      if (this.isMuted) stopQuestionSpeech();
+      this.restorePlaybackLevels();
       if (this.isMuted) { if(typeof window!=='undefined')window.dispatchEvent(new Event('learning-rogue:sports-voice-muted'));this.stopFlightRadio(); this.stopStarTideVoices(); this.stopLanternWarVoices(); this.stopSportsVoices(); this.stopRpgFishingSounds(); this.stopHobbySounds(); this.stopKochoVoices(); this.stopCardClubVoices(); this.stopPaperPlaneVoices(); this.stopMiniRushAudio(); }
-      if (this.masterGain && this.ctx) {
-          this.masterGain.gain.setTargetAtTime(this.isMuted ? 0 : 0.4, this.ctx.currentTime, 0.1);
-      }
   }
 
   private playAttackSynth(t: number) {
@@ -1826,7 +1883,7 @@ class AudioService {
       const sources = this.activeSfxSources.get(name);
       if (sources) {
           for (const source of sources) {
-              const sourceGain = this.findSfxSourceGain(name, source);
+              const sourceGain = this.sfxSourceGains.get(source);
               try {
                   source.onended = null;
                   source.stop();
@@ -1847,15 +1904,14 @@ class AudioService {
 
       const htmlAudios = this.activeHtmlSfx.get(name);
       if (!htmlAudios) return;
-      for (const audio of htmlAudios) {
-          const timer = this.htmlSfxStopTimers.get(audio);
-          if (timer) window.clearTimeout(timer);
-          this.htmlSfxStopTimers.delete(audio);
-          audio.onended = null;
-          audio.pause();
-          audio.currentTime = 0;
-      }
-      this.activeHtmlSfx.delete(name);
+      for (const audio of htmlAudios) this.stopHtmlSfx(audio);
+  }
+
+  private stopHtmlSfx(audio: HTMLAudioElement) {
+      audio.onvolumechange = null;
+      audio.muted = true;
+      try { audio.pause(); audio.currentTime = 0; } catch {}
+      audio.onended?.call(audio, new Event('ended'));
   }
 
   private startSfxSource(
@@ -1871,7 +1927,7 @@ class AudioService {
       try {
           const source = this.ctx.createBufferSource();
           source.buffer = buffer;
-          const gain = volume === 1 ? null : this.ctx.createGain();
+          const gain = volume === 1 && !directOutput ? null : this.ctx.createGain();
           if (gain) {
               gain.gain.value = Math.min(1, Math.max(0, volume));
               source.connect(gain);
@@ -1910,11 +1966,6 @@ class AudioService {
       }
   }
 
-  private findSfxSourceGain(name: string, source: AudioBufferSourceNode) {
-      if (!this.isVoiceSfxName(name)) return null;
-      return this.sfxSourceGains.get(source) || null;
-  }
-
   private async playHtmlSfx(
       name: string,
       paths: string[],
@@ -1926,77 +1977,65 @@ class AudioService {
       stillActive = () => true,
   ): Promise<boolean> {
       const lifecycle = this.appLifecycleGeneration;
-      const canPlay = () => stillActive() && performance.now() < startDeadline && !this.isMuted && this.appIsActive
+      const canPlay = () => stillActive() && performance.now() < startDeadline && !this.isMuted && this.isPlaybackActive()
           && lifecycle === this.appLifecycleGeneration
-          && (typeof document === 'undefined' || !document.hidden)
+          && ((overlap && !this.isVoiceSfxName(name)) || this.sfxPlaybackGenerations.get(name) === generation)
           && this.getHtmlSfxVolume(name) > 0;
       if (!canPlay()) return false;
       void this.resumeAudioContext();
       for (const path of paths) {
-          if (!canPlay() || (name === MINI_RUSH_VOICE && this.sfxPlaybackGenerations.get(name) !== generation)) return false;
-          if ((name.startsWith('flight-radio-voice-') || name.startsWith('lantern-war-voice-') || name.startsWith('sports-voice-') || name.startsWith('star-tide-voice-') || name.startsWith('dungeon-chronicle-voice-') || name.startsWith('kocho-voice-') || name.startsWith('card-club-voice-') || name.startsWith('paper-plane-voice-')) && (this.sfxPlaybackGenerations.get(name) !== generation || !this.canPlayConversationVoice())) return false;
+          if (!canPlay()) return false;
+          let audio: HTMLAudioElement | undefined;
           try {
-              const audio = new Audio(path);
+              const element = new Audio(path);
+              audio = element;
               audio.preload = 'auto';
-              const htmlVolume = Math.min(1, this.getHtmlSfxVolume(name) * level);
               this.htmlSfxLevels.set(audio, level);
-              audio.volume = htmlVolume;
-              const didStart = await Promise.race([
-                  audio.play().then(() => true).catch(() => false),
-                  new Promise<boolean>(resolve => window.setTimeout(() => resolve(false), 1500)),
-              ]);
-              if (!canPlay()) { audio.pause(); return false; }
-              if (!didStart) {
-                  audio.pause();
-                  continue;
-              }
-              // Voices may overlap, but an exit/mute must also cancel a delayed play().
-              if ((!overlap || this.isVoiceSfxName(name)) && this.sfxPlaybackGenerations.get(name) !== generation) {
-                  audio.pause();
-                  audio.currentTime = 0;
-                  return true;
+              if (!this.applyHtmlSfxVolume(name, audio)) {
+                  audio.removeAttribute('src');
+                  return false;
               }
               if (!overlap) this.stopActiveSfx(name);
-
+              // Media may already be audible before play() settles. Include the
+              // pending element in volume changes and interruption cleanup.
               const audios = this.activeHtmlSfx.get(name) ?? new Set<HTMLAudioElement>();
               audios.add(audio);
               this.activeHtmlSfx.set(name, audios);
-              const cleanup = () => {
-                  const timer = this.htmlSfxStopTimers.get(audio);
-                  if (timer) window.clearTimeout(timer);
-                  this.htmlSfxStopTimers.delete(audio);
-                  audios.delete(audio);
-                  if (audios.size === 0) this.activeHtmlSfx.delete(name);
-              };
-              audio.onended = cleanup;
-              const timer = window.setTimeout(() => {
-                  audio.pause();
-                  audio.currentTime = 0;
-                  cleanup();
-              }, maxDurationMs);
-              this.htmlSfxStopTimers.set(audio, timer);
-              return await new Promise<boolean>((resolve) => {
-                  let settled = false;
-                  const settle = () => {
-                      if (settled) return;
-                      settled = true;
+              audio.onvolumechange = () => this.applyHtmlSfxVolume(name, element);
+              const finished = new Promise<boolean>(resolve => {
+                  element.onended = () => {
+                      window.clearTimeout(this.htmlSfxStopTimers.get(element));
+                      this.htmlSfxStopTimers.delete(element);
+                      element.onended = null;
+                      element.onvolumechange = null;
+                      audios.delete(element);
+                      if (audios.size === 0) this.activeHtmlSfx.delete(name);
                       resolve(true);
                   };
-                  const cleanupAndSettle = () => {
-                      cleanup();
-                      settle();
-                  };
-                  audio.onended = cleanupAndSettle;
-                  const existingTimer = this.htmlSfxStopTimers.get(audio);
-                  if (existingTimer) window.clearTimeout(existingTimer);
-                  const settleTimer = window.setTimeout(() => {
-                      audio.pause();
-                      audio.currentTime = 0;
-                      cleanupAndSettle();
-                  }, maxDurationMs);
-                  this.htmlSfxStopTimers.set(audio, settleTimer);
               });
+              const started = audio.play().then(() => true).catch(() => false);
+              let startTimer = 0;
+              const didStart = await Promise.race([
+                  started,
+                  finished,
+                  new Promise<boolean>(resolve => { startTimer = window.setTimeout(() => resolve(false), 1500); }),
+              ]);
+              window.clearTimeout(startTimer);
+              if (!audios.has(audio)) return true;
+              if (!canPlay()) { this.stopHtmlSfx(audio); return false; }
+              if (!didStart) {
+                  this.stopHtmlSfx(audio);
+                  continue;
+              }
+              if (!this.applyHtmlSfxVolume(name, audio)) {
+                  this.stopHtmlSfx(audio);
+                  return false;
+              }
+              const timer = window.setTimeout(() => this.stopHtmlSfx(element), maxDurationMs);
+              this.htmlSfxStopTimers.set(audio, timer);
+              return await finished;
           } catch {
+              if (audio) this.stopHtmlSfx(audio);
               // Try the next URL shape before falling back to WebAudio or synth.
           }
       }
@@ -2016,9 +2055,8 @@ class AudioService {
       if (!this.ctx || !this.sfxGain || this.isMuted) return false;
 
       const lifecycle = this.appLifecycleGeneration;
-      const canPlay = () => performance.now() < startDeadline && !this.isMuted && this.appIsActive
+      const canPlay = () => performance.now() < startDeadline && !this.isMuted && this.isPlaybackActive()
           && lifecycle === this.appLifecycleGeneration
-          && (typeof document === 'undefined' || !document.hidden)
           && this.getHtmlSfxVolume(name) > 0;
 
       // Keep the pre-2026-09-20 playback behavior as the primary path. Voice
@@ -2058,7 +2096,7 @@ class AudioService {
   }
 
   private isVoiceSfxName(name: string) {
-      return name === MINI_RUSH_VOICE || name.startsWith('flight-radio-voice-') || name.startsWith('lantern-war-voice-') || name.startsWith('sports-voice-') || name.startsWith('star-tide-voice-') || name.startsWith('dungeon-chronicle-voice-') || name.startsWith('paper-plane-voice-') || name.startsWith('card-club-voice-') || name.startsWith('kocho-voice-') || name.startsWith('home-dash-voice-') || name.startsWith('dungeons2-voice-') || name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-') || name.startsWith('enemy-voice-') || name.startsWith('protagonist-audition-');
+      return name === MINI_RUSH_VOICE || name.startsWith('flight-radio-voice-') || name.startsWith('lantern-war-voice-') || name.startsWith('sports-voice-') || name.startsWith('star-tide-voice-') || name.startsWith('dungeon-chronicle-voice-') || name.startsWith('paper-plane-voice-') || name.startsWith('card-club-voice-') || name.startsWith('kocho-voice-') || name.startsWith('home-dash-voice-') || name.startsWith('poker-rival-voice-') || name.startsWith('dungeons2-voice-') || name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-') || name.startsWith('enemy-voice-') || name.startsWith('protagonist-audition-');
   }
 
   private getHtmlSfxVolume(name: string) {
@@ -2134,11 +2172,15 @@ class AudioService {
           if (cached && !this.foregroundRecoveryPromise && this.ctx?.state === 'running'
               && this.startSfxSource(name, cached, maxDurationMs, overlap, volume)) return;
 
-          // Native media can still play while WebKit's context is interrupted.
-          // Try it immediately, even for cached clips, without awaiting resume().
+          // Native media can start while the context recovers if it can apply
+          // the requested volume. Otherwise use the controlled SFX bus.
           void this.playHtmlSfx(name, this.getSfxPlaybackPaths(name), maxDurationMs, overlap, generation, deadline, volume, options?.stillActive)
               .then(played => {
-                  if (!played && canPlay()) this.runSfxWhenReady(() => { if (canPlay()) fallback(); });
+                  if (!played && canPlay()) this.runSfxWhenReady(() => {
+                      if (!canPlay()) return;
+                      const decoded = this.sfxBuffers[name];
+                      if (!decoded || !this.startSfxSource(name, decoded, maxDurationMs, overlap, volume)) fallback();
+                  });
               });
           void this.loadSfxBuffer(name);
       };
@@ -3003,8 +3045,7 @@ class AudioService {
   }
 
   private canPlaySfx() {
-      return !this.isMuted && this.sfxVolume > 0 && this.appIsActive
-          && (typeof document === 'undefined' || !document.hidden);
+      return !this.isMuted && this.sfxVolume > 0 && this.isPlaybackActive();
   }
 
   /** All synthesized mini-game cues share the same foreground recovery barrier. */

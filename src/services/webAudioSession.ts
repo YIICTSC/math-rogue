@@ -3,16 +3,38 @@
 const contexts = new Map<AudioContext, () => boolean>();
 let listening = false;
 const hidden = () => typeof document !== 'undefined' && document.hidden;
+type WebAudioSession = EventTarget & { type: string; readonly state?: string };
+const getAudioSession = () => typeof navigator === 'undefined'
+  ? undefined : (navigator as Navigator & { audioSession?: WebAudioSession }).audioSession;
+
+export function isGameAudioInterrupted() {
+  return getAudioSession()?.state === 'interrupted';
+}
+
+export function onGameAudioInterruptionChange(listener: () => void) {
+  const session = getAudioSession();
+  if (!session?.addEventListener) return () => {};
+  let interrupted = isGameAudioInterrupted();
+  const handleStateChange = () => {
+    const next = isGameAudioInterrupted();
+    if (next === interrupted) return;
+    interrupted = next;
+    listener();
+  };
+  session.addEventListener('statechange', handleStateChange);
+  return () => session.removeEventListener('statechange', handleStateChange);
+}
+
 export function prepareWebAudioSession() {
-  if (typeof navigator === 'undefined') return;
   try {
-    const session = (navigator as Navigator & {audioSession?: {type: string}}).audioSession;
+    const session = getAudioSession();
     if (session && session.type !== 'playback') session.type = 'playback';
   } catch { /* Older WebKit does not expose the Audio Session API. */ }
 }
 export async function resumeGameAudio(context: AudioContext, fromGesture = false, canResume = () => true): Promise<boolean> {
+  const interrupted = () => hidden() || isGameAudioInterrupted() || !canResume();
+  if (context.state === 'closed' || interrupted()) return false;
   prepareWebAudioSession();
-  if (context.state === 'closed' || hidden() || !canResume()) return false;
   // Start a silent buffer synchronously in the gesture, before the first await.
   // Older iOS releases require this in addition to resume().
   // WebKit can report running while its output is still gesture-locked.
@@ -24,15 +46,15 @@ export async function resumeGameAudio(context: AudioContext, fromGesture = false
     } catch {}
   }
   for (let attempt = 0; attempt < 3; attempt++) {
+    if ((context.state as string) === 'closed' || interrupted()) return false;
     if (context.state === 'running') return true;
-    if ((context.state as string) === 'closed' || hidden() || !canResume()) return false;
     try {
       await Promise.race([context.resume().catch(() => undefined), new Promise<void>(resolve => setTimeout(resolve, 250))]);
     } catch { return false; }
-    if ((context.state as string) === 'running') return true;
+    if ((context.state as string) === 'running') return !interrupted();
     if (attempt < 2) await new Promise<void>(resolve => setTimeout(resolve, 100));
   }
-  return (context.state as string) === 'running';
+  return (context.state as string) === 'running' && !interrupted();
 }
 const gestureEvents = ['pointerdown', 'pointerup', 'touchend', 'keydown', 'click'];
 const wake = (event: Event) => {
@@ -62,10 +84,10 @@ export function registerGameAudio(context: AudioContext, canResume = () => true)
 
 /** Keep a first action during resume, but never replay stale actions in a burst. */
 export function runWhenGameAudioReady(context: AudioContext, play: () => void, canPlay = () => true) {
-  if (hidden() || !canPlay() || context.state === 'closed') return;
+  if (hidden() || isGameAudioInterrupted() || !canPlay() || context.state === 'closed') return;
   if (context.state === 'running') { play(); return; }
   const requestedAt = performance.now();
   void resumeGameAudio(context, false, canPlay).then(ready => {
-    if (ready && !hidden() && canPlay() && performance.now() - requestedAt < 1000) play();
+    if (ready && !hidden() && !isGameAudioInterrupted() && canPlay() && performance.now() - requestedAt < 1000) play();
   });
 }

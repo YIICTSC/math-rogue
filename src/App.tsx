@@ -255,6 +255,8 @@ import { AndroidAssetPackStartupModal } from './components/AndroidAssetPackManag
 import Card from './components/Card';
 import PixelSprite from './components/PixelSprite';
 import { audioService, type BgmThemeId } from './services/audioService';
+import { isGameAudioInterrupted, onGameAudioInterruptionChange } from './services/webAudioSession';
+import { stopQuestionSpeech } from './services/questionSpeech';
 import { assetPreloadService } from './services/assetPreloadService';
 import { androidAssetPackService } from './services/androidAssetPackService';
 import { setLegacySpriteModeEnabled } from './utils/legacySpriteMode';
@@ -5302,36 +5304,41 @@ const App: React.FC = () => {
 
     useEffect(() => {
         let appStateHandle: PluginListenerHandle | undefined;
-        const handleVisibilityChange = () => {
-            if (document.hidden) {
-                audioService.handleAppBackground();
-                return;
-            }
-            void audioService.handleAppForeground();
+        let disposed = false;
+        let appIsActive = true;
+        let blocked = false;
+        const syncAudioLifecycle = () => {
+            const appIsHidden = document.hidden || !appIsActive;
+            if (appIsHidden) stopQuestionSpeech();
+            const shouldPause = appIsHidden || isGameAudioInterrupted();
+            if (shouldPause) {
+                if (!blocked) audioService.handleAppBackground();
+            } else void audioService.handleAppForeground();
+            blocked = shouldPause;
         };
-        const handleForegroundSignal = () => {
-            if (!document.hidden) void audioService.handleAppForeground();
-        };
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        document.addEventListener('resume', handleForegroundSignal);
-        window.addEventListener('pageshow', handleForegroundSignal);
-        window.addEventListener('focus', handleForegroundSignal);
+        const removeInterruptionListener = onGameAudioInterruptionChange(syncAudioLifecycle);
+        document.addEventListener('visibilitychange', syncAudioLifecycle);
+        document.addEventListener('resume', syncAudioLifecycle);
+        window.addEventListener('pageshow', syncAudioLifecycle);
+        window.addEventListener('focus', syncAudioLifecycle);
+        if (document.hidden || isGameAudioInterrupted()) syncAudioLifecycle();
         void CapacitorApp.addListener('appStateChange', ({ isActive }) => {
-            if (isActive) {
-                void audioService.handleAppForeground();
-            } else {
-                audioService.handleAppBackground();
-            }
+            if (disposed) return;
+            appIsActive = isActive;
+            syncAudioLifecycle();
         }).then(handle => {
-            appStateHandle = handle;
+            if (disposed) void handle.remove();
+            else appStateHandle = handle;
         }).catch(() => {
             // Browser and Electron builds continue to use visibility/focus events.
         });
         return () => {
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
-            document.removeEventListener('resume', handleForegroundSignal);
-            window.removeEventListener('pageshow', handleForegroundSignal);
-            window.removeEventListener('focus', handleForegroundSignal);
+            disposed = true;
+            removeInterruptionListener();
+            document.removeEventListener('visibilitychange', syncAudioLifecycle);
+            document.removeEventListener('resume', syncAudioLifecycle);
+            window.removeEventListener('pageshow', syncAudioLifecycle);
+            window.removeEventListener('focus', syncAudioLifecycle);
             void appStateHandle?.remove();
         };
     }, []);
@@ -21771,6 +21778,7 @@ const App: React.FC = () => {
                     <div className="absolute inset-0" data-allow-japanese="true">
                         <EnglishChallengeScreen
                             mode={localAssignmentProblemConfig?.mode || gameState.mode}
+                            answerMode={localAssignmentProblemConfig?.answerMode || gameState.answerMode || 'CHOICE'}
                             onComplete={handleMathChallengeComplete}
                             onAnswerResult={handleAssignmentAnswerResult}
                             debugSkip={false}

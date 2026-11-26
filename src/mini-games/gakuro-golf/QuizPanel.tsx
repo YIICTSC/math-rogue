@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import MathText from '../../components/MathText';
+import QuestionListenButton from '../../components/QuestionListenButton';
 import { MAP_SYMBOL_ASSET_MAP } from '../../components/mapSymbolImageMap';
 import { drawProblemVisual } from '../../utils/drawProblemVisual';
 import { trans } from '../../utils/textUtils';
@@ -9,7 +10,6 @@ export default function QuizPanel({ quiz, languageMode, disabled, send, title='�
   const canvas = useRef<HTMLCanvasElement>(null), q = quiz.question, t = (s: string) => trans(s, languageMode);
   const symbol = q.visual?.kind === 'map_symbol' ? MAP_SYMBOL_ASSET_MAP[q.visual.symbol] : null;
   useEffect(() => { if (canvas.current && q.visual && !symbol) drawProblemVisual(canvas.current, q.visual); }, [q.id, quiz.shotId, symbol]);
-  useEffect(() => () => { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); }, [q.id, quiz.shotId]);
   const sender=useRef(send);sender.current=send;
   const panel = useRef<HTMLElement>(null);
   const sent = useRef('');
@@ -37,7 +37,6 @@ export default function QuizPanel({ quiz, languageMode, disabled, send, title='�
     };
     window.addEventListener('keydown', key); return () => window.removeEventListener('keydown', key);
   }, [quiz.shotId, quiz.index, quiz.answer, disabled]);
-  const speak = () => { if (!q.audioPrompt || !('speechSynthesis' in window)) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(q.audioPrompt.text); u.lang = q.audioPrompt.lang || 'ja-JP'; u.rate = .85; window.speechSynthesis.speak(u); };
   return <section ref={panel} data-gamepad-question-screen data-gamepad-initial-scope={`golf-${quiz.shotId}-${quiz.index}`} data-gamepad-modal className="gg-quiz gg-panel" aria-label={t(title)}>
     <header><span>{t(title)}</span><b>{quiz.index + 1} / 3</b></header>
     <div className="gg-question" data-allow-japanese="true">
@@ -45,7 +44,7 @@ export default function QuizPanel({ quiz, languageMode, disabled, send, title='�
       <strong><MathText text={q.question} /></strong>
       {q.visual && (symbol ? <img src={symbol.src} alt="" /> : <canvas ref={canvas} width={520} height={360} aria-label={t('問題の図')} />)}
     </div>
-    {q.audioPrompt && <button disabled={disabled || !('speechSynthesis' in window)} onClick={speak}>{t('聞く')}</button>}
+    <QuestionListenButton prompt={q.audioPrompt} questionKey={`${quiz.shotId}:${q.id}`} languageMode={languageMode} disabled={disabled || quiz.answer !== null} />
     <div className="gg-options" data-allow-japanese="true">{q.options.map((option, i) => <button data-quiz-action key={i} disabled={disabled || quiz.answer !== null} className={quiz.answer === i ? 'is-correct' : quiz.selected === i ? 'is-wrong' : ''} onClick={() => once('answer', i)}><b>{i + 1}</b><MathText text={option} /></button>)}</div>
   </section>;
 }

@@ -1,6 +1,6 @@
 import {awardAnswer} from '../point-exchange/store';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { CheckCircle, XCircle, Volume2, VolumeX } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { AnswerMode, AssignmentAnswerResult, AssignmentReviewProblem, AssignmentUnit, GameMode, LanguageMode } from '../types';
@@ -11,6 +11,8 @@ import { trans } from '../utils/textUtils';
 import { assignmentFilterForMode } from '../utils/assignmentRangeFilters';
 import { getProblemCycleScope, selectProblemsForCycle } from '../utils/problemCycle';
 import { matchesSchoolAnswer } from '../utils/schoolAnswer';
+import { questionSpeechMessage, useQuestionPronunciation } from '../utils/useQuestionPronunciation';
+import { useSchoolAnswerInput } from '../utils/useSchoolAnswerInput';
 
 interface EnglishChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -33,8 +35,6 @@ interface ExtendedEnglishProblem extends EnglishProblem {
   retryOfProblemKey?: string;
 }
 
-const ENGLISH_AUDIO_BGM_DUCK_MULTIPLIER = 0.05;
-
 const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE', debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'JAPANESE', onAnswerResult, reviewProblem = null, assignmentUnits }) => {
   const pointQuestionRef = React.useRef<{problem:unknown;index:number;receipt:string}>({problem:null,index:-1,receipt:''});
   const getPointReceipt=(problem:unknown,index:number)=>{const q=pointQuestionRef.current;if(q.problem!==problem||q.index!==index){q.problem=problem;q.index=index;q.receipt=crypto.randomUUID();}return q.receipt;};
@@ -49,40 +49,24 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
   // Voice feature control
   const [voiceEnabled, setVoiceEnabled] = useState(() => storageService.getEnglishVoiceEnabled());
   const questionStartedAtRef = React.useRef(Date.now());
-  const speechGenerationRef = React.useRef(0);
-
-  const speakWord = useCallback((word: string) => {
-    if (!('speechSynthesis' in window)) return;
-    const speechGeneration = ++speechGenerationRef.current;
-    const synthesis = window.speechSynthesis;
-    synthesis.cancel();
-    synthesis.resume();
-    audioService.setBgmDuckMultiplier(ENGLISH_AUDIO_BGM_DUCK_MULTIPLIER);
-    const utterance = new SpeechSynthesisUtterance(word);
-    utterance.lang = 'en-US';
-    utterance.rate = 0.85; 
-    utterance.volume = 0.78;
-    const voices = synthesis.getVoices();
-    const preferredVoice = voices.find((voice) => voice.lang.toLowerCase() === 'en-us')
-      || voices.find((voice) => voice.lang.toLowerCase().startsWith('en-'));
-    if (preferredVoice) utterance.voice = preferredVoice;
-    const restoreBgm = () => {
-      if (speechGenerationRef.current === speechGeneration) audioService.setBgmDuckMultiplier(1);
-    };
-    utterance.onend = restoreBgm;
-    utterance.onerror = restoreBgm;
-    synthesis.speak(utterance);
-  }, []);
+  const submittedProblem = useRef<ExtendedEnglishProblem | undefined>(undefined);
+  const currentProblem = problems[currentProblemIndex];
+  const filter = assignmentFilterForMode(assignmentUnits, mode);
+  const listeningAssignment = filter?.kind === 'english_words' && filter.values.includes('listening');
+  const prompt = currentProblem && { text: currentProblem.question, lang: /[ぁ-んァ-ヶ一-龠]/.test(currentProblem.question) ? 'ja-JP' : 'en-US' };
+  const pronunciation = useQuestionPronunciation(audioService, prompt, currentProblemIndex, {
+    enabled: !isAnswered,
+    autoPlay: voiceEnabled || listeningAssignment,
+    muteBgm: Boolean(currentProblem && (voiceEnabled || listeningAssignment || currentProblem.isDialogue)),
+  });
+  const pronunciationMessage = questionSpeechMessage(pronunciation.status, languageMode);
+  const listenLabel = languageMode === 'ENGLISH' ? 'Listen to audio' : 'おとを きく';
 
   const toggleVoice = () => {
     const newVal = !voiceEnabled;
     setVoiceEnabled(newVal);
     storageService.saveEnglishVoiceEnabled(newVal);
-    if (!newVal) {
-      speechGenerationRef.current += 1;
-      window.speechSynthesis.cancel();
-      audioService.setBgmDuckMultiplier(1);
-    }
+    if (!newVal) pronunciation.stop();
     audioService.playSound('select');
   };
 
@@ -135,7 +119,6 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
         options: [problem.question, ...[1, 2, 3].map((offset) => source[(index + offset) % source.length]?.question).filter(Boolean)],
       }));
     }
-    if (rangeFilter?.kind === 'english_words' && rangeFilter.values.includes('listening')) setVoiceEnabled(true);
     
     const count = isChallenge ? 1 : 3;
     const cycleScope = getProblemCycleScope(String(mode), rangeFilter);
@@ -164,35 +147,19 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
     questionStartedAtRef.current = Date.now();
   }, [currentProblemIndex]);
 
-  useEffect(() => {
-    if (problems.length > 0 && !isAnswered && voiceEnabled) {
-      const timer = setTimeout(() => {
-        speakWord(problems[currentProblemIndex].question);
-      }, 600);
-      return () => clearTimeout(timer);
-    }
-  }, [currentProblemIndex, problems, speakWord, isAnswered, voiceEnabled]);
-
-  useEffect(() => {
-    return () => {
-      speechGenerationRef.current += 1;
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
-      audioService.setBgmDuckMultiplier(1);
-    };
-  }, []);
+  const isCorrectInput = (value: string) => Boolean(currentProblem && (
+    matchesSchoolAnswer(value, currentProblem.actualCorrectAnswer) || matchesSchoolAnswer(value, currentProblem.answer)
+  ));
 
   const handleAnswer = (option: string) => {
-    if (isAnswered) return;
+    if (!currentProblem || isAnswered || submittedProblem.current === currentProblem) return;
+    submittedProblem.current = currentProblem;
+    pronunciation.stop();
     
     setSelectedOption(option);
     setIsAnswered(true);
     
-    const problem = problems[currentProblemIndex];
-    const isCorrect = answerMode === 'INPUT'
-      ? matchesSchoolAnswer(option, problem.actualCorrectAnswer) || matchesSchoolAnswer(option, problem.answer)
-      : option === problem.actualCorrectAnswer;
+    const isCorrect = answerMode === 'INPUT' ? isCorrectInput(option) : option === currentProblem.actualCorrectAnswer;
     const answerResult = {
       pointReceipt: getPointReceipt(problems[currentProblemIndex],currentProblemIndex),
       mode,
@@ -243,9 +210,12 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
     }, 1200);
   };
 
+  const { isComposing, ...inputEvents } = useSchoolAnswerInput(setInputAnswer, (value) => {
+    if (isCorrectInput(value)) handleAnswer(value);
+  });
   const handleInputSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (inputAnswer.trim()) handleAnswer(inputAnswer);
+    if (!isComposing() && inputAnswer.trim()) handleAnswer(inputAnswer);
   };
 
   if (debugSkip) return <div className="w-full h-full bg-black"></div>;
@@ -255,7 +225,6 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
       </div>
   );
 
-  const currentProblem = problems[currentProblemIndex];
   const isConv = currentProblem.isDialogue;
 
   return (
@@ -288,27 +257,28 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
                 </div>
 
                 {isConv ? (
-                  <div 
+                  <button
+                    type="button"
+                    aria-label={listenLabel}
+                    disabled={isAnswered}
                     className="relative bg-white text-black p-4 md:p-5 rounded-3xl rounded-bl-none border-4 border-cyan-400 max-w-[95%] group cursor-pointer transition-transform active:scale-95 shadow-xl"
-                    onClick={() => speakWord(currentProblem.question)}
+                    onClick={() => pronunciation.play()}
                   >
-                     <div className="text-base md:text-xl font-bold font-sans italic text-left pr-6 leading-tight">
+                     <span className="block text-base md:text-xl font-bold font-sans italic text-left pr-6 leading-tight">
                         "{currentProblem.question}"
-                     </div>
+                     </span>
                      <Volume2 size={18} className="absolute top-2 right-2 text-cyan-600 opacity-50 group-hover:opacity-100" />
-                     <div className="absolute -bottom-4 left-0 w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-white"></div>
-                  </div>
+                     <span className="absolute -bottom-4 left-0 w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-white"></span>
+                  </button>
                 ) : (
-                  <div 
-                    className="group cursor-pointer relative flex flex-col items-center"
-                    onClick={() => speakWord(currentProblem.question)}
-                  >
-                    <h3 className="text-4xl md:text-6xl font-bold text-white tracking-widest font-sans italic transition-transform group-active:scale-95 break-words max-w-full">
-                      {currentProblem.question}
-                    </h3>
-                    <Volume2 size={24} className="text-cyan-400 mt-2 opacity-50 group-hover:opacity-100 transition-opacity" />
-                  </div>
+                  <h3 className="text-4xl md:text-6xl font-bold text-white tracking-widest font-sans italic break-words max-w-full">
+                    <button type="button" aria-label={listenLabel} disabled={isAnswered} onClick={() => pronunciation.play()} className="group relative flex flex-col items-center transition-transform active:scale-95">
+                      <span>{currentProblem.question}</span>
+                      <Volume2 size={24} className="text-cyan-400 mt-2 opacity-50 group-hover:opacity-100 transition-opacity" />
+                    </button>
+                  </h3>
                 )}
+                {pronunciationMessage && <p role="status" className="mt-3 text-xs text-amber-200">{pronunciationMessage}</p>}
                 
                 {feedback && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-20 animate-in zoom-in duration-200">
@@ -324,7 +294,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
             {answerMode === 'INPUT' ? <form onSubmit={handleInputSubmit} className="basic-challenge-input w-full space-y-3">
                 <input
                   value={inputAnswer}
-                  onChange={(event) => setInputAnswer(event.target.value)}
+                  {...inputEvents}
                   disabled={isAnswered}
                   autoFocus
                   inputMode="text"

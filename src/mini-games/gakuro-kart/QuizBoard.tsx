@@ -4,6 +4,7 @@ import type { Race, Racer } from './engine';
 import { answerLane, LANE_COLORS, QUIZ_END, QUIZ_FEEDBACK_SECONDS, QUIZ_GATES, quizDistance } from './learning';
 import { getTrack } from './track';
 import MathText from '../../components/MathText';
+import QuestionListenButton from '../../components/QuestionListenButton';
 import { drawProblemVisual } from '../../utils/drawProblemVisual';
 import { MAP_SYMBOL_ASSET_MAP } from '../../components/mapSymbolImageMap';
 import { trans } from '../../utils/textUtils';
@@ -15,10 +16,7 @@ export default function QuizBoard({ world, racer, languageMode, sound }: { world
   const trackLength = getTrack(world.course,world.customCourse).length, lapDistance = quizDistance(racer.distance, trackLength);
   const canvas = useRef<HTMLCanvasElement>(null);
   const t = (s: string) => trans(s, languageMode);
-  const speaking = useRef<SpeechSynthesisUtterance | null>(null);
-  const speak = () => { if (!q?.audioPrompt || !sound || !('speechSynthesis' in window)) return; const u = new SpeechSynthesisUtterance(q.audioPrompt.text); u.lang = q.audioPrompt.lang || 'ja-JP'; u.rate = .85; window.speechSynthesis.cancel(); speaking.current = u; window.speechSynthesis.speak(u); };
   useEffect(() => { if (canvas.current && q?.visual) drawProblemVisual(canvas.current, q.visual); }, [q]);
-  useEffect(() => { if (!feedback && !world.paused && world.phase === 'race') speak(); return () => { if (speaking.current && 'speechSynthesis' in window) window.speechSynthesis.cancel(); }; }, [q?.id, sound, world.paused, world.phase]);
   if (!q || world.phase !== 'race' || racer.distance < racer.quizLap * trackLength || racer.finish || (racer.quizApplied && lapDistance > QUIZ_END + 230)) return null;
   const lane = answerLane(racer.x), correct = feedback && racer.quizAnswers[index] === q.correct;
   const result = racer.quizApplied || (done === 3 && !feedback);
@@ -28,7 +26,7 @@ export default function QuizBoard({ world, racer, languageMode, sound }: { world
     <div className="gk-board-top"><b>LEARNING STRAIGHT · LAP {racer.quizLap + 1} / {world.laps}</b><span>{result ? `${racer.quizCorrect} / 3` : `${index + 1} / 3`}</span><span>{t('正解')} {racer.quizCorrect}</span></div>
     {result ? <div className="gk-quiz-summary" role="status"><strong>{racer.quizCorrect} / 3</strong><b>{t(resultText)}</b></div> : <>
       <div className="gk-board-content" data-allow-japanese="true">
-        <div className="gk-question-copy">{q.passage && <p className="gk-passage">{q.passage}</p>}<strong><MathText text={q.question} /></strong>{q.audioPrompt && <button onClick={speak} disabled={!sound}>{t('聞く')}</button>}</div>
+        <div className="gk-question-copy">{q.passage && <p className="gk-passage">{q.passage}</p>}<strong><MathText text={q.question} /></strong><QuestionListenButton prompt={q.audioPrompt} questionKey={`${racer.quizLap}:${q.id}`} languageMode={languageMode} disabled={!sound || world.paused || feedback} autoPlay /></div>
         {q.visual && (symbol ? <img className="gk-question-visual" src={symbol.src} alt="" /> : <canvas className="gk-question-visual" ref={canvas} width={520} height={360} aria-label={t('問題の図')} />)}
       </div>
       <div className="gk-answers" data-allow-japanese="true">{q.options.map((option, i) => <div key={i} className={`${i === lane ? 'is-selected' : ''} ${feedback && i === q.correct ? 'is-answer' : ''}`} style={{ '--lane': LANE_COLORS[i] } as React.CSSProperties}><b>{i + 1}</b><MathText text={option} /></div>)}</div>

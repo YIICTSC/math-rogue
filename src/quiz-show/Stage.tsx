@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Check, LockKeyhole, Send, Users, Radio, BellRing, Heart, Eye, X, Crown } from 'lucide-react';
 import type { LanguageMode } from '../types';
+import type { QuestionSpeechStatus } from '../services/questionSpeech';
+import { questionSpeechMessage } from '../utils/useQuestionPronunciation';
 import type { AnswerTile, InkStroke, ShowAction, ShowView } from './types';
 import type { QuizShowRoom } from './room';
 import FlipPad, { InkView } from './FlipPad';
@@ -69,15 +71,17 @@ export function AnswerInput({ view: v, room, language, connected }: { view: Show
     </>}{networkError && <p className="qs-error" role="alert">{t('送信を確認できません。接続を確認してもう一度押してください。', 'Delivery was not confirmed. Check your connection and try again.', 'おくれなかったよ。つうしんをかくにんしてね。')}</p>}
   </section>;
 }
-export function QuestionStage({ view: v, room, language, speak, stopSpeech, speaking = false }: { view: ShowView; room: QuizShowRoom; language: LanguageMode; speak: (prompt: NonNullable<NonNullable<ShowView['round']>['audioPrompt']>) => void; stopSpeech: () => void; speaking?: boolean }) {
+export function QuestionStage({ view: v, room, language, speak, stopSpeech, speaking = false, speechStatus = 'idle' }: { view: ShowView; room: QuizShowRoom; language: LanguageMode; speak: () => void; stopSpeech: () => void; speaking?: boolean; speechStatus?: QuestionSpeechStatus }) {
   const t = copy(language), r = v.round; if (!r) return null;
   const drawing = r.mode === 'DRAW' && v.self !== r.artist && v.role !== 'host' && !r.showAnswer;
   const artist = r.artist && room.inks.get(`${r.id}:${r.artist}`);
   const pose = roundPose(v);
+  const speechMessage = questionSpeechMessage(speechStatus, language);
   return <section className={`qs-question-stage ${v.phase === 'ready' ? 'is-ready' : ''}`} data-studio-pose={pose}>
     <div className="qs-question-topline">{v.phase !== 'ready' && <StudioHost pose={pose} />}<span className="qs-question-number">Q<span>{String(v.index + 1).padStart(2, '0')}</span>{!v.wolf && <small>/ {v.questionCount}</small>}</span><span className="qs-question-value">{r.points} PT</span><Countdown view={v} language={language} /></div>
     {v.phase === 'ready' ? <div className="qs-ready-title"><StudioHost pose={pose} /><h2>{t('準備はいい？', 'Ready for the next question?', 'じゅんびはいい？')}</h2><p>{t('司会の「出題スタート！」を待とう。', 'Wait for the host to start the question.', 'しかいがもんだいをだすまでまってね。')}</p></div> : drawing ? <div className="qs-live-drawing"><h2>{t('この絵は何でしょう？', 'What is this drawing?', 'このえはなんでしょう？')}</h2>{artist ? <InkView strokes={artist.strokes} label={t('描き手の絵', 'Live drawing', 'かきてのえ')} /> : <div className="qs-empty-drawing">{t('描き手が描き始めるのを待っています…', 'Waiting for the artist’s first stroke…', 'かきはじめるのをまっているよ…')}</div>}<small>{v.players.find(p => p.id === r.artist)?.name} · {t('描画中', 'drawing', 'かいているよ')}</small></div> : <QuestionContent key={r.id} round={r} />}
-    {r.audioPrompt && v.phase !== 'ready' && <button className="qs-speak" onClick={() => speaking ? stopSpeech() : speak(r.audioPrompt!)}>{speaking ? t('発音を停止', 'Stop pronunciation', 'はつおんをていし') : t('問題の音声を聞く', 'Play question audio', 'もんだいのおんせいをきく')}</button>}
+    {r.audioPrompt && v.phase !== 'ready' && <button className="qs-speak" onClick={speaking ? stopSpeech : speak}>{speaking ? t('発音を停止', 'Stop pronunciation', 'はつおんをていし') : t('問題の音声を聞く', 'Play question audio', 'もんだいのおんせいをきく')}</button>}
+    {speechMessage && <p role="status" className="qs-muted">{speechMessage}</p>}
     {r.showAnswer && <div className="qs-correct-answer" data-allow-japanese="true"><span>{['CONSENSUS', 'MAJORITY', 'VOTE', 'WOLF'].includes(r.mode) ? t('回答公開', 'Answers revealed', 'こたえこうかい') : r.mode==='NEAREST'?t('ベストアンサー（参加者平均）', 'BEST ANSWER · GROUP MEAN', 'ベストアンサー（みんなのへいきん）'):t('正解', 'ANSWER', 'せいかい')}</span><b>{r.answer || (r.mode==='NEAREST'?t('有効な回答がありません', 'No valid numeric answers', 'ゆうこうなこたえがありません'):t('みんなの回答をチェック！', 'Check everyone’s answers!', 'みんなのこたえをチェック！'))}</b></div>}
     {pose === 'celebrate' && <Confetti key={r.id} />}
   </section>;

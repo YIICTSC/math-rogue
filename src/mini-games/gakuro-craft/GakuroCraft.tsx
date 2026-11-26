@@ -12,6 +12,7 @@ import type { LanguageMode } from '../../types';
 import { trans } from '../../utils/textUtils';
 import TranslatedUiTree from '../../components/TranslatedUiTree';
 import MathText from '../../components/MathText';
+import QuestionListenButton from '../../components/QuestionListenButton';
 import { drawProblemVisual } from '../../utils/drawProblemVisual';
 import { MAP_SYMBOL_ASSET_MAP } from '../../components/mapSymbolImageMap';
 import { storageService } from '../../services/storageService';
@@ -40,14 +41,13 @@ type Answer = Extract<Reply,{type:'answer'}>;
 function QuizDialog({quiz,answer,waiting,onAnswer,onNext,onClose,t}: {quiz:Quiz;answer:Answer|null;waiting:boolean;onAnswer:(i:number)=>void;onNext:()=>void;onClose:()=>void;t:(s:string)=>string}) {
   const canvas=useRef<HTMLCanvasElement>(null),q=quiz.question;
   useEffect(()=>{if(canvas.current&&q.visual)drawProblemVisual(canvas.current,q.visual);},[q]);
-  useEffect(()=>()=>{if('speechSynthesis' in window)window.speechSynthesis.cancel();},[q]);
   const symbol=q.visual?.kind==='map_symbol'?MAP_SYMBOL_ASSET_MAP[q.visual.symbol]:null;
   return <div className="gc-shade"><section data-gamepad-question-screen data-gamepad-initial-scope={`craft-${quiz.token}`} className="gc-quiz gc-panel" role="dialog" aria-modal="true" aria-label={t('問題で回復')}>
     <header><div><small>LEARNING BREAK</small><h2>{t('問題で回復')}</h2></div><button onClick={onClose} aria-label={t('閉じる')}>✕</button></header>
     <p>{t('正解でエネルギー +30。不正解でも減りません。')}</p>
     <div className="gc-question" data-allow-japanese="true">{q.passage&&<p>{q.passage}</p>}<MathText text={q.question}/></div>
     {q.visual&&(symbol?<img className="gc-visual" src={symbol.src} alt=""/>:<canvas ref={canvas} className="gc-visual" width={520} height={360}/>)}
-    {q.audioPrompt&&<button onClick={()=>{if('speechSynthesis' in window){window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(q.audioPrompt!.text);u.lang=q.audioPrompt!.lang||'ja-JP';u.rate=.85;window.speechSynthesis.speak(u);}}}>{t('聞く')}</button>}
+    <QuestionListenButton prompt={q.audioPrompt} questionKey={String(quiz.token)} translate={t} disabled={Boolean(answer) || waiting} />
     <div className="gc-options" data-allow-japanese="true">{q.options.map((o,i)=><button key={i} disabled={!!answer||waiting} onClick={()=>onAnswer(i)} className={answer&&o===answer.answer?'gc-correct':''}><b>{i+1}</b><MathText text={o}/></button>)}</div>
     {answer?<div className={`gc-feedback ${answer.correct?'good':''}`} role="status"><strong>{answer.correct?'〇':'×'} {t(answer.correct?'正解！エネルギー回復':'正答を確認しましょう')}</strong><span data-allow-japanese="true"><MathText text={answer.answer}/></span><div className="gc-row"><button onClick={onNext}>{t('次の問題')}</button><button className="gc-primary" onClick={onClose}>{t('島に戻る')}</button></div></div>:<small>{t('好きなときに島に戻れます。')}</small>}
   </section></div>;

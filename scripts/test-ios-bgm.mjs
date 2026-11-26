@@ -15,11 +15,13 @@ const synthesizedMiniGames = [
   'src/components/SchoolyardSurvivorScreen.tsx',
 ];
 
-// Dungeons 1 intentionally has dedicated technique-effect cues; its ordinary attacks
-// still use studentCue. Keep the restriction for the other synthesized games.
+// Both Dungeons games use packaged sounds for techniques and synthesized ordinary attacks.
 for (const sourcePath of synthesizedMiniGames) {
-  const source = readFileSync(sourcePath, 'utf8');
-  if (source.includes('playBattleSound(') || (!sourcePath.endsWith('/SchoolDungeonRPG.tsx') && source.includes('playAttackEffectSound('))) {
+  let source = readFileSync(sourcePath, 'utf8');
+  if (/SchoolDungeonRPG2?\.tsx$/.test(sourcePath)) {
+    source = source.replace("if(technique)audioService.playAttackEffectSound(deads.length>0?'finisher':'slash');else studentCue('attack',deads.length>0);", '');
+  }
+  if (source.includes('playBattleSound(') || source.includes('playAttackEffectSound(')) {
     throw new Error(`${sourcePath} must keep the original synthesized mini-game sounds`);
   }
 }
@@ -82,6 +84,8 @@ try {
     window.__iosBgmPauseCount = 0;
     window.__iosBgmMediaSourceCount = 0;
     window.__iosOscillatorStartCount = 0;
+    window.__iosAudioSession = Object.assign(new EventTarget(), { state: 'active', type: 'auto' });
+    Object.defineProperty(navigator, 'audioSession', { configurable: true, value: window.__iosAudioSession });
     const playingMedia = new WeakSet();
     const OriginalAudioContext = window.AudioContext || window.webkitAudioContext;
     if (OriginalAudioContext?.prototype?.createMediaElementSource) {
@@ -250,6 +254,25 @@ try {
   if (runtimeState.attemptsAfterBackgroundRace !== runtimeState.attemptsBeforeBackgroundRace) {
     throw new Error('A stale title gesture restarted BGM after the app entered background');
   }
+  // A call can interrupt the session without hiding the page or WebView.
+  const sessionInterrupted = await page.evaluate(async () => {
+    const { audioService } = await import('/src/services/audioService.ts');
+    const audio = audioService.currentHtmlAudio;
+    window.__iosAudioSession.state = 'interrupted';
+    window.__iosAudioSession.dispatchEvent(new Event('statechange'));
+    window.dispatchEvent(new Event('focus'));
+    return !document.hidden && audio.paused && audio.muted;
+  });
+  if (!sessionInterrupted) throw new Error('Visible audio interruption was not kept quiet');
+  const resumedVolume = await page.evaluate(async () => {
+    const { audioService } = await import('/src/services/audioService.ts');
+    window.__iosAudioSession.state = 'active';
+    window.__iosAudioSession.dispatchEvent(new Event('statechange'));
+    await audioService.handleAppForeground();
+    const audio = audioService.currentHtmlAudio;
+    return audio && !audio.paused && !audio.muted && audio.volume;
+  });
+  if (Math.abs(resumedVolume - .1) > .001) throw new Error('Foreground events must restore the saved mixer volume');
   const attempts = await page.evaluate(() => [...window.__iosBgmPlayAttempts]);
   process.stdout.write(`✓ iOS BGM and battle-only packaged SE routing verified (${attempts.at(-1)})\n`);
 } catch (error) {

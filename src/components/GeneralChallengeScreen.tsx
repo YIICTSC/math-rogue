@@ -18,6 +18,8 @@ import MathText from './MathText';
 import { assignmentFilterForMode, matchesAssignmentRangeFilter } from '../utils/assignmentRangeFilters';
 import { getProblemCycleScope, selectProblemsForCycle } from '../utils/problemCycle';
 import { matchesSchoolAnswer, matchesSchoolSpeech, normalizeSchoolNumber, schoolAnswerOptions, schoolQuestionNeedsChoices, schoolQuestionPromptKey } from '../utils/schoolAnswer';
+import { questionSpeechMessage, useQuestionPronunciation } from '../utils/useQuestionPronunciation';
+import { useSchoolAnswerInput } from '../utils/useSchoolAnswerInput';
 
 interface GeneralChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -135,17 +137,6 @@ const isEnglishSpeakingReviewMode = (mode: string) =>
   /^ENGLISH_G8_U(11|12|13)$/.test(mode) ||
   /^ENGLISH_G9_U(12|13|14)$/.test(mode);
 
-const ENGLISH_AUDIO_BGM_DUCK_MULTIPLIER = 0.05;
-
-const isEnglishAudioFocusProblem = (problem: ExtendedGeneralProblem | undefined, fallbackMode: string) => {
-  if (!problem?.audioPrompt && !problem?.speechPrompt) return false;
-  const sourceMode = problem.sourceMode || fallbackMode;
-  const isEnglishMode = /(?:^|_)ENGLISH(?:_|$)/.test(sourceMode);
-  const hasEnglishAudio = [problem.audioPrompt?.lang, problem.speechPrompt?.lang]
-    .some((lang) => typeof lang === 'string' && /^en(?:-|$)/i.test(lang));
-  return isEnglishMode || hasEnglishAudio;
-};
-
 const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onComplete, mode, modePool, onModeCorrect, answerMode = 'CHOICE', debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'JAPANESE', onAnswerResult, customProblems = EMPTY_CUSTOM_PROBLEMS, problemOffset = 0, reviewProblem = null, assignmentUnits, debugProblems = EMPTY_DEBUG_PROBLEMS, previewOnly = false }) => {
   const pointQuestionRef = React.useRef<{problem:unknown;index:number;receipt:string}>({problem:null,index:-1,receipt:''});
   const getPointReceipt=(problem:unknown,index:number)=>{const q=pointQuestionRef.current;if(q.problem!==problem||q.index!==index){q.problem=problem;q.index=index;q.receipt=crypto.randomUUID();}return q.receipt;};
@@ -170,12 +161,19 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   const [mapSymbolImageFailed, setMapSymbolImageFailed] = useState(false);
   const [isUnitBoardOpen, setIsUnitBoardOpen] = useState(false);
   const currentProblem = problems[currentProblemIndex];
+  const activeProblem = useRef<ExtendedGeneralProblem | undefined>(undefined);
+  const submittedProblem = useRef<ExtendedGeneralProblem | undefined>(undefined);
+  activeProblem.current = currentProblem;
   const preferredAnswerMode = assignmentUnits?.find((unit) => unit.modes.includes(currentProblem?.sourceMode || mode))?.answerMode || answerMode;
   const currentAnswerMode = currentProblem?.choiceRequired ? 'CHOICE' : preferredAnswerMode;
   const numericAnswer = normalizeSchoolNumber(currentProblem?.actualCorrectAnswer ?? '');
   const inputMode = numericAnswer === null || numericAnswer.startsWith('-')
     ? 'text' : numericAnswer.includes('.') ? 'decimal' : 'numeric';
-  const shouldDuckBgmForEnglishAudio = isEnglishAudioFocusProblem(currentProblem, mode);
+  const { play: playPronunciation, stop: stopPronunciation, status: pronunciationStatus } = useQuestionPronunciation(
+    audioService, currentProblem?.audioPrompt, `${currentProblemIndex}:${currentProblem?.assignmentProblemKey ?? ''}`,
+    { enabled: !isListening && !isAnswered && !isUnitBoardOpen, muteBgm: Boolean(currentProblem?.audioPrompt || currentProblem?.speechPrompt) },
+  );
+  const pronunciationMessage = questionSpeechMessage(pronunciationStatus, languageMode);
   const shouldUseEnglishAudioButton = languageMode === 'ENGLISH';
   const audioButtonLabel = shouldUseEnglishAudioButton ? 'Listen' : 'おとを きく';
   const audioButtonAriaLabel = shouldUseEnglishAudioButton ? 'Listen to audio' : 'おとを きく';
@@ -191,13 +189,6 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   const visualRenderKey = JSON.stringify(currentProblem?.visual ?? null);
 
   useEffect(() => {
-    audioService.setBgmDuckMultiplier(shouldDuckBgmForEnglishAudio ? ENGLISH_AUDIO_BGM_DUCK_MULTIPLIER : 1);
-    return () => {
-      if (shouldDuckBgmForEnglishAudio) audioService.setBgmDuckMultiplier(1);
-    };
-  }, [shouldDuckBgmForEnglishAudio]);
-
-  useEffect(() => {
     if (previewOnly || !unitBoardSummary || reviewProblem) return;
     if (unitBoardAutoShownRef.current === unitBoardSummary.id) return;
     unitBoardAutoShownRef.current = unitBoardSummary.id;
@@ -210,12 +201,14 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   }, []);
 
   const stopSpeechSynthesis = useCallback((settleMs = 0) => new Promise<void>((resolve) => {
-    if (!('speechSynthesis' in window)) {
+    stopPronunciation();
+    const synthesis = window.speechSynthesis;
+    if (!synthesis) {
       resolve();
       return;
     }
 
-    window.speechSynthesis.cancel();
+    if (synthesis.speaking || synthesis.pending) synthesis.cancel();
 
     if (speechSynthSettlingTimerRef.current) {
       window.clearTimeout(speechSynthSettlingTimerRef.current);
@@ -224,7 +217,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
 
     const start = Date.now();
     const waitUntilQuiet = () => {
-      if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
+      if (!synthesis.speaking && !synthesis.pending) {
         speechSynthSettlingTimerRef.current = window.setTimeout(() => {
           speechSynthSettlingTimerRef.current = null;
           resolve();
@@ -241,7 +234,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     };
 
     waitUntilQuiet();
-  }), []);
+  }), [stopPronunciation]);
 
   const primeMicrophonePermission = useCallback(async () => {
     if (!navigator.mediaDevices?.getUserMedia) return true;
@@ -261,24 +254,6 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       return false;
     }
   }, []);
-
-  const speakPrompt = useCallback((text: string, lang = 'ja-JP') => {
-    if (!('speechSynthesis' in window) || !text || isListening) return;
-    const synthesis = window.speechSynthesis;
-    synthesis.cancel();
-    synthesis.resume();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang;
-    utterance.rate = 0.82;
-    utterance.pitch = 1.0;
-    utterance.volume = 0.78;
-    const normalizedLang = lang.toLowerCase();
-    const voices = synthesis.getVoices();
-    const preferredVoice = voices.find((voice) => voice.lang.toLowerCase() === normalizedLang)
-      || voices.find((voice) => voice.lang.toLowerCase().startsWith(normalizedLang.split('-')[0]));
-    if (preferredVoice) utterance.voice = preferredVoice;
-    synthesis.speak(utterance);
-  }, [isListening]);
 
   useEffect(() => {
     if (debugSkip) {
@@ -404,15 +379,6 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
 
   useEffect(() => {
-    if (!currentProblem?.audioPrompt || isAnswered) return;
-    if (currentProblem.audioPrompt.autoPlay === false) return;
-    const timer = window.setTimeout(() => {
-      speakPrompt(currentProblem.audioPrompt!.text, currentProblem.audioPrompt!.lang || 'ja-JP');
-    }, 500);
-    return () => window.clearTimeout(timer);
-  }, [currentProblemIndex, currentProblem?.audioPrompt?.text, currentProblem?.audioPrompt?.lang, currentProblem?.audioPrompt?.autoPlay, isAnswered, speakPrompt]);
-
-  useEffect(() => {
     return () => {
       if (recognitionRef.current) {
         try {
@@ -421,9 +387,6 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
         } catch (error) {
           console.warn('Failed to stop speech recognition:', error);
         }
-      }
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
       }
       if (speechSynthSettlingTimerRef.current) {
         window.clearTimeout(speechSynthSettlingTimerRef.current);
@@ -441,7 +404,10 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   }, [currentProblem?.timeLimitSeconds, currentProblemIndex]);
 
   const submitAnswerResult = useCallback((isCorrect: boolean, selected: string) => {
-    if (isAnswered) return;
+    const problem = problems[currentProblemIndex];
+    if (!problem || isAnswered || activeProblem.current !== problem || submittedProblem.current === problem) return;
+    submittedProblem.current = problem;
+    stopPronunciation();
 
     setSelectedOption(selected);
     setIsAnswered(true);
@@ -499,7 +465,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
         onComplete(isCorrect ? correctCount + 1 : correctCount);
       }
     }, 1200);
-  }, [correctCount, currentProblemIndex, isAnswered, isChallenge, onAnswerResult, onComplete, onModeCorrect, previewOnly, problems]);
+  }, [correctCount, currentProblemIndex, isAnswered, isChallenge, onAnswerResult, onComplete, onModeCorrect, previewOnly, problems, stopPronunciation]);
 
   const handleAnswer = (option: string) => {
     if (currentProblem) submitAnswerResult(option === currentProblem.actualCorrectAnswer, option);
@@ -515,13 +481,18 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     return () => window.clearTimeout(timer);
   }, [currentProblem?.timeLimitSeconds, isAnswered, languageMode, remainingSeconds, submitAnswerResult]);
 
+  const isCorrectInput = (value: string) => {
+    if (!currentProblem) return false;
+    const options = schoolAnswerOptions(currentProblem.sourceMode, currentProblem.question);
+    return matchesSchoolAnswer(value, currentProblem.actualCorrectAnswer, options)
+      || matchesSchoolAnswer(value, currentProblem.answer, options);
+  };
+  const { isComposing, ...inputEvents } = useSchoolAnswerInput(setInputAnswer, (value) => {
+    if (isCorrectInput(value)) submitAnswerResult(true, value);
+  });
   const handleInputSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!currentProblem || !inputAnswer.trim()) return;
-    const options = schoolAnswerOptions(currentProblem.sourceMode, currentProblem.question);
-    const isCorrect = matchesSchoolAnswer(inputAnswer, currentProblem.actualCorrectAnswer, options)
-      || matchesSchoolAnswer(inputAnswer, currentProblem.answer, options);
-    submitAnswerResult(isCorrect, inputAnswer);
+    if (!isComposing() && inputAnswer.trim()) submitAnswerResult(isCorrectInput(inputAnswer), inputAnswer);
   };
 
   useEffect(() => {
@@ -691,8 +662,8 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                 {currentProblem.audioPrompt && (
                     <button
                         type="button"
-                        onClick={() => speakPrompt(currentProblem.audioPrompt!.text, currentProblem.audioPrompt!.lang || 'ja-JP')}
-                        disabled={isListening}
+                        onClick={() => playPronunciation()}
+                        disabled={isListening || isAnswered}
                         aria-label={audioButtonAriaLabel}
                         className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-300/50 bg-cyan-500/15 px-4 py-2 text-sm font-bold text-cyan-100 hover:bg-cyan-500/25"
                     >
@@ -700,6 +671,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                         {audioButtonLabel}
                     </button>
                 )}
+                {pronunciationMessage && <p role="status" className="mb-3 text-xs text-amber-200">{pronunciationMessage}</p>}
 
                 {currentProblem.speechPrompt && (
                     <div className="mb-4 flex w-full flex-col items-center gap-2">
@@ -784,7 +756,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                 <input
                     ref={inputRef}
                     value={inputAnswer}
-                    onChange={(event) => setInputAnswer(event.target.value)}
+                    {...inputEvents}
                     disabled={isAnswered}
                     autoFocus
                     inputMode={inputMode}
