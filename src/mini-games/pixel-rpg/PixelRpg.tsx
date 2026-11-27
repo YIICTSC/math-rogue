@@ -145,7 +145,7 @@ function sceneMusic(state:Adventure|undefined,battle:Battle|undefined,overlay:Ov
   }
   if(battle){
     if(battle.outcome==='win')return 'pixel-rpg-victory';
-    if(battle.outcome==='loss')return 'pixel-rpg-sorrow';
+    if(battle.outcome==='loss')return 'pixel-rpg-defeat';
     if(battle.encounter.boss)return battle.encounter.region>=5?'pixel-rpg-final':'pixel-rpg-boss';
     return battle.encounter.variant===3||battle.encounter.hidden?'pixel-rpg-strong':'pixel-rpg-battle';
   }

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readdir, rm, stat } from 'node:fs/promises';
+import { mkdtemp, rm, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -374,8 +374,11 @@ try{
   assert(m.clearSlot(1,mock));
   assert.equal(m.readSave(2,mock).length,1);
   assert.equal(mock.getItem('learning-rogue:main:player'),'untouched');
-  const tracks=await readdir('public/bgm-new/pixel-rpg');
-  assert.deepEqual(new Set(tracks),new Set(m.PIXEL_RPG_TRACKS.map(name=>name+'.mp3')));
-  assert((await Promise.all(tracks.map(file=>stat(`public/bgm-new/pixel-rpg/${file}`)))).every(s=>s.size>10000));
-  console.log('PASS defeat/recovery, target validation, optional question bonus, independent autosave/manual, alternate-copy recovery and 25 music assets');
+  const tracks=[...Object.values(m.PIXEL_RPG_MUSIC),...Object.values(m.PIXEL_RPG_MUSIC_FALLBACKS)];
+  assert.equal(Object.keys(m.PIXEL_RPG_MUSIC).length,26);
+  for(const file of new Set(tracks)){
+    assert((await stat(`public/${file}`)).size>10000,file);
+    assert((await stat(`public/web-audio/${file.replace(/\.mp3$/,'.ogg')}`)).size>10000,file);
+  }
+  console.log('PASS defeat/recovery, target validation, optional question bonus, independent autosave/manual, alternate-copy recovery and music for all 26 scenes');
 }finally{await rm(folder,{recursive:true,force:true});}

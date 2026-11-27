@@ -25,7 +25,8 @@ try {
   const musicRequests=new Set(), battleArt=new Set();
   page.on('pageerror',error=>errors.push(error.message));
   page.on('response',r=>{
-    if(r.ok()&&r.url().includes('/bgm-new/pixel-rpg/'))musicRequests.add(r.url().split('/').at(-1).split('?')[0]);
+    const audioPath=new URL(r.url()).pathname.replace(/^\/(?:web-audio\/)?/,'').replace(/\.ogg$/,'.mp3');
+    if(r.ok()&&/^bgm(?:-new)?\//.test(audioPath))musicRequests.add(audioPath);
     if(r.ok()&&r.url().includes('/sprites/pixel-rpg/battle-'))battleArt.add(r.url().split('/').at(-1));
   });
   await page.addInitScript(()=>{
@@ -417,7 +418,10 @@ try {
   await page.getByRole('dialog',{name:/たびの[ 　]?てちょう/}).waitFor();
   await shot('13-hiragana-settings');
   assert(battleArt.has('battle-meadow.webp'));
-  assert(musicRequests.has('title.mp3')&&musicRequests.has('village.mp3')&&musicRequests.has('battle.mp3'),`BGM tracks requested: ${[...musicRequests]}`);
+  for(const track of ['menu','rest','battle','boss','victory','game_over']){
+    assert(musicRequests.has(`bgm/${track}.mp3`),`Missing old elementary track ${track}; requested ${[...musicRequests]}`);
+  }
+  assert(![...musicRequests].some(path=>path.startsWith('bgm-new/pixel-rpg/')));
   assert.deepEqual(errors,[]);
   console.log(`PASS real mini-game entry, hero selection, movement on keyboard/touch/pad, party joins, job/palette change, study, targeting, boss victory and defeat, audio and both save paths. Screenshots: ${output}`);
 }catch(error){

@@ -1,4 +1,4 @@
-import type { PixelRpgTrack } from '../mini-games/pixel-rpg/music';
+import { PIXEL_RPG_MUSIC, PIXEL_RPG_MUSIC_FALLBACKS, type PixelRpgTrack } from '../mini-games/pixel-rpg/music';
 import { tableMaterialNames, nextMaterialTake, TABLE_MATERIAL_GAIN, materialFallback, type TableMaterial } from './traditionalTableSound';
 import academyBroadcastVoices from '../mini-games/academy-sports/broadcastVoices.generated.json';
 import {ACADEMY_VOICES} from '../mini-games/academy-sports/voiceCatalog';
@@ -558,7 +558,7 @@ class AudioService {
       const resolvedTheme = theme === 'magic-female' && type === 'menu'
           ? 'magic'
           : theme;
-      const path = this.getWebBgmPaths(bgmRoot, resolvedTheme, type)[0];
+      const path = this.getWebBgmPaths(this.getCanonicalWebBgmAssetPath(bgmRoot, resolvedTheme, type))[0];
       const existing = this.preparedBgmHtmlAudios.get(path);
       if (existing) {
           this.preparedBgmHtmlAudios.delete(path);
@@ -1441,8 +1441,7 @@ class AudioService {
       return `${bgmRoot}/${type}.mp3`;
   }
 
-  private getWebBgmPaths(bgmRoot: string, resolvedTheme: string, type: string): string[] {
-      const assetPath = this.getCanonicalWebBgmAssetPath(bgmRoot, resolvedTheme, type);
+  private getWebBgmPaths(assetPath: string): string[] {
       const mp3Path = versionBgmPath(assetUrl(assetPath));
       if (!this.supportsWebOpusAudio()) return [mp3Path];
       const opusPath = versionBgmPath(assetUrl(`web-audio/${assetPath.replace(/\.mp3$/i, '.ogg')}`));
@@ -1481,19 +1480,21 @@ class AudioService {
       ].map(versionBgmPath);
       // GitHub Pages has one canonical asset base URL. Avoid trying several
       // root-relative variants and waiting for failed requests between them.
-      const pixelTheme = type.startsWith('pixel-rpg-');
-      const webPlaybackPaths = pixelTheme
-          ? [versionBgmPath(assetUrl(`bgm-new/pixel-rpg/${type.slice(10)}.mp3`))]
-          : WEB_PERFORMANCE_MODE ? this.getWebBgmPaths(bgmRoot, resolvedTheme, type) : paths;
+      const pixelTrack = type.startsWith('pixel-rpg-') ? type as PixelRpgTrack : undefined;
+      const pixelAsset = pixelTrack && PIXEL_RPG_MUSIC[pixelTrack];
+      const pixelFallback = pixelTrack && PIXEL_RPG_MUSIC_FALLBACKS[pixelTrack];
+      const playbackPaths = pixelAsset
+          ? [...this.getWebBgmPaths(pixelAsset), ...(pixelFallback ? this.getWebBgmPaths(pixelFallback) : [])]
+          : WEB_PERFORMANCE_MODE ? this.getWebBgmPaths(this.getCanonicalWebBgmAssetPath(bgmRoot, resolvedTheme, type)) : paths;
       // Native iOS and the GitHub Pages build use the media element path first.
       // It can start streaming before the whole MP3 has been fetched and decoded.
       // Keep the Web Audio decoder as a fallback for unsupported or blocked media.
-      if ((IS_IOS_BUILD || WEB_PERFORMANCE_MODE) && await this.playHtmlAudioMp3(IS_IOS_BUILD && !pixelTheme ? paths : webPlaybackPaths, loop, type, playbackGeneration)) return;
+      if ((IS_IOS_BUILD || WEB_PERFORMANCE_MODE) && await this.playHtmlAudioMp3(IS_IOS_BUILD && !pixelAsset ? paths : playbackPaths, loop, type, playbackGeneration)) return;
       if (!this.isCurrentPlayback(type, playbackGeneration)) return;
       const cacheKey = `${mode}:${theme}:${type}`;
       let buffer = this.audioBuffers[cacheKey];
       if (!buffer) {
-          for (const path of pixelTheme || WEB_PERFORMANCE_MODE ? webPlaybackPaths : paths) {
+          for (const path of playbackPaths) {
               try {
                   const response = await fetch(path);
                   if (response.ok) {
