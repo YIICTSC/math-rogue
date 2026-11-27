@@ -18,7 +18,7 @@ import {
   Swords,
 } from 'lucide-react';
 import type { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, LanguageMode } from '../../types';
-import MiniGameProblemChallenge from '../../components/MiniGameProblemChallenge';
+import AdventureProblemSheet from '../shared/AdventureProblemSheet';
 import EnemyIllustration from '../../components/EnemyIllustration';
 import ResilientAssetImage from '../../components/ResilientAssetImage';
 import { audioService } from '../../services/audioService';
@@ -852,7 +852,7 @@ const SchoolTrpgGame = ({
   if (!state) return <StartScreen saved={savedAtOpen} languageMode={languageMode} onBack={onBack} onNew={startNew} onContinue={continueSaved} dataErrors={dataErrors} />;
 
   return (
-    <main className="school-trpg-campaign-shell is-playing" data-gamepad-navigation-root data-gamepad-initial-scope="school-trpg-campaign">
+    <main className="school-trpg-campaign-shell is-playing" data-gamepad-navigation-root data-gamepad-initial-scope="school-trpg-campaign" data-adventure-screen>
       <SchoolTrpgBackdrop asset="sprites/backgrounds/mini-games/school-trpg.png" className="shell-background" />
       <header className="school-trpg-campaign-header">
         <button type="button" onClick={onBack} aria-label={text(SCHOOL_TRPG_COPY.exit, languageMode)}><ArrowLeft size={20} /><span>{text(SCHOOL_TRPG_COPY.exit, languageMode)}</span></button>
@@ -908,25 +908,17 @@ const SchoolTrpgGame = ({
         <div className="school-trpg-footer-route"><span>{text(UI_COPY.route, languageMode)}</span><b>{getSchoolTrpgProgress(state).percent}%</b></div>
       </footer>
       {state.phase === 'QUESTION' && state.pendingQuestionGate && (
-        <div className="school-trpg-question-overlay" role="dialog" aria-modal="true" data-gamepad-modal="true">
-          <div className="school-trpg-question-brand">
-            <span>{text(getQuestionGateCopy(state.pendingQuestionGate), languageMode)}</span>
-            <b>{text(getQuestionGateTitleCopy(state.pendingQuestionGate), languageMode)}</b>
-            <small>{text(SCHOOL_TRPG_COPY.questionHint, languageMode)}</small>
-          </div>
-          <div className="school-trpg-question-content">
-            <MiniGameProblemChallenge
-              mode={problemMode}
-              modePool={problemModePool}
-              answerMode={answerMode}
-              assignment={assignment}
-              onAnswerResult={onAnswerResult}
-              languageMode={languageMode}
-              onComplete={correctCount => setState(current => current ? completeSchoolTrpgQuestion(current, correctCount) : current)}
-              rewardHint={text(getQuestionGateCopy(state.pendingQuestionGate), languageMode)}
-            />
-          </div>
-        </div>
+        <AdventureProblemSheet
+          heading={text(getQuestionGateTitleCopy(state.pendingQuestionGate), languageMode)}
+          mode={problemMode}
+          modePool={problemModePool}
+          answerMode={answerMode}
+          assignment={assignment}
+          onAnswerResult={onAnswerResult}
+          languageMode={languageMode}
+          onComplete={correctCount => setState(current => current ? completeSchoolTrpgQuestion(current, correctCount) : current)}
+          rewardHint={text(getQuestionGateCopy(state.pendingQuestionGate), languageMode)}
+        />
       )}
       {showReset && (
         <div className="school-trpg-confirm-overlay" role="dialog" aria-modal="true" data-gamepad-modal="true">

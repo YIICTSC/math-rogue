@@ -55,9 +55,10 @@ export type PlayedCard = { id:number; value:DeckCard; temporary?:boolean; jam?:b
 export type Fighter = Status & Gauge & { id:string; hp:number; max:number; hero:HeroState; hand:PlayedCard[]; draw:PlayedCard[]; discard:PlayedCard[] };
 export type Opponent = Status & { id:string; spec:Enemy; hp:number; max:number; ordinal:number; phase:number; intent:Intent; target:string; weakness:Element };
 export type Pulse = { id:number; from?:string; to:string; art:'blade'|'cast'|'block'|'heal'|'status'|'critical'|'summon'|'transform'|'phase'|'hit'|'victory'|'gesture'; element:Element; value?:number };
+export type ActionCue = { name:Copy; parts:Technique[]; actor:string; kind:'card'|'link'|'finale' };
 export type Battle = {
   encounter:Encounter; party:Fighter[]; enemies:Opponent[]; turn:number; link:number; spentStudy:boolean; outcome?:'win'|'loss'|'escape';
-  serial:number; rng:number; pulses:Pulse[]; history:Copy[]; learnedHelped:boolean; items:Adventure['items']; relics:string[]; cycle:number; comboActors?:string[];
+  serial:number; rng:number; pulses:Pulse[]; history:Copy[]; learnedHelped:boolean; items:Adventure['items']; relics:string[]; cycle:number; comboActors?:string[]; cue?:ActionCue;
 };
 const zeroStatus: Status={block:0,poison:0,weak:0,expose:0,reflect:0,power:0,sealed:0};
 export const LINK_MAX=12;
@@ -174,7 +175,7 @@ function updateResult(b:Battle){
 function withFreshEffects(source:Battle){
   // Render state is immutable between commands; catalog definitions stay shared.
   return {
-    ...source,pulses:[] as Pulse[],comboActors:undefined as string[]|undefined,history:source.history.slice(),items:{...source.items},
+    ...source,pulses:[] as Pulse[],comboActors:undefined as string[]|undefined,cue:undefined as ActionCue|undefined,history:source.history.slice(),items:{...source.items},
     party:source.party.map(p=>({...p,hand:p.hand.map(c=>({...c})),draw:p.draw.slice(),discard:p.discard.slice()})),
     enemies:source.enemies.map(e=>({...e})),
   };
@@ -211,6 +212,11 @@ export function legalTarget(b:Battle,actor:string,target:Target,id:string){
   if(target==='foe')return Boolean(opponent(b,id));
   if(target==='ally')return Boolean(fighter(b,id));
   return target==='foes'?living(b).length>0:target==='self'?Boolean(fighter(b,actor)):b.party.some(ALIVE);
+}
+export function cursorTarget(b:Battle,actor:string,target:Target,enemy?:string,ally?:string){
+  if(target==='foe'||target==='foes')return enemy&&opponent(b,enemy)?enemy:living(b)[0]?.id;
+  if(target==='ally'&&ally&&fighter(b,ally))return ally;
+  return fighter(b,actor)?.id;
 }
 export function canPlay(b:Battle,p:Fighter,card:PlayedCard){
   return !b.outcome&&p.hp>0&&p.actions<MAX_ACTIONS&&p.energy>=inspect(card).cost&&!(p.sealed>0&&inspect(card).parts.some(t=>t.element!=='steel'));
@@ -309,6 +315,7 @@ export function playCard(b:Battle,actor:string,cardId:number,target:string):Batt
   unit.hand=unit.hand.filter(card=>card.id!==cardId);
   unit.energy-=resolved.cost;unit.actions++;unit.played++;
   if(c.jam){tell(next,['空白札を処分した。','Discarded a blank card.']);return next;}
+  next.cue={name:resolved.name,parts:resolved.parts,actor,kind:'card'};
   for(const part of resolved.parts)applyTechnique(next,unit,part,target,resolved.rank,resolved.element);
   if(next.pulses.length===0)animate(next,actor,'gesture',resolved.element??resolved.parts[0]?.element??'steel',actor);
   unit.limit=Math.min(LIMIT_MAX,unit.limit+1+Number(resolved.cost>=2));
@@ -337,6 +344,7 @@ export function useCombo(b:Battle,key:string,target:string):Battle {
   if(!members[0]||!legalTarget(b,members[0].id,c.tech.target,target))return b;
   const next=withFreshEffects(b);
   next.link=0;next.comboActors=members.map(p=>p.id);
+  next.cue={name:c.name,parts:[c.tech],actor:members[0].id,kind:'link'};
   applyTechnique(next,fighter(next,members[0].id)!,c.tech,target);
   for(const member of members)animate(next,member.id,'transform',c.tech.element,member.id);
   tell(next,[`連携 · ${c.name[0]}`,`Link · ${c.name[1]}`]);updateResult(next);
@@ -347,6 +355,7 @@ export function useLimit(b:Battle,actor:string,target:string):Battle {
   if(!p||!t||b.outcome||p.limit<LIMIT_MAX||!legalTarget(b,actor,t.target,target))return b;
   const next=withFreshEffects(b),unit=fighter(next,actor)!;
   unit.limit=0;next.comboActors=[actor];
+  next.cue={name:t.name,parts:[t],actor,kind:'finale'};
   applyTechnique(next,unit,t,target);
   animate(next,actor,'transform',t.element,actor);
   tell(next,[`決め技 · ${t.name[0]}`,`Finale · ${t.name[1]}`]);updateResult(next);

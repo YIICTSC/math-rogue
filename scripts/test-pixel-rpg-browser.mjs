@@ -60,6 +60,17 @@ try {
   async function key(key,count=1){for(let n=0;n<count;n++)await page.keyboard.press(key,{delay:8});}
   await boot();
   await page.locator('.mini-game-select-card').filter({hasText:/知識の旅人|Knowledge Travelers/}).click();
+  const modeSelect=page.locator('.main-mode-selection-screen');
+  const defer=page.locator('.assignment-letter-actions').getByRole('button',{name:/あとで|Later/i});
+  await modeSelect.or(defer).first().waitFor();
+  if(await defer.isVisible())await defer.click();
+  await modeSelect.waitFor();
+  const normalProblems=modeSelect.getByRole('button',{name:/^(通常問題へ|Normal Problems)$/});
+  if(await normalProblems.isVisible())await normalProblems.click();
+  const addition=modeSelect.getByRole('button',{name:/2.Digit Addition|[２2]ケタ.*たし/i}).first();
+  if(!await addition.isVisible())await modeSelect.locator('.mode-category-button').filter({hasText:/^(Arithmetic|計算|けいさん)$/i}).first().click();
+  await addition.click();
+  if(await modeSelect.isVisible())await modeSelect.getByRole('button',{name:/この条件で開始|このじょうけんで|Start with/i}).click();
   await page.locator('.pr-title h1').waitFor({timeout:75000});
   assert.equal(await page.locator('.pr-title nav button').count(),3);
   await shot('01-title-desktop');
@@ -71,6 +82,14 @@ try {
   assert.equal(await page.locator('.pr-hero-grid button').count(),17);
   await button(/^(異郷の旅人|Other worlds)$/).click();
   assert.equal(await page.locator('.pr-hero-grid button').count(),18);
+  assert.equal(await page.locator('.pr-hero-grid .pr-hero-guest-sprite').count(),9);
+  assert(await page.locator('.pr-hero-grid .pr-hero-guest-sprite').evaluateAll(async nodes=>{
+    await Promise.all(nodes.map(async node=>{
+      const image=new Image();image.src=getComputedStyle(node).backgroundImage.slice(5,-2);await image.decode();
+      if(image.naturalWidth!==320)throw Error('Missing guest atlas');
+    }));
+    return true;
+  }));
   await shot('03-extra-travelers');
   await button(/^(この旅人で進む|Continue with this traveler)$/).click();
   await page.locator('.pr-save-list article').first().getByRole('button').click();
@@ -169,39 +188,45 @@ try {
   assert.equal(new Set(actionSources.map(rect=>rect.join(','))).size,3,'Attack, skill and damage use different crops in Akari’s Guardian outfit');
   await layout('.pr-arena');await layout('.pr-endturn');
   await shot('06-battle-phone');
+  assert.equal(await page.locator('.pr-unit-enemy[aria-pressed="true"] .pr-enemy-cursor').count(),1);
+  await page.waitForFunction(()=>[...document.querySelectorAll('.pr-hand-card img')].some(image=>image.complete&&image.naturalWidth>0));
   await page.setViewportSize({width:844,height:390});await layout('.pr-arena');await layout('.pr-endturn');await shot('07-battle-landscape');
   await button(/^(ひらめき|Study)$/).click();
-  await page.locator('.pr-study h3').waitFor({timeout:45000});
-  const question=await page.locator('.pr-study h3').innerText();
+  const challenge=page.locator('[data-adventure-problem] .main-challenge-screen');
+  await challenge.waitFor({timeout:45000});
+  const board=challenge.locator('[data-gamepad-initial-scope^="unit-board-"]');
+  if(await board.isVisible())await board.locator('button[data-gamepad-back]').first().click();
+  assert.equal(await challenge.getByRole('button',{name:/聞く|Listen/}).count(),0);
+  const question=await challenge.getByRole('heading',{level:3,name:/\+.*=\s*\?/}).innerText();
   assert(question.length>1);
   await shot('08-question-landscape');
   // Simple default addition uses numeric operands and a known expected answer.
   const matches=question.match(/(-?\d+)\s*[＋+]\s*(-?\d+)/u);
-  if(matches){
-    const answer=String(Number(matches[1])+Number(matches[2]));
-    const options=await page.locator('.pr-choice-grid button').allTextContents();
-    const index=options.findIndex((o,i)=>o.slice(String(i+1).length).trim()===answer);
-    assert(index>=0,`Question did not include the correct option: ${question} · ${options}`);
-    await page.locator('.pr-choice-grid button').nth(index).click();
-    assert.match(await page.locator('.pr-study-feedback strong').innerText(),/正解|Correct/);
-    await page.locator('.pr-study-feedback button.pr-primary').click();
-    assert.match(await page.locator('.pr-energy').innerText(),/3 EN/);
-  }else{
-    await page.locator('.pr-choice-grid button').first().click();
-    await page.locator('.pr-study-feedback button.pr-primary').click();
-  }
+  assert(matches,question);
+  const readProgress=()=>page.evaluate(async()=>{
+    const {storageService}=await import('/src/services/storageService.ts');
+    return storageService.getModeCorrectCounts().ADDITION??0;
+  });
+  const beforeQuiz=await readProgress();
+  const answer=String(Number(matches[1])+Number(matches[2]));
+  await challenge.locator('.basic-challenge-options').getByRole('button',{name:answer,exact:true}).click();
+  await challenge.waitFor({state:'hidden'});
+  assert.match(await page.locator('.pr-energy').innerText(),/3 EN/);
+  assert.equal(await readProgress(),beforeQuiz+1,'One correct shared question records one unit answer');
+  const attack=page.locator('.pr-hand-card[aria-disabled="false"]').filter({hasText:/威力|Power/}).first();
+  const aimedVitals=await page.locator('.pr-unit-enemy[aria-pressed="true"]>small').textContent();
+  await attack.click();
+  const afterHit=await page.locator('.pr-unit-enemy[aria-pressed="true"]>small').allTextContents();
+  assert(!afterHit.length||afterHit[0]!==aimedVitals,'A single card tap attacks the cursor target');
+  assert.equal(await page.locator('.pr-target-bar').count(),0);
   for(let round=0;round<14&&!await page.locator('.pr-outcome').count();round++){
     const combatants=page.locator('.pr-unit-ally:enabled');
     for(let a=0;a<await combatants.count()&&!await page.locator('.pr-outcome').count();a++){
       await combatants.nth(a).click();
       for(let n=0;n<4&&!await page.locator('.pr-outcome').count();n++){
-        const hand=page.locator('.pr-hand-card:enabled').filter({hasText:/威力|Power/});
+        const hand=page.locator('.pr-hand-card[aria-disabled="false"]').filter({hasText:/威力|Power/});
         if(!await hand.count())break;
         await hand.first().click();
-        const foe=page.locator('.pr-unit-enemy.pr-target:enabled').first();
-        if(await foe.count())await foe.click();
-        else if(await page.locator('.pr-target-bar .pr-primary').count())await page.locator('.pr-target-bar .pr-primary').click();
-        else {await page.locator('.pr-target-bar button').first().click();break;}
       }
     }
     if(!await page.locator('.pr-outcome').count())await page.locator('.pr-endturn').click();
@@ -287,13 +312,9 @@ try {
       if(!await ally.count())break;
       await ally.click();
       for(let c=0;c<4&&!await page.locator('.pr-outcome').count();c++){
-        const hand=page.locator('.pr-hand-card:enabled').filter({hasText:/威力|Power/});
+        const hand=page.locator('.pr-hand-card[aria-disabled="false"]').filter({hasText:/威力|Power/});
         if(!await hand.count())break;
         await hand.first().click();
-        const foe=page.locator('.pr-unit-enemy.pr-target:enabled').first(),play=page.locator('.pr-target-bar .pr-primary');
-        if(await foe.count())await foe.click();
-        else if(await play.count())await play.click();
-        else {await page.locator('.pr-target-bar button').first().click();break;}
         if(!secondPhase&&(await page.locator('.pr-combat-top').innerText()).match(/第二形態|Second phase/)){
           secondPhase=true;await shot('12-boss-phase-two');
         }
@@ -321,6 +342,9 @@ try {
   assert(musicRequests.has('title.mp3')&&musicRequests.has('village.mp3')&&musicRequests.has('battle.mp3'),`BGM tracks requested: ${[...musicRequests]}`);
   assert.deepEqual(errors,[]);
   console.log(`PASS real mini-game entry, hero selection, movement on keyboard/touch/pad, party joins, job/palette change, study, targeting, boss victory and defeat, audio and both save paths. Screenshots: ${output}`);
+}catch(error){
+  console.error(`Pixel RPG playtest screenshots: ${output}`);
+  throw error;
 }finally{
   await browser?.close();await server.close();
 }

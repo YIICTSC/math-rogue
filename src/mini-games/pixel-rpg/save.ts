@@ -18,6 +18,10 @@ const strings=(v:unknown,n:number)=>list(v,k=>typeof k==='string'&&k.length<=160
 const point=(p:unknown, map:string):p is Point=>isRecord(p)&&isNumber(p.x,0,area(map).width-1)&&isNumber(p.y,0,area(map).height-1);
 const map=(m:unknown):m is string=>typeof m==='string'&&area(m).id===m;
 const modeList=new Set<string>(Object.values(GameMode));
+const questionText=(value:unknown,limit:number)=>typeof value==='string'&&value.length>0&&value.length<=limit;
+const validMissed=(q:unknown)=>validKartQuestion(q)||(isRecord(q)&&questionText(q.mode,120)&&questionText(q.problemKey,16000)&&
+  questionText(q.question,12000)&&questionText(q.correctAnswer,3000)&&(q.problemId===undefined||questionText(q.problemId,300))&&
+  (q.unitName===undefined||questionText(q.unitName,300))&&(q.options===undefined||list(q.options,value=>questionText(value,3000),12)));
 function validCard(c:unknown):c is DeckCard{
   return isRecord(c)&&isIn(c.key,CARDS)&&(c.rank===undefined||isNumber(c.rank,0,2))&&(c.element===undefined||isIn(c.element,ELEMENTS))&&
     (c.parts===undefined||Array.isArray(c.parts)&&c.parts.length>=2&&list(c.parts,k=>isIn(k,CARDS),3));
@@ -47,11 +51,11 @@ export function validAdventure(v:unknown):v is Adventure {
   const items=v.items;
   if(!isRecord(items)||!Object.keys(ITEMS).every(k=>isNumber(items[k],0,999)))return false;
   const q=v.learned;
-  if(!isRecord(q)||!isNumber(q.attempts)||!isNumber(q.correct,0,q.attempts)||!list(q.missed,validKartQuestion,48)||!isRecord(q.units)||
+  if(!isRecord(q)||!isNumber(q.attempts)||!isNumber(q.correct,0,q.attempts)||!list(q.missed,validMissed,48)||!isRecord(q.units)||
     !Object.values(q.units).every(u=>isRecord(u)&&isNumber(u.attempts)&&isNumber(u.correct,0,u.attempts)))return false;
   const settings=v.settings;
   return isRecord(settings)&&['random','symbol'].includes(String(settings.encounters))&&['normal','low'].includes(String(settings.rate))&&
-    ['choice','typing'].includes(String(settings.answer))&&['turn','battle','off'].includes(String(settings.quizHints))&&['normal','quick','instant'].includes(String(settings.rateFx))&&
+    ['choice','typing','writing'].includes(String(settings.answer))&&['turn','battle','off'].includes(String(settings.quizHints))&&['normal','quick','instant'].includes(String(settings.rateFx))&&
     typeof settings.reduceFx==='boolean'&&typeof settings.read==='boolean'&&(settings.avoidWeak===undefined||typeof settings.avoidWeak==='boolean')&&
     (settings.language===undefined||['JAPANESE','HIRAGANA','ENGLISH'].includes(String(settings.language)))&&list(settings.modes,m=>typeof m==='string'&&modeList.has(m),400);
 }

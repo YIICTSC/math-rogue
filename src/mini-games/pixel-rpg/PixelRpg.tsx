@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent } from 'react';
 import { ArrowLeft, ArrowUp, ArrowRight, ArrowDown, BookOpen, Compass, Flag, Map, Backpack, ShipWheel, Footprints, ChevronRight, Move, Save, Swords, Shield } from 'lucide-react';
-import { GameMode, type LanguageMode } from '../../types';
+import { GameMode, type AnswerMode, type AssignmentAnswerResult, type AssignmentReviewProblem, type LanguageMode } from '../../types';
 import type { MiniGameComponentProps } from '../../components/MiniGameRouter';
 import { PAD, useGameplayGamepad } from '../../hooks/useGameplayGamepad';
 import { audioService } from '../../services/audioService';
@@ -8,18 +8,20 @@ import { assetUrl } from '../../utils/assetPaths';
 import { abyssHero } from '../../components/school-dungeon/dungeons2/roster';
 import { isProtagonistId } from '../../components/school-dungeon/student/content';
 import { studentSpriteUrl } from '../../components/school-dungeon/student/sprites';
-import type { KartQuestion } from '../gakuro-kart/learning';
-import { GROUPS, applyStudy, climate, completeBattle, currentLandmark, currentRegion, escape, interact, introScenes, maxHp, mount, newAdventure, recover, step, type Adventure, type Change, type Encounter, type Scene } from './adventure';
+import AdventureProblemSheet from '../shared/AdventureProblemSheet';
+import { GROUPS, applyStudy, climate, completeBattle, currentLandmark, currentRegion, escape, interact, introScenes, maxHp, mount, newAdventure, recover, reviewEntry, step, type Adventure, type Change, type Encounter, type Scene, type Settings } from './adventure';
 import { heroSelectionIllustration, illustration, type Animation } from './art';
 import { createBattle, fighter, studyBonus, victory, type Battle } from './battle';
+import { playTravelerBattleVoice } from './battleVoice';
 import BattleScreen from './BattleScreen';
 import { HEROES, HERO_LIST, JOBS, PASSIVES, type WorldOfOrigin } from './catalog';
 import { REGIONS, TITLE, VEHICLES, type Copy, type Service } from './campaign';
+import { guestSpriteUrl } from './guestArt';
 import { Journal, Lessons, SaveSlots, ServicePanel, type MenuTab } from './Menus';
 import type { PixelRpgTrack } from './music';
 import { FieldCanvas, Language, Meter, Panel, useWords } from './presentation';
 import { clearSlot, readSave, SAVE_SLOTS, writeSave, type Slot, type SlotData } from './save';
-import { Study } from './Study';
+import TravelerPortrait from './TravelerPortrait';
 import { WORLD_ID, area, headline, isAir, type Direction, type Landmark } from './world';
 import './pixelRpg.css';
 
@@ -27,7 +29,7 @@ const DIRECTIONS = [
   ['up',ArrowUp,'上','Up'],['left',ArrowLeft,'左','Left'],['down',ArrowDown,'下','Down'],['right',ArrowRight,'右','Right'],
 ] as const;
 const KEY_DIRECTIONS:Record<string,Direction>={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',a:'left',s:'down',d:'right'};
-type StudyState = { mode:'battle'|'seal'|'review'|'library'; question?:KartQuestion; error?:boolean; landmark?:Landmark; actor?:string; nonce:number };
+type StudyState = { mode:'battle'|'seal'|'review'|'library'; review?:AssignmentReviewProblem; landmark?:Landmark; actor?:string; nonce:number };
 type Overlay =
   | {type:'journal';tab:MenuTab}
   | {type:'shop';service:Service;region:number}
@@ -41,6 +43,8 @@ type TitlePanel = 'hero'|'new'|'load'|'replace'|'help'|undefined;
 function HeroChoiceArt({id}:{id:string}){
   const abyss=abyssHero(id);
   if(abyss)return <img src={assetUrl(abyss.portrait)} alt="" />;
+  const guest=guestSpriteUrl(id);
+  if(guest)return <span className="pr-hero-dungeon-sprite pr-hero-guest-sprite" aria-hidden="true" style={{backgroundImage:`url("${guest}")`}} />;
   if(isProtagonistId(id))return <span className="pr-hero-dungeon-sprite" aria-hidden="true" style={{backgroundImage:`url("${studentSpriteUrl(id)}")`}} />;
   return <img src={heroSelectionIllustration(id)} alt="" />;
 }
@@ -138,8 +142,10 @@ function sceneMusic(state:Adventure|undefined,battle:Battle|undefined,overlay:Ov
 }
 
 function defaultModes(props:MiniGameComponentProps):string[]{
-  return props.problemModePool?.length?[...props.problemModePool]:[props.problemMode===GameMode.MIXED?GameMode.ADDITION:props.problemMode??GameMode.ADDITION];
+  return props.problemModePool?.length?[...props.problemModePool]:[props.problemMode??GameMode.ADDITION];
 }
+const savedAnswer = (mode?:AnswerMode):Settings['answer'] => mode==='WRITING'?'writing':mode==='INPUT'?'typing':'choice';
+const answerMode = (mode:Settings['answer']):AnswerMode => mode==='writing'?'WRITING':mode==='typing'?'INPUT':'CHOICE';
 const titleAsset='sprites/pixel-rpg/title.webp';
 const slotList=()=>Object.fromEntries(SAVE_SLOTS.map(s=>[s,readSave(s)])) as Record<Slot,SlotData[]>;
 function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:LanguageMode|undefined)=>void}){
@@ -161,8 +167,6 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
   const fieldInput=useRef<{key?:Direction;touch?:Direction;pad?:Direction;next:number;shift:boolean}>({next:0,shift:false});
   const questionCount=useRef(0);
   const answered=useRef(0);
-  const history=useRef<string[]>([]);
-  const questionPool=useRef<{key:string;questions:KartQuestion[]}>({key:'',questions:[]});
   const track=sceneMusic(state,battle,overlay,title);
   const trackRef=useRef(track);trackRef.current=track;
   const audioScope=useRef<ReturnType<typeof audioService.acquireBgmScene>|undefined>(undefined);
@@ -195,7 +199,6 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
     changeBattle(undefined);setActor(s.party[0]);setAnimation(undefined);animationUntil.current=0;
     startAt.current=performance.now();saveAt.current=0;slotRef.current=slot;setSlot(slot);
     setTitle(undefined);setMessage(undefined);setCarry(undefined);setReturnOverlay(undefined);setLanguage(s.settings.language);
-    questionPool.current={key:'',questions:[]};history.current=[];
     changeState(s);save('auto');
     present(opening?{type:'dialog',scenes:introScenes(),index:0}:undefined);
   };
@@ -213,40 +216,19 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
     if(!s.flags.includes('battle-tutorial')){
       changeState({...s,flags:[...s.flags,'battle-tutorial']});
       present({type:'dialog',index:0,scenes:[
-        {speaker:['戦闘の手引き','Field manual'],line:['味方を選ぶと、その仲間の手札に切り替わる。カードを選んだら、盤面から対象を決めよう。','Select an ally to view their hand. Choose a card and then select a target on the field.']},
+        {speaker:['戦闘の手引き','Field manual'],line:['赤いカーソルの敵が攻撃対象。敵をタップして照準を変え、手札を一度タップすれば技が出る。防御は自分にかかる。','The red cursor marks your target. Tap an enemy to aim, then tap a card once to play it. Guard cards protect their user.']},
         {speaker:['戦闘の手引き','Field manual'],line:['敵の予兆と狙い先を見てから、全員が動き終わったらターン終了。ひらめきは、答えられそうなときに使っていい。','Read enemy intents and targets. End the turn when everyone is ready. Use Study when you want an optional boost.']},
       ]});
     }
     audioService.playSound(encounter.boss?'buff':'select');
   };
-  const ask=async(mode:StudyState['mode'],landmark?:Landmark,heroId?:string,again?:KartQuestion)=>{
+  const ask=(mode:StudyState['mode'],landmark?:Landmark,heroId?:string)=>{
     const s=stateRef.current;if(!s)return;
     const nonce=++questionCount.current;
     answered.current=0;
     if(mode==='review'||mode==='library')setReturnOverlay(overlayRef.current);
-    const data:StudyState={mode,landmark,actor:heroId,nonce,question:again??(mode==='review'?s.learned.missed[0]:undefined)};
-    present({type:'study',data});
-    if(data.question)return;
-    try{
-      const selected=s.settings.modes.length?s.settings.modes:defaultModes(props);
-      const found=selected.length?selected:[GameMode.ADDITION];
-      const key=found.join('|');
-      let pool=questionPool.current;
-      if(pool.key!==key||!pool.questions.length){
-        const {buildLesson}=await import('../gakuro-kart/questions');
-        let lesson;
-        try {lesson=buildLesson({mode:found[0] as GameMode,modes:found,includeHints:true},9,history.current);}
-        catch {lesson=buildLesson({mode:GameMode.ADDITION,includeHints:true},9,history.current);}
-        pool={key,questions:lesson.questions};
-        if(overlayRef.current?.type!=='study'||overlayRef.current.data.nonce!==nonce)return;
-        questionPool.current=pool;
-      }
-      if(overlayRef.current?.type==='study'&&overlayRef.current.data.nonce===nonce){
-        present({type:'study',data:{...data,question:pool.questions.shift()}});
-      }
-    }catch{
-      if(overlayRef.current?.type==='study'&&overlayRef.current.data.nonce===nonce)present({type:'study',data:{...data,error:true}});
-    }
+    const missed=mode==='review'?s.learned.missed[0]:undefined;
+    present({type:'study',data:{mode,landmark,actor:heroId,nonce,review:missed?reviewEntry(missed):undefined}});
   };
   const apply = (op:(s:Adventure)=>Change) => {
     const s=stateRef.current;if(!s)return;
@@ -271,23 +253,38 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
     if(!b||!s||performance.now()<animationUntil.current)return;
     const next=op(b);
     if(next===b)return;
-    const duration=s.settings.rateFx==='instant'?0:s.settings.rateFx==='quick'?176:next.comboActors?.length?640:340;
+    const before=b.enemies.filter(enemy=>enemy.hp>0);
+    const defeated=before.filter(enemy=>next.enemies.find(after=>after.id===enemy.id)?.hp===0);
+    const newEnemies=next.enemies.filter(enemy=>enemy.hp>0&&!before.some(old=>old.id===enemy.id));
+    const duration=s.settings.rateFx==='instant'?0:s.settings.rateFx==='quick'?(defeated.length?290:176)
+      :defeated.some(enemy=>enemy.spec.boss)?880:next.comboActors?.length?730:defeated.length?580:390;
+    const settle=()=>{
+      setAnimation(undefined);
+      if(next.outcome==='win')audioService.playSound('win');
+      if(next.outcome==='loss')audioService.playSound('lose');
+    };
     window.clearTimeout(fxTimer.current);
-    animationUntil.current=next.pulses.length?performance.now()+duration:0;
-    if(next.pulses.length&&duration>0){
-      setAnimation({pulses:next.pulses,at:performance.now(),actors:next.comboActors??[],duration});
-      fxTimer.current=window.setTimeout(()=>setAnimation(undefined),duration);
-    }else setAnimation(undefined);
+    const at=performance.now(),animated=duration>0&&(next.pulses.length>0||defeated.length>0);
+    animationUntil.current=animated?at+duration:0;
+    if(animated){
+      setAnimation({pulses:next.pulses,at,actors:next.comboActors??[],duration,cue:next.cue,
+        defeated:defeated.map(enemy=>enemy.id),enemyOrder:[...before,...newEnemies].map(enemy=>enemy.id)});
+      fxTimer.current=window.setTimeout(settle,duration);
+    }else settle();
     changeBattle(next);
-    if(next.outcome==='win'){audioService.playSound('win');return;}
-    if(next.outcome==='loss'){audioService.playSound('lose');return;}
-    if(!next.pulses.length){audioService.playSound('select');return;}
-    const art=next.pulses[0].art;
-    audioService.playSound(art==='hit'?'damage':art==='block'?'block':art==='heal'?'buff':art==='phase'||art==='summon'?'finisher_explosion':art==='gesture'?'select':'attack');
-    if(voiceId&&(next.comboActors?.length||(next.party.find(p=>p.id===voiceId)?.played===1&&next.turn===1))){
-      const h=HEROES[voiceId], id=(h.originalVoice??h.id.slice(h.origin.length+1)).toUpperCase();
-      if(h.origin==='magic'||h.originalVoice)void audioService.playMagicVoice(id,art==='blade'?'attack':'spell');
-      if(h.origin==='high-school')void audioService.playHighSchoolVoice(id,art==='blade'?'attack':art==='block'?'block':'power');
+    const art=next.pulses[0]?.art;
+    if(!next.outcome||animated){
+      audioService.playSound(defeated.length&&animated||next.cue?.kind==='finale'||next.cue?.kind==='link'||art==='phase'||art==='summon'?'finisher_explosion':
+        art==='hit'?'damage':art==='block'?'block':art==='heal'?'buff':!art||art==='gesture'?'select':'attack');
+    }
+    const speaking=next.cue?.actor??voiceId;
+    if(speaking&&(next.cue||art==='heal')){
+      void playTravelerBattleVoice(speaking,next.cue?.kind==='finale'?'ultimate':next.outcome==='win'?'win':
+        art==='heal'?'heal':next.cue?.kind==='card'&&next.cue.parts.some(part=>part.skill.damage)?'attack':'skill');
+    }else{
+      const injured=next.party.find(member=>member.hp===0&&b.party.some(old=>old.id===member.id&&old.hp>0))
+        ??next.party.find(member=>next.pulses.some(p=>p.to===member.id&&(p.value??0)>0&&(p.art==='hit'||p.art==='status')));
+      if(injured)void playTravelerBattleVoice(injured.id,injured.hp>0?'damage':'defeat');
     }
   };
   const acknowledge=()=>{
@@ -379,7 +376,7 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
   const canStart=(item:Slot)=>{setSlot(item);if(saves[item].length)setTitle('replace');else start(item);};
   const start=(item:Slot)=>{
     const seed=(Math.random()*2**32)>>>0;
-    const next=newAdventure(selected,seed,{modes:defaultModes(props),answer:props.answerMode==='CHOICE'||!props.answerMode?'choice':'typing'},carry);
+    const next=newAdventure(selected,seed,{modes:defaultModes(props),answer:savedAnswer(props.answerMode)},carry);
     if(saves[item].length&&!writeSave(item,next,'auto')){setStorageError(true);return;}
     if(saves[item].length)clearSlot(item,undefined,'manual');
     begin(next,item,true);
@@ -393,12 +390,18 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
   };
   const journal=(tab:MenuTab)=>present({type:'journal',tab});
   const lesson=()=>{setReturnOverlay(overlayRef.current);present({type:'lesson'});};
-  const readQuestion=(correct:boolean,data:StudyState)=>{
-    if(answered.current===data.nonce||!data.question)return;
+  const readQuestion=(result:AssignmentAnswerResult,data:StudyState)=>{
+    if(answered.current===data.nonce)return;
     answered.current=data.nonce;
-    audioService.playSound(correct?'correct':'wrong');
-    apply(s=>applyStudy(s,data.question!,correct,data.landmark));
-    if(data.mode==='battle'&&data.actor)updateCombat(b=>studyBonus(b,data.actor!,correct));
+    props.onAnswerResult?.(result);
+    const active=overlayRef.current;
+    if(active?.type!=='study'||active.data.nonce!==data.nonce)return;
+    if(result.question&&result.correctAnswer){
+      const entry:AssignmentReviewProblem={mode:result.mode,problemId:result.problemId,
+        problemKey:result.problemKey??`${result.mode}:${result.question}`,question:result.question,correctAnswer:result.correctAnswer};
+      apply(s=>applyStudy(s,entry,result.correct,data.landmark));
+    }
+    if(data.mode==='battle'&&data.actor)updateCombat(b=>studyBonus(b,data.actor!,result.correct));
   };
   const nextScene=()=>{
     const ui=overlayRef.current;
@@ -407,7 +410,7 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
     else{present(undefined);if(!battleRef.current)save('auto');}
   };
 
-  return <main className="pixel-rpg" lang={language==='ENGLISH'?'en':'ja'} data-gamepad-navigation-root
+  return <main className="pixel-rpg" lang={language==='ENGLISH'?'en':'ja'} data-gamepad-navigation-root data-adventure-screen
     data-allow-japanese={language!=='ENGLISH'&&props.languageMode==='ENGLISH'?true:undefined} data-pr-theme={state?climate(state):'meadow'} data-pr-playing={!!state}>
     {!state&&<section className="pr-title" aria-label={l(TITLE)}>
       <img className="pr-title-art" src={`${import.meta.env.BASE_URL}${titleAsset}`} alt="" fetchPriority="high" onError={event=>{
@@ -450,37 +453,42 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
     {state&&overlay?.type==='shop'&&<ServicePanel state={state} service={overlay.service} region={overlay.region} apply={apply} close={closeOverlay} onJournal={journal} onStudy={()=>void ask('library')}/>}
     {state&&overlay?.type==='lesson'&&<Lessons close={closeOverlay} onSelect={(mode,pool,answer)=>{
       const modes=[...new Set(pool?.length?pool:[mode])];
-      apply(s=>({state:{...s,settings:{...s.settings,modes,answer:answer==='CHOICE'?'choice':answer?'typing':s.settings.answer}}}));
-      history.current=[];questionPool.current={key:'',questions:[]};closeOverlay();save('auto');
+      apply(s=>({state:{...s,settings:{...s.settings,modes,answer:answer?savedAnswer(answer):s.settings.answer}}}));
+      closeOverlay();save('auto');
     }}/>}
     {state&&overlay?.type==='travel'&&<Panel heading={t('乗り物','Vehicles')} close={closeOverlay}>
       <div className="pr-list"><p>{t('船は水辺、飛空艇は空から操作する。陸の上で降りられる。','Board boats at the shore. Fly airships across the chart. Disembark over land.')}</p>
         {state.licenses.map(key=><button key={key} disabled={state.vehicle===key} onClick={()=>{apply(s=>mount(s,key));present(undefined);save('auto');}}>{l(VEHICLES[key])}{state.vehicle===key&&<span>✓</span>}</button>)}</div>
     </Panel>}
-    {state&&overlay?.type==='dialog'&&<Panel wide heading={l(overlay.scenes[overlay.index].speaker)} subtitle={`${overlay.index+1} / ${overlay.scenes.length}`} close={closeOverlay}>
-      <div className={`pr-story ${overlay.ending?'pr-story-ending':''}`}>
-        {overlay.scenes[overlay.index].hero&&(()=>{
-          const id=overlay.scenes[overlay.index].hero!,h=HEROES[id];
-          const image=illustration(id,state.heroes[id]?.job??h.job,'joy');
-          return <img src={image} alt="" />;
-        })()}
-        <p>{l(overlay.scenes[overlay.index].line)}</p>
-      </div>
-      <footer className="pr-sticky"><button className="pr-primary" onClick={nextScene}>{overlay.index+1===overlay.scenes.length?t('冒険に戻る','Return to adventure'):t('次へ','Next')} <ChevronRight size={16}/></button></footer>
-    </Panel>}
-    {state&&overlay?.type==='study'&&<Panel heading={overlay.data.mode==='seal'?l(overlay.data.landmark!.label):t('知識のひらめき','Insight')} close={closeOverlay}>
-      {overlay.data.question?<Study key={overlay.data.nonce} question={overlay.data.question} typing={state.settings.answer==='typing'} read={state.settings.read}
-        onAnswer={right=>readQuestion(right,overlay.data)} onClose={closeOverlay}
-        retry={overlay.data.mode!=='battle'?()=>{const nonce=++questionCount.current;present({type:'study',data:{...overlay.data,nonce}});}:undefined}
-        reward={overlay.data.mode==='battle'?t('正解でエナジーとドローを追加。次の攻撃と連携を強化する。','A correct answer adds energy and a card, and strengthens your next attack and Link.'):overlay.data.mode==='seal'?t('正解すると、封印の奥に残された品を獲得。','Solve the seal to earn the hidden cache.'):t('旅の学習記録に保存される。','Your answer is saved to the travel journal.')}/>
-        :<p role={overlay.data.error?'alert':'status'}>{overlay.data.error?t('問題を読み込めませんでした。学習範囲を変えて試してください。','Could not load questions. Try a different learning range.'):t('問題を準備中…','Preparing a question…')}</p>}
-    </Panel>}
+    {state&&overlay?.type==='dialog'&&(()=>{
+      const scene=overlay.scenes[overlay.index],portrait=scene.portrait??scene.hero;
+      return <Panel wide heading={l(scene.speaker)} subtitle={`${overlay.index+1} / ${overlay.scenes.length}`} close={closeOverlay}>
+        <div className={`pr-story ${overlay.ending?'pr-story-ending':''}`}>
+          {portrait&&<div className="pr-dialog-portrait"><TravelerPortrait id={portrait} name={l(scene.speaker)} reaction={scene.hero?'joy':'neutral'} /></div>}
+          <p>{l(scene.line)}</p>
+        </div>
+        <footer className="pr-sticky"><button className="pr-primary" onClick={nextScene}>{overlay.index+1===overlay.scenes.length?t('冒険に戻る','Return to adventure'):t('次へ','Next')} <ChevronRight size={16}/></button></footer>
+      </Panel>;
+    })()}
+    {state&&overlay?.type==='study'&&<AdventureProblemSheet key={overlay.data.nonce}
+      heading={overlay.data.landmark?l(overlay.data.landmark.label):t('知識のひらめき','Insight')} onClose={closeOverlay}
+      mode={(state.settings.modes[0]??props.problemMode) as GameMode} modePool={state.settings.modes.length>1?state.settings.modes:undefined}
+      assignment={props.assignment} answerMode={answerMode(state.settings.answer)} languageMode={language} isChallenge
+      problemOffset={overlay.data.nonce-1} reviewProblem={overlay.data.review}
+      onAnswerResult={result=>readQuestion(result,overlay.data)} onComplete={()=>{
+        const active=overlayRef.current;
+        if(active?.type==='study'&&active.data.nonce===overlay.data.nonce)closeOverlay();
+      }}
+      rewardHint={overlay.data.mode==='battle'?t('正解でエナジーとドローを追加。次の攻撃と連携を強化する。','A correct answer adds energy and a card, and strengthens your next attack and Link.'):overlay.data.mode==='seal'?t('正解すると、封印の奥に残された品を獲得。','Solve the seal to earn the hidden cache.'):t('旅の学習記録に保存される。','Your answer is saved to the travel journal.')}/>}
     {state&&overlay?.type==='exit'&&<Panel heading={t('タイトルへ戻る','Return to title')} close={closeOverlay}><div className="pr-list">
       <p>{t('今の冒険を自動記録して戻ります。','Your adventure will be autosaved before returning.')}</p><button className="pr-primary" onClick={openTitle}>{t('記録して戻る','Save and return')}</button></div></Panel>}
     {state&&overlay&&message&&<div className="pr-toast pr-toast-modal" role="status">{l(message)}</div>}
     {storageError&&<div className="pr-storage-error" role="alert">{t('この端末では冒険を記録できません。','This device could not save the adventure.')}</div>}
   </main>;
-  function beginLoad(chosen:Slot,entry:SlotData){begin(entry.state,chosen,false);}
+  function beginLoad(chosen:Slot,entry:SlotData){
+    const s=entry.state;
+    begin({...s,settings:{...s.settings,modes:defaultModes(props),answer:props.answerMode?savedAnswer(props.answerMode):s.settings.answer}},chosen,false);
+  }
 }
 
 export default function PixelRpg(props:MiniGameComponentProps){

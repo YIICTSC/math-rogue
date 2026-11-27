@@ -22,6 +22,8 @@ interface CardProps {
   gamepadZone?: string;
   gamepadOrder?: number;
   appearanceMode?: CharacterAppearanceMode;
+  className?: string;
+  presentation?: { name: string; description: string; artwork: React.ReactNode };
 }
 
 export const KEYWORD_DEFINITIONS: Record<string, { title: string; desc: string }> = {
@@ -227,7 +229,7 @@ const CompositeArtPiece: React.FC<{
   return <div className="w-full h-full bg-black/20" />;
 };
 
-const Card: React.FC<CardProps> = ({ card, onClick, disabled, selected, onInspect, languageMode = 'JAPANESE', gamepadZone, gamepadOrder, appearanceMode = 'STANDARD' }) => {
+const Card: React.FC<CardProps> = ({ card, onClick, disabled, selected, onInspect, languageMode = 'JAPANESE', gamepadZone, gamepadOrder, appearanceMode = 'STANDARD', className = '', presentation }) => {
   const longPressTimer = useRef<any>(null);
   const isLongPressActive = useRef(false);
   const startPos = useRef({ x: 0, y: 0 });
@@ -235,7 +237,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, selected, onInspec
   const translatedCardName = languageMode === 'ENGLISH'
     ? buildEnglishCardName(card)
     : trans(card.name, languageMode);
-  const displayCardName = toAge9BattleText(translatedCardName, languageMode);
+  const displayCardName = presentation?.name ?? toAge9BattleText(translatedCardName, languageMode);
   const imageCandidates = useMemo(
     () => getCardIllustrationPaths(card.id, translatedCardName, [card.name, ...(card.originalNames || [])]),
     [card.id, card.name, card.originalNames, translatedCardName]
@@ -336,6 +338,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, selected, onInspec
   };
 
   const renderCardArt = () => {
+    if (presentation) return presentation.artwork;
     const signatureImages=getEnemyHeroSignatureImages(card);
     if(signatureImages.length)return <ResilientAssetImage sources={signatureImages} alt={displayCardName} className="w-full h-full object-contain opacity-95 drop-shadow-md"/>;
 
@@ -528,6 +531,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, selected, onInspec
   };
 
   const renderDescription = () => {
+    if (presentation) return presentation.description;
     const rawDesc = languageMode === 'ENGLISH'
       ? buildEnglishCardDescription(card)
       : languageMode === 'HIRAGANA'
@@ -559,7 +563,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, selected, onInspec
   };
 
   const displayName = displayCardName + (card.upgraded ? '+' : '');
-  const needsScroll = displayName.length > 6;
+  const needsScroll = !presentation && displayName.length > 6;
   const statusCategoryLabel = getStatusCategoryLabel(card);
   const statusCategoryClass = getStatusCategoryClass(card);
   const cardFrameClass = card.holographic
@@ -580,6 +584,8 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, selected, onInspec
     <div
       role="button"
       aria-pressed={selected}
+      aria-disabled={disabled}
+      aria-label={presentation ? displayName : undefined}
       tabIndex={disabled ? -1 : 0}
       data-card-id={card.id}
       data-gamepad-zone={gamepadZone}
@@ -596,6 +602,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, selected, onInspec
         transition-all duration-200 select-none group touch-manipulation
         ${getTypeColor(card.type)}
         ${cardFrameClass}
+        ${className}
         ${disabled ? 'opacity-50 cursor-not-allowed grayscale' : 'cursor-pointer hover:-translate-y-4 hover:shadow-[0_0_15px_rgba(255,255,255,0.4)] hover:z-50'}
       `}
     >
@@ -610,7 +617,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, selected, onInspec
         </>
       )}
       {/* Header: fixed */}
-      <div className="flex items-center relative z-30 mb-1 h-6 overflow-hidden shrink-0">
+      <div className="card-name-row flex items-center relative z-30 mb-1 h-6 overflow-hidden shrink-0">
         <div className={`w-6 h-6 flex items-center justify-center rounded text-[11px] border border-white font-bold shrink-0 shadow-sm mr-1 ${card.holographic ? 'bg-cyan-300 text-slate-950' : card.upgraded && card.cost < 99 ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'}`}>
           {card.xCost ? 'X' : card.cost}
         </div>
@@ -636,7 +643,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, selected, onInspec
       )}
 
       {/* Description: layer, bottom position */}
-      <div className="absolute bottom-5 left-2 right-2 z-[60] pointer-events-none">
+      <div className="card-description-layer absolute bottom-5 left-2 right-2 z-[60] pointer-events-none">
         <div className="bg-black/75 p-1 rounded border border-white/10 backdrop-blur-[1px] w-full min-h-[42px] overflow-visible">
           <div className="text-[9px] text-white leading-tight text-left whitespace-pre-wrap break-words w-full font-bold">
             {renderDescription()}
@@ -651,7 +658,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, selected, onInspec
         </div>
       </div>
 
-      <div className="relative z-10 mt-auto">
+      <div className="card-type-row relative z-10 mt-auto">
         <div className="text-[9px] text-center mt-0.5 text-white/60 font-mono tracking-tighter">{getTypeText(card.type)}</div>
       </div>
     </div>

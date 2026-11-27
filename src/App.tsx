@@ -7402,7 +7402,7 @@ const App: React.FC = () => {
         }
         audioService.playSound('select');
         setPendingMiniGameScreen(screen);
-        if (screen === GameScreen.MINI_GAME_GAKUROGEAR || screen === GameScreen.MINI_GAME_CARD_CLUB || screen === GameScreen.MINI_GAME_TRADITIONAL || screen === GameScreen.MINI_GAME_PIXEL_RPG) {
+        if (screen === GameScreen.MINI_GAME_GAKUROGEAR || screen === GameScreen.MINI_GAME_CARD_CLUB || screen === GameScreen.MINI_GAME_TRADITIONAL) {
             setPendingMiniGameScreen(null);
             setGameState(prev => ({ ...prev, screen }));
             return;
@@ -7425,14 +7425,15 @@ const App: React.FC = () => {
             return;
         }
         // Story campaigns confirm problem selection before their dedicated titles.
-        if (screen !== GameScreen.MINI_GAME_STAR_TIDE && screen !== GameScreen.MINI_GAME_LANTERN_WAR && activeAssignment?.gameMode === 'FREE' && isAssignmentWithinDeadline) {
+        const chooseBeforeAdventure = [GameScreen.MINI_GAME_STAR_TIDE, GameScreen.MINI_GAME_LANTERN_WAR, GameScreen.MINI_GAME_PIXEL_RPG, GameScreen.MINI_GAME_SCHOOL_TRPG].includes(screen);
+        if (!chooseBeforeAdventure && activeAssignment?.gameMode === 'FREE' && isAssignmentWithinDeadline) {
             applyMiniGameAssignmentConfig(screen, activeAssignment);
             return;
         }
         setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_MODE_SELECTION }));
     };
 
-    const handleMiniGameModeSelect = async (mode: GameMode, modePool?: string[]) => {
+    const handleMiniGameModeSelect = async (mode: GameMode, modePool?: string[], answerMode: AnswerMode = 'CHOICE') => {
         if (redirectToAssignmentChallengeIfLocked()) return;
         if (isDailyLimitReached) {
             audioService.playSound('wrong');
@@ -7447,7 +7448,8 @@ const App: React.FC = () => {
         const assignmentHasCustomProblems = activeAssignment?.gameMode === 'FREE' && activeAssignment.customProblems.length > 0;
         setMiniGameProblemMode(assignmentHasCustomProblems ? GameMode.UPPER_TRIVIA : assignmentModePool ? getAssignmentRepresentativeMode(activeAssignment) : mode);
         setMiniGameProblemModePool(assignmentHasCustomProblems ? (assignmentModePool || []) : (assignmentModePool || modePool));
-        setMiniGameAnswerMode(activeAssignment?.answerMode || 'CHOICE');
+        const usesSelectedAnswerMode = nextScreen === GameScreen.MINI_GAME_PIXEL_RPG || nextScreen === GameScreen.MINI_GAME_SCHOOL_TRPG;
+        setMiniGameAnswerMode(activeAssignment?.answerMode || (usesSelectedAnswerMode ? answerMode : 'CHOICE'));
         setPendingMiniGameScreen(null);
         setGameState(prev => ({ ...prev, screen: nextScreen }));
     };

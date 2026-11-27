@@ -1,4 +1,5 @@
 import { FEATURES, REGIONS, SERVICES, type Climate, type Copy, type Feature, type Service, type Vehicle } from './campaign';
+import { TOWN_SHOPS, townProfile, type TownNpc } from './towns';
 
 export type Point = { x: number; y: number };
 export type Direction = 'up' | 'down' | 'left' | 'right';
@@ -15,7 +16,7 @@ export function noise(x: number,y: number,seed = 0) {
 
 export const enum Tile { Deep, Sea, Shallow, Sand, Grass, Flowers, Forest, Rock, Hill, Path, Wood, Stone, Wall, Cave, Bridge, Ice, Water, Trap, Void, Hidden, Carpet, Rotor, Waterfall }
 export type Kind = 'site' | 'door' | 'exit' | 'keeper' | 'resident' | 'recruit' | 'service' | 'chest' | 'seal' | 'feature' | 'gate' | 'stairs' | 'enemy' | 'boss' | 'shortcut' | 'rock' | 'plate' | 'secret' | 'trial' | 'camp' | 'sign';
-export type Landmark = Point & { id: string; label: Copy; kind: Kind; link?: string; feature?: Feature; service?: Service; variant?: number };
+export type Landmark = Point & { id: string; label: Copy; kind: Kind; link?: string; feature?: Feature; service?: Service; variant?: number; npc?: TownNpc; portrait?: string };
 export type Area = {
   id: string; region: number; name: Copy; climate: Climate; place: 'world'|'town'|'indoors'|'wild'|'dungeon';
   width: number; height: number; tiles: Uint8Array; start: Point; points: Landmark[];
@@ -102,7 +103,6 @@ function makeWorld(): Area {
   return a;
 }
 
-const TOWN_SERVICES: Service[] = ['inn','armory','cards','items','library','guild','forge','tavern','notice','home'];
 function makeTown(region: number,site: number,id: string,name:Copy) {
   const start={x:17,y:21};
   const a=createArea(id,region,name,'town',35,25,Tile.Grass,start);
@@ -115,7 +115,7 @@ function makeTown(region: number,site: number,id: string,name:Copy) {
   for(const y of [8,15,22]) rectangle(a,2,y,31,2,Tile.Path);
   if (region===1 || region===4 || site===3) rectangle(a,13,10,9,4,Tile.Stone);
   if (region===3) rectangle(a,2,21,7,2,Tile.Bridge);
-  TOWN_SERVICES.forEach((service,index)=>{
+  TOWN_SHOPS.forEach((service,index)=>{
     const cols=[5,11,23,29], row=Math.floor(index/4), cx=cols[index%4], cy=5+row*7;
     rectangle(a,cx-2,cy-2,5,4,Tile.Wall);
     stamp(a,{x:cx,y:cy+1},Tile.Wood);
@@ -123,8 +123,9 @@ function makeTown(region: number,site: number,id: string,name:Copy) {
     thing(a,service,'door',cx,cy+1,SERVICES[service],{link:`${id}/${service}`,service,variant:index});
   });
   const r=REGIONS[region];
-  thing(a,'keeper','keeper',17,17,r.keeper);
-  thing(a,'resident','resident',19,21,['広場の住人','Square resident']);
+  const locals=townProfile(region,site);
+  thing(a,'keeper','keeper',17,17,locals.keeper?.name??r.keeper,{npc:locals.keeper,portrait:locals.keeperPortrait});
+  thing(a,'resident','resident',19,21,locals.square.name,{npc:locals.square});
   thing(a,'camp','camp',15,16,CAMP);
   thing(a,'exit','exit',17,23,EXIT,{link:WORLD_ID});
   thing(a,'sign','sign',19,18,['街道の案内板','Road sign']);
@@ -137,7 +138,8 @@ function makeInterior(region: number,site: number,id: string, service: Service):
   rectangle(a,2,2,13,8,service==='library'||service==='guild'||service==='armory'?Tile.Stone:Tile.Wood);
   rectangle(a,6,4,5,4,Tile.Carpet);
   thing(a,service,'service',8,4,SERVICES[service],{service});
-  thing(a,'resident','resident',12,5,['腰掛けた旅人','Seated traveler'],{variant:2});
+  const resident=townProfile(region,site).rooms[service];
+  thing(a,'resident','resident',12,5,resident.name,{npc:resident});
   thing(a,'exit','exit',8,10,EXIT,{link:mapId(region,site)});
   stamp(a,{x:8,y:10},Tile.Wood);
   for(const x of [3,13]) { stamp(a,{x,y:3},Tile.Wall);stamp(a,{x,y:7},Tile.Wall); }

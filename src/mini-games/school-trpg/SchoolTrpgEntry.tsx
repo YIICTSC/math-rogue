@@ -133,6 +133,7 @@ export default function SchoolTrpgEntry(props: MiniGameComponentProps) {
     <div
       className={'sa-app' + (mode === 'play' ? ' sa-playing' : '')}
       data-frontier-screen={mode}
+      data-adventure-screen
       data-mini-game-scope="school-adventure"
       data-gamepad-navigation-root
     >

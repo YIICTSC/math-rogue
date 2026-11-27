@@ -1,4 +1,5 @@
 import { CORE_CHAMBERS, ENDING, FEATURES, PROLOGUE, REGIONS, VEHICLES, type Copy, type Vehicle } from './campaign';
+import type { AssignmentReviewProblem } from '../../types';
 import { CARDS, GEAR, HEROES, HERO_LIST, ITEMS, JOBS, RELICS, starterDeck, type DeckCard, type Element, type EquipSlot, type ItemId, type RelicId, type Technique } from './catalog';
 import type { KartQuestion } from '../gakuro-kart/learning';
 import { OFFSETS, Tile, WORLD_ID, add, area, areaSite, canTravel, climateAt, coordinate, distance, isAir, isRoad, isShore, isWater, mapId, nearbyLandmark, noise, regionAt, same, sitePoint, tileAt, type Direction, type Landmark, type Point } from './world';
@@ -7,7 +8,8 @@ export type HeroState = {
   id: string; level: number; xp: number; hp: number; job: string; mastery: Record<string,number>; inherited?: string;
   deck: DeckCard[]; learned: string[]; equipment: Partial<Record<EquipSlot,string>>; relic?: RelicId; rear: boolean;
 };
-export type Settings = { encounters: 'random'|'symbol'; rate: 'normal'|'low'; answer: 'choice'|'typing'; quizHints: 'turn'|'battle'|'off'; rateFx: 'normal'|'quick'|'instant'; reduceFx: boolean; read: boolean; avoidWeak?: boolean; language?: 'JAPANESE'|'HIRAGANA'|'ENGLISH'; modes: string[] };
+export type Settings = { encounters: 'random'|'symbol'; rate: 'normal'|'low'; answer: 'choice'|'typing'|'writing'; quizHints: 'turn'|'battle'|'off'; rateFx: 'normal'|'quick'|'instant'; reduceFx: boolean; read: boolean; avoidWeak?: boolean; language?: 'JAPANESE'|'HIRAGANA'|'ENGLISH'; modes: string[] };
+type MissedQuestion = KartQuestion | AssignmentReviewProblem;
 export type Adventure = {
   version: 1; leader: string; heroes: Record<string,HeroState>; party: string[];
   map: string; at: Point; direction: Direction; trail: Point[]; parent: {map:string; at:Point; vehicle:Vehicle}[];
@@ -16,10 +18,10 @@ export type Adventure = {
   rocks: Record<string,Point>; visits: string[]; monsters: string[]; books: number[];
   gold: number; gear: string[]; relics: RelicId[]; partyRelic?: RelicId; items: Record<ItemId,number>; unlockedCards: string[];
   steps: number; minutes: number; elapsed: number; rng: number; streak: number; repellent: number;
-  learned: { correct: number; attempts: number; missed: KartQuestion[]; units: Record<string,{correct:number;attempts:number}> };
+  learned: { correct: number; attempts: number; missed: MissedQuestion[]; units: Record<string,{correct:number;attempts:number}> };
   settings: Settings; rank: number;
 };
-export type Scene = { speaker: Copy; line: Copy; hero?: string };
+export type Scene = { speaker: Copy; line: Copy; hero?: string; portrait?: string };
 export type Encounter = { region: number; variant: number; key?: string; boss?: boolean; hidden?: boolean; rush?: number; surprise?: 'party'|'foe' };
 export type Effect =
   | { type:'dialog'; scenes:Scene[] }
@@ -258,11 +260,12 @@ export function interact(s:Adventure, landmark=currentLandmark(s)):Change {
       const finish=has&&!s.quests.includes(questFlag(a.region));
       let next={...s,flags:got(s.flags,progressFlag(a.region)),gold:s.gold+(finish?32+a.region*14:0),
         quests:finish?got(s.quests,questFlag(a.region)):s.quests};
-      let lines: Scene[]=[{speaker:r.keeper,line:s.stage>a.region?r.aftermath:first?r.opening:r.rumor}];
-      if(finish)lines.push({speaker:r.keeper,line:r.questDone});
+      const speaker={speaker:l.label,portrait:l.portrait};
+      let lines: Scene[]=[{...speaker,line:l.npc?.line??(s.stage>a.region?r.aftermath:first?r.opening:r.rumor)}];
+      if(finish)lines.push({...speaker,line:r.questDone});
       if(first){
         const joining=recruits(next,a.region,1,a.region===0);
-        next=joining.state; lines=lines.concat(joining.scenes,[{speaker:r.keeper,line:r.quest}]);
+        next=joining.state; lines=lines.concat(joining.scenes,[{...speaker,line:r.quest}]);
         if(a.region===0)next={...next,flags:got(next.flags,'guild'),checkpoint:{map:s.map,at:a.start}};
       }
       return scene(next,lines);
@@ -270,15 +273,15 @@ export function interact(s:Adventure, landmark=currentLandmark(s)):Change {
     case 'resident': {
       const hero=s.party.find(id=>id!==s.leader)??s.leader;
       const key=`side:${hero}:${a.region}`;
-      const lines:Scene[]=[{speaker:r.keeper,line:s.stage>a.region?r.aftermath:r.rumor}];
-      if(s.party.length>=2 && (s.quests.includes(questFlag(a.region))||s.stage>a.region)){
+      if(!l.npc)return asIs(s);
+      const lines:Scene[]=[{speaker:l.npc.name,line:l.npc.line,portrait:l.npc.portrait}];
+      if(a.place==='town'&&s.party.length>=2 && (s.quests.includes(questFlag(a.region))||s.stage>a.region)){
         lines.push({speaker:HEROES[hero].name,line:HEROES[hero].side,hero});
         return scene({...s,flags:got(s.flags,key),gold:s.flags.includes(key)?s.gold:s.gold+12},lines);
       }
       return scene(s,lines);
     }
     case 'service': {
-      if(l.service==='inn') return {state:s,effect:{type:'service',service:l.service,region:a.region}};
       return {state:s,effect:{type:'service',service:l.service!,region:a.region}};
     }
     case 'recruit': {
@@ -393,8 +396,12 @@ export function worldSymbol(s:Adventure,p:Point) {
     &&![Tile.Path,Tile.Sand,Tile.Bridge].includes(tileAt(area(s.map),p))&&canTravel(tileAt(area(s.map),p),'foot',true)
     &&noise(p.x,p.y,regionAt(p))>.89&&!area(s.map).points.some(l=>distance(l,p)<2)&&!s.completed.includes(`world:foe:${coordinate(p)}`);
 }
-export function applyStudy(s:Adventure,question:KartQuestion,correct:boolean,landmark?:Landmark):Change{
-  const key=(q:KartQuestion)=>q.problemId??`${q.mode}:${q.question}:${q.options[q.correct]}`;
+export function reviewEntry(q:MissedQuestion):AssignmentReviewProblem {
+  if(!('correct' in q))return q;
+  return {mode:q.mode,problemId:q.problemId,problemKey:q.id,question:q.question,correctAnswer:q.options[q.correct],options:q.options,unitName:q.unitName};
+}
+export function applyStudy(s:Adventure,question:MissedQuestion,correct:boolean,landmark?:Landmark):Change{
+  const key=(entry:MissedQuestion)=>{const q=reviewEntry(entry);return q.problemId??`${q.mode}:${q.question}:${q.correctAnswer}`;};
   const missed=s.learned.missed.filter(q=>key(q)!==key(question));
   const previous=s.learned.units[question.mode]??{correct:0,attempts:0};
   const next={...s,learned:{correct:s.learned.correct+Number(correct),attempts:s.learned.attempts+1,missed:correct?missed:[question,...missed].slice(0,48),

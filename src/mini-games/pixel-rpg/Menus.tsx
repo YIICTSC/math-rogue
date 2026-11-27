@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { BookOpen, Backpack, Map, Puzzle, Settings2, Shield, Sparkles, Users, Save, Flag, ChevronRight, Gem, ScrollText } from 'lucide-react';
-import { GameMode, type LanguageMode } from '../../types';
+import { GameMode, type AnswerMode, type LanguageMode } from '../../types';
 import ModeSelectionScreen from '../../components/ModeSelectionScreen';
+import { storageService } from '../../services/storageService';
 import { trans } from '../../utils/textUtils';
 import { CARDS, CARD_LIST, COMBOS, ELEMENTS, GEAR, GEAR_LIST, HEROES, ITEMS, JOBS, JOB_LIST, PASSIVES, RELICS, SLOTS, type Element, type EquipSlot, type ItemId, type RelicId } from './catalog';
 import { REGIONS, SERVICES, VEHICLES, type Service } from './campaign';
@@ -12,6 +13,7 @@ import { illustration } from './art';
 import { Meter, Panel, useWords } from './presentation';
 import { SAVE_SLOTS, type Slot, type SlotData } from './save';
 import { Tile, WORLD_ID, area, isWater, sitePoint, tileAt } from './world';
+import TravelerPortrait from './TravelerPortrait';
 
 export type MenuTab='party'|'job'|'gear'|'deck'|'relics'|'pack'|'map'|'quests'|'index'|'study'|'save'|'settings';
 export type Apply=(change:(s:Adventure)=>Change)=>void;
@@ -201,19 +203,20 @@ function SettingsPanel({state,apply,onLesson}:{state:Adventure;apply:Apply;onLes
     <label className="pr-check"><input type="checkbox" checked={!!s.avoidWeak} onChange={e=>set('avoidWeak',e.target.checked)}/>{t('格下の敵との自動遭遇を避ける','Skip automatic encounters with weaker foes')}</label>
     <label className="pr-select-label">{t('戦闘の演出速度','Battle animation speed')}<select value={s.rateFx} onChange={e=>set('rateFx',e.target.value as typeof s.rateFx)}><option value="normal">{t('標準','Standard')}</option><option value="quick">{t('倍速','Double speed')}</option><option value="instant">{t('演出スキップ','Skip animations')}</option></select></label>
     <label className="pr-check"><input type="checkbox" checked={s.reduceFx} onChange={e=>set('reduceFx',e.target.checked)}/>{t('点滅・移動演出を軽減','Reduce flashes and motion')}</label>
-    <label className="pr-select-label">{t('回答方法','Answer mode')}<select value={s.answer} onChange={e=>set('answer',e.target.value as typeof s.answer)}><option value="choice">{t('選択式','Multiple choice')}</option><option value="typing">{t('入力式','Typed answer')}</option></select></label>
+    <label className="pr-select-label">{t('回答方法','Answer mode')}<select value={s.answer} onChange={e=>set('answer',e.target.value as typeof s.answer)}><option value="choice">{t('選択式','Multiple choice')}</option><option value="typing">{t('入力式','Typed answer')}</option><option value="writing">{t('手書き','Handwriting')}</option></select></label>
     <label className="pr-select-label">{t('ひらめきの表示頻度','Study reminders')}<select value={s.quizHints} onChange={e=>set('quizHints',e.target.value as typeof s.quizHints)}>
       <option value="turn">{t('毎ターン','Each turn')}</option><option value="battle">{t('各戦闘の最初','Once per battle')}</option><option value="off">{t('通知なし','No reminder')}</option></select></label>
     <label className="pr-select-label">{t('言語','Language')}<select value={s.language??''} onChange={e=>set('language',e.target.value as LanguageMode||undefined)}>
       <option value="">{t('本編と同じ','Use app setting')}</option><option value="JAPANESE">{t('日本語','Japanese')}</option><option value="HIRAGANA">{t('ひらがな','Hiragana')}</option><option value="ENGLISH">English</option></select></label>
-    <label className="pr-check"><input type="checkbox" checked={s.read} onChange={e=>set('read',e.target.checked)}/>{t('問題の読み上げ','Question audio')}</label>
     <button onClick={onLesson}>{t('学年・教科・単元を選ぶ','Choose grade, subject and units')} <ChevronRight size={15}/></button>
   </div>;
 }
-export function Lessons({close,onSelect}:{close:()=>void;onSelect:(mode:GameMode,modes?:string[],answer?:'CHOICE'|'TYPING')=>void}){
+export function Lessons({close,onSelect}:{close:()=>void;onSelect:(mode:GameMode,modes?:string[],answer?:AnswerMode)=>void}){
   const {t,language}=useWords();
+  const counts=storageService.getModeCorrectCounts();
   return <Panel wide heading={t('学習する範囲','Learning units')} subtitle={t('難易度に関係なく、戦闘で得る効果は同じ。','Every difficulty grants the same battle bonus.')} close={close}>
-    <div className="pr-lesson-picker"><ModeSelectionScreen onBack={close} languageMode={language} onSelectMode={(mode,pool,answer)=>onSelect(mode,pool,answer==='CHOICE'?'CHOICE':answer?'TYPING':undefined)}/></div>
+    <div className="pr-lesson-picker"><ModeSelectionScreen onBack={close} languageMode={language} onSelectMode={onSelect} modeCorrectCounts={counts}
+      modeMasteryMap={Object.fromEntries(Object.entries(counts).map(([mode,count])=>[mode,count>=100]))}/></div>
   </Panel>;
 }
 export function SaveSlots({mode,data,onPick,onLoad,onPlus,selected}:{mode:'new'|'load';data:Record<Slot,SlotData[]>;onPick:(slot:Slot)=>void;onLoad:(slot:Slot,save:SlotData)=>void;onPlus:(slot:Slot,save:SlotData)=>void;selected?:Slot}){
@@ -274,7 +277,12 @@ export function ServicePanel({state,service,region,apply,close,onJournal,onStudy
   const h=state.heroes[hero];
   const shopCards=CARD_LIST.filter(c=>!c.id.includes(':')&&!['artifact','remnant','transfigure'].includes(c.id));
   const inn=service==='inn'||service==='tavern';
+  const host=area(state.map).points.find(point=>point.kind==='resident')?.npc;
   return <Panel wide heading={l(SERVICES[service])} subtitle={`${state.gold} G · ${l(REGIONS[region].name)}`} close={close}>
+    {host&&<div className="pr-service-host">
+      {host.portrait&&<div className="pr-dialog-portrait"><TravelerPortrait id={host.portrait} name={l(host.name)} /></div>}
+      <div><b>{l(host.name)}</b><p>{l(host.line)}</p></div>
+    </div>}
     {inn&&<div className="pr-list"><p>{t('食事と休息をとると体力が全快し、ここが再開地点になる。','A meal and a rest restore everyone and set your checkpoint.')}</p><button className="pr-primary" onClick={()=>apply(s=>purchase(s,'inn','',region))}>{t('食事と休息','Eat and rest')}</button></div>}
     {service==='armory'&&<div className="pr-list">{GEAR_LIST.filter(g=>g.place===region||g.place===0).map(g=><button key={g.id} disabled={state.gold<g.price||state.gear.includes(g.id)} onClick={()=>apply(s=>purchase(s,'gear',g.id,region))}>
       <span><b>{l(g.name)}</b><small>{l(SLOTS[g.slot])} · {gearEffects(g,i)}</small></span><span>{state.gear.includes(g.id)?'✓':`${g.price} G`}</span></button>)}</div>}

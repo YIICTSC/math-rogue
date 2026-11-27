@@ -28,7 +28,7 @@ await writeFile(
   const languageMode = new URLSearchParams(location.search).get('jp') ? 'JAPANESE' : 'ENGLISH';
   function Menu() {
     const [screen, select] = React.useState(null);
-    return screen ? <MiniGameRouter screen={screen} problemMode={GameMode.MIXED}
+    return screen ? <MiniGameRouter screen={screen} problemMode={GameMode.ADDITION}
       onBack={() => select(null)} languageMode={languageMode} /> :
       <MiniGameSelectScreen onSelect={select} onBack={() => {}}
         totalMathCorrect={0} mainClearCount={6} isDebug={false} languageMode={languageMode} />;
@@ -268,6 +268,24 @@ try {
   assert.equal(roll.faces.length, 2);
   assert.equal((await slot()).inspiration, 0);
   await click('Town life');
+  await view.getByRole('button', { name: /^Review a lesson/ }).click();
+  const challenge = view.locator('[data-adventure-problem] .main-challenge-screen');
+  await challenge.locator('.basic-challenge-question h3').waitFor();
+  const lessonBoard = challenge.locator('[data-gamepad-initial-scope^="unit-board-"]');
+  if (await lessonBoard.isVisible()) await lessonBoard.locator('button[data-gamepad-back]').first().click();
+  const prompt = await challenge.locator('.basic-challenge-question h3').innerText();
+  const sum = prompt.match(/(\d+)\s*[+＋]\s*(\d+)/u);
+  assert(sum, prompt);
+  assert.equal(await challenge.getByRole('button', { name: 'Listen' }).count(), 0);
+  const progress = () => view.evaluate(async () => {
+    const { storageService } = await import('/src/services/storageService.ts');
+    return storageService.getModeCorrectCounts().ADDITION ?? 0;
+  });
+  const learnedBefore = await progress();
+  await challenge.locator('.basic-challenge-options').getByRole('button', { name: String(Number(sum[1])+Number(sum[2])), exact: true }).click();
+  await challenge.waitFor({ state: 'hidden' });
+  assert.equal(await progress(), learnedBefore + 1, 'Frontier records one shared unit answer');
+  assert((await slot()).inspiration > 0);
   await view.getByRole('button', { name: /^Work a shift/ }).click();
   await view.getByRole('button', { name: /^Work a shift/ }).click();
   await click('Home');

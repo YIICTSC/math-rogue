@@ -23,7 +23,7 @@ import type {
   GameMode,
   LanguageMode,
 } from '../../../types';
-import MiniGameProblemChallenge from '../../../components/MiniGameProblemChallenge';
+import AdventureProblemSheet from '../../shared/AdventureProblemSheet';
 import { audioService } from '../../../services/audioService';
 import {
   AFFIXES,
@@ -682,30 +682,7 @@ export default function AdventurePlay(props: PlayProps) {
         )}
         {fallen ? (
           <FallenJournal s={s} t={t} back={back} />
-        ) : lesson ? (
-          <section className="sa-panel sa-lesson">
-            <button type="button" onClick={() => setLesson(false)}>
-              <ArrowLeft size={16} />
-              {t(['復習をやめる', 'Leave lesson'])}
-            </button>
-            <div className="sa-lesson-board">
-              <MiniGameProblemChallenge
-                mode={mode}
-                modePool={modePool}
-                answerMode={answerMode}
-                assignment={assignment}
-                languageMode={language}
-                onAnswerResult={onAnswerResult}
-                onComplete={(correct) => {
-                  send({ type: 'lesson', correct });
-                  setLesson(false);
-                }}
-                isChallenge
-                rewardHint={t(['正解でひらめきを獲得', 'Correct answers grant Inspiration'])}
-              />
-            </div>
-          </section>
-        ) : delving ? (
+        ) : lesson ? null : delving ? (
           <DelveView
             state={ending ?? s}
             cue={battleCue}
@@ -772,6 +749,22 @@ export default function AdventurePlay(props: PlayProps) {
           </div>
         )}
       </div>
+      {!fallen && lesson && <AdventureProblemSheet
+        heading={t(['復習', 'Study', 'ふくしゅう'])}
+        onClose={() => setLesson(false)}
+        mode={mode}
+        modePool={modePool}
+        answerMode={answerMode}
+        assignment={assignment}
+        languageMode={language}
+        onAnswerResult={onAnswerResult}
+        onComplete={(correct) => {
+          send({ type: 'lesson', correct });
+          setLesson(false);
+        }}
+        isChallenge
+        rewardHint={t(['正解でひらめきを獲得', 'Correct answers grant Inspiration'])}
+      />}
       {!fallen && !lesson && latest && (
         <footer className="sa-feed">
           <p role="status">{t(latest.text)}</p>

@@ -1,6 +1,6 @@
 import { recordMiniGameUnitProgress } from '../services/miniGameUnitProgress';
 import React from 'react';
-import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, GameScreen, LanguageMode } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, AssignmentReviewProblem, GameMode, GameScreen, LanguageMode } from '../types';
 import { getChallengeScreenForMode } from '../subjectConfig';
 import { MathChallengeScreen, KanjiChallengeScreen, EnglishChallengeScreen, GeneralChallengeScreen } from './DeferredChallengeScreens';
 import { storageService } from '../services/storageService';
@@ -22,6 +22,7 @@ interface MiniGameProblemChallengeProps {
   assignment?: AssignmentPayload | null;
   onAnswerResult?: (result: AssignmentAnswerResult) => void;
   problemOffset?: number;
+  reviewProblem?: AssignmentReviewProblem;
 }
 
 const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
@@ -36,6 +37,7 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
   assignment: assignmentOverride,
   onAnswerResult,
   problemOffset = 0,
+  reviewProblem,
 }) => {
   const assignmentCandidate = assignmentOverride ?? storageService.getCurrentAssignment();
   const assignmentSignature = assignmentCandidate
@@ -61,7 +63,7 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
     [assignment],
   );
   const assignmentHasCustomProblems = assignment?.gameMode === 'FREE' && assignment.customProblems.length > 0;
-  const effectiveMode = assignmentHasCustomProblems
+  const effectiveMode = reviewProblem ? reviewProblem.mode as GameMode : assignmentHasCustomProblems
     ? GameMode.UPPER_TRIVIA
     : assignmentModePoolForPlay && assignmentModePoolForPlay.length > 0
       ? getAssignmentRepresentativeMode(assignment!)
@@ -104,11 +106,11 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
   };
 
   if (challengeScreen === GameScreen.KANJI_CHALLENGE) {
-    return <KanjiChallengeScreen mode={effectiveMode} answerMode={effectiveAnswerMode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} languageMode={languageMode} onAnswerResult={handleAnswerResult} assignmentUnits={assignment?.units} />;
+    return <KanjiChallengeScreen mode={effectiveMode} answerMode={effectiveAnswerMode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} languageMode={languageMode} onAnswerResult={handleAnswerResult} assignmentUnits={assignment?.units} reviewProblem={reviewProblem} />;
   }
 
   if (challengeScreen === GameScreen.ENGLISH_CHALLENGE) {
-    return <EnglishChallengeScreen mode={effectiveMode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} languageMode={languageMode} onAnswerResult={handleAnswerResult} assignmentUnits={assignment?.units} />;
+    return <EnglishChallengeScreen mode={effectiveMode} answerMode={effectiveAnswerMode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} languageMode={languageMode} onAnswerResult={handleAnswerResult} assignmentUnits={assignment?.units} reviewProblem={reviewProblem} />;
   }
 
   if (challengeScreen === GameScreen.GENERAL_CHALLENGE) {
@@ -126,11 +128,12 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
         customProblems={effectiveCustomProblems}
         problemOffset={problemOffset}
         assignmentUnits={assignment?.units}
+        reviewProblem={reviewProblem}
       />
     );
   }
 
-  return <MathChallengeScreen mode={effectiveMode} answerMode={effectiveAnswerMode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} languageMode={languageMode} onAnswerResult={handleAnswerResult} assignmentUnits={assignment?.units} />;
+  return <MathChallengeScreen mode={effectiveMode} answerMode={effectiveAnswerMode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} languageMode={languageMode} onAnswerResult={handleAnswerResult} assignmentUnits={assignment?.units} reviewProblem={reviewProblem} />;
 };
 
 export default MiniGameProblemChallenge;

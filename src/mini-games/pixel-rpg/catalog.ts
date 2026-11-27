@@ -171,7 +171,7 @@ export const PASSIVES: Record<Passive, Copy> = {
   precision:['氷の秩序：氷の威力＋3','Icy Order: ice power +3'], riposte:['迎撃：自分の防御が削られるたびに反撃','Riposte: counter when block is hit'],
 };
 
-export type Hero = Identity & { id: string; name: Copy; origin: WorldOfOrigin; portrait: string; maxHp: number; signature: Technique; limit: Technique; originalVoice?: string };
+export type Hero = Identity & { id: string; name: Copy; origin: WorldOfOrigin; portrait: string; maxHp: number; signature: Technique; limit: Technique };
 const SCHOOL_SPECIALS: Record<string, readonly [string, string]> = {
   warrior:['HS_STARTER_EDGE','Penblade'], caretaker:['HS_STARTER_STEP','Step In'], assassin:['HS_STARTER_FAINT','Feint Report'],
   dodgeball:['HS_STARTER_THROW','Side Throw'], bard:['HS_STARTER_RESONANCE','Resonant Tuning'], librarian:['HS_STARTER_PREP','Forbidden Bookmark'],
@@ -234,7 +234,7 @@ for(const [index,entry] of ABYSS_HEROES.entries()){
   const limit=tech(`limit:${entry.id}`,[entry.transformedTitle,entry.skills[2].en],support?'party':'foes',
     support?{heal:15,cleanse:true,block:6}:{damage:21,pierce:true},element,0);
   HERO_LIST.push({id:entry.id,name:[entry.name,entry.en],en:entry.en,origin:'guest',color:entry.color,hairColor,hair,token,job,passive,
-    maxHp:support?39:37,portrait:entry.portrait,originalVoice:entry.voice.replace(/^magic-/,''),signature,limit,
+    maxHp:support?39:37,portrait:entry.portrait,signature,limit,
     voice:[profile?.open[0]??entry.role,profile?.open[1]??entry.englishRole],side:[profile?.resolve[0]??entry.role,profile?.resolve[1]??entry.englishRole]});
 }
 const OTHER_TRAVELERS = [

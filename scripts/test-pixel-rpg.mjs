@@ -13,6 +13,9 @@ try{
       export * from './src/mini-games/pixel-rpg/adventure';
       export * from './src/mini-games/pixel-rpg/battle';
       export { BATTLE_ACTIONS, actionFrame, battleActionForActor } from './src/mini-games/pixel-rpg/battleActionArt';
+      export { resolveBattleVoice } from './src/mini-games/pixel-rpg/battleVoice';
+      export { guestSpriteUrl } from './src/mini-games/pixel-rpg/guestArt';
+      export { TOWN_SHOPS } from './src/mini-games/pixel-rpg/towns';
       export * from './src/mini-games/pixel-rpg/campaign';
       export * from './src/mini-games/pixel-rpg/catalog';
       export * from './src/mini-games/pixel-rpg/save';
@@ -29,6 +32,37 @@ try{
   assert.equal(m.JOB_LIST.length,26);
   assert.equal(m.HERO_LIST.length,53);
   assert(m.PROTAGONISTS.concat(m.ABYSS_HEROES).every(hero=>m.HEROES[hero.id]));
+  const actorVoice=m.resolveBattleVoice('dungeons2-lyria','attack',()=>0);
+  assert.deepEqual(actorVoice,{theme:'dungeons2',id:'lyria',file:'attack'});
+  const voices=m.HERO_LIST.map(hero=>m.resolveBattleVoice(hero.id,'attack',()=>0));
+  assert(voices.every(Boolean),'All 53 travelers have their own attack voice assigned');
+  assert.equal(new Set(voices.map(voice=>`${voice.theme}:${voice.id}`)).size,53);
+  const guests=m.HERO_LIST.filter(hero=>m.guestSpriteUrl(hero.id));
+  assert.equal(guests.length,9);
+  for(const {id} of guests)assert((await stat(`public/sprites/pixel-rpg/guests/${id}.webp`)).size>0);
+  const names=new Set(), lines=new Set();
+  const roaming=m.newAdventure('magic-akari',31);
+  m.REGIONS.forEach((region,r)=>region.sites.forEach((site,s)=>{
+    if(site.type!=='town')return;
+    const base=m.mapId(r,s);
+    for(const map of [base,...m.TOWN_SHOPS.map(service=>`${base}/${service}`)]){
+      const landmark=m.area(map).points.find(point=>point.kind==='resident');
+      assert(landmark?.npc,`${map} must have its own resident`);
+      const dialogue=m.interact({...roaming,map},landmark).effect;
+      assert.equal(dialogue?.type,'dialog');
+      assert.deepEqual(dialogue.scenes[0].speaker,landmark.label);
+      names.add(landmark.label[0]);lines.add(dialogue.scenes[0].line[0]);
+    }
+  }));
+  assert.equal(names.size,88);assert.equal(lines.size,88);
+  const targetBattle=m.createBattle(roaming,{region:3,variant:2});
+  const first=targetBattle.enemies[0],second=targetBattle.enemies[1]??{...first,id:'other'};
+  if(targetBattle.enemies.length===1)targetBattle.enemies.push(second);
+  assert.equal(m.cursorTarget(targetBattle,roaming.leader,'foe',second.id),second.id);
+  assert.equal(m.cursorTarget(targetBattle,roaming.leader,'self',second.id),roaming.leader);
+  second.hp=0;
+  assert.equal(m.cursorTarget(targetBattle,roaming.leader,'foe',second.id),first.id);
+  console.log('PASS 53 distinct voice identities, nine guest sprites, 88 local residents, and cursor targeting');
   const action=(art,from='hero',to='foe',element='steel',value)=>({id:1,art,from,to,element,value});
   assert.equal(m.battleActionForActor([action('blade')],'hero'),'attack');
   assert.equal(m.battleActionForActor([action('critical','hero','foe','fire')],'hero'),'skill');
