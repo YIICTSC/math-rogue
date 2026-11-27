@@ -12,6 +12,7 @@ try{
     stdin:{contents:`
       export * from './src/mini-games/pixel-rpg/adventure';
       export * from './src/mini-games/pixel-rpg/battle';
+      export { BATTLE_ACTIONS, actionFrame, battleActionForActor } from './src/mini-games/pixel-rpg/battleActionArt';
       export * from './src/mini-games/pixel-rpg/campaign';
       export * from './src/mini-games/pixel-rpg/catalog';
       export * from './src/mini-games/pixel-rpg/save';
@@ -28,13 +29,28 @@ try{
   assert.equal(m.JOB_LIST.length,26);
   assert.equal(m.HERO_LIST.length,53);
   assert(m.PROTAGONISTS.concat(m.ABYSS_HEROES).every(hero=>m.HEROES[hero.id]));
+  const action=(art,from='hero',to='foe',element='steel',value)=>({id:1,art,from,to,element,value});
+  assert.equal(m.battleActionForActor([action('blade')],'hero'),'attack');
+  assert.equal(m.battleActionForActor([action('critical','hero','foe','fire')],'hero'),'skill');
+  assert.equal(m.battleActionForActor([action('gesture','hero','hero')],'hero'),'skill');
+  assert.equal(m.battleActionForActor([action('status','foe','hero','dark',4)],'hero'),'damage');
+  assert.equal(m.battleActionForActor([action('hit','foe','hero','steel',8)],'hero'),'damage');
+  assert.equal(m.battleActionForActor([action('status','foe','hero','dark')],'hero'),undefined);
+  assert.equal(m.battleActionForActor([],'hero',true),'skill');
   for(const hero of m.HERO_LIST){
     const original=m.newAdventure(hero.id,31);
     assert(m.validAdventure(original));
     assert.equal(original.heroes[hero.id].deck.length,10);
     assert(original.heroes[hero.id].deck.some(c=>c.key===hero.signature.id));
     assert(m.createBattle(original,{region:0,variant:0}).party[0].hand.length>=3);
+    const frames=m.JOB_LIST.flatMap(job=>m.BATTLE_ACTIONS.map(art=>{
+      const frame=m.actionFrame(hero.id,job.id,art);
+      assert(Number.isInteger(frame),`${hero.id}/${job.id} missing ${art}`);
+      return frame;
+    }));
+    assert.equal(new Set(frames).size,frames.length,`${hero.id} reuses an action frame`);
   }
+  console.log('PASS physical/skill/damage selection and distinct battle frames for all 53 heroes across 26 jobs');
   console.log('PASS 53 named protagonists, individual signatures, 26 jobs, and 10-card starter builds');
 
   const directions=Object.keys(m.OFFSETS);

@@ -4,8 +4,7 @@ import { COMBOS, HEROES, ITEMS, JOBS, type ItemId, type Target, type Technique }
 import { REGIONS } from './campaign';
 import { LIMIT_MAX, LINK_MAX, availableCombos, battleItem, canPlay, describeIntent, elementLabel, endTurn, explain, fighter, flee, inspect, living, orderOf, playCard, useCombo, useLimit, type Battle, type Fighter, type ResolvedCard } from './battle';
 import { BattleCanvas, Meter, Panel, positionStyle, useWords } from './presentation';
-import { type Animation } from './art';
-import { assetUrl } from '../../utils/assetPaths';
+import { illustration, type Animation } from './art';
 import { getMagicCardArtUrl } from '../../utils/cardArtPaths';
 import { getCardIllustrationPaths } from '../../utils/cardIllustration';
 import type { Settings } from './adventure';
@@ -99,7 +98,7 @@ export default function BattleScreen({battle,actor,setActor,onCommand,onStudy,on
         <b>{l(HEROES[p.id].name)}</b><Meter value={p.hp} max={p.max} /><div>{showPoints(p)}</div>
       </button>)}
       {animation?.actors.length&&!settings.reduceFx&&<div className="pr-cut" aria-hidden="true">
-        {animation.actors.map(id=>HEROES[id].portrait&&<img key={id} src={assetUrl(HEROES[id].portrait)} alt="" />)}
+        {animation.actors.map(id=>{const member=orderOf(battle,id);return member&&<img key={id} src={illustration(id,member.hero.job,'limit')} alt="" />;})}
       </div>}
       {battle.outcome&&<div className="pr-outcome" role="status">
         <small>{battle.outcome==='win'?'VICTORY':battle.outcome==='loss'?'DEFEAT':'RETREAT'}</small>

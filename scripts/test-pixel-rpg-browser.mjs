@@ -140,6 +140,33 @@ try {
   for(const direction of moves)await key(direction);
   await page.locator('.pr-combat').waitFor();
   await finishDialog();
+  const actionSources=await page.evaluate(async state=>{
+    const {battleFrame}=await import('/src/mini-games/pixel-rpg/art.ts');
+    const {createBattle}=await import('/src/mini-games/pixel-rpg/battle.ts');
+    const {preloadBattleActionArt}=await import('/src/mini-games/pixel-rpg/battleActionArt.ts');
+    const battle=createBattle(state,{region:0,variant:0});
+    const actor='magic-akari',enemy=battle.enemies[0].id;
+    const atlas=preloadBattleActionArt(actor);
+    await atlas.decode();
+    const canvas=document.createElement('canvas');canvas.width=600;canvas.height=250;
+    const cx=canvas.getContext('2d'),draw=cx.drawImage.bind(cx);
+    let rect;
+    cx.drawImage=(source,...args)=>{
+      if(source===atlas&&args.length===8)rect=args.slice(0,4);
+      draw(source,...args);
+    };
+    return [
+      {art:'blade',from:actor,to:enemy},
+      {art:'gesture',from:actor,to:actor},
+      {art:'hit',from:enemy,to:actor,value:4},
+    ].map(pulse=>{
+      rect=undefined;
+      battleFrame(cx,battle,canvas.width,canvas.height,200,{at:0,duration:340,actors:[],pulses:[{id:1,element:'steel',...pulse}]});
+      return rect;
+    });
+  },saved.state);
+  assert(actionSources.every(rect=>rect?.[2]===64&&rect[3]===64),'Each battle action draws a decoded generated sprite');
+  assert.equal(new Set(actionSources.map(rect=>rect.join(','))).size,3,'Attack, skill and damage use different crops in Akari’s Guardian outfit');
   await layout('.pr-arena');await layout('.pr-endturn');
   await shot('06-battle-phone');
   await page.setViewportSize({width:844,height:390});await layout('.pr-arena');await layout('.pr-endturn');await shot('07-battle-landscape');

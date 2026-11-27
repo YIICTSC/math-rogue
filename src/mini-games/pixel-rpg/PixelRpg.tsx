@@ -7,7 +7,7 @@ import { audioService } from '../../services/audioService';
 import { assetUrl } from '../../utils/assetPaths';
 import type { KartQuestion } from '../gakuro-kart/learning';
 import { GROUPS, applyStudy, climate, completeBattle, currentLandmark, currentRegion, escape, interact, introScenes, maxHp, mount, newAdventure, recover, step, type Adventure, type Change, type Encounter, type Scene } from './adventure';
-import { illustration, type Animation } from './art';
+import { heroSelectionIllustration, illustration, type Animation } from './art';
 import { createBattle, fighter, studyBonus, victory, type Battle } from './battle';
 import BattleScreen from './BattleScreen';
 import { HEROES, HERO_LIST, JOBS, PASSIVES, type WorldOfOrigin } from './catalog';
@@ -40,12 +40,12 @@ function HeroChoice({selected,onSelect}:{selected:string;onSelect:(id:string)=>v
   const hero=HEROES[selected];
   return <div className="pr-hero-select">
     <div className="pr-hero-feature">
-      <div>{hero.portrait.startsWith('sprites/')?<img src={assetUrl(hero.portrait)} alt="" />:<img className="pr-feature-pixel" src={illustration(hero.id,hero.job,'joy')} alt="" />}</div>
+      <div><img className="pr-feature-pixel" src={heroSelectionIllustration(hero.id)} alt="" /></div>
       <section><span>{l(GROUPS[hero.origin])}</span><h3>{l(hero.name)}</h3><strong>{l(JOBS[hero.job].name)}</strong><p>{l(PASSIVES[hero.passive])}</p><p>{l(hero.voice)}</p></section>
     </div>
     <nav className="pr-tabs" aria-label={t('出身編','School worlds')}>{(Object.keys(GROUPS) as WorldOfOrigin[]).map(g=><button key={g} aria-pressed={group===g} onClick={()=>setGroup(g)}>{l(GROUPS[g])}</button>)}</nav>
     <div className="pr-hero-grid">{HERO_LIST.filter(h=>h.origin===group).map(h=><button key={h.id} aria-pressed={selected===h.id} onClick={()=>onSelect(h.id)}>
-      <img src={illustration(h.id,h.job)} alt="" /><span>{l(h.name)}</span></button>)}</div>
+      <img src={heroSelectionIllustration(h.id)} alt="" /><span>{l(h.name)}</span></button>)}</div>
   </div>;
 }
 function FieldView({state,dash,setDash,move,hold,stop,activate,open,travel,message,covered}:{
@@ -273,7 +273,7 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
     if(next.outcome==='loss'){audioService.playSound('lose');return;}
     if(!next.pulses.length){audioService.playSound('select');return;}
     const art=next.pulses[0].art;
-    audioService.playSound(art==='hit'?'damage':art==='block'?'block':art==='heal'?'buff':art==='phase'||art==='summon'?'finisher_explosion':'attack');
+    audioService.playSound(art==='hit'?'damage':art==='block'?'block':art==='heal'?'buff':art==='phase'||art==='summon'?'finisher_explosion':art==='gesture'?'select':'attack');
     if(voiceId&&(next.comboActors?.length||(next.party.find(p=>p.id===voiceId)?.played===1&&next.turn===1))){
       const h=HEROES[voiceId], id=(h.originalVoice??h.id.slice(h.origin.length+1)).toUpperCase();
       if(h.origin==='magic'||h.originalVoice)void audioService.playMagicVoice(id,art==='blade'?'attack':'spell');
@@ -447,7 +447,7 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
       <div className={`pr-story ${overlay.ending?'pr-story-ending':''}`}>
         {overlay.scenes[overlay.index].hero&&(()=>{
           const id=overlay.scenes[overlay.index].hero!,h=HEROES[id];
-          const image=h.portrait.startsWith('sprites/')?assetUrl(h.portrait):illustration(id,state.heroes[id]?.job??h.job,'joy');
+          const image=illustration(id,state.heroes[id]?.job??h.job,'joy');
           return <img src={image} alt="" />;
         })()}
         <p>{l(overlay.scenes[overlay.index].line)}</p>

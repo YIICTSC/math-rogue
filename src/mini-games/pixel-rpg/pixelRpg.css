@@ -274,7 +274,7 @@
 .pr-story { min-height: min(180px,28vh); display: grid; grid-template-columns: minmax(0,1fr); align-items: center; background: linear-gradient(115deg,#364a474d,#1b2d3673); border-left: 2px solid #a69268; padding: clamp(12px,3vw,27px); }
 .pr-story:has(img) { grid-template-columns: minmax(60px,1fr) 3fr; gap: min(4vw,30px); }
 .pr-story img { width: 100%; max-height: min(30vh,190px); object-fit: contain; }
-.pr-story img[src^="data:"] { image-rendering: pixelated; }
+.pr-story img { image-rendering: pixelated; }
 .pr-story p { font: 675 clamp(15px,2.4vw,21px)/1.8 var(--pr-serif); max-width: 35em; padding: 4px; }
 .pr-story-ending { background: linear-gradient(115deg,#45515e,#795b4b99); }
 .pr-select-label { display: flex; flex-wrap: wrap; gap: 5px 8px; align-items: center; border: 1px solid #677970; padding: 5px 8px; border-radius: 4px; }
@@ -374,3 +374,6 @@
   .pr-title h1 { font-size: 34px; }
 }
 @media (prefers-reduced-motion: reduce) { .pr-cut { animation: none; } }
+
+.pixel-rpg .pr-cut img { image-rendering: pixelated; }
+.pr-hero-grid button img,.pr-job-preview,.pr-person img { object-fit: contain; }

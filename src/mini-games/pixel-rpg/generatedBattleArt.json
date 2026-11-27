@@ -1,0 +1,7162 @@
+{
+  "frameWidth": 64,
+  "frameHeight": 64,
+  "columns": 8,
+  "actors": {
+    "elementary-warrior": {
+      "file": "0.webp",
+      "costumes": {
+        "adventurer": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "swordsman": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "guardian": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "monk": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "mage": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "elementary-caretaker": {
+      "file": "1.webp",
+      "costumes": {
+        "guardian": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "monk": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "mage": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "elementary-assassin": {
+      "file": "2.webp",
+      "costumes": {
+        "scout": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "medic": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "archer": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "elementary-dodgeball": {
+      "file": "3.webp",
+      "costumes": {
+        "monk": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "mage": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "elementary-bard": {
+      "file": "4.webp",
+      "costumes": {
+        "archer": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "medic": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "elementary-librarian": {
+      "file": "5.webp",
+      "costumes": {
+        "scholar": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "medic": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "archer": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scout": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "elementary-chef": {
+      "file": "6.webp",
+      "costumes": {
+        "medic": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "elementary-gardener": {
+      "file": "7.webp",
+      "costumes": {
+        "medic": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "elementary-mage": {
+      "file": "8.webp",
+      "costumes": {
+        "mage": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "high-school-warrior": {
+      "file": "9.webp",
+      "costumes": {
+        "swordsman": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "guardian": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "monk": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "mage": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "high-school-caretaker": {
+      "file": "10.webp",
+      "costumes": {
+        "guardian": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "monk": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "mage": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "high-school-assassin": {
+      "file": "11.webp",
+      "costumes": {
+        "scout": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "medic": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "archer": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "high-school-mage": {
+      "file": "12.webp",
+      "costumes": {
+        "alchemist": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "medic": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "archer": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scout": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "scholar": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "high-school-dodgeball": {
+      "file": "13.webp",
+      "costumes": {
+        "monk": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "mage": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "high-school-bard": {
+      "file": "14.webp",
+      "costumes": {
+        "archer": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "medic": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "high-school-librarian": {
+      "file": "15.webp",
+      "costumes": {
+        "scholar": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "medic": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "archer": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scout": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "high-school-chef": {
+      "file": "16.webp",
+      "costumes": {
+        "medic": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "high-school-gardener": {
+      "file": "17.webp",
+      "costumes": {
+        "medic": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "magic-shizuku": {
+      "file": "19.webp",
+      "costumes": {
+        "guardian": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "monk": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "mage": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "magic-hiyori": {
+      "file": "20.webp",
+      "costumes": {
+        "medic": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "magic-tsubasa": {
+      "file": "21.webp",
+      "costumes": {
+        "monk": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "mage": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "magic-rei": {
+      "file": "22.webp",
+      "costumes": {
+        "mage": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "magic-madoka": {
+      "file": "23.webp",
+      "costumes": {
+        "alchemist": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "medic": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "archer": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scout": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "scholar": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "magic-koharu": {
+      "file": "24.webp",
+      "costumes": {
+        "archer": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "medic": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "magic-mirai": {
+      "file": "25.webp",
+      "costumes": {
+        "scout": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "medic": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "archer": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "magic-sera": {
+      "file": "26.webp",
+      "costumes": {
+        "scholar": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "medic": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "archer": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scout": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "magic-ren": {
+      "file": "27.webp",
+      "costumes": {
+        "guardian": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "monk": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "mage": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "magic-soma": {
+      "file": "28.webp",
+      "costumes": {
+        "swordsman": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "guardian": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "monk": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "mage": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "magic-minato": {
+      "file": "29.webp",
+      "costumes": {
+        "medic": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "magic-riku": {
+      "file": "30.webp",
+      "costumes": {
+        "scholar": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "medic": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "archer": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scout": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "magic-yamato": {
+      "file": "31.webp",
+      "costumes": {
+        "monk": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "mage": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "magic-leon": {
+      "file": "32.webp",
+      "costumes": {
+        "mage": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "magic-elliot": {
+      "file": "33.webp",
+      "costumes": {
+        "mage": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "magic-sakuya": {
+      "file": "34.webp",
+      "costumes": {
+        "scout": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "medic": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "archer": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "dungeons2-lyria": {
+      "file": "35.webp",
+      "costumes": {
+        "swordsman": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "guardian": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "monk": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "mage": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "dungeons2-celis": {
+      "file": "36.webp",
+      "costumes": {
+        "mage": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "dungeons2-flora": {
+      "file": "37.webp",
+      "costumes": {
+        "archer": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "medic": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "dungeons2-noctia": {
+      "file": "38.webp",
+      "costumes": {
+        "mage": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "dungeons2-aurene": {
+      "file": "39.webp",
+      "costumes": {
+        "medic": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "dungeons2-ignis": {
+      "file": "40.webp",
+      "costumes": {
+        "monk": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "mage": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "dungeons2-leon": {
+      "file": "41.webp",
+      "costumes": {
+        "guardian": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "monk": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "mage": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "dungeons2-orion": {
+      "file": "42.webp",
+      "costumes": {
+        "swordsman": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "guardian": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "monk": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "mage": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "dungeons2-leif": {
+      "file": "43.webp",
+      "costumes": {
+        "archer": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "medic": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "aster": {
+      "file": "44.webp",
+      "costumes": {
+        "swordsman": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "guardian": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "monk": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "mage": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "lyra": {
+      "file": "45.webp",
+      "costumes": {
+        "swordsman": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "guardian": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "monk": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "mage": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "nagi": {
+      "file": "46.webp",
+      "costumes": {
+        "archer": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "medic": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "mio": {
+      "file": "47.webp",
+      "costumes": {
+        "archer": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "medic": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "sena": {
+      "file": "48.webp",
+      "costumes": {
+        "alchemist": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "medic": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "archer": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scout": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "scholar": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "end-vesper": {
+      "file": "49.webp",
+      "costumes": {
+        "guardian": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "monk": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "mage": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "end-sable": {
+      "file": "50.webp",
+      "costumes": {
+        "archer": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "medic": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "end-hikari": {
+      "file": "51.webp",
+      "costumes": {
+        "mage": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "end-ren": {
+      "file": "52.webp",
+      "costumes": {
+        "medic": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "adventurer": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "swordsman": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "guardian": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "monk": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "mage": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    },
+    "magic-akari": {
+      "file": "18.webp",
+      "costumes": {
+        "adventurer": {
+          "attack": 0,
+          "skill": 1,
+          "damage": 2
+        },
+        "swordsman": {
+          "attack": 3,
+          "skill": 4,
+          "damage": 5
+        },
+        "guardian": {
+          "attack": 6,
+          "skill": 7,
+          "damage": 8
+        },
+        "monk": {
+          "attack": 9,
+          "skill": 10,
+          "damage": 11
+        },
+        "mage": {
+          "attack": 12,
+          "skill": 13,
+          "damage": 14
+        },
+        "medic": {
+          "attack": 15,
+          "skill": 16,
+          "damage": 17
+        },
+        "archer": {
+          "attack": 18,
+          "skill": 19,
+          "damage": 20
+        },
+        "scout": {
+          "attack": 21,
+          "skill": 22,
+          "damage": 23
+        },
+        "scholar": {
+          "attack": 24,
+          "skill": 25,
+          "damage": 26
+        },
+        "alchemist": {
+          "attack": 27,
+          "skill": 28,
+          "damage": 29
+        },
+        "spellblade": {
+          "attack": 30,
+          "skill": 31,
+          "damage": 32
+        },
+        "spirit": {
+          "attack": 33,
+          "skill": 34,
+          "damage": 35
+        },
+        "chronist": {
+          "attack": 36,
+          "skill": 37,
+          "damage": 38
+        },
+        "tactician": {
+          "attack": 39,
+          "skill": 40,
+          "damage": 41
+        },
+        "cantor": {
+          "attack": 42,
+          "skill": 43,
+          "damage": 44
+        },
+        "beast": {
+          "attack": 45,
+          "skill": 46,
+          "damage": 47
+        },
+        "summoner": {
+          "attack": 48,
+          "skill": 49,
+          "damage": 50
+        },
+        "runes": {
+          "attack": 51,
+          "skill": 52,
+          "damage": 53
+        },
+        "astral": {
+          "attack": 54,
+          "skill": 55,
+          "damage": 56
+        },
+        "sage": {
+          "attack": 57,
+          "skill": 58,
+          "damage": 59
+        },
+        "phantom": {
+          "attack": 60,
+          "skill": 61,
+          "damage": 62
+        },
+        "skymage": {
+          "attack": 63,
+          "skill": 64,
+          "damage": 65
+        },
+        "drake": {
+          "attack": 66,
+          "skill": 67,
+          "damage": 68
+        },
+        "omni": {
+          "attack": 69,
+          "skill": 70,
+          "damage": 71
+        },
+        "cardmaster": {
+          "attack": 72,
+          "skill": 73,
+          "damage": 74
+        },
+        "seeker": {
+          "attack": 75,
+          "skill": 76,
+          "damage": 77
+        }
+      }
+    }
+  }
+}

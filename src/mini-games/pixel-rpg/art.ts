@@ -1,3 +1,6 @@
+import { battleActionForActor, drawBattleActor } from './battleActionArt';
+import generatedArt from './generatedHeroArt.json';
+import { drawJobPixels, jobPixelColors } from './jobPixelArt';
 import { assetUrl } from '../../utils/assetPaths';
 import { HEROES, JOBS, ELEMENT_COLOR, type Hero, type Job } from './catalog';
 import { type Climate } from './campaign';
@@ -206,7 +209,7 @@ const spriteCache=new Map<string,HTMLCanvasElement>();
 function pixelHero(hero:Hero,job:Job,dir:Direction,pose:Pose,frame:number){
   const key=`${hero.id}:${job.id}:${dir}:${pose}:${frame}`;
   const old=spriteCache.get(key);if(old)return old;
-  const c=screen(38,48),[coat,gold]=job.color;
+  const c=screen(38,48),[coat,gold]=jobPixelColors(job.id);
   const hair=hero.hairColor,lights=mix(hair,'#e2c7a7',.23),darker=mix(hair,INK,.38);
   const skin=hero.origin==='elementary'?'#ebbf96':'#e8bca3',shadow='#b38377';
   const left=dir==='left',side=left||dir==='right',back=dir==='up',right=dir==='right';
@@ -219,7 +222,7 @@ function pixelHero(hero:Hero,job:Job,dir:Direction,pose:Pose,frame:number){
   if(pose==='fallen'){c.translate(34,42);c.rotate(-Math.PI/2);c.translate(-18,-33);}
   if(pose==='hit') c.translate(frame%2?1:-1,0);
   const bob=lowered?3:swinging&&frame%2===1?-1:high&&frame%2===1?-2:0;
-  const child=hero.origin==='elementary'?2:0;
+  const child=hero.origin==='elementary'?1:0;
   const y=bob+child+(pose==='dash'?1:0),ox=forward?frame:0;
   const shirt=mix(coat,hero.color,.12),bright=mix(shirt,gold,.36),dark=mix(shirt,INK,.4);
   const pants=job.outfit==='robe'||hero.hair==='wave'?dark:'#343047';
@@ -249,6 +252,7 @@ function pixelHero(hero:Hero,job:Job,dir:Direction,pose:Pose,frame:number){
     const ya=24+y+gesture+(swinging?sideArm*step:0);
     box(c,INK,xa-2,ya,4,8);box(c,bright,xa-1,ya,2,5);box(c,skin,xa-1,ya+5,2,2);
   }
+  drawJobPixels(c,job.id,27+ox,y,center,back,forward||pose==='cast'||pose==='guard');
   const hx=center+(side?1:0);
   if(['long','braid','pony','wave'].includes(hero.hair)){
     const width=hero.hair==='pony'?4:5;
@@ -270,10 +274,12 @@ function pixelHero(hero:Hero,job:Job,dir:Direction,pose:Pose,frame:number){
   }else{
     const sleepy=pose==='sad'||pose==='weak'||pose==='win'&&frame%2===1;
     const eye=pose==='surprise'?3:sleepy?1:2;
-    box(c,INK,hx+(side?3:-4),12+y,1,eye);
-    if(!side)box(c,INK,hx+3,12+y,1,eye);
+    box(c,'#fff5db',hx+(side?2:-5),12+y,3,2);
+    box(c,INK,hx+(side?4:-3),12+y,1,eye);
+    if(!side){box(c,'#fff5db',hx+1,12+y,3,2);box(c,INK,hx+2,12+y,1,eye);}
     box(c,pose==='surprise'?'#846079':'#9f7069',hx+(side?4:0),16+y,2,1);
   }
+  drawJobPixels(c,job.id,0,y,hx,back,false,true);
   if(hero.hair==='buns'){
     ellipse(c,INK,hx-8,5+y,3,3);ellipse(c,INK,hx+8,5+y,3,3);
     ellipse(c,lights,hx-8,4+y,2,2);ellipse(c,lights,hx+8,4+y,2,2);
@@ -308,7 +314,26 @@ export function heroSprite(c:Canvas,id:string,job:string,x:number,y:number,direc
   c.drawImage(image,Math.round(x-19*scale),Math.round(y-45*scale),Math.ceil(38*scale),Math.ceil(48*scale));
 }
 const thumbnails=new Map<string,string>();
+const generatedBaseArt=new Map(Object.entries(generatedArt.base));
+const generatedJobFolders=new Map(Object.entries(generatedArt.jobs));
+const jobArtIndex=new Map(generatedArt.jobOrder.map((id,index)=>[id,index]));
+
+export function heroSelectionIllustration(id:string){
+  const index=generatedBaseArt.get(id);
+  return index!==undefined
+    ? assetUrl(`sprites/pixel-rpg/heroes/base/${index}.webp`)
+    : proceduralIllustration(id,HEROES[id].job,'joy');
+}
 export function illustration(id:string,job:string,pose:Pose='idle'){
+  if(pose==='idle'||pose==='joy'||pose==='limit'){
+    const jobIndex=jobArtIndex.get(job),heroFolder=generatedJobFolders.get(id);
+    if(jobIndex!==undefined&&heroFolder!==undefined)return assetUrl(`sprites/pixel-rpg/heroes/jobs/${heroFolder}/${jobIndex}.webp`);
+    if(generatedBaseArt.has(id)&&HEROES[id].job===job)return heroSelectionIllustration(id);
+  }
+  return proceduralIllustration(id,job,pose);
+}
+
+export function proceduralIllustration(id:string,job:string,pose:Pose='idle'){
   const key=`${id}:${job}:${pose}`, cached=thumbnails.get(key);
   if(cached)return cached;
   const image=pixelHero(HEROES[id],JOBS[job],'down',pose,1).toDataURL();
@@ -508,6 +533,7 @@ function battleBackdrop(climate:Climate){
   return image;
 }
 function fx(c:Canvas,p:Pulse,pos:Point,from:Point|undefined,t:number){
+  if(p.art==='gesture')return;
   const color=ELEMENT_COLOR[p.element],white=mix(color,'#ffffff',.72),a=1-t;
   const size= Math.floor((1+Math.sin(Math.PI*t))*10);
   c.globalAlpha=Math.max(.1,a);
@@ -597,11 +623,13 @@ export function battleFrame(c:Canvas,b:Battle,width:number,height:number,now:num
     const p0=arenaPosition('party',i,compact), x=p0.x*width,y=p0.y*height-5;
     const acting=livePulse.find(a=>a.from===unit.id), hit=livePulse.find(a=>a.to===unit.id);
     const cut=anim?.actors.includes(unit.id)&&time<1;
+    const action=battleActionForActor(livePulse,unit.id,cut);
     const pose:Pose=!unit.hp?'fallen':b.outcome==='win'?'win':cut?'limit':acting?.art==='blade'?'attack':acting?.art==='block'?'guard':acting?.art==='heal'?'heal':acting?.art==='cast'||acting?.art==='summon'?'cast':acting?'card':hit?.art==='hit'?'hit':unit.hp<unit.max*.27?'weak':'idle';
     const lunge=acting&&acting.to!==unit.id&&(pose==='attack'||pose==='limit')&&!reduced?-Math.sin(time*Math.PI)*17:0;
     centers[unit.id]={x,y:y-23*size};
     ellipse(c,'#323944',Math.round(x),Math.round(y),Math.round(10*size),Math.max(1,Math.round(3*size)));
     if(unit.transformed){c.globalAlpha=.37;ellipse(c,'#f9cc91',Math.round(x),Math.round(y),Math.round(13*size),3);c.globalAlpha=1;}
+    if((unit.hp>0||action==='damage')&&drawBattleActor(c,unit.id,unit.hero.job,illustration(unit.id,unit.hero.job),x,y,size*.94,action,Math.min(1,time),reduced))return;
     heroSprite(c,unit.id,unit.hero.job,x+lunge,y,'left',pose,acting?time*410:now,size*.94);
   });
   if(!reduced&&time<1){

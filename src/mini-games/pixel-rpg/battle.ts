@@ -54,7 +54,7 @@ type Gauge = { energy:number; limit:number; nextDraw:number; nextEnergy:number; 
 export type PlayedCard = { id:number; value:DeckCard; temporary?:boolean; jam?:boolean };
 export type Fighter = Status & Gauge & { id:string; hp:number; max:number; hero:HeroState; hand:PlayedCard[]; draw:PlayedCard[]; discard:PlayedCard[] };
 export type Opponent = Status & { id:string; spec:Enemy; hp:number; max:number; ordinal:number; phase:number; intent:Intent; target:string; weakness:Element };
-export type Pulse = { id:number; from?:string; to:string; art:'blade'|'cast'|'block'|'heal'|'status'|'critical'|'summon'|'transform'|'phase'|'hit'|'victory'; element:Element; value?:number };
+export type Pulse = { id:number; from?:string; to:string; art:'blade'|'cast'|'block'|'heal'|'status'|'critical'|'summon'|'transform'|'phase'|'hit'|'victory'|'gesture'; element:Element; value?:number };
 export type Battle = {
   encounter:Encounter; party:Fighter[]; enemies:Opponent[]; turn:number; link:number; spentStudy:boolean; outcome?:'win'|'loss'|'escape';
   serial:number; rng:number; pulses:Pulse[]; history:Copy[]; learnedHelped:boolean; items:Adventure['items']; relics:string[]; cycle:number; comboActors?:string[];
@@ -310,6 +310,7 @@ export function playCard(b:Battle,actor:string,cardId:number,target:string):Batt
   unit.energy-=resolved.cost;unit.actions++;unit.played++;
   if(c.jam){tell(next,['空白札を処分した。','Discarded a blank card.']);return next;}
   for(const part of resolved.parts)applyTechnique(next,unit,part,target,resolved.rank,resolved.element);
+  if(next.pulses.length===0)animate(next,actor,'gesture',resolved.element??resolved.parts[0]?.element??'steel',actor);
   unit.limit=Math.min(LIMIT_MAX,unit.limit+1+Number(resolved.cost>=2));
   next.link=Math.min(LINK_MAX,next.link+1+Number(HEROES[actor].passive==='code')+Number(hasRelic(next,unit,'whistle'))+stats(unit.hero).link);
   const exhausted=c.temporary||resolved.parts.some(t=>t.skill.exhaust);
