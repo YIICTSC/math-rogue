@@ -1,4 +1,5 @@
 import { FEATURES, REGIONS, SERVICES, type Climate, type Copy, type Feature, type Service, type Vehicle } from './campaign';
+import { DUNGEON_HEIGHT, DUNGEON_LAYOUTS, DUNGEON_WIDTH } from './dungeonLayouts';
 import { TOWN_SHOPS, townProfile, type TownNpc } from './towns';
 
 export type Point = { x: number; y: number };
@@ -16,7 +17,7 @@ export function noise(x: number,y: number,seed = 0) {
 
 export const enum Tile { Deep, Sea, Shallow, Sand, Grass, Flowers, Forest, Rock, Hill, Path, Wood, Stone, Wall, Cave, Bridge, Ice, Water, Trap, Void, Hidden, Carpet, Rotor, Waterfall }
 export type Kind = 'site' | 'door' | 'exit' | 'keeper' | 'resident' | 'recruit' | 'service' | 'chest' | 'seal' | 'feature' | 'gate' | 'stairs' | 'enemy' | 'boss' | 'shortcut' | 'rock' | 'plate' | 'secret' | 'trial' | 'camp' | 'sign';
-export type Landmark = Point & { id: string; label: Copy; kind: Kind; link?: string; feature?: Feature; service?: Service; variant?: number; npc?: TownNpc; portrait?: string };
+export type Landmark = Point & { id: string; label: Copy; kind: Kind; link?: string; destination?: Point; feature?: Feature; service?: Service; variant?: number; npc?: TownNpc; portrait?: string };
 export type Area = {
   id: string; region: number; name: Copy; climate: Climate; place: 'world'|'town'|'indoors'|'wild'|'dungeon';
   width: number; height: number; tiles: Uint8Array; start: Point; points: Landmark[];
@@ -26,6 +27,7 @@ const CAMP: Copy = ['道中の灯火','Wayfarer’s Lamp'];
 export const mapId = (region: number, site: number, floor=0) => `r${region}-s${site}-f${floor}`;
 export const floors = (region: number, site: number) => site===4 && region !== 2 ? (region>=5?3:2) : 1;
 export const WORLD_ID = 'world';
+export const DUNGEON_LAYOUT_VERSION = 2;
 const PALETTES: Climate[] = REGIONS.map(r=>r.climate);
 const SITE_OFFSETS: Point[] = [{x:-4,y:2},{x:0,y:5},{x:-4,y:-5},{x:4,y:1},{x:3,y:-5}];
 export function regionAt(p: Point): number {
@@ -173,72 +175,66 @@ function makeWild(region: number,site: number,id: string,name: Copy,feature?:Fea
   thing(a,'foe-1','enemy',13,8,['徘徊する魔物','Roaming creature'],{variant:1});
   thing(a,'travelers','recruit',16,11,['道を探す旅人','Travelers seeking a road'],{variant:site});
   rectangle(a,15,9,3,4,Tile.Grass);
-  if(feature) placeFeature(a,feature,'wild');
+  if(feature) placeWildFeature(a,feature);
   return a;
 }
 
-function placeFeature(a:Area,f:Feature, variant:'wild'|'main'|'side') {
-  const x=16,y=variant==='wild'?15:14;
-  const tile = a.place==='wild'?Tile.Path:Tile.Cave;
-  if(f==='rock'){
-    rectangle(a,x-5,y-1,6,3,tile);
-    thing(a,'rock','rock',x-3,y,FEATURES.rock,{feature:f});
-    thing(a,'plate','plate',x-1,y,['重しを載せる床','Counterweight plate'],{feature:f});
-  } else {
-    const p={x:f==='warp'?25:x+1,y:f==='warp'?y+1:y+1};
-    stamp(a,p,tile);
-    thing(a,'feature','feature',p.x,p.y,FEATURES[f],{feature:f});
-  }
-  if(variant==='wild') return;
-  if(f==='water') rectangle(a,14,10,5,3,Tile.Water);
-  if(f==='ice') rectangle(a,14,9,5,4,Tile.Stone);
-  if(f==='rotor') rectangle(a,15,10,4,3,Tile.Rotor);
-  if(f==='pit') rectangle(a,12,11,4,2,Tile.Trap);
-  if(f==='warp'){
-    rectangle(a,24,4,4,3,tile);
-    thing(a,'warp-return','feature',25,6,FEATURES.warp,{feature:f,variant:1});
+function placeWildFeature(a:Area,feature:Feature) {
+  if(feature==='rock'){
+    rectangle(a,11,14,6,3,Tile.Path);
+    thing(a,'rock','rock',13,15,FEATURES.rock,{feature});
+    thing(a,'plate','plate',15,15,['重しを載せる床','Counterweight plate'],{feature});
+  }else {
+    const p=feature==='warp'?{x:25,y:16}:{x:17,y:16};
+    stamp(a,p,Tile.Path);
+    thing(a,'feature','feature',p.x,p.y,FEATURES[feature],{feature});
   }
 }
 
 function makeDungeon(region: number,site: number,floor: number,id: string,name: Copy,feature: Feature): Area {
-  const a=createArea(id,region,floor?[name[0]+` 地下${floor+1}層`, name[1]+` · B${floor+1}`]:name,'dungeon',35,25,Tile.Wall,{x:16,y:22});
+  const plan=DUNGEON_LAYOUTS[feature];
+  const orientation=(region+site+floor)%4;
+  const a=createArea(id,region,floor?[name[0]+` 地下${floor+1}層`,name[1]+` · B${floor+1}`]:name,'dungeon',DUNGEON_WIDTH,DUNGEON_HEIGHT,Tile.Wall,{x:0,y:0});
   const fill=region===1||region===5?Tile.Stone:Tile.Cave;
-  for(const room of [[12,17,9,6],[3,11,8,7],[12,10,10,7],[24,11,8,8],[13,3,8,5],[4,3,7,5],[24,3,7,5]]){
-    for(let y=room[1];y<room[1]+room[3];y++)for(let x=room[0];x<room[0]+room[2];x++){
-      const edge=(x===room[0]||x===room[0]+room[2]-1)&&(y===room[1]||y===room[1]+room[3]-1);
-      if(!edge || noise(x,y,region+floor)>.7) stamp(a,{x,y},fill);
-    }
+  const specialTiles: Record<string,Tile> = {
+    ':':Tile.Stone,'=':Tile.Bridge,'~':Tile.Water,w:feature==='warp'?Tile.Void:Tile.Deep,
+    i:Tile.Ice,r:Tile.Rotor,'^':Tile.Trap,'+':Tile.Hidden,u:Tile.Hidden,
+  };
+  const markers: Record<string,Point> = {};
+  plan.forEach((row,y)=>Array.from(row).forEach((symbol,x)=>{
+    if(symbol==='#')return;
+    const point={x:orientation%2?DUNGEON_WIDTH-1-x:x,y:orientation>=2?DUNGEON_HEIGHT-1-y:y};
+    stamp(a,point,specialTiles[symbol]??fill);
+    if(symbol==='a')a.start=point;
+    markers[symbol]=point;
+  }));
+  const mark=(symbol:string,key:string,kind:Kind,label:Copy,extra?:Partial<Landmark>)=>{
+    const point=markers[symbol];
+    if(point)thing(a,key,kind,point.x,point.y,label,extra);
+  };
+  mark('v','exit','exit',floor?['上の層へ戻る','Stairs up']:EXIT,{link:floor?mapId(region,site,floor-1):WORLD_ID});
+  mark('g','gate','gate',['奥の間への扉','Inner gate'],{feature});
+  mark('u','passage','secret',['傷のある壁','Cracked wall']);
+  mark('c','camp','camp',CAMP);
+  mark('t','sign','sign',['探索の石碑','Exploration tablet']);
+  mark('b','cache','chest',REGIONS[region].book,{variant:site+floor});
+  mark('k','seal','seal',['知識の封印','Seal of Lore']);
+  mark('1','minor','enemy',['番犬の影','A guardian’s shadow'],{variant:(floor+1)%3});
+  mark('2','minor2','enemy',['巣を守る魔物','Nest guardian'],{variant:(floor+2)%3});
+  mark('s','shortcut','shortcut',['帰還の転移石','Returnstone']);
+  mark('h','north-cache','chest',['奥の隠し宝箱','Hidden inner chest'],{variant:5+floor});
+  if(site===2||site===3)mark('e','hidden-foe','trial',['裏道の強敵','Guardian of the side passage'],{variant:1});
+  if(site!==4)mark('x','recruit','recruit',['閉じ込められた旅人','Trapped traveler'],{variant:site});
+  else if(floor+1<floors(region,site))mark('x','down','stairs',['深層へ進む','Stairs down'],{link:mapId(region,site,floor+1)});
+  else mark('x','boss','boss',REGIONS[region].boss);
+
+  if(feature==='rock'){
+    mark('f','rock','rock',FEATURES[feature],{feature});
+    mark('p','plate','plate',['重しを載せる床','Counterweight plate'],{feature});
+  }else{
+    mark('f','feature','feature',FEATURES[feature],{feature,destination:markers.z});
+    mark('z','warp-return','feature',FEATURES[feature],{feature,destination:markers.f,variant:1});
   }
-  route(a,{x:6,y:14},{x:28,y:17},fill,2);
-  route(a,{x:6,y:16},{x:16,y:20},fill,2);
-  route(a,{x:16,y:14},{x:16,y:5},fill);
-  route(a,{x:7,y:5},{x:28,y:5},fill);
-  route(a,{x:28,y:18},{x:16,y:20},fill);
-  stamp(a,{x:16,y:23},fill);
-  thing(a,'exit','exit',16,23,floor?['上の層へ戻る','Stairs up']:EXIT,{link:floor?mapId(region,site,floor-1):WORLD_ID});
-  thing(a,'gate','gate',16,8,['奥の間への扉','Inner gate'],{feature});
-  stamp(a,{x:7,y:8},Tile.Hidden);
-  stamp(a,{x:7,y:9},Tile.Hidden);
-  stamp(a,{x:7,y:10},Tile.Hidden);
-  thing(a,'passage','secret',7,10,['傷のある壁','Cracked wall']);
-  thing(a,'camp','camp',15,21,CAMP);
-  thing(a,'sign','sign',15,18,['探索の石碑','Exploration tablet']);
-  thing(a,'cache','chest',6,12,REGIONS[region].book,{variant:site+floor});
-  thing(a,'seal','seal',26,13,['知識の封印','Seal of Lore']);
-  thing(a,'minor','enemy',6,16,['番犬の影','A guardian’s shadow'],{variant:(floor+1)%3});
-  thing(a,'minor2','enemy',21,14,['巣を守る魔物','Nest guardian'],{variant:(floor+2)%3});
-  thing(a,'shortcut','shortcut',26,5,['帰還の転移石','Returnstone']);
-  thing(a,'north-cache','chest',7,5,['奥の隠し宝箱','Hidden inner chest'],{variant:5+floor});
-  if(site===2||site===3){
-    thing(a,'hidden-foe','trial',27,5,['裏道の強敵','Guardian of the side passage'],{variant:1});
-  }
-  if(site===4){
-    if(floor+1<floors(region,site)) thing(a,'down','stairs',17,4,['深層へ進む','Stairs down'],{link:mapId(region,site,floor+1)});
-    else thing(a,'boss','boss',17,4,REGIONS[region].boss);
-  } else {
-    thing(a,'recruit','recruit',17,4,['閉じ込められた旅人','Trapped traveler'],{variant:site});
-  }
-  placeFeature(a,feature,site===4?'main':'side');
   return a;
 }
 

@@ -1,5 +1,5 @@
 import { REGIONS, type Copy } from './campaign';
-import { HEROES, JOBS, COMBOS, ITEMS, type Combo, type DeckCard, type Element, type ItemId, type Skill, type Target, type Technique } from './catalog';
+import { HEROES, JOBS, COMBOS, ITEMS, LINK_MAX, type Combo, type DeckCard, type Element, type ItemId, type Skill, type Target, type Technique } from './catalog';
 import { battleDeck, inRange, randomState, resolveParts, stats, type Adventure, type Encounter, type HeroState, type Win } from './adventure';
 
 export type Intent = 'attack'|'charge'|'ward'|'venom'|'mirror'|'seal'|'summon'|'shift'|'jam'|'heal';
@@ -61,7 +61,7 @@ export type Battle = {
   serial:number; rng:number; pulses:Pulse[]; history:Copy[]; learnedHelped:boolean; items:Adventure['items']; relics:string[]; cycle:number; comboActors?:string[]; cue?:ActionCue;
 };
 const zeroStatus: Status={block:0,poison:0,weak:0,expose:0,reflect:0,power:0,sealed:0};
-export const LINK_MAX=12;
+export { LINK_MAX } from './catalog';
 export const LIMIT_MAX=9;
 const MAX_ACTIONS=8;
 const ALIVE= (unit:{hp:number})=>unit.hp>0;
@@ -122,7 +122,7 @@ function plan(b:Battle,e:Opponent){
   e.target=focus[Math.floor(random(b)*focus.length)]?.id??'';
 }
 export function createBattle(s:Adventure,encounter:Encounter):Battle {
-  const b:Battle={encounter,party:[],enemies:[],turn:1,link:0,spentStudy:false,serial:0,rng:s.rng||1,pulses:[],history:[],
+  const b:Battle={encounter,party:[],enemies:[],turn:1,link:s.link??0,spentStudy:false,serial:0,rng:s.rng||1,pulses:[],history:[],
     learnedHelped:false,items:{...s.items},relics:s.partyRelic?[s.partyRelic]:[],cycle:s.cycle};
   b.party=s.party.map(id=>{
     const hero=s.heroes[id], base=stats(hero), d=battleDeck(hero).map(value=>({value:{...value},id:++b.serial}));
@@ -142,7 +142,7 @@ export function createBattle(s:Adventure,encounter:Encounter):Battle {
   if(!encounter.boss&&b.party.length===4&&encounter.region>=3&&random(b)>.3)b.enemies.push(createEnemy(b,encounter.region,2));
   b.enemies.forEach(e=>plan(b,e));
   if(encounter.surprise==='party'){
-    b.link=3;
+    b.link=Math.min(LINK_MAX,b.link+3);
     tell(b,['先制攻撃！ 初手のエナジーと連携が増えた。','Preemptive strike! Opening energy and Link increased.']);
   }
   if(encounter.surprise==='foe'){
@@ -219,7 +219,18 @@ export function cursorTarget(b:Battle,actor:string,target:Target,enemy?:string,a
   return fighter(b,actor)?.id;
 }
 export function canPlay(b:Battle,p:Fighter,card:PlayedCard){
-  return !b.outcome&&p.hp>0&&p.actions<MAX_ACTIONS&&p.energy>=inspect(card).cost&&!(p.sealed>0&&inspect(card).parts.some(t=>t.element!=='steel'));
+  if(b.outcome||p.hp<=0||p.actions>=MAX_ACTIONS)return false;
+  const resolved=inspect(card);
+  return p.energy>=resolved.cost&&!(p.sealed>0&&resolved.parts.some(t=>t.element!=='steel'));
+}
+export const canAct = (b:Battle,p:Fighter)=>p.hand.some(c=>canPlay(b,p,c));
+export function nextActingHero(b:Battle,id:string){
+  const index=b.party.findIndex(p=>p.id===id), current=b.party[index];
+  if(current&&canAct(b,current))return id;
+  const ordered=[...b.party.slice(index+1),...b.party.slice(0,Math.max(0,index))];
+  const energized=ordered.find(p=>p.energy>0&&canAct(b,p));
+  if(energized)return energized.id;
+  return ordered.find(p=>canAct(b,p))?.id??(current?.hp?id:b.party.find(ALIVE)?.id??id);
 }
 function rawEnemyDamage(b:Battle,e:Opponent,amount:number){
   const absorbed=Math.min(e.block,amount);e.block-=absorbed;
@@ -330,11 +341,20 @@ export function playCard(b:Battle,actor:string,cardId:number,target:string):Batt
   return next;
 }
 export function availableCombos(b:Battle):Combo[]{
-  const party=b.party.filter(ALIVE),origins=party.map(p=>HEROES[p.id].origin),jobs=party.map(p=>p.hero.job);
-  return COMBOS.filter(c=>(!c.origins||c.origins.every(x=>origins.includes(x)))&&(!c.jobs||c.jobs.every(x=>jobs.includes(x)))&&(!c.full||party.length===4&&['elementary','high-school','magic'].every(origin=>origins.includes(origin as typeof origins[number]))));
+  return COMBOS.filter(c=>comboMembers(b,c).length>=2);
 }
 export function comboMembers(b:Battle,c:Combo) {
-  return b.party.filter(p=>p.hp>0&&(c.full||c.origins?.includes(HEROES[p.id].origin)||c.jobs?.includes(p.hero.job)));
+  const party=b.party.filter(ALIVE);
+  if(c.full&&party.length!==4)return [];
+  const needed=c.origins??c.jobs;
+  if(!needed)return party.slice(0,2);
+  const matched=new Set<Fighter>();
+  for(const slot of needed){
+    const hero=party.find(p=>!matched.has(p)&&(c.origins?HEROES[p.id].origin:p.hero.job)===slot);
+    if(!hero)return [];
+    matched.add(hero);
+  }
+  return c.full?party:party.filter(p=>matched.has(p));
 }
 export function useCombo(b:Battle,key:string,target:string):Battle {
   if(b.outcome||b.link<LINK_MAX)return b;

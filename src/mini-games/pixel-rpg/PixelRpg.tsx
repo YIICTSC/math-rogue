@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState, type PointerEvent } from 'react';
-import { ArrowLeft, ArrowUp, ArrowRight, ArrowDown, BookOpen, Compass, Flag, Map, Backpack, ShipWheel, Footprints, ChevronRight, Move, Save, Swords, Shield } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
+import { ArrowLeft, ArrowUp, ArrowRight, ArrowDown, BookOpen, Compass, Flag, Map, Backpack, ShipWheel, Footprints, ChevronRight, Save, Swords, Shield } from 'lucide-react';
 import { GameMode, type AnswerMode, type AssignmentAnswerResult, type AssignmentReviewProblem, type LanguageMode } from '../../types';
 import type { MiniGameComponentProps } from '../../components/MiniGameRouter';
 import { PAD, useGameplayGamepad } from '../../hooks/useGameplayGamepad';
@@ -11,7 +11,7 @@ import { studentSpriteUrl } from '../../components/school-dungeon/student/sprite
 import AdventureProblemSheet from '../shared/AdventureProblemSheet';
 import { GROUPS, applyStudy, climate, completeBattle, currentLandmark, currentRegion, escape, interact, introScenes, maxHp, mount, newAdventure, recover, reviewEntry, step, type Adventure, type Change, type Encounter, type Scene, type Settings } from './adventure';
 import { heroSelectionIllustration, illustration, type Animation } from './art';
-import { createBattle, fighter, studyBonus, victory, type Battle } from './battle';
+import { createBattle, fighter, nextActingHero, studyBonus, victory, type Battle } from './battle';
 import { playTravelerBattleVoice } from './battleVoice';
 import BattleScreen from './BattleScreen';
 import { HEROES, HERO_LIST, JOBS, PASSIVES, type WorldOfOrigin } from './catalog';
@@ -62,16 +62,47 @@ function HeroChoice({selected,onSelect}:{selected:string;onSelect:(id:string)=>v
       <HeroChoiceArt id={h.id} /><span>{l(h.name)}</span></button>)}</div>
   </div>;
 }
+function VirtualPad({move,hold,stop,covered}:{move:(d:Direction)=>void;hold:(d:Direction)=>void;stop:()=>void;covered:boolean}){
+  const {t}=useWords();
+  const pointer=useRef<number|undefined>(undefined);
+  const direction=useRef<Direction|undefined>(undefined);
+  const [thumb,setThumb]=useState({x:0,y:0});
+  const [held,setHeld]=useState<Direction>();
+  const release=()=>{
+    pointer.current=undefined;direction.current=undefined;
+    stop();setThumb({x:0,y:0});setHeld(undefined);
+  };
+  const steer=(e:PointerEvent<HTMLDivElement>)=>{
+    if(pointer.current!==e.pointerId||covered)return;
+    const rect=e.currentTarget.getBoundingClientRect();
+    const x=e.clientX-rect.left-rect.width/2,y=e.clientY-rect.top-rect.height/2;
+    const radius=rect.width/2,length=Math.hypot(x,y),thumbScale=radius*.44/Math.max(length,radius);
+    setThumb({x:x*thumbScale,y:y*thumbScale});
+    const next=length<radius*.22?undefined:Math.abs(x)>Math.abs(y)?(x<0?'left':'right'):(y<0?'up':'down');
+    if(next===direction.current)return;
+    direction.current=next;setHeld(next);
+    if(next)hold(next);else stop();
+  };
+  return <div className="pr-virtual-pad" role="group" aria-label={t('移動','Movement')}
+    style={{'--pr-stick-x':thumb.x+'px','--pr-stick-y':thumb.y+'px'} as CSSProperties}
+    onPointerDown={e=>{
+      if(e.button!==0||pointer.current!==undefined||covered)return;
+      e.preventDefault();pointer.current=e.pointerId;e.currentTarget.setPointerCapture(e.pointerId);steer(e);
+    }}
+    onPointerMove={steer} onPointerUp={e=>{if(pointer.current===e.pointerId)release();}}
+    onPointerCancel={e=>{if(pointer.current===e.pointerId)release();}}
+    onLostPointerCapture={e=>{if(pointer.current===e.pointerId)release();}}>
+    <div className="pr-pad-thumb" aria-hidden="true"/>
+    {DIRECTIONS.map(([d,Icon,ja,en])=><button type="button" key={d} className={'pr-dir-'+d} aria-label={t(ja,en)}
+      disabled={covered} data-held={held===d||undefined} onClick={e=>{if(e.detail===0)move(d);}}><Icon size={18}/></button>)}
+  </div>;
+}
 function FieldView({state,dash,setDash,move,hold,stop,activate,open,travel,message,covered}:{
   state:Adventure;dash:boolean;setDash:(value:boolean)=>void;move:(d:Direction)=>void;hold:(d:Direction)=>void;stop:()=>void;activate:()=>void;
   open:(tab:MenuTab)=>void;travel:()=>void;message?:Copy;covered:boolean;
 }){
   const {l,t}=useWords(),a=area(state.map),region=REGIONS[currentRegion(state)],point=currentLandmark(state), time=state.minutes%1440;
   const objective=REGIONS[Math.min(state.stage,6)];
-  const press=(e:PointerEvent<HTMLButtonElement>,direction:Direction)=>{
-    if(e.button!==0)return;
-    e.preventDefault();e.currentTarget.setPointerCapture(e.pointerId);hold(direction);
-  };
   const coord=state.map===WORLD_ID?`${state.at.x}E · ${state.at.y}S`:`X ${state.at.x} · Y ${state.at.y}`;
   const labels=t('場所','Location');
   return <section className="pr-field" data-gamepad-live={covered?undefined:'pixel-rpg'} aria-label={t('フィールド','Field')} data-pr-map={state.map} data-pr-x={state.at.x} data-pr-y={state.at.y}>
@@ -90,12 +121,7 @@ function FieldView({state,dash,setDash,move,hold,stop,activate,open,travel,messa
     })}</div>
     {message&&<div className="pr-toast" role="status">{l(message)}</div>}
     <footer className="pr-field-controls">
-      <div className="pr-dpad" aria-label={t('移動','Movement')}>
-        <div className="pr-dpad-center"><Move size={17}/></div>
-        {DIRECTIONS.map(([d,Icon,ja,en])=><button key={d} className={`pr-dir-${d}`} aria-label={t(ja,en)}
-          onPointerDown={e=>press(e,d)} onPointerUp={stop} onPointerCancel={stop} onLostPointerCapture={stop}
-          onClick={e=>{if(e.detail===0)move(d);}}><Icon size={21}/></button>)}
-      </div>
+      <VirtualPad hold={hold} stop={stop} move={move} covered={covered}/>
       <div className="pr-field-action">
         {point&&<div className="pr-nearby" aria-live="polite"><Compass size={15}/>{l(point.label)}</div>}
         <button className="pr-primary pr-action-main" onClick={activate}><span>A</span>{t('調べる','Interact')}</button>
@@ -148,6 +174,8 @@ const savedAnswer = (mode?:AnswerMode):Settings['answer'] => mode==='WRITING'?'w
 const answerMode = (mode:Settings['answer']):AnswerMode => mode==='writing'?'WRITING':mode==='typing'?'INPUT':'CHOICE';
 const titleAsset='sprites/pixel-rpg/title.webp';
 const slotList=()=>Object.fromEntries(SAVE_SLOTS.map(s=>[s,readSave(s)])) as Record<Slot,SlotData[]>;
+const afterBattle=(state:Adventure,battle:Battle)=>({...state,items:battle.items,rng:battle.rng,link:battle.link});
+const settleVictory=(state:Adventure,battle:Battle)=>completeBattle(afterBattle(state,battle),battle.encounter,victory(battle));
 function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:LanguageMode|undefined)=>void}){
   const {onBack,setLanguage}=props;
   const {t,l,language}=useWords();
@@ -160,6 +188,7 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
   const [overlay,setOverlay]=useState<Overlay>(),overlayRef=useRef<Overlay|undefined>(undefined);
   const [returnOverlay,setReturnOverlay]=useState<Overlay>();
   const [animation,setAnimation]=useState<Animation>(),fxTimer=useRef(0),animationUntil=useRef(0);
+  const [encounterIntro,setEncounterIntro]=useState<{duration:number;fight:Battle}>();
   const [message,setMessage]=useState<Copy>(),messageTimer=useRef(0);
   const [dash,setDash]=useState(false),[pressedShift,setPressedShift]=useState(false);
   const [storageError,setStorageError]=useState(false);
@@ -168,11 +197,15 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
   const questionCount=useRef(0);
   const answered=useRef(0);
   const track=sceneMusic(state,battle,overlay,title);
+  const victoryRewards=battle?.outcome==='win'&&state?settleVictory(state,battle).rewards:undefined;
   const trackRef=useRef(track);trackRef.current=track;
   const audioScope=useRef<ReturnType<typeof audioService.acquireBgmScene>|undefined>(undefined);
 
-  const present=(value:Overlay|undefined)=>{overlayRef.current=value;setOverlay(value);fieldInput.current.key=undefined;fieldInput.current.touch=undefined;};
-  const changeState=(s:Adventure)=>{stateRef.current=s;setState(s);};
+  const present=useCallback((value:Overlay|undefined)=>{
+    overlayRef.current=value;setOverlay(value);
+    fieldInput.current.key=undefined;fieldInput.current.touch=undefined;
+  },[]);
+  const changeState=useCallback((s:Adventure)=>{stateRef.current=s;setState(s);},[]);
   const changeBattle=(b:Battle|undefined)=>{
     battleRef.current=b;setBattle(b);
   };
@@ -196,7 +229,8 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
     return ok;
   },[]);
   const begin=(s:Adventure,slot:Slot,opening:boolean)=>{
-    changeBattle(undefined);setActor(s.party[0]);setAnimation(undefined);animationUntil.current=0;
+    changeBattle(undefined);setActor(s.party[0]);setAnimation(undefined);setEncounterIntro(undefined);
+    window.clearTimeout(fxTimer.current);animationUntil.current=0;
     startAt.current=performance.now();saveAt.current=0;slotRef.current=slot;setSlot(slot);
     setTitle(undefined);setMessage(undefined);setCarry(undefined);setReturnOverlay(undefined);setLanguage(s.settings.language);
     changeState(s);save('auto');
@@ -204,24 +238,35 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
   };
   const openTitle=()=>{
     save('auto');
+    window.clearTimeout(fxTimer.current);animationUntil.current=0;setEncounterIntro(undefined);
     stateRef.current=undefined;setState(undefined);
     setLanguage(undefined);
     setSaves(slotList());setTitle(undefined);setAnimation(undefined);changeBattle(undefined);present(undefined);setReturnOverlay(undefined);
   };
   const beginBattle=(s:Adventure,encounter:Encounter)=>{
-    setAnimation(undefined);window.clearTimeout(fxTimer.current);animationUntil.current=0;
+    setAnimation(undefined);window.clearTimeout(fxTimer.current);
     present(undefined);setReturnOverlay(undefined);
     const fight=createBattle(s,encounter);
-    changeBattle(fight);setActor(fight.party[0].id);
-    if(!s.flags.includes('battle-tutorial')){
-      changeState({...s,flags:[...s.flags,'battle-tutorial']});
-      present({type:'dialog',index:0,scenes:[
-        {speaker:['戦闘の手引き','Field manual'],line:['赤いカーソルの敵が攻撃対象。敵をタップして照準を変え、手札を一度タップすれば技が出る。防御は自分にかかる。','The red cursor marks your target. Tap an enemy to aim, then tap a card once to play it. Guard cards protect their user.']},
-        {speaker:['戦闘の手引き','Field manual'],line:['敵の予兆と狙い先を見てから、全員が動き終わったらターン終了。ひらめきは、答えられそうなときに使っていい。','Read enemy intents and targets. End the turn when everyone is ready. Use Study when you want an optional boost.']},
-      ]});
-    }
+    const duration=s.settings.rateFx==='instant'?240:s.settings.rateFx==='quick'?400:680;
+    setEncounterIntro({duration,fight});animationUntil.current=Infinity;
+    changeBattle(fight);setActor(nextActingHero(fight,fight.party[0].id));
     audioService.playSound(encounter.boss?'buff':'select');
   };
+  useEffect(()=>{
+    if(!encounterIntro)return;
+    const timer=window.setTimeout(()=>{
+      if(battleRef.current!==encounterIntro.fight)return;
+      setEncounterIntro(undefined);animationUntil.current=0;
+      const latest=stateRef.current;
+      if(!latest||latest.flags.includes('battle-tutorial'))return;
+      changeState({...latest,flags:[...latest.flags,'battle-tutorial']});
+      present({type:'dialog',index:0,scenes:[
+        {speaker:['戦闘の手引き','Field manual'],line:['赤いカーソルの敵が攻撃対象。敵をタップして照準を変え、手札を一度タップすれば技が出る。防御は自分にかかる。','The red cursor marks your target. Tap an enemy to aim, then tap a card once to play it. Guard cards protect their user.']},
+        {speaker:['戦闘の手引き','Field manual'],line:['消費ENが0の札も含め、使える手札を使い切ると仲間に交代する。全員が動き終わったらターン終了。連携ゲージは次の戦闘に持ち越せる。','Use all playable cards, including cards that cost 0 EN, before the next ally takes over. End the turn once everyone is done. Link carries into your next fight.']},
+      ]});
+    },encounterIntro.duration);
+    return ()=>window.clearTimeout(timer);
+  },[encounterIntro,present,changeState]);
   const ask=(mode:StudyState['mode'],landmark?:Landmark,heroId?:string)=>{
     const s=stateRef.current;if(!s)return;
     const nonce=++questionCount.current;
@@ -272,6 +317,7 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
       fxTimer.current=window.setTimeout(settle,duration);
     }else settle();
     changeBattle(next);
+    if(!next.outcome)setActor(id=>nextActingHero(next,id));
     const art=next.pulses[0]?.art;
     if(!next.outcome||animated){
       audioService.playSound(defeated.length&&animated||next.cue?.kind==='finale'||next.cue?.kind==='link'||art==='phase'||art==='summon'?'finisher_explosion':
@@ -289,11 +335,11 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
   };
   const acknowledge=()=>{
     const b=battleRef.current,s=stateRef.current;
-    if(!s||!b?.outcome)return;
+    if(!s||!b?.outcome||performance.now()<animationUntil.current)return;
     changeBattle(undefined);setAnimation(undefined);animationUntil.current=0;window.clearTimeout(fxTimer.current);
-    if(b.outcome==='win')apply(st=>completeBattle({...st,items:b.items,rng:b.rng},b.encounter,victory(b)));
-    else if(b.outcome==='loss')apply(st=>({state:recover({...st,items:b.items,rng:b.rng})}));
-    else apply(st=>({state:escape({...st,items:b.items,rng:b.rng,heroes:Object.fromEntries(Object.entries(st.heroes).map(([id,h])=>[id,{...h,hp:Math.max(1,b.party.find(p=>p.id===id)?.hp??h.hp)}]))})}));
+    if(b.outcome==='win')apply(st=>settleVictory(st,b));
+    else if(b.outcome==='loss')apply(st=>({state:recover(afterBattle(st,b))}));
+    else apply(st=>({state:escape({...afterBattle(st,b),heroes:Object.fromEntries(Object.entries(st.heroes).map(([id,h])=>[id,{...h,hp:Math.max(1,b.party.find(p=>p.id===id)?.hp??h.hp)}]))})}));
     save('auto');
   };
   const moving=useRef<(direction:Direction)=>void>(()=>undefined);
@@ -445,8 +491,9 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
       </Panel>}
     </section>}
     {state&&(battle
-      ? <BattleScreen battle={battle} actor={actor} setActor={setActor} onCommand={updateCombat} onStudy={()=>void ask('battle',undefined,fighter(battle,actor)?.id??battle.party.find(x=>x.hp>0)?.id)} onOutcome={acknowledge}
-          animation={animation} settings={state.settings} covered={!!overlay}/>
+      ? <BattleScreen key={battle.encounter.rush??'battle'} battle={battle} actor={actor} setActor={setActor} onCommand={updateCombat}
+          onStudy={()=>void ask('battle',undefined,fighter(battle,actor)?.id??battle.party.find(x=>x.hp>0)?.id)} onOutcome={acknowledge}
+          animation={animation} settings={state.settings} covered={!!overlay} encounterIntro={encounterIntro?.duration??0} rewards={victoryRewards}/>
       : <FieldView state={state} dash={dash||pressedShift} setDash={setDash} move={d=>moving.current(d)} hold={hold} stop={stop} activate={()=>actionRef.current()} open={journal}
           travel={()=>present({type:'travel'})} message={overlay?undefined:message} covered={!!overlay}/>)}
     {state&&overlay?.type==='journal'&&<Journal key={overlay.tab} state={snapshot()??state} initial={overlay.tab} apply={apply} slot={slot} onClose={closeOverlay} onSave={()=>save('manual',true)} onLesson={lesson} onReview={()=>void ask('review')} onExit={()=>present({type:'exit'})}/>}

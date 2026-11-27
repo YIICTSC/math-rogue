@@ -148,9 +148,10 @@ try{
   const activate=(s)=>{
     const feature=point(s,'feature'),rock=point(s,'rock');
     if(rock){
-      const p={x:rock.x-1,y:rock.y};
+      const plate=point(s,'plate'), shove=plate.x>rock.x?'right':'left';
+      const p={x:rock.x-m.OFFSETS[shove].x,y:rock.y};
       s=at(s,p);
-      for(let i=0;i<3;i++)s=m.step(s,'right').state;
+      for(let i=0;i<2*m.distance(rock,plate)-1;i++)s=m.step(s,shove).state;
       assert(s.flags.includes(s.map+':mechanism'),`Push rock onto plate in ${s.map}`);
       featured.add('rock');
     }else if(feature){
@@ -160,6 +161,24 @@ try{
     }
     return s;
   };
+  const dungeonPlans=new Set();
+  for(const [region,data] of m.REGIONS.entries())for(const [site,location] of data.sites.entries()){
+    if(!['dungeon','sanctuary'].includes(location.type))continue;
+    for(let floor=0;floor<m.floors(region,site);floor++){
+      const id=m.mapId(region,site,floor),level=m.area(id);
+      dungeonPlans.add(Buffer.from(level.tiles).toString('base64'));
+      const probe={...m.newAdventure('magic-akari',207,{encounters:'symbol'}),map:id,at:level.start,trail:[level.start],repellent:64};
+      assert(m.same(at(probe,point(probe,'exit')).at,point(probe,'exit')));
+      const end=level.points.find(p=>['recruit','stairs','boss'].includes(p.kind));
+      assert(m.same(at(activate(probe),end).at,end),`The puzzle opens the route on ${id}`);
+      const passage=point(probe,'secret');
+      const opened=m.interact(near(probe,passage),passage).state;
+      const hidden=level.points.find(p=>p.id.endsWith(':north-cache'));
+      assert(m.same(at(opened,hidden).at,hidden),`The optional passage reaches its rewards in ${id}`);
+    }
+  }
+  assert(dungeonPlans.size>=16);
+  console.log(`PASS ${dungeonPlans.size} distinct dungeon layouts, entry/exit, mechanisms and hidden rooms`);
   function finishBattle(state,encounter,useStudy=false){
     let b=m.createBattle(state,encounter);
     assert(b.enemies.every(e=>e.intent&&e.target));
@@ -301,6 +320,35 @@ try{
   assert.equal(m.fighter(boosted,actor).energy,m.fighter(powered,actor).energy+1);
   const noTarget=powered.party[0].hand.find(c=>m.inspect(c).target==='foe');
   assert.equal(m.playCard(powered,actor,noTarget.id,'not-a-target'),powered);
+  const carried=m.createBattle({...s,link:m.LINK_MAX-2},{region:0,variant:0,surprise:'party'});
+  assert.equal(carried.link,m.LINK_MAX);
+  const duet=m.availableCombos(carried).find(combo=>combo.id==='road-duet');
+  assert(duet&&m.COMBOS.length>=24);
+  assert(!m.availableCombos(m.createBattle(m.newAdventure('magic-akari',24),{region:0,variant:0})).length);
+  const linked=m.useCombo(carried,duet.id,m.comboMembers(carried,duet)[0].id);
+  assert.equal(linked.link,0);
+  const following=m.createBattle({...s,link:linked.link},{region:0,variant:0});
+  assert.equal(following.link,0);
+  const exhausted={...carried,party:carried.party.map((p,i)=>i===0?{...p,energy:0,hand:[]}:p)};
+  assert.equal(m.nextActingHero(exhausted,exhausted.party[0].id),exhausted.party[1].id);
+  assert(!m.canAct(exhausted,exhausted.party[0]));
+  const freeCards=carried.party[0].hand.slice(0,2).map(card=>({...card,value:{key:'camp-shield'},temporary:true}));
+  const zeroCost={...exhausted,party:exhausted.party.map((p,i)=>i===0?{...p,hand:freeCards}:p)};
+  const firstHero=zeroCost.party[0].id;
+  assert(m.canAct(zeroCost,zeroCost.party[0]));
+  assert.equal(m.nextActingHero(zeroCost,firstHero),firstHero);
+  const usedOne=m.playCard(zeroCost,firstHero,freeCards[0].id,firstHero);
+  assert.equal(m.nextActingHero(usedOne,firstHero),firstHero);
+  const usedBoth=m.playCard(usedOne,firstHero,freeCards[1].id,firstHero);
+  assert.equal(usedBoth.party[0].hand.length,0);
+  assert.equal(m.nextActingHero(usedBoth,firstHero),usedBoth.party[1].id);
+  const lootState={...s,stage:0,licenses:['foot'],party:s.party.slice(0,2)};
+  const lootFight=m.createBattle(lootState,{region:0,variant:0,boss:true});
+  const summary=m.completeBattle(lootState,lootFight.encounter,m.victory(lootFight));
+  assert.equal(summary.rewards.heroes.filter(h=>!h.reserve).length,2);
+  assert(summary.rewards.heroes.filter(h=>h.reserve).every(h=>h.xp===Math.floor(65*.35)&&h.mastery===0));
+  assert(summary.rewards.loot.some(item=>item.quantity===2&&item.name===m.ITEMS.tonic.name));
+  assert(summary.rewards.loot.some(item=>item.name===m.VEHICLES.canoe));
   const map=new Map();
   const mock={getItem:id=>map.get(id)??null,setItem:(id,v)=>map.set(id,v),removeItem:id=>map.delete(id)};
   map.set('learning-rogue:main:player','untouched');
@@ -311,6 +359,16 @@ try{
   assert.equal(written.length,2);
   assert.equal(written.find(i=>i.kind==='manual').state.gold,s.gold);
   assert.equal(m.readSave(2,mock)[0].state.leader,'dungeons2-lyria');
+  const dungeon=m.area(m.mapId(0,4));
+  const oldGate={x:16,y:8};
+  const oldSave={...s,map:dungeon.id,at:oldGate,trail:[oldGate],flags:[...s.flags,dungeon.id+':mechanism'],link:9};
+  delete oldSave.dungeonLayout;
+  assert(m.writeSave(3,oldSave,'manual',mock));
+  const migrated=m.readSave(3,mock)[0].state;
+  assert.equal(migrated.map,dungeon.id);
+  assert(m.canTravel(m.activeTile(migrated,migrated.at),'foot',false));
+  assert(m.same(at(migrated,point(migrated,'exit')).at,point(migrated,'exit')));
+  assert.equal(m.createBattle(migrated,{region:0,variant:0}).link,9);
   mock.setItem('learning-rogue:pixel-rpg:v1:1:auto','broken');
   assert.equal(m.readSave(1,mock)[0].kind,'manual');
   assert(m.clearSlot(1,mock));

@@ -1,9 +1,9 @@
 import { GameMode } from '../../types';
 import { validKartQuestion } from '../gakuro-kart/learning';
-import { maxHp, type Adventure, type HeroState } from './adventure';
-import { CARDS, ELEMENTS, GEAR, HEROES, ITEMS, JOBS, RELICS, SLOTS, type DeckCard } from './catalog';
+import { maxHp, restoreAdventure, type Adventure, type HeroState } from './adventure';
+import { CARDS, ELEMENTS, GEAR, HEROES, ITEMS, JOBS, LINK_MAX, RELICS, SLOTS, type DeckCard } from './catalog';
 import { REGIONS, VEHICLES } from './campaign';
-import { OFFSETS, area, type Point } from './world';
+import { DUNGEON_LAYOUT_VERSION, OFFSETS, area, type Point } from './world';
 
 export const SAVE_SLOTS=[1,2,3] as const;
 export type Slot=typeof SAVE_SLOTS[number];
@@ -36,6 +36,7 @@ function validHero(v:unknown, id:string):v is HeroState {
 }
 export function validAdventure(v:unknown):v is Adventure {
   if(!isRecord(v)||v.version!==1||!map(v.map)||!point(v.at,v.map)||!isIn(v.direction,OFFSETS)||!isIn(v.vehicle,VEHICLES)||!isIn(v.leader,HEROES))return false;
+  if(v.dungeonLayout!==undefined&&v.dungeonLayout!==DUNGEON_LAYOUT_VERSION)return false;
   const heroes=v.heroes;
   if(!isRecord(heroes)||!heroes[v.leader]||!Object.entries(heroes).every(([id,h])=>validHero(h,id))||
     !Array.isArray(v.party)||v.party.length<1||!list(v.party,p=>isIn(p,heroes),4)||new Set(v.party).size!==v.party.length)return false;
@@ -44,7 +45,8 @@ export function validAdventure(v:unknown):v is Adventure {
   if(!isRecord(v.rocks)||!Object.entries(v.rocks).every(([id,p])=>map(id)&&point(p,id))||
     !list(v.licenses,l=>isIn(l,VEHICLES),6)||!(v.licenses as string[]).includes(String(v.vehicle)))return false;
   if(!isNumber(v.stage,0,REGIONS.length)||typeof v.ending!=='boolean'||!isNumber(v.cycle,0,200)||!isNumber(v.gold)||
-    !isNumber(v.steps)||!isNumber(v.minutes)||!isNumber(v.elapsed)||!isNumber(v.rng,0,4294967295)||!isNumber(v.streak)||!isNumber(v.repellent,0,64)||!isNumber(v.rank,0,200))return false;
+    !isNumber(v.steps)||!isNumber(v.minutes)||!isNumber(v.elapsed)||!isNumber(v.rng,0,4294967295)||!isNumber(v.streak)||!isNumber(v.repellent,0,64)||!isNumber(v.rank,0,200)||
+    v.link!==undefined&&!isNumber(v.link,0,LINK_MAX))return false;
   if(!strings(v.completed,10000)||!strings(v.quests,200)||!strings(v.flags,2000)||!strings(v.open,1500)||!list(v.visits,map,1000)||!strings(v.monsters,200)||
     !list(v.books,n=>isNumber(n,0,REGIONS.length-1),REGIONS.length)||!list(v.gear,k=>isIn(k,GEAR),500)||!list(v.unlockedCards,k=>isIn(k,CARDS),500)||
     !list(v.relics,k=>isIn(k,RELICS),50)||v.partyRelic!==undefined&&!isIn(v.partyRelic,RELICS))return false;
@@ -72,7 +74,7 @@ export function readSave(slot:Slot,storage?:Storage):SlotData[] {
     try {
       const raw=(storage??localStorage).getItem(key(slot,kind));if(!raw||raw.length>4_000_000)continue;
       const p:unknown=JSON.parse(raw);
-      if(isRecord(p)&&isNumber(p.savedAt,1)&&validAdventure(p.state))copies.push({savedAt:p.savedAt,state:p.state,kind});
+      if(isRecord(p)&&isNumber(p.savedAt,1)&&validAdventure(p.state))copies.push({savedAt:p.savedAt,state:restoreAdventure(p.state),kind});
     }catch{/* The alternate save may still be readable after a partial browser restore. */}
   }
   return copies.sort((a,b)=>b.savedAt-a.savedAt);

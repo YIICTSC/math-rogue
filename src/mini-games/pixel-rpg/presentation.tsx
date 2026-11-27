@@ -50,14 +50,20 @@ export function FieldCanvas({state,dash}:{state:Adventure;dash:boolean}){
     if(!canvas)return;
     const ctx=canvas.getContext('2d',{alpha:false});
     if(!ctx)return;
-    let raf=0, last=0;
+    let raf=0, last=0, sceneWidth=1, sceneHeight=1;
     let prev=data.current.state, movement:Parameters<typeof fieldFrame>[5];
     const resize=()=>{
       const {width,height}=canvas.getBoundingClientRect();
       if(width<8||height<8)return;
-      const ratio=width/height, h=Math.min(310,Math.max(ratio>2?86:115,Math.round(height/(ratio>2?2.25:2.35))));
-      canvas.width=Math.min(720,Math.round(h*ratio));canvas.height=h;
+      const ratio=width/height;
+      sceneHeight=Math.min(310,Math.max(ratio>2?86:115,Math.round(height/(ratio>2?2.25:2.35))));
+      sceneWidth=Math.min(720,Math.round(sceneHeight*ratio));
+      const pixelRatio=Math.min(2,window.devicePixelRatio||1,2048/Math.max(width,height));
+      canvas.width=Math.round(width*pixelRatio);canvas.height=Math.round(height*pixelRatio);
+      ctx.setTransform(canvas.width/sceneWidth,0,0,canvas.height/sceneHeight,0,0);
       ctx.imageSmoothingEnabled=false;
+      const {state,dash}=data.current;
+      fieldFrame(ctx,state,sceneWidth,sceneHeight,performance.now(),movement,dash);
     };
     const observer=new ResizeObserver(resize);observer.observe(canvas);resize();
     const at=(s:Adventure,n:number)=>s.trail[Math.min(s.trail.length-1,n*2)]??s.at;
@@ -80,12 +86,12 @@ export function FieldCanvas({state,dash}:{state:Adventure;dash:boolean}){
         movement={lead:s.at,at:time,speed:dash?78:118,prev:previous,next,map:s.map,faces:previous.map((p,i)=>direction(p,next[i],movement?.faces[i]??s.direction))};
       }
       prev=s;
-      fieldFrame(ctx,s,canvas.width,canvas.height,time,movement,dash);
+      fieldFrame(ctx,s,sceneWidth,sceneHeight,time,movement,dash);
     };
     raf=requestAnimationFrame(tick);
     return ()=>{observer.disconnect();cancelAnimationFrame(raf);};
   },[]);
-  return <canvas ref={ref} className="pr-scene" aria-hidden="true" />;
+  return <canvas ref={ref} className="pr-scene pr-field-scene" aria-hidden="true" />;
 }
 
 export function BattleCanvas({battle,animation,reduced}:{battle:Battle;animation?:Animation;reduced:boolean}){
@@ -109,6 +115,8 @@ export function BattleCanvas({battle,animation,reduced}:{battle:Battle;animation
       canvas.height=Math.round(height*pixelRatio);
       ctx.setTransform(canvas.width/sceneWidth,0,0,canvas.height/sceneHeight,0,0);
       ctx.imageSmoothingEnabled=false;
+      const {battle,animation,reduced}=current.current;
+      battleFrame(ctx,battle,sceneWidth,sceneHeight,performance.now(),animation,reduced,compact.matches);
     };
     const observer=new ResizeObserver(resize);observer.observe(canvas);resize();
     const tick=(time:number)=>{

@@ -1,15 +1,15 @@
-import { useEffect, useState, type CSSProperties } from 'react';
-import { Shield, Sparkles, HeartPulse, Target as AimIcon, ChevronDown, Flame, FlaskConical, BookOpen, ChevronRight, Flag, Zap, ScrollText } from 'lucide-react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { Shield, Sparkles, HeartPulse, Target as AimIcon, ChevronDown, Flame, FlaskConical, BookOpen, ChevronRight, Flag, Zap, ScrollText, Swords, Trophy } from 'lucide-react';
 import CardView from '../../components/Card';
 import { CardType } from '../../types';
 import { COMBOS, HEROES, ITEMS, JOBS, type ItemId, type Target } from './catalog';
 import { REGIONS } from './campaign';
-import { LIMIT_MAX, LINK_MAX, availableCombos, battleItem, canPlay, comboMembers, cursorTarget, describeIntent, elementLabel, endTurn, explain, fighter, flee, inspect, living, orderOf, playCard, useCombo, useLimit, type Battle, type Fighter, type PlayedCard, type ResolvedCard } from './battle';
+import { LIMIT_MAX, LINK_MAX, availableCombos, battleItem, canAct, canPlay, comboMembers, cursorTarget, describeIntent, elementLabel, endTurn, explain, fighter, flee, inspect, living, orderOf, playCard, useCombo, useLimit, type Battle, type Fighter, type PlayedCard, type ResolvedCard } from './battle';
 import { BattleCanvas, Meter, Panel, positionStyle, useWords } from './presentation';
 import { type Animation } from './art';
 import { TechniqueArtwork, TechniqueStrip } from './CardArtwork';
 import TravelerPortrait from './TravelerPortrait';
-import type { Settings } from './adventure';
+import { GROUPS, type Settings, type VictoryRewards } from './adventure';
 
 export function CardInfo({card}:{card:ResolvedCard}){
   const {l,i,t}=useWords();
@@ -26,12 +26,46 @@ function handKind(card:ResolvedCard){
   return CardType.SKILL;
 }
 
-export default function BattleScreen({battle,actor,setActor,onCommand,onStudy,onOutcome,animation,settings,covered}:{
+function BattleOutcome({outcome,rewards,onContinue}:{outcome:NonNullable<Battle['outcome']>;rewards?:VictoryRewards;onContinue:()=>void}){
+  const {t,l}=useWords();
+  const button=useRef<HTMLButtonElement>(null);
+  useEffect(()=>{button.current?.focus({preventScroll:true});},[]);
+  const won=outcome==='win';
+  const title=won?t('勝利！','Victory!'):outcome==='loss'?t('冒険隊は力尽きた','The party fell'):t('無事に退いた','Retreated safely');
+  return <div className="pr-outcome" data-victory={won||undefined} role="dialog" aria-modal="true" aria-label={title} data-gamepad-modal
+    onClick={won?onContinue:undefined}>
+    <div className="pr-result">
+      <header>{won&&<Trophy size={22} aria-hidden="true" />}<strong>{title}</strong></header>
+      {won&&rewards?<div className="pr-reward-grid">
+        <section aria-label={t('経験値と熟練度','Experience and mastery')}>
+          <h3>{t('旅人の成長','Traveler growth')}</h3>
+          <ul className="pr-reward-heroes">{rewards.heroes.map(hero=><li key={hero.id}>
+            <span><b>{l(HEROES[hero.id].name)}</b>{hero.reserve&&<small>{t('控え','Reserve')}</small>}{hero.level>0&&<small className="pr-level-up">Lv. +{hero.level}</small>}</span>
+            <span className="pr-reward-exp"><b>EXP +{hero.xp}</b>{hero.mastery>0&&<small>{t('熟練度','Mastery')} +{hero.mastery}</small>}</span>
+          </li>)}</ul>
+        </section>
+        <section aria-label={t('獲得アイテム','Rewards')}>
+          <h3>{t('獲得報酬','Loot')}</h3>
+          <ul className="pr-reward-loot"><li><b>{t('ゴールド','Gold')}</b><span>+{rewards.gold} G</span></li>
+            {rewards.loot.map(({name,quantity},index)=><li key={index}><b>{l(name)}</b>{quantity!==undefined&&<span>×{quantity}</span>}</li>)}
+          </ul>
+          {!rewards.loot.length&&<p>{t('アイテムの獲得はありません','No item drops')}</p>}
+        </section>
+      </div>:<p>{outcome==='loss'?t('記録した休憩地点から再開します。','Resume at the last resting point.'):t('少しの間、敵との遭遇を避けます。','Avoid encounters briefly after retreating.')}</p>}
+      <footer><button ref={button} type="button" data-gamepad-initial-choice className="pr-primary" onClick={won?undefined:onContinue}>
+        {outcome==='loss'?t('休憩地点へ','Return to checkpoint'):t('続ける','Continue')} <ChevronRight size={15}/>
+      </button>{won&&<small>{t('画面のどこでもタップして続行','Tap anywhere to continue')}</small>}</footer>
+    </div>
+  </div>;
+}
+
+export default function BattleScreen({battle,actor,setActor,onCommand,onStudy,onOutcome,animation,settings,covered,encounterIntro,rewards}:{
   battle:Battle;actor:string;setActor:(id:string)=>void;onCommand:(op:(b:Battle)=>Battle,actor?:string)=>void;
-  onStudy:()=>void;onOutcome:()=>void;animation?:Animation;settings:Settings;covered:boolean;
+  onStudy:()=>void;onOutcome:()=>void;animation?:Animation;settings:Settings;covered:boolean;encounterIntro:number;rewards?:VictoryRewards;
 }){
   const {l,t,i,language}=useWords();
   const [menu,setMenu]=useState<'link'|'items'|'log'|'options'>();
+  const [showOtherCombos,setShowOtherCombos]=useState(false);
   const [detail,setDetail]=useState<ResolvedCard>();
   const [item,setItem]=useState<ItemId>();
   const [enemyCursor,setEnemyCursor]=useState<string>();
@@ -44,7 +78,11 @@ export default function BattleScreen({battle,actor,setActor,onCommand,onStudy,on
   const aimedAlly=cursorTarget(battle,unit.id,'ally',undefined,supportTarget);
   const hasSupport=unit.hand.some(c=>inspect(c).target==='ally')||HEROES[unit.id].limit.target==='ally';
   const locked=Boolean(animation)&&settings.rateFx!=='instant';
-  const inactive=locked||Boolean(battle.outcome);
+  const opening=encounterIntro>0;
+  const inactive=locked||opening||covered||Boolean(battle.outcome);
+  const menusCover=inactive||Boolean(menu||detail);
+  const linkReady=battle.link>=LINK_MAX&&combos.length>0;
+  const turnReady=!inactive&&!battle.party.some(p=>canAct(battle,p));
   const isStudyReady=!battle.spentStudy&&(settings.quizHints==='turn'||settings.quizHints==='battle'&&!battle.learnedHelped);
   const nextEnemy=(delta:number)=>{
     if(!alive.length)return;
@@ -115,17 +153,17 @@ export default function BattleScreen({battle,actor,setActor,onCommand,onStudy,on
     return()=>window.removeEventListener('keydown',keys);
   });
   const activeCue=animation?.cue;
-  return <section className="pr-combat">
-    <header className="pr-combat-top">
+  return <section className="pr-combat" data-pr-reduced-fx={settings.reduceFx||undefined}>
+    <header className="pr-combat-top" inert={menusCover}>
       <div><span>{phase?t('第二形態','Second phase'):battle.encounter.boss?t('番人戦','Guardian battle'):t('遭遇戦','Encounter')}</span><strong>{l(REGIONS[battle.encounter.region].name)}</strong></div>
       <b>TURN {battle.turn}</b>
       <button className="pr-icon" aria-label={t('戦闘の選択肢','Battle options')} onClick={()=>setMenu('options')} disabled={inactive}><Flag size={16} /></button>
     </header>
-    <div className="pr-arena" data-finishing={Boolean(animation?.defeated?.length)&&!settings.reduceFx||undefined}>
+    <div className="pr-arena" inert={menusCover} data-finishing={Boolean(animation?.defeated?.length)&&!settings.reduceFx||undefined}>
       <BattleCanvas battle={battle} animation={animation} reduced={settings.reduceFx} />
       <div className="pr-arena-bar">
         <span><span className="pr-indicator pr-red" /> {t('敵の予兆','Enemy intents')}</span>
-        <button type="button" onClick={()=>setMenu('log')} aria-label={t('戦闘記録','Battle log')}><ScrollText size={15}/></button>
+        <button type="button" onClick={()=>setMenu('log')} disabled={inactive} aria-label={t('戦闘記録','Battle log')}><ScrollText size={15}/></button>
         <span>{t('冒険隊','Travelers')} <span className="pr-indicator"/></span>
       </div>
       {alive.map((e,index)=>{
@@ -146,7 +184,7 @@ export default function BattleScreen({battle,actor,setActor,onCommand,onStudy,on
           <b>{l(HEROES[p.id].name)}</b><Meter value={p.hp} max={p.max} /><div>{showPoints(p)}</div>
         </button>;
       })}
-      {animation?.actors.length&&!settings.reduceFx&&<div className="pr-cut" aria-hidden="true">
+      {animation&&animation.actors.length>0&&!settings.reduceFx&&<div className="pr-cut" aria-hidden="true">
         {animation.actors.map(id=>orderOf(battle,id)&&<div key={id} className="pr-cut-portrait"><TravelerPortrait id={id} name={l(HEROES[id].name)} reaction="resolve" /></div>)}
       </div>}
       {animation&&activeCue&&<aside key={animation.at} className={`pr-play-cue pr-play-${activeCue.kind}`} aria-live="polite"
@@ -155,14 +193,8 @@ export default function BattleScreen({battle,actor,setActor,onCommand,onStudy,on
         <div>{activeCue.kind!=='card'&&<small>{activeCue.kind==='link'?t('連携','Link'):t('決め技','Finale')}</small>}
           <b>{l(activeCue.name)}</b></div>
       </aside>}
-      {battle.outcome&&(!animation||settings.reduceFx)&&<div className="pr-outcome" role="status">
-        <small>{battle.outcome==='win'?'VICTORY':battle.outcome==='loss'?'DEFEAT':'RETREAT'}</small>
-        <strong>{battle.outcome==='win'?t('勝利！','Victory!'):battle.outcome==='loss'?t('冒険隊は力尽きた','The party fell'):t('無事に退いた','Retreated safely')}</strong>
-        <p>{battle.outcome==='loss'?t('記録した休憩地点から再開します。','Resume at the last resting point.'):battle.outcome==='win'?t('経験値と熟練度を獲得。','Earn experience and job mastery.'):t('少しの間、敵との遭遇を避けます。','Avoid encounters briefly after retreating.')}</p>
-        <button data-gamepad-initial-choice className="pr-primary" onClick={onOutcome} disabled={locked}>{battle.outcome==='loss'?t('休憩地点へ','Return to checkpoint'):t('続ける','Continue')}</button>
-      </div>}
     </div>
-    <section className="pr-battle-deck" aria-label={t('手札','Hand')}>
+    <section className="pr-battle-deck" inert={menusCover} aria-label={t('手札','Hand')}>
       <div className="pr-deck-meta">
         <div><b>{l(HEROES[unit.id].name)}</b><span>{l(JOBS[unit.hero.job].name)}</span></div>
         <span className="pr-energy" aria-label={t('エナジー','Energy')}><Zap size={13}/>{unit.energy} EN</span>
@@ -193,18 +225,40 @@ export default function BattleScreen({battle,actor,setActor,onCommand,onStudy,on
       <nav className="pr-battle-actions">
         <button className={isStudyReady?'pr-study-ready':''} disabled={inactive||battle.spentStudy} onClick={()=>{setItem(undefined);setPreview(undefined);onStudy();}}><BookOpen size={15}/>{t('ひらめき','Study')}</button>
         <button disabled={inactive} onClick={()=>setMenu('items')}><FlaskConical size={15}/>{t('道具','Items')}</button>
-        <button disabled={inactive||!combos.length} onClick={()=>setMenu('link')}><Sparkles size={15}/>{t('連携','Link')}</button>
+        <button className={linkReady?'pr-link-ready':''} disabled={inactive||!combos.length} onClick={()=>{setPreview(undefined);setMenu('link');}}>
+          <Sparkles size={15}/>{t('連携','Link')}{linkReady&&<span className="sr-only">{t('発動可能','Ready')}</span>}
+        </button>
         <button disabled={inactive||unit.limit<LIMIT_MAX} onClick={useFinale}><AimIcon size={15}/>{t('決め技','Finale')} {unit.limit}/{LIMIT_MAX}</button>
-        <button className="pr-primary pr-endturn" disabled={inactive} onClick={()=>{setItem(undefined);setPreview(undefined);onCommand(endTurn);}}>{t('ターン終了','End turn')} <ChevronRight size={15}/></button>
+        <button className="pr-primary pr-endturn" data-ready={turnReady||undefined} disabled={inactive}
+          onClick={()=>{setItem(undefined);setPreview(undefined);onCommand(endTurn);}}>
+          <span>{t('ターン終了','End turn')}</span><ChevronRight size={15}/>
+          {turnReady&&<small>{t('使える手札なし','No playable cards')}</small>}
+        </button>
       </nav>
     </section>
+    {opening&&<div className="pr-encounter-intro" data-boss={battle.encounter.boss||undefined}
+      style={{'--pr-encounter-ms':`${encounterIntro}ms`} as CSSProperties} role="status">
+      <div><Swords aria-hidden="true" size={24}/><strong>{battle.encounter.boss?t('番人戦','Guardian battle'):battle.encounter.surprise==='party'?t('先制攻撃！','Preemptive strike!'):battle.encounter.surprise==='foe'?t('不意打ち！','Ambush!'):t('魔物と遭遇！','Encounter!')}</strong></div>
+    </div>}
+    {battle.outcome&&!locked&&<BattleOutcome outcome={battle.outcome} rewards={rewards} onContinue={onOutcome}/>}
     {detail&&<Panel heading={l(detail.name)} close={()=>setDetail(undefined)}><CardInfo card={detail}/></Panel>}
     {menu&&<Panel heading={menu==='link'?t('連携技','Link techniques'):menu==='items'?t('戦闘道具','Battle items'):menu==='log'?t('戦闘記録','Battle log'):t('戦闘の選択肢','Battle options')} close={()=>setMenu(undefined)}>
-      {menu==='link'&&<div className="pr-list">
-        <p>{t('味方のカードや学習で溜める。ゲージが満ちると発動できる。','Fill the gauge with party cards and study, then unleash a Link.')}</p>
-        {COMBOS.map(c=><button key={c.id} disabled={!combos.includes(c)||battle.link<LINK_MAX||inactive} onClick={()=>useLink(c)}>
-          <span><b>{l(c.name)}</b><small>{explain(c.tech,i)}</small></span><span>{combos.includes(c)?`${battle.link}/${LINK_MAX}`:t('編成条件','Formation')}</span>
+      {menu==='link'&&<div className="pr-list pr-link-list">
+        <div className="pr-link-overview"><span>{t('連携ゲージ','Link gauge')} <b>{battle.link}/{LINK_MAX}</b></span><Meter value={battle.link} max={LINK_MAX}/>
+          <p>{t('カードやひらめきで溜まり、次の戦闘に持ち越せる。','Play cards or Study to build Link. The gauge carries into the next battle.')}</p></div>
+        {combos.map(c=><button key={c.id} disabled={!linkReady||inactive} onClick={()=>useLink(c)}>
+          <span><b>{l(c.name)}</b><small>{explain(c.tech,i)}</small></span>{linkReady&&<span>{t('発動','Use')}</span>}
         </button>)}
+        {combos.length<COMBOS.length&&<div className="pr-link-locked">
+          <button type="button" aria-expanded={showOtherCombos} onClick={()=>setShowOtherCombos(open=>!open)}>
+            {t('ほかの編成で使える技','Techniques for other parties')} <ChevronDown size={14}/>
+          </button>
+          {showOtherCombos&&<div className="pr-list">{COMBOS.filter(c=>!combos.includes(c)).map(c=>{
+            const members=c.origins?.map(origin=>l(GROUPS[origin]))??c.jobs?.map(job=>l(JOBS[job].name));
+            return <article key={c.id}><span><b>{l(c.name)}</b><small>{explain(c.tech,i)}</small>
+              <small>{c.full?`${t('4人','4 travelers')} · `:''}{members?.join(' × ')??t('味方2人','2 allies')}</small></span></article>;
+          })}</div>}
+        </div>}
       </div>}
       {menu==='items'&&<div className="pr-list">{(Object.keys(ITEMS) as ItemId[]).filter(id=>id!=='oil').map(id=><button key={id} disabled={!battle.items[id]||!unit.freeItem||inactive} onClick={()=>{setMenu(undefined);setPreview(undefined);setItem(id);}}>
         <span><b>{l(ITEMS[id].name)}</b><small>{l(ITEMS[id].desc)}</small></span><span>×{battle.items[id]}</span></button>)}</div>}

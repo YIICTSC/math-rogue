@@ -2,7 +2,7 @@ import { CORE_CHAMBERS, ENDING, FEATURES, PROLOGUE, REGIONS, VEHICLES, type Copy
 import type { AssignmentReviewProblem } from '../../types';
 import { CARDS, GEAR, HEROES, HERO_LIST, ITEMS, JOBS, RELICS, starterDeck, type DeckCard, type Element, type EquipSlot, type ItemId, type RelicId, type Technique } from './catalog';
 import type { KartQuestion } from '../gakuro-kart/learning';
-import { OFFSETS, Tile, WORLD_ID, add, area, areaSite, canTravel, climateAt, coordinate, distance, isAir, isRoad, isShore, isWater, mapId, nearbyLandmark, noise, regionAt, same, sitePoint, tileAt, type Direction, type Landmark, type Point } from './world';
+import { DUNGEON_LAYOUT_VERSION, OFFSETS, Tile, WORLD_ID, add, area, areaSite, canTravel, climateAt, coordinate, distance, isAir, isRoad, isShore, isWater, mapId, nearbyLandmark, noise, regionAt, same, sitePoint, tileAt, type Direction, type Landmark, type Point } from './world';
 
 export type HeroState = {
   id: string; level: number; xp: number; hp: number; job: string; mastery: Record<string,number>; inherited?: string;
@@ -13,10 +13,12 @@ type MissedQuestion = KartQuestion | AssignmentReviewProblem;
 export type Adventure = {
   version: 1; leader: string; heroes: Record<string,HeroState>; party: string[];
   map: string; at: Point; direction: Direction; trail: Point[]; parent: {map:string; at:Point; vehicle:Vehicle}[];
+  dungeonLayout?: typeof DUNGEON_LAYOUT_VERSION;
   vehicle: Vehicle; licenses: Vehicle[]; checkpoint: {map:string; at:Point};
   stage: number; ending: boolean; cycle: number; completed: string[]; quests: string[]; flags: string[]; open: string[];
   rocks: Record<string,Point>; visits: string[]; monsters: string[]; books: number[];
   gold: number; gear: string[]; relics: RelicId[]; partyRelic?: RelicId; items: Record<ItemId,number>; unlockedCards: string[];
+  link?: number;
   steps: number; minutes: number; elapsed: number; rng: number; streak: number; repellent: number;
   learned: { correct: number; attempts: number; missed: MissedQuestion[]; units: Record<string,{correct:number;attempts:number}> };
   settings: Settings; rank: number;
@@ -31,6 +33,11 @@ export type Effect =
   | { type:'ending'; scenes:Scene[] };
 export type Change = { state: Adventure; message?: Copy; effect?: Effect; sound?: 'select'|'buff'|'win'|'damage' };
 export type Win = { xp:number; mastery:number; gold:number; enemyIds:string[]; hp:Record<string,number>; card?:string };
+export type VictoryRewards = {
+  heroes: { id:string; xp:number; mastery:number; level:number; reserve:boolean }[];
+  gold: number;
+  loot: { name:Copy; quantity?:number }[];
+};
 const defaultSettings: Settings = { encounters:'random',rate:'normal',answer:'choice',quizHints:'turn',rateFx:'normal',reduceFx:false,read:true,modes:[] };
 const BOOK_SITES = [1,1,1,2,1,1,1];
 const GROUPS = {
@@ -87,9 +94,9 @@ export function newAdventure(id:string,seed:number,settings:Partial<Settings>={}
       relics:plus.relics,partyRelic:plus.partyRelic,unlockedCards:plus.unlockedCards,monsters:plus.monsters,learned:plus.learned,flags:plus.flags.filter(flag=>flag.startsWith('mastery:'))};
   }
   return {
-    version:1,leader:id,heroes:{[id]:first},party:[id],map:mapId(0,0),at:start,direction:'up',trail:[start],parent:[],vehicle:'foot',licenses:['foot'],
+    version:1,leader:id,heroes:{[id]:first},party:[id],map:mapId(0,0),at:start,direction:'up',trail:[start],parent:[],dungeonLayout:DUNGEON_LAYOUT_VERSION,vehicle:'foot',licenses:['foot'],
     checkpoint:{map:mapId(0,0),at:start},stage:0,ending:false,cycle:0,completed:[],quests:[],flags:[],open:[],rocks:{},visits:[mapId(0,0)],monsters:[],books:[],
-    gold:32,gear:[seedWeapon(first.job)],relics:[],items:{tonic:3,salve:1,dew:1,oil:0},unlockedCards:['remedy','field-note','opening'],
+    gold:32,gear:[seedWeapon(first.job)],relics:[],items:{tonic:3,salve:1,dew:1,oil:0},unlockedCards:['remedy','field-note','opening'],link:0,
     steps:0,minutes:8*60,elapsed:0,rng:seed>>>0,streak:0,repellent:0,settings:{...defaultSettings,...settings},
     learned:{correct:0,attempts:0,missed:[],units:{}},rank:0,
   };
@@ -169,7 +176,7 @@ export function activeTile(s:Adventure,p:Point):Tile {
   if(tile===Tile.Water&&active&&feature==='water')return Tile.Bridge;
   if(tile===Tile.Rotor&&active)return Tile.Cave;
   if(tile===Tile.Trap&&active)return Tile.Stone;
-  if(feature==='ice'&&active&&p.x>=14&&p.x<=18&&p.y>=9&&p.y<=12&&tile===Tile.Stone)return Tile.Ice;
+  if(tile===Tile.Ice&&feature==='ice'&&!active)return Tile.Stone;
   return tile;
 }
 function relocate(s:Adventure,map:string,at:Point,vehicle:Vehicle,parent: Adventure['parent']):Adventure {
@@ -311,7 +318,7 @@ export function interact(s:Adventure, landmark=currentLandmark(s)):Change {
     }
     case 'feature': {
       const key=a.id+':mechanism';
-      const p= l.feature==='warp' && a.place==='dungeon' ? (l.variant?{x:25,y:15}:{x:25,y:5}):s.at;
+      const p=l.destination??s.at;
       return { state:{...s,at:p,trail:same(p,s.at)?s.trail:[p],flags:got(s.flags,key)},message:l.feature==='warp'?['足元に転移陣が光った。','The warp sigil shines underfoot.']:['仕掛けが動き、奥の道が開いた。','The mechanism opens a way inward.'],sound:'select' };
     }
     case 'secret': {
@@ -333,6 +340,42 @@ function passable(s:Adventure,p:Point) {
   }
   const gate=a.points.find(l=>l.kind==='gate'&&same(p,l));
   return !gate||s.flags.includes(a.id+':mechanism');
+}
+function nearestDungeonFloor(s:Adventure,map:string,point:Point):Point {
+  const a=area(map);
+  if(a.place!=='dungeon')return point;
+  const local={...s,map,at:a.start,vehicle:'foot' as const};
+  const rock=s.rocks[map]??a.points.find(marker=>marker.kind==='rock');
+  const queue=[a.start], seen=new Set([coordinate(a.start)]);
+  let nearest=a.start;
+  for(let index=0;index<queue.length;index++){
+    const at=queue[index];
+    if(same(at,point))return point;
+    if(distance(at,point)<distance(nearest,point))nearest=at;
+    for(const offset of Object.values(OFFSETS)){
+      const next=add(at,offset),key=coordinate(next);
+      if(seen.has(key)||!passable(local,next)||activeTile(local,next)===Tile.Trap||rock&&same(next,rock))continue;
+      seen.add(key);queue.push(next);
+    }
+  }
+  return nearest;
+}
+export function restoreAdventure(s:Adventure):Adventure {
+  if(s.dungeonLayout===DUNGEON_LAYOUT_VERSION)return s;
+  const rocks:Adventure['rocks']={};
+  for(const [map,position] of Object.entries(s.rocks)){
+    const a=area(map);
+    if(a.place!=='dungeon')rocks[map]=position;
+    else if(s.flags.includes(map+':mechanism')){
+      const plate=a.points.find(marker=>marker.kind==='plate');
+      if(plate)rocks[map]={x:plate.x,y:plate.y};
+    }
+  }
+  const next={...s,rocks,dungeonLayout:DUNGEON_LAYOUT_VERSION};
+  const at=nearestDungeonFloor(next,s.map,s.at);
+  return {...next,at,trail:area(s.map).place==='dungeon'?[at]:s.trail,
+    parent:s.parent.map(p=>({...p,at:nearestDungeonFloor(next,p.map,p.at)})),
+    checkpoint:{...s.checkpoint,at:nearestDungeonFloor(next,s.checkpoint.map,s.checkpoint.at)}};
 }
 export function step(s:Adventure,direction:Direction,dash=false):Change {
   const a=area(s.map), d=OFFSETS[direction];
@@ -412,11 +455,30 @@ export function applyStudy(s:Adventure,question:MissedQuestion,correct:boolean,l
   }
   return {state:next};
 }
-export function completeBattle(s:Adventure,encounter:Encounter,win:Win):Change {
+const earnedXp = (win:Win,active:boolean)=>Math.floor(win.xp*(active?1:.35));
+
+export function completeBattle(s:Adventure,encounter:Encounter,win:Win):Change & { rewards:VictoryRewards } {
+  const change=grantVictory(s,encounter,win);
+  const next=change.state;
+  const loot:VictoryRewards['loot']=[];
+  for(const id of Object.keys(ITEMS) as ItemId[]){
+    const quantity=next.items[id]-s.items[id];
+    if(quantity>0)loot.push({name:ITEMS[id].name,quantity});
+  }
+  for(const id of next.gear)if(!s.gear.includes(id))loot.push({name:GEAR[id].name});
+  for(const id of next.unlockedCards)if(!s.unlockedCards.includes(id))loot.push({name:CARDS[id].name});
+  for(const id of next.licenses)if(!s.licenses.includes(id))loot.push({name:VEHICLES[id]});
+  const roster=[...s.party,...Object.keys(s.heroes).filter(id=>!s.party.includes(id))];
+  return {...change,rewards:{loot,gold:next.gold-s.gold,heroes:roster.map(id=>{
+    const before=s.heroes[id], hero=next.heroes[id], active=s.party.includes(id);
+    return {id,xp:earnedXp(win,active),mastery:(hero.mastery[hero.job]??0)-(before.mastery[hero.job]??0),level:hero.level-before.level,reserve:!active};
+  })}};
+}
+function grantVictory(s:Adventure,encounter:Encounter,win:Win):Change {
   const region=encounter.region;
   const heroes=Object.fromEntries(Object.entries(s.heroes).map(([id,h])=>{
     const active=s.party.includes(id);
-    let xp=h.xp+Math.floor(win.xp*(active?1:.35)), level=h.level;
+    let xp=h.xp+earnedXp(win,active), level=h.level;
     while(xp>=xpNext(level)&&level<60){xp-=xpNext(level);level++;}
     const mastery=active?{...h.mastery,[h.job]:(h.mastery[h.job]??0)+win.mastery}:h.mastery;
     const unit={...h,xp,level,mastery};
@@ -444,7 +506,7 @@ export function completeBattle(s:Adventure,encounter:Encounter,win:Win):Change {
   const r=REGIONS[region];
   next={...next,stage:s.stage+1,ending:s.ending||region===5,
     licenses:r.grant&&!next.licenses.includes(r.grant)?[...next.licenses,r.grant]:next.licenses,
-    items:{...next.items,tonic:next.items.tonic+2,dew:next.items.dew+1},
+    items:{...next.items,tonic:Math.min(999,next.items.tonic+2),dew:Math.min(999,next.items.dew+1)},
     flags:got(next.flags,`core:${region}`),unlockedCards:got(next.unlockedCards,region>=4?'remnant':'artifact')};
   if(region===5)return {state:next,message:msg,effect:{type:'ending',scenes:endingScenes(next)},sound:'win'};
   const line:Copy=r.grant?

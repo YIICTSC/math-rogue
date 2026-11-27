@@ -302,16 +302,36 @@ export const ITEMS = {
   oil: {name:['灯芯油','Wick Oil'], desc:['次の探索でエンカウントを避ける','Prevents encounters on the next stretch of road'], price:24},
 } satisfies Record<string,{name:Copy;desc:Copy;price:number}>;
 export type ItemId = keyof typeof ITEMS;
+export const LINK_MAX = 12;
 export type Combo = { id: string; name: Copy; origins?: WorldOfOrigin[]; jobs?: string[]; full?: boolean; tech: Technique };
 function combo(id: string,name: Copy, target: Target, skill: Skill, element: Element, condition: Pick<Combo,'origins'|'jobs'|'full'>): Combo {
   return { id,name,...condition,tech:tech(id,name,target,skill,element,0) };
 }
 export const COMBOS = [
+  combo('road-duet',['旅路の呼吸','On the Same Road'],'party',{ block:9,nextDraw:1 },'wind',{}),
   combo('companions',['先輩と後輩の絆','A Bond Across Years'],'party',{ block:14,strength:2 },'light',{origins:['elementary','high-school']}),
   combo('courage',['勇気と魔法','Magic and Courage'],'foes',{ damage:16,weak:1 },'fire',{origins:['elementary','magic']}),
   combo('wisdom',['知略と魔術','Wit and Sorcery'],'foes',{ damage:15,expose:2 },'storm',{origins:['high-school','magic']}),
+  combo('playground',['校庭の一番星','Playground Shooting Star'],'foe',{ damage:19,expose:2,block:7 },'steel',{origins:['elementary','elementary']}),
+  combo('last-bell',['放課後の大作戦','After the Last Bell'],'party',{ strength:2,nextEnergy:1 },'steel',{origins:['high-school','high-school']}),
+  combo('starlit-recess',['星降る休み時間','Starfall Recess'],'party',{ heal:11,cleanse:true,nextDraw:1 },'light',{origins:['magic','magic']}),
+  combo('new-friends',['はじめての友だち','Friends at First Sight'],'party',{ heal:9,block:7,cleanse:true },'light',{origins:['elementary','guest']}),
+  combo('night-patrol',['異郷の夜回り','Night Watch Together'],'foes',{ damage:12,weak:2,poison:3 },'dark',{origins:['high-school','guest']}),
+  combo('wandering-star',['さすらい星の術式','Wandering Star Array'],'foe',{ damage:22,pierce:true,nextEnergy:1 },'storm',{origins:['magic','guest']}),
+  combo('two-horizons',['ふたつの地平線','Between Two Horizons'],'foes',{ damage:15,expose:1,draw:2 },'wind',{origins:['guest','guest']}),
   combo('oath',['守護の誓い','Oath of Protection'],'party',{ block:15,heal:10 },'light',{jobs:['guardian','medic']}),
   combo('timespell',['時空魔法連鎖','Spacetime Chain'],'foes',{ damage:17,nextEnergy:1 },'ice',{jobs:['mage','chronist']}),
   combo('crossfire',['クロスアタック','Cross Attack'],'foe',{ damage:16,repeats:2,pierce:true },'wind',{jobs:['swordsman','archer']}),
-  combo('all',['知識の共鳴','Resonance of Knowledge'],'foes',{ damage:25,cleanse:true },'light',{full:true}),
+  combo('scouted-strike',['影渡りの奇襲','Shadowstep Ambush'],'foe',{ damage:10,repeats:3,weak:2 },'steel',{jobs:['scout','monk']}),
+  combo('cauldron',['試薬の連鎖反応','Catalyst Reaction'],'foes',{ poison:8,expose:2 },'dark',{jobs:['scholar','alchemist']}),
+  combo('second-wind',['野営地の追い風','Campfire Tailwind'],'party',{ heal:12,nextEnergy:1 },'wind',{jobs:['adventurer','spirit']}),
+  combo('counter-song',['反撃の行進曲','Countermarch Anthem'],'party',{ block:13,reflect:6,strength:1 },'light',{jobs:['tactician','cantor']}),
+  combo('ember-pack',['残火を追う群れ','Ember Hunt'],'foes',{ damage:13,summon:true,weak:2 },'fire',{jobs:['beast','spellblade']}),
+  combo('storm-familiar',['雲上の雷獣','Thunder Above the Clouds'],'foes',{ damage:21,summon:true },'storm',{jobs:['summoner','skymage']}),
+  combo('mirror-bastion',['天蓋の鏡陣','Firmament Mirror Array'],'party',{ block:21,reflect:7,cleanse:true },'ice',{jobs:['runes','astral']}),
+  combo('phantom-drake',['竜影の三連斬','Drake Shadow Barrage'],'foe',{ damage:12,repeats:3,pierce:true },'dark',{jobs:['phantom','drake']}),
+  combo('open-book',['全知の虹頁','Prismatic Open Book'],'foes',{ damage:19,expose:2,draw:2 },'storm',{jobs:['omni','sage']}),
+  combo('atlas-deck',['旅の地図をめくる','Turn the Atlas Page'],'party',{ block:10,nextEnergy:1,nextDraw:2 },'light',{jobs:['cardmaster','seeker']}),
+  combo('all',['知識の共鳴','Resonance of Knowledge'],'foes',{ damage:25,cleanse:true },'light',{full:true,origins:['elementary','high-school','magic']}),
+  combo('four-roads',['四つの世界の道しるべ','Waymark of Four Worlds'],'party',{ heal:18,block:17,cleanse:true },'light',{full:true,origins:['elementary','high-school','magic','guest']}),
 ];

@@ -16,10 +16,10 @@ export function loadD1HeroArt(id:string,transformed=false){
  return image;
 }
 /** Artwork is bottom-centered and drawn at integer pixel coordinates. */
-export function drawD1HeroAction(ctx:CanvasRenderingContext2D,id:string,source:HTMLImageElement,facing:number,x:number,y:number,size:number,transformed=false){
+export function drawD1HeroAction(ctx:CanvasRenderingContext2D,id:string,source:HTMLImageElement,facing:number,x:number,y:number,size:number,transformed=false,smooth=false){
  const motion=studentActionSnapshot(id);if(!motion)return false;
  const painted=loadD1HeroArt(id,transformed);
- ctx.save();ctx.imageSmoothingEnabled=false;
+ ctx.save();ctx.imageSmoothingEnabled=smooth;
  // The painted atlas has the same 8-direction order as the legacy hero sheets.
  if(!directedAction(motion.action)&&painted?.complete&&painted.naturalWidth){
   const row=motion.action==='walk'?motion.frame<3?0:1:({attack:2,throw:3,swing:4,read:5,use:6,shoot:7})[motion.action];

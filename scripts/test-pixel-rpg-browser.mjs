@@ -56,6 +56,13 @@ try {
     }
     await page.locator('.pr-story:visible').waitFor({state:'hidden'});
   }
+  async function battleReady(tutorial=false){
+    await page.locator('.pr-combat').waitFor();
+    await page.locator('.pr-encounter-intro').waitFor({state:'hidden'});
+    if(tutorial)await page.locator('.pr-story:visible').waitFor();
+    await finishDialog();
+  }
+  const combatInputReady=()=>page.locator('.pr-battle-deck:not([inert]),.pr-outcome').first().waitFor();
   const coords=async()=>field().evaluate(n=>({x:Number(n.dataset.prX),y:Number(n.dataset.prY),map:n.dataset.prMap}));
   async function key(key,count=1){for(let n=0;n<count;n++)await page.keyboard.press(key,{delay:8});}
   await boot();
@@ -95,7 +102,7 @@ try {
   await page.locator('.pr-save-list article').first().getByRole('button').click();
   await finishDialog();
   assert.deepEqual(await coords(),{x:17,y:21,map:'r0-s0-f0'});
-  await layout('.pr-dpad');await layout('.pr-action-main');await shot('04-first-village');
+  await layout('.pr-virtual-pad');await layout('.pr-action-main');await shot('04-first-village');
   await key('ArrowUp',3);
   assert.deepEqual(await coords(),{x:17,y:18,map:'r0-s0-f0'});
   await button(/^(A 調べる|A Interact)$/).click();
@@ -109,7 +116,7 @@ try {
   assert.notEqual(await page.locator('.pr-person img').getAttribute('src'),oldSprite,'The clothing illustration changes after a job switch');
   await button(/^(設定|Settings)$/).click();
   await page.locator('.pr-settings select').nth(0).selectOption('symbol');
-  await page.locator('.pr-settings select').nth(2).selectOption('instant');
+  await page.locator('.pr-settings select').nth(2).selectOption('normal');
   await button(/^(記録|Save)$/).click();
   await page.locator('.pr-window .pr-primary').click();
   const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('learning-rogue:pixel-rpg:v1:1:manual')));
@@ -120,6 +127,12 @@ try {
   const dpad=page.locator('.pr-dir-right');
   await dpad.tap();
   assert.equal((await coords()).x,x+1,'Touch pad moves exactly once per tap');
+  const pad=await page.locator('.pr-virtual-pad').boundingBox(), stickStart=await coords();
+  const padX=pad.x+pad.width/2, padY=pad.y+pad.height/2;
+  await page.mouse.move(padX,padY);await page.mouse.down();
+  assert.deepEqual(await coords(),stickStart,'The center of the virtual pad has a dead zone');
+  await page.mouse.move(padX,padY+pad.height*.42);await page.mouse.up();
+  assert.equal((await coords()).y,stickStart.y+1,'Dragging the virtual pad steers the party');
   await page.evaluate(()=>window.__pixelTestPad={mapping:'standard',connected:true,axes:[-1,0,0,0],buttons:Array.from({length:17},()=>({pressed:false}))});
   await page.waitForFunction(x=>Number(document.querySelector('.pr-field')?.dataset.prX)<x+1,x);
   await page.evaluate(()=>window.__pixelTestPad=null);
@@ -137,7 +150,7 @@ try {
   await finishDialog();
   assert.equal(await page.locator('.pr-field-party button').count(),4);
   for(const [width,height] of [[844,390],[820,1180],[1280,768],[390,844]]){
-    await page.setViewportSize({width,height});await layout('.pr-field');await layout('.pr-dpad');await layout('.pr-action-main');await shot(`05-party-${width}`);
+    await page.setViewportSize({width,height});await layout('.pr-field');await layout('.pr-virtual-pad');await layout('.pr-action-main');await shot(`05-party-${width}`);
   }
   // Derive a legal movement path from the current scene, and issue it using real key events.
   const moves=await page.evaluate(async(coords)=>{
@@ -157,8 +170,19 @@ try {
     throw new Error('Enemy unreachable');
   },await coords());
   for(const direction of moves)await key(direction);
-  await page.locator('.pr-combat').waitFor();
-  await finishDialog();
+  const encounterIntro=page.locator('.pr-encounter-intro');
+  await encounterIntro.waitFor();
+  const initial=await page.evaluate(()=>{
+    const enemy=document.querySelector('.pr-unit-enemy[aria-pressed="true"]>small').textContent;
+    const hand=document.querySelector('.pr-hand-card').getBoundingClientRect();
+    return {enemy,x:hand.x+10,y:hand.y+10,locked:document.querySelector('.pr-battle-deck').inert};
+  });
+  assert(initial.locked);
+  await page.touchscreen.tap(initial.x,initial.y);
+  await key('1');
+  await battleReady(true);
+  assert.equal(await page.locator('.pr-unit-enemy[aria-pressed="true"]>small').textContent(),initial.enemy);
+  assert.match(await page.locator('.pr-energy').innerText(),/2 EN/);
   const actionSources=await page.evaluate(async state=>{
     const {battleFrame}=await import('/src/mini-games/pixel-rpg/art.ts');
     const {createBattle}=await import('/src/mini-games/pixel-rpg/battle.ts');
@@ -188,6 +212,19 @@ try {
   assert.equal(new Set(actionSources.map(rect=>rect.join(','))).size,3,'Attack, skill and damage use different crops in Akari’s Guardian outfit');
   await layout('.pr-arena');await layout('.pr-endturn');
   await shot('06-battle-phone');
+  await button(/^(連携|Link)$/).click();
+  const linkDialog=page.getByRole('dialog',{name:/連携技|Link techniques/});
+  await linkDialog.getByRole('button',{name:/ほかの編成|Techniques for other parties/}).click();
+  assert(await linkDialog.evaluate(window=>{
+    const hand=document.querySelector('.pr-hand-card'), deck=document.querySelector('.pr-battle-deck');
+    const a=hand.getBoundingClientRect(),b=window.getBoundingClientRect();
+    const x=(Math.max(a.left,b.left)+Math.min(a.right,b.right))/2;
+    const y=(Math.max(a.top,b.top)+Math.min(a.bottom,b.bottom))/2;
+    return deck.inert&&y>=a.top&&y<=a.bottom&&y>=b.top&&y<=b.bottom&&window.contains(document.elementFromPoint(x,y));
+  }), 'The Link dialog covers the hand and blocks interaction');
+  await shot('06-link-phone');
+  await key('Escape');
+  await linkDialog.waitFor({state:'hidden'});
   assert.equal(await page.locator('.pr-unit-enemy[aria-pressed="true"] .pr-enemy-cursor').count(),1);
   await page.waitForFunction(()=>[...document.querySelectorAll('.pr-hand-card img')].some(image=>image.complete&&image.naturalWidth>0));
   await page.setViewportSize({width:844,height:390});await layout('.pr-arena');await layout('.pr-endturn');await shot('07-battle-landscape');
@@ -211,11 +248,13 @@ try {
   const answer=String(Number(matches[1])+Number(matches[2]));
   await challenge.locator('.basic-challenge-options').getByRole('button',{name:answer,exact:true}).click();
   await challenge.waitFor({state:'hidden'});
+  await combatInputReady();
   assert.match(await page.locator('.pr-energy').innerText(),/3 EN/);
   assert.equal(await readProgress(),beforeQuiz+1,'One correct shared question records one unit answer');
   const attack=page.locator('.pr-hand-card[aria-disabled="false"]').filter({hasText:/威力|Power/}).first();
   const aimedVitals=await page.locator('.pr-unit-enemy[aria-pressed="true"]>small').textContent();
   await attack.click();
+  await combatInputReady();
   const afterHit=await page.locator('.pr-unit-enemy[aria-pressed="true"]>small').allTextContents();
   assert(!afterHit.length||afterHit[0]!==aimedVitals,'A single card tap attacks the cursor target');
   assert.equal(await page.locator('.pr-target-bar').count(),0);
@@ -227,14 +266,23 @@ try {
         const hand=page.locator('.pr-hand-card[aria-disabled="false"]').filter({hasText:/威力|Power/});
         if(!await hand.count())break;
         await hand.first().click();
+        await combatInputReady();
       }
     }
-    if(!await page.locator('.pr-outcome').count())await page.locator('.pr-endturn').click();
+    if(!await page.locator('.pr-outcome').count()){
+      await page.locator('.pr-endturn').click();await combatInputReady();
+    }
   }
   await page.locator('.pr-outcome').waitFor();
   assert.match(await page.locator('.pr-outcome strong').innerText(),/勝利|Victory/);
+  assert.equal(await page.locator('.pr-reward-heroes li').count(),4);
+  assert((await page.locator('.pr-reward-heroes li').allTextContents()).every(line=>line.includes('EXP +18')));
+  const bankedLink=Number((await page.locator('.pr-link').innerText()).match(/LINK (\d+)\//)[1]);
+  assert(bankedLink>0);
   await shot('09-victory-landscape');
-  await page.locator('.pr-outcome .pr-primary').click();
+  await page.touchscreen.tap(30,350);
+  await field().waitFor();
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('learning-rogue:pixel-rpg:v1:1:auto')).state.link),bankedLink);
   const afterWin=await coords();
   await boot('MINI_GAME_PIXEL_RPG');
   await page.locator('.pr-title h1').waitFor();
@@ -282,8 +330,10 @@ try {
   await approachAndUse('exit');
   await approachAndUse('site','The Forgotten Cave');
   await finishDialog();
+  await shot('10-dungeon-cave');
   await approachAndUse('feature');
   await approachAndUse('stairs');
+  await shot('10-dungeon-rotor');
   await approachAndUse('feature');
   await key('x');
   await button(/^(記録|Save)$/).click();
@@ -291,8 +341,27 @@ try {
   await dialog().locator('button[data-pr-close]').click();
   const beforeBoss=await coords();
   await approachAndUse('boss');
-  await page.locator('.pr-combat').waitFor();
-  for(let round=0;round<55&&!await page.locator('.pr-outcome').count();round++)await page.locator('.pr-endturn').click();
+  await battleReady();
+  assert.match(await page.locator('.pr-link').innerText(),new RegExp(`LINK ${bankedLink}/12`));
+  const control=page.locator('.pr-deck-meta>div:first-child>b');
+  const firstActor=await control.innerText();
+  const handNow=()=>page.locator('.pr-hand-card[aria-disabled="false"]');
+  for(let n=0;n<24&&!await page.locator('.pr-endturn[data-ready]').count();n++){
+    const defense=handNow().filter({hasText:/防御|Block/}).first();
+    const card=await defense.count()?defense:handNow().first();
+    if(!await card.count())break;
+    await card.click();
+    await combatInputReady();
+  }
+  assert.notEqual(await control.innerText(),firstActor,'Running out of playable cards selects the next traveler');
+  assert(await page.locator('.pr-endturn[data-ready]').isVisible(),'Exhausting all turns highlights End turn');
+  await page.locator('.pr-link-ready').click();
+  await page.getByRole('button',{name:/旅路の呼吸|On the Same Road/}).click();
+  await combatInputReady();
+  assert.match(await page.locator('.pr-link').innerText(),/LINK 0\/12/);
+  for(let round=0;round<55&&!await page.locator('.pr-outcome').count();round++){
+    await page.locator('.pr-endturn').click();await combatInputReady();
+  }
   assert.match(await page.locator('.pr-outcome strong').innerText(),/冒険隊は力尽きた|The party fell/);
   await layout('.pr-outcome .pr-primary');await shot('11-boss-defeat');
   await page.locator('.pr-outcome .pr-primary').click();
@@ -303,7 +372,7 @@ try {
   await page.locator('.pr-save-list article').first().getByRole('button',{name:/手動記録|Manual save/}).click();
   assert.deepEqual(await coords(),beforeBoss);
   await approachAndUse('boss');
-  await page.locator('.pr-combat').waitFor();
+  await battleReady();
   let secondPhase=false;
   for(let round=0;round<16&&!await page.locator('.pr-outcome').count();round++){
     const n=await page.locator('.pr-unit-ally:enabled').count();
@@ -315,15 +384,24 @@ try {
         const hand=page.locator('.pr-hand-card[aria-disabled="false"]').filter({hasText:/威力|Power/});
         if(!await hand.count())break;
         await hand.first().click();
+        await combatInputReady();
         if(!secondPhase&&(await page.locator('.pr-combat-top').innerText()).match(/第二形態|Second phase/)){
           secondPhase=true;await shot('12-boss-phase-two');
         }
       }
     }
-    if(!await page.locator('.pr-outcome').count())await page.locator('.pr-endturn').click();
+    if(!await page.locator('.pr-outcome').count()){
+      await page.locator('.pr-endturn').click();await combatInputReady();
+    }
   }
   assert(secondPhase,'The guardian visibly transitions to phase two');
   assert.match(await page.locator('.pr-outcome strong').innerText(),/勝利|Victory/);
+  assert.match(await page.locator('.pr-reward-loot').innerText(),/旅の薬|Travel Tonic/);
+  assert.match(await page.locator('.pr-reward-loot').innerText(),/×2/);
+  await shot('12-boss-rewards');
+  await page.setViewportSize({width:390,height:844});
+  await layout('.pr-outcome .pr-primary');
+  await shot('12-boss-rewards-phone');
   await page.locator('.pr-outcome .pr-primary').click();
   await finishDialog();
   const cleared=await page.evaluate(()=>JSON.parse(localStorage.getItem('learning-rogue:pixel-rpg:v1:1:auto')).state);

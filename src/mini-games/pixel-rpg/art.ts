@@ -439,8 +439,11 @@ export function fieldFrame(c:Canvas,s:Adventure,width:number,height:number,now:n
       const spriteSize=32;
       const left=Math.round(x-spriteSize/2),top=Math.round(y-spriteSize*.95);
       const walking=t<1&&!same(old,dest);
-      if(drawStudentSprite(c,id,OFFSETS[dir],left,top,spriteSize)||drawGuestSprite(c,id,dir,left,top,spriteSize,walking?t:undefined))return;
-      heroSprite(c,id,s.heroes[id].job,x,y,dir,walking?(dash?'dash':'walk'):'idle',now,.67);
+      c.save();c.imageSmoothingEnabled=true;
+      if(!drawStudentSprite(c,id,OFFSETS[dir],left,top,spriteSize,false,true)&&!drawGuestSprite(c,id,dir,left,top,spriteSize,walking?t:undefined)){
+        heroSprite(c,id,s.heroes[id].job,x,y,dir,walking?(dash?'dash':'walk'):'idle',now,.67);
+      }
+      c.restore();
     }});
   });
   front.sort((x,y)=>x.y-y.y).forEach(t=>t.draw());
