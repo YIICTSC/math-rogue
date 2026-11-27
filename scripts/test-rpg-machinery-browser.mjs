@@ -46,6 +46,15 @@ try {
         p.x=x;p.y=z;p.position3D={x:x+.5,y:terrainHeight(w,x,z),z:z+.5,surface2D:true,layered2D:true};
         w.revision++;r.emit();
       };
+      window.seedConstruction=()=>{
+        const w=r.world,p=w.players.local;
+        p.x=20;p.y=20;p.position3D={x:20.5,y:0,z:20.5,surface2D:true,layered2D:true};
+        for(const [x,y,z,block] of [[20,0,19,'ladder'],[20,1,19,'ladder'],[20,2,19,'ladder'],[21,0,20,'signboard'],[21,0,19,'stone']]){
+          const key=x+','+y+','+z;
+          w.voxels.edits[key]=block;w.voxels.placedBy[key]=p.id;
+        }
+        w.voxels.revision++;w.revision++;r.emit();
+      };
       window.seedSandbox=()=>{
       const w=r.world,p=w.players.local;
       w.sites=w.sites.filter(s=>Math.abs(s.x-20)+Math.abs(s.y-20)>12);
@@ -287,8 +296,23 @@ try {
   }
   await page.getByRole('button',{name:'宝箱を開ける',exact:true}).click();
   await page.waitForFunction(()=>window.snapshot.world.players.local.voxelDiscoveries.includes('cache-railvault'));
+  await page.evaluate(()=>window.seedConstruction());
+  await page.getByRole('button',{name:'高さ断面',exact:true}).click();
+  await canvas.press('ArrowRight');
+  await page.getByRole('button',{name:'調べる',exact:true}).click();
+  await page.getByLabel('看板の文字',{exact:true}).fill('霜鉄の廃坑へ');
+  await page.getByRole('button',{name:'書き込む',exact:true}).click();
+  await page.waitForFunction(()=>window.snapshot.world.voxels.details.signs['21,0,20']==='霜鉄の廃坑へ');
+  await page.getByRole('button',{name:'地表に戻る',exact:true}).click();
+  await page.getByRole('button',{name:'登る',exact:true}).click();
+  await page.waitForFunction(()=>window.snapshot.world.players.local.position3D.y===1);
+  await page.getByRole('button',{name:'2D / 3D'}).click();
+  await scene.waitFor();
+  await page.waitForFunction(()=>document.querySelector('[data-testid=rpg-world-3d]')?.dataset.landscape);
+  assert.equal(await page.evaluate(()=>window.snapshot.world.players.local.position3D.y),1);
+  await page.screenshot({path:`${out}/ladder-and-sign-3d.png`});
   assert.deepEqual(errors,[]);
-  console.log('PASS RPG UI, blueprint place/undo, circuit across modes, mouse lock and drag, creature journal, IndexedDB, cargo boat, glider and underground exploration.');
+  console.log('PASS 2D/3D circuitry, blueprints, mouse lock/drag, creature journal, IndexedDB, sailing, flight, caves, signs and climbing.');
 } catch (error) {
   console.error('Browser errors:', errors, (await page?.locator('body').innerText({timeout:3000}).catch(() => ''))?.slice(0,1600));
   console.error(await page?.evaluate(() => {

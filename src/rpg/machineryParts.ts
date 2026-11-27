@@ -20,6 +20,12 @@ export const MACHINE_PARTS = {
   crystal_lamp: ['魔晶ランプ', 'Crystal lamp', 'ましょうランプ', '#f3be60', 'lamp'],
   copper_lamp: ['銅ランプ', 'Copper lamp', 'どうランプ', '#d89668', 'lamp'],
   signal_gate: ['自動ゲート', 'Powered gate', 'じどうゲート', '#ac996f', 'gate'],
+  fence_gate: ['木の柵門', 'Fence gate', 'きのさくもん', '#baa477', 'gate'],
+  trapdoor: ['床はね戸', 'Trapdoor', 'ゆかはねど', '#916549', 'gate'],
+  iron_door: ['鉄扉', 'Iron door', 'てつとびら', '#9baaaf', 'gate'],
+  steel_shutter: ['鋼のシャッター', 'Steel shutter', 'はがねのシャッター', '#7a889b', 'gate'],
+  drawbridge: ['跳ね橋', 'Drawbridge', 'はねばし', '#ce9b64', 'gate'],
+  waygate: ['魔晶転送門', 'Crystal waygate', 'ましょうてんそうもん', '#528da8', 'portal'],
   piston: ['ピストン', 'Piston', 'ピストン', '#b58f64', 'piston'],
   sticky_piston: ['粘着ピストン', 'Sticky piston', 'ねんちゃくピストン', '#8caa6f', 'piston'],
   crystal_beacon: ['魔晶ビーコン', 'Crystal beacon', 'ましょうビーコン', '#8cc8d5', 'crystal'],
@@ -57,6 +63,9 @@ export type MachineShape = typeof MACHINE_PARTS[MachinePart][4];
 export const isMachinePart = (block: unknown): block is MachinePart =>
   typeof block === 'string' && Object.hasOwn(MACHINE_PARTS, block);
 
+export const isGatePart = (block:unknown) => isMachinePart(block)&&MACHINE_PARTS[block][4]==='gate';
+export const manuallyOpenedGate = (block:unknown) => block==='fence_gate'||block==='trapdoor';
+
 const rails: ReadonlySet<unknown> = new Set(['rail','powered_rail','detector_rail','station_rail','switch_rail','trigger_rail','buffer_rail']);
 export const isRail = (block: unknown) => rails.has(block);
 
@@ -64,7 +73,7 @@ const thinParts = new Set<MachinePart>([
   'crystal_wire', 'crystal_lever', 'crystal_button', 'wooden_button', 'pressure_plate',
   'weight_plate', 'daylight_sensor', 'water_sensor', 'farm_sensor', 'crystal_inverter', 'crystal_repeater',
   'crystal_comparator', 'rail', 'powered_rail', 'detector_rail', 'station_rail', 'switch_rail', 'trigger_rail', 'buffer_rail',
-  'conveyor', 'tripwire', 'tripwire_hook', 'item_sensor', 'presence_sensor', 'vibration_sensor',
+  'conveyor', 'tripwire', 'tripwire_hook', 'item_sensor', 'presence_sensor', 'vibration_sensor', 'waygate',
 ]);
 
 export const isThinMachinePart = (block: unknown) => isMachinePart(block) && thinParts.has(block);

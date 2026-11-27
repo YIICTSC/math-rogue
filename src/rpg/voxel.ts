@@ -5,7 +5,9 @@ import { potionSeconds, toolLimit, wearTool } from './explorationEquipment';
 import { applySandboxSettings, recordSandboxEvent, sandboxAllows, sandboxHost, type SandboxAction } from './sandboxAccess';
 import { applyTransport, occupiedByBoat, traveling, type TransportAction } from './transport';
 import { applyCavern, cavernBlock, cavernStructure, cavernWater, type CavernAction } from './subsurface';
-import { isMachinePart, isThinMachinePart, isRail } from './machineryParts';
+import { applyBuildingAction, buildingSupport, isClimbingBlock, openDecoration, recordBuildingEdit, terrainJumpFactor, terrainMoveFactor,
+ type BuildingAction, type BuildingDetails } from './buildingPhysics';
+import { isGatePart, isMachinePart, isThinMachinePart, isRail } from './machineryParts';
 import { activeBeaconAt, applyMachineCommand, canAddMachinePart, cartWorkbench, hasPistonHead, machineStorage, poweredGateOpen, recordMachineEdit, ridingCart, type MachineCommand, type MachineryState } from './machinery';
 import {traceAdventureSprings,type SpringWater} from './adventureHydrology';
 import {adventureElevation,adventureRoadGrades} from './adventureTerrain';
@@ -26,8 +28,8 @@ export type Block=typeof BLOCKS[number];
 export const VOXEL_COLORS:Record<TerrainBlock,string>={...Object.fromEntries(BLOCKS.map(b=>[b,VOXEL_CATALOG[b].color])) as Record<Block,string>,'door-top':'#b38958',bedrock:'#424954','oasis-water':'#3de1cf','cave-lava':'#e56930',piston_head:'#9f8495'};
 export type TerrainBlock=Block|'bedrock'|'oasis-water'|'cave-lava'|'door-top'|'piston_head';
 export const MIN_DEPTH=-18,MAX_HEIGHT=WORLD_SCALE.ceiling,EYE_HEIGHT=WORLD_SCALE.eyeHeight;
-export interface VoxelWorld {edits:Record<string,Block|null>;revision:number;placedBy?:Record<string,string>;terrainVersion?:2;legacyFlat?:string[];rotations?:Record<string,number>;containers?:Record<string,VoxelContainer>;machinery?:MachineryState;fluids?:PlacedFluids}
-export type VoxelAction=WorkshopAction|MachineCommand|FluidAction|ResearchAction|BlueprintAction|SandboxAction|TransportAction|CavernAction|{type:'voxel-landmark'}|{type:'voxel-building-survey'}|{type:'voxel-move';dx:number;dy:number}|{type:'voxel-snap';preserveHeight?:true}|{type:'voxel-jump'}|{type:'voxel-dive'}|{type:'voxel-break'|'voxel-place';x:number;y:number;z:number;block?:Block;rotation?:number};
+export interface VoxelWorld {edits:Record<string,Block|null>;revision:number;placedBy?:Record<string,string>;terrainVersion?:2;legacyFlat?:string[];rotations?:Record<string,number>;containers?:Record<string,VoxelContainer>;machinery?:MachineryState;fluids?:PlacedFluids;details?:BuildingDetails}
+export type VoxelAction=WorkshopAction|MachineCommand|FluidAction|ResearchAction|BlueprintAction|SandboxAction|TransportAction|CavernAction|BuildingAction|{type:'voxel-landmark'}|{type:'voxel-building-survey'}|{type:'voxel-move';dx:number;dy:number}|{type:'voxel-snap';preserveHeight?:true}|{type:'voxel-jump'}|{type:'voxel-dive'}|{type:'voxel-break'|'voxel-place';x:number;y:number;z:number;block?:Block;rotation?:number};
 export const voxelKey=(x:number,y:number,z:number)=>`${x},${y},${z}`;
 const springCache=new WeakMap<World,{revision:number;cells:Map<string,SpringWater>}>();
 function springWater(w:World,x:number,z:number){
@@ -155,20 +157,24 @@ export function blockAt(w:World,x:number,y:number,z:number):TerrainBlock|null {
  if(protectedCell||landscapeGate(x,z)||w.tiles[z*WIDTH+x]==='water')return null;
  return vegetationAt(w,x,y,z);
 }
-export const solid=(b:TerrainBlock|null)=>!!b&&b!=='oasis-water'&&b!=='cave-lava'&&b!=='door'&&b!=='door-top'&&!isThinMachinePart(b);
+export const solid=(b:TerrainBlock|null)=>!!b&&b!=='oasis-water'&&b!=='cave-lava'&&b!=='door'&&b!=='door-top'&&!isThinMachinePart(b)&&!openDecoration(b);
 const cellSolid=(w:World,x:number,y:number,z:number,b:TerrainBlock|null)=>
- solid(b)&&(b!=='signal_gate'||!poweredGateOpen(w,x,y,z));
+ solid(b)&&(!isGatePart(b)||(b==='drawbridge'?poweredGateOpen(w,x,y,z):!poweredGateOpen(w,x,y,z)));
 export function hasClosedSignalGate(w:World,x:number,z:number) {
  const y=Math.floor(terrainHeight(w,x,z));
- return !!w.voxels?.machinery&&[y,y+1].some(level=>blockAt(w,x,level,z)==='signal_gate'&&!poweredGateOpen(w,x,level,z));
+ return !!w.voxels?.machinery&&[y,y+1].some(level=>{
+  const block=blockAt(w,x,level,z);
+  return block!=='trapdoor'&&block!=='drawbridge'&&isGatePart(block)&&!poweredGateOpen(w,x,level,z);
+ });
 }
-const blockTop=(b:TerrainBlock)=>shapeOf(b)==='slab'?.5:1;
+const blockTop=(w:World,x:number,y:number,z:number,b:TerrainBlock)=>b==='trapdoor'||b==='drawbridge'&&poweredGateOpen(w,x,y,z)?.21:shapeOf(b)==='slab'?.5:1;
+const forbiddenStep=(w:World,x:number,z:number,from:number,to:number)=>to>=from+.95&&isGatePart(blockAt(w,x,Math.floor(to-.01),z));
 export function bodyClear(w:World,x:number,z:number,feet:number,top=feet+WORLD_SCALE.playerHeight){
- for(let y=Math.floor(feet);y<Math.ceil(top);y++){if(fluidAt(w,x,y,z)?.kind==='lava')return false;const b=blockAt(w,x,y,z);if(b==='cave-lava'||b&&cellSolid(w,x,y,z,b)&&y+blockTop(b)>feet+.001&&y<top-.001)return false;}return true;
+ for(let y=Math.floor(feet);y<Math.ceil(top);y++){if(fluidAt(w,x,y,z)?.kind==='lava')return false;const b=blockAt(w,x,y,z);if(b==='cave-lava'||b&&cellSolid(w,x,y,z,b)&&y+blockTop(w,x,y,z,b)>feet+.001&&y<top-.001)return false;}return true;
 }
 export function floorAt(w:World,x:number,z:number,maxTop:number,minTop=MIN_DEPTH):number|null {
  if(!legacyRegion(x,z)&&!landscapeRegion(x,z))return null;
- for(let y=Math.min(MAX_HEIGHT,Math.ceil(maxTop)-1);y>=Math.max(MIN_DEPTH,Math.floor(minTop)-1);y--){const b=blockAt(w,x,y,z);if(b&&cellSolid(w,x,y,z,b)){const top=y+blockTop(b);if(top>=minTop-.001&&top<=maxTop+.001&&bodyClear(w,x,z,top))return top;}}
+ for(let y=Math.min(MAX_HEIGHT,Math.ceil(maxTop)-1);y>=Math.max(MIN_DEPTH,Math.floor(minTop)-1);y--){const b=blockAt(w,x,y,z);if(b&&(cellSolid(w,x,y,z,b)||b==='scaffold')){const top=y+blockTop(w,x,y,z,b);if(top>=minTop-.001&&top<=maxTop+.001&&bodyClear(w,x,z,top))return top;}}
  return null;
 }
 export function playerHeight(w:World,p:Adventurer){return p.position3D?.y??floorAt(w,p.x,p.y,terrainHeight(w,p.x,p.y)+1)??0;}
@@ -206,6 +212,7 @@ function undoSandboxPlacement(w:World,p:Adventurer,number:number) {
  if(event.before===null)voxels.edits[id]=null;
  else delete voxels.edits[id];
  delete voxels.placedBy![id];if(voxels.rotations)delete voxels.rotations[id];
+ recordBuildingEdit(w,id,null);
  const inventory=lifePlayer(builder).bag;
  inventory[block]=(inventory[block]??0)+1;
  event.undone=true;voxels.revision++;w.revision++;
@@ -213,6 +220,7 @@ function undoSandboxPlacement(w:World,p:Adventurer,number:number) {
  return true;
 }
 export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
+ if(a.type==='voxel-climb'||a.type==='voxel-sign')return !ridingCart(w,p.id)&&!farmBusy(w,p)&&applyBuildingAction(w,p,a,now);
  if(a.type==='voxel-cave')return !farmBusy(w,p)&&applyCavern(w,p,a);
  if(a.type==='voxel-transport')return !farmBusy(w,p)&&applyTransport(w,p,a,now);
  if(a.type==='voxel-admin')return a.command==='undo'?undoSandboxPlacement(w,p,a.id):applySandboxSettings(w,p,a);
@@ -250,7 +258,8 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
    const x=Math.floor(current.x),z=Math.floor(current.z),feet=playerHeight(w,p);
    const top=floorAt(w,x,z,feet+.05);
    const water=voxelWater(w,x,z,feet);
-   if(top!==null&&Math.abs(top-feet)<.08||water&&feet>=water.surface-water.depth&&feet<water.surface&&bodyClear(w,x,z,feet)){
+   const onLadder=(isClimbingBlock(blockAt(w,x,Math.floor(feet),z)) || isClimbingBlock(blockAt(w,x,Math.floor(feet)-1,z)))&&bodyClear(w,x,z,feet);
+   if(top!==null&&Math.abs(top-feet)<.08||onLadder||water&&feet>=water.surface-water.depth&&feet<water.surface&&bodyClear(w,x,z,feet)){
     current.surface2D=true;current.layered2D=true;w.revision++;return true;
    }
   }
@@ -294,25 +303,28 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
   if(water&&(pos.y??0)<water.surface){const y=Math.max(water.surface-water.depth,Math.min(water.surface-.25,(pos.y??0)+(a.type==='voxel-dive'?-.5:.5)));if(bodyClear(w,Math.floor(pos.x),Math.floor(pos.z),y)){pos.y=y;pos.swimming=true;w.revision++;return true;}return false;}
   if(a.type==='voxel-dive'||pos.vy||now-(p.voxelAt||0)<400)return false;
   const floor=floorAt(w,Math.floor(pos.x),Math.floor(pos.z),(pos.y??0)+.05);if(floor===null||Math.abs(floor-(pos.y??0))>.1)return false;
-  pos.vy=WORLD_SCALE.jumpSpeed;p.voxelAt=now;w.revision++;return true;
+  const surface=blockAt(w,Math.floor(pos.x),Math.ceil(pos.y??0)-1,Math.floor(pos.z));
+  pos.vy=WORLD_SCALE.jumpSpeed*terrainJumpFactor(surface);p.position3D=pos;p.voxelAt=now;w.revision++;return true;
  }
  if(a.type==='voxel-move'){
   if(farmBusy(w,p))return false;
   if(!Number.isFinite(a.dx)||!Number.isFinite(a.dy)||Math.hypot(a.dx,a.dy)>.45||now-p.lastMove<45)return false;
   let {x,z}=p.position3D??{x:p.x+.5,z:p.y+.5},feet=playerHeight(w,p);
   const water=voxelWater(w,x,z,feet);
+  const surface=blockAt(w,Math.floor(x),Math.ceil(feet)-1,Math.floor(z));
   const dt=Math.min(.1,Math.max(0,(now-p.lastMove)/1000)),speed=water?WORLD_SCALE.swimSpeed:WORLD_SCALE.walkSpeed;
   const boost=w.gameMode==='BATTLE_ROYALE'?1:1+activeBeaconAt(w,p)*.055+(potionSeconds(w,p,'stride_draught')>0?.22:0);
-  const travel=Math.min(.4,dt*speed*boost),length=Math.hypot(a.dx,a.dy);
+  const stride=water?1:terrainMoveFactor(surface),travel=Math.min(.45,.4*stride,dt*speed*boost*stride),length=Math.hypot(a.dx,a.dy);
   let vy=p.position3D?.vy||0;
   if(!length&&!vy)return false;
   if(vy){const next=feet+vy*dt;vy-=WORLD_SCALE.gravity*dt;
    if(next>feet){if(bodyClear(w,Math.floor(x),Math.floor(z),feet,next+WORLD_SCALE.playerHeight))feet=next;else vy=-.1;}
    else {const ground=floorAt(w,Math.floor(x),Math.floor(z),feet+.01);if(ground!==null&&next<=ground){feet=ground;vy=0;}else feet=next;}
   }
-  const dx=a.dx*Math.min(boost,travel/(length||1)),dz=a.dy*Math.min(boost,travel/(length||1));
-  const step=(nx:number,nz:number)=>{if(!legacyRegion(nx,nz)&&!landscapeRegion(nx,nz))return false;const r=WORLD_SCALE.radius;const corners=[[-r,-r],[-r,r],[r,-r],[r,r]].map(([ox,oz])=>({x:Math.floor(nx+ox),z:Math.floor(nz+oz)}));const heights=corners.map(c=>floorAt(w,c.x,c.z,feet+1));if(heights.some(h=>h===null))return false;let next=Math.max(...heights as number[]);const pool=voxelWater(w,nx,nz,feet);if(pool&&next<pool.surface){next=Math.max(next,p.position3D?.swimming?Math.min(feet,pool.surface-.25):pool.surface-1.3);}else if(vy)next=Math.max(next,feet);if(corners.some(c=>!bodyClear(w,c.x,c.z,next)))return false;if(next<feet&&corners.some(c=>!bodyClear(w,c.x,c.z,next,feet+WORLD_SCALE.playerHeight)))return false;x=nx;z=nz;feet=next;return true;};
-  if(dx)step(x+dx,z);if(dz)step(x,z+dz);p.position3D={x,z,y:feet,oxygen:p.position3D?.oxygen,waterAt:p.position3D?.waterAt,...(vy?{vy}:{}),...(water?{swimming:!!p.position3D?.swimming}:{})};if(legacyRegion(x,z)){p.x=Math.max(1,Math.min(WIDTH-2,Math.floor(x)));p.y=Math.max(1,Math.min(HEIGHT-2,Math.floor(z)));}p.lastMove=now;p.moveCount++;w.revision++;
+  const dx=a.dx*Math.min(boost*stride,travel/(length||1)),dz=a.dy*Math.min(boost*stride,travel/(length||1));
+  const step=(nx:number,nz:number)=>{if(!legacyRegion(nx,nz)&&!landscapeRegion(nx,nz))return false;const r=WORLD_SCALE.radius;const corners=[[-r,-r],[-r,r],[r,-r],[r,r]].map(([ox,oz])=>({x:Math.floor(nx+ox),z:Math.floor(nz+oz)}));const heights=corners.map(c=>floorAt(w,c.x,c.z,feet+1));if(heights.some((h,i)=>h===null||forbiddenStep(w,corners[i].x,corners[i].z,feet,h)))return false;let next=Math.max(...heights as number[]);const pool=voxelWater(w,nx,nz,feet);if(pool&&next<pool.surface){next=Math.max(next,p.position3D?.swimming?Math.min(feet,pool.surface-.25):pool.surface-1.3);}else if(vy)next=Math.max(next,feet);if(corners.some(c=>!bodyClear(w,c.x,c.z,next)))return false;if(next<feet&&corners.some(c=>!bodyClear(w,c.x,c.z,next,feet+WORLD_SCALE.playerHeight)))return false;x=nx;z=nz;feet=next;return true;};
+  const surface2D=!length&&p.position3D?.surface2D;
+  if(dx)step(x+dx,z);if(dz)step(x,z+dz);p.position3D={x,z,y:feet,oxygen:p.position3D?.oxygen,waterAt:p.position3D?.waterAt,...(surface2D?{surface2D:true,layered2D:true}:{}),...(vy?{vy}:{}),...(water?{swimming:!!p.position3D?.swimming}:{})};if(legacyRegion(x,z)){p.x=Math.max(1,Math.min(WIDTH-2,Math.floor(x)));p.y=Math.max(1,Math.min(HEIGHT-2,Math.floor(z)));}p.lastMove=now;p.moveCount++;w.revision++;
   const oasis=legacyRegion(x,z)?undergroundOasis(w,p.x,feet,p.y):undefined;if(oasis&&!p.voxelDiscoveries?.includes(oasis.id)){(p.voxelDiscoveries??=[]).push(oasis.id);p.message='地下のオアシスを発見しました！';}
   return true;
  }
@@ -344,9 +356,14 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
   if(isMachinePart(a.block)&&!canAddMachinePart(w))return tell('このワールドの装置数上限に達しました。');
   if(isRail(a.block)&&!solid(blockAt(w,x,y-1,z)))return false;
   if(a.block==='door'&&(y>=MAX_HEIGHT||blockAt(w,x,y+1,z)||!solid(blockAt(w,x,y-1,z))))return false;
-  if(existing||occupiedByBoat(w,x,y,z)||state.fluids?.sources[voxelKey(x,y,z)]||!a.block||!BLOCKS.includes(a.block)||(lp.bag[a.block]||0)<1||(legacyRegion(x,z)&&w.tiles[z*WIDTH+x]==='water'))return false;
+  const inRiver=legacyRegion(x,z)&&w.tiles[z*WIDTH+x]==='water';
+  const bridge=a.block==='drawbridge'&&y>=(naturalVoxelWater(w,x,z)?.surface??0);
+  if(existing||occupiedByBoat(w,x,y,z)||state.fluids?.sources[voxelKey(x,y,z)]||!a.block||!BLOCKS.includes(a.block)||(lp.bag[a.block]||0)<1||inRiver&&!bridge)return false;
   if(energyOf(lp)+1e-8<cost)return tell('エネルギーが足りません。問題に正解して回復しましょう。');
-  if(![[x,y-1,z],[x-1,y,z],[x+1,y,z],[x,y,z-1],[x,y,z+1]].some(([bx,by,bz])=>solid(blockAt(w,bx,by,bz))))return false;
+  const anchor=[[x,y-1,z],[x-1,y,z],[x+1,y,z],[x,y,z-1],[x,y,z+1]];
+  if(a.block==='hanging_rope'||a.block==='hanging_sign'||a.block==='chain')anchor.push([x,y+1,z]);
+  if(bridge&&inRiver)anchor.push([x-1,y-1,z],[x+1,y-1,z],[x,y-1,z-1],[x,y-1,z+1]);
+  if(!anchor.some(([bx,by,bz])=>buildingSupport(blockAt(w,bx,by,bz))))return false;
   if(Object.values(w.players).some(q=>Math.floor(q.position3D?.x??q.x+.5)===x&&Math.floor(q.position3D?.z??q.y+.5)===z&&y>=playerHeight(w,q)&&y<playerHeight(w,q)+2))return false;
   if(a.rotation!==undefined&&(!Number.isInteger(a.rotation)||a.rotation<0||a.rotation>3))return false;
   lp.bag[a.block]=(lp.bag[a.block]||0)-1;state.edits[voxelKey(x,y,z)]=a.block;(state.placedBy??={})[voxelKey(x,y,z)]=p.id;(state.rotations??={})[voxelKey(x,y,z)]=a.rotation??0;
@@ -364,6 +381,7 @@ export function landscapeStep(w:World,pos:{x:number;z:number;y?:number;layered2D
  const x=Math.floor(pos.x)+dx,z=Math.floor(pos.z)+dz;
  if(!legacyRegion(x,z)&&!landscapeRegion(x,z))return null;
  let top=floorAt(w,x,z,(pos.y??0)+1);const water=voxelWater(w,x,z,top??pos.y);
+ if(top!==null&&forbiddenStep(w,x,z,pos.y??0,top))return null;
  if(water&&(top===null||top<water.surface)){top=water.surface-1.3;if(!bodyClear(w,x,z,top))return null;}if(top===null)return null;
  if(legacyRegion(x,z)&&!pos.layered2D&&!water&&!lifeWalkable(w,x,z)&&!landscapeGate(x,z))return null;
  return {x:x+.5,z:z+.5,y:top};

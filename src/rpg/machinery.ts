@@ -3,7 +3,7 @@ import { lifePlayer, type Bag } from './life';
 import { farmMachineSignal, operateFarmMachine, validFarmMachineJob, type FarmMachineJob } from './farm/model';
 import { ranchPosition } from './farm/animalLook';
 import { exchangeFluidBucket, fluidAt } from './placedFluids';
-import { isFilteredPart, isLogisticsPart, isMachinePart, isProcessor, isRail, isTransportLane, PROCESSOR, type LogisticsPart, type MachinePart, type ProcessorPart } from './machineryParts';
+import { isFilteredPart, isLogisticsPart, isMachinePart, isProcessor, isRail, isTransportLane, manuallyOpenedGate, PROCESSOR, type LogisticsPart, type MachinePart, type ProcessorPart } from './machineryParts';
 import { ALL_MATERIAL_NAMES, CART_NAMES, WORKSHOP_RECIPES, type CartItem, type CatalogBlock, type VoxelItem } from './voxelCatalog';
 import { blockAt, bodyClear, floorAt, playerHeight, protectedVoxel, solid, terrainHeight, voxelKey, voxelWater,
   MAX_HEIGHT, MIN_DEPTH, type TerrainBlock } from './voxel';
@@ -11,13 +11,15 @@ import { DAY_SECONDS } from './town/catalog';
 import { legacyRegion } from './worldLandscape';
 import { sandboxAllows } from './sandboxAccess';
 import { occupiedByBoat } from './transport';
+import { recordBuildingEdit } from './buildingPhysics';
 
 export type MachineCell = { x: number; y: number; z: number };
 export type MachineMode = 'compare' | 'subtract';
 export type NoteInstrument = 'bell' | 'wood' | 'reed';
 export const NOTE_REPEATS = [0,1,2,3,4,6,8,12,16] as const;
 export type MachineCommand =
-  | (MachineCell & { type: 'voxel-device'; command: 'use' | 'rotate' | 'piston-axis' | 'cart-ride' | 'cart-drive' | 'cart-stop' | 'cart-remove' | 'station-signal' })
+  | (MachineCell & { type: 'voxel-device'; command: 'use' | 'rotate' | 'piston-axis' | 'cart-ride' | 'cart-drive' | 'cart-stop' | 'cart-remove' | 'station-signal' | 'waygate-travel' })
+  | (MachineCell & { type: 'voxel-device'; command: 'waygate-link'; value: string })
   | (MachineCell & { type: 'voxel-device'; command: 'cart-place'; value?: CartItem })
   | (MachineCell & { type: 'voxel-device'; command: 'cart-cargo'; item: VoxelItem; direction: 'load' | 'unload'; amount: number })
   | (MachineCell & { type: 'voxel-device'; command: 'station-name'; value: string })
@@ -58,6 +60,7 @@ interface Device {
   farmJob?: FarmMachineJob;
   vertical?: boolean;
   workTick?: number;
+  waygate?: string;
 }
 type CartTimetable = { stops: string[]; dwellSeconds: number };
 interface Cart {
@@ -121,7 +124,7 @@ const needsTick = new Set<MachinePart>([
   'pressure_plate', 'weight_plate', 'daylight_sensor', 'water_sensor', 'crystal_button',
   'presence_sensor','vibration_sensor','item_sensor','tripwire_hook',
   'wooden_button', 'crystal_inverter', 'crystal_repeater', 'crystal_comparator', 'crystal_observer',
-  'signal_gate', 'piston', 'sticky_piston', 'crystal_beacon', 'detector_rail',
+  'signal_gate', 'fence_gate', 'trapdoor', 'iron_door', 'steel_shutter', 'drawbridge', 'piston', 'sticky_piston', 'crystal_beacon', 'detector_rail',
   'hopper', 'dropper', 'dispenser', 'item_pipe', 'conveyor', 'item_sorter', 'item_collector',
   ...Object.keys(PROCESSOR) as ProcessorPart[], 'farm_sensor', 'farm_machine',
 ]);
@@ -161,13 +164,14 @@ export const canAddMachinePart = (w: World) => Object.keys(stateOf(w)?.devices ?
 export function recordMachineEdit(w: World, x: number, y: number, z: number, before: TerrainBlock | null, after: CatalogBlock | null) {
   const voxels = w.voxels;
   if (!voxels) return;
+  const key=voxelKey(x,y,z);
+  recordBuildingEdit(w,key,after);
   const state = voxels.machinery ?? (isMachinePart(after)
     ? (voxels.machinery = { tick: 0, devices: {}, heads: {}, carts: {} })
     : undefined);
   if (!state) return;
   const work = workFor(w, state);
   const cell = { x, y, z };
-  const key = keyOf(cell);
   if (isMachinePart(before)) {
     // A piston owns only its temporary head. Moved blocks stay where they landed.
     for (const [head, base] of Object.entries(state.heads)) {
@@ -195,6 +199,11 @@ export const poweredGateOpen = (w: World, x: number, y: number, z: number) =>
   !!stateOf(w)?.devices[voxelKey(x, y, z)]?.opened;
 
 export const hasPistonHead = (w: World, key: string) => !!stateOf(w)?.heads[key];
+
+export function waygateEndpoints(w:World,owner:string,excluding:string) {
+  return Object.entries(stateOf(w)?.devices ?? {}).filter(([key])=>key!==excluding&&kindAt(w,key)==='waygate'&&sameOwner(w,key,owner))
+    .map(([key,device])=>({key,...fromKey(key),active:device.signal>0}));
+}
 
 export function machineCarts(w: World) {
   return Object.entries(stateOf(w)?.carts ?? {}).map(([id, cart]) => ({ id, ...cart, ...fromKey(cart.cell) }));
@@ -246,6 +255,15 @@ function moveBlock(w: World, from: MachineCell, to: MachineCell, work: CircuitWo
   if (voxels.rotations) {
     voxels.rotations[target] = voxels.rotations[origin] ?? 0;
     delete voxels.rotations[origin];
+  }
+  const details=voxels.details;
+  if(details?.gravity?.[origin]) {
+    details.gravity[target]=true;
+    delete details.gravity[origin];
+  }
+  if(details?.signs && Object.hasOwn(details.signs,origin)) {
+    details.signs[target]=details.signs[origin];
+    delete details.signs[origin];
   }
   markNearby(work, state, from);
   markNearby(work, state, to);
@@ -641,9 +659,14 @@ function updateDevice(w: World, state: MachineryState, work: CircuitWork, key: s
       signal = (device.until || 0) > state.tick ? 15 : 0;
       break;
     }
-    case 'signal_gate': {
+    case 'signal_gate':
+    case 'fence_gate':
+    case 'trapdoor':
+    case 'iron_door':
+    case 'steel_shutter':
+    case 'drawbridge': {
       signal = rawInput();
-      const open = !!signal || !!device.opened && movingGateOccupied(w, cell);
+      const open = !!signal || manuallyOpenedGate(kind)&&!!device.enabled || !!device.opened && movingGateOccupied(w, cell);
       if (!!device.opened !== open) { device.opened = open; changed = true; }
       break;
     }
@@ -942,6 +965,33 @@ export function applyMachineCommand(w: World, p: Adventurer, command: MachineCom
   const locomotive=cart?.coupledTo ? state.carts[cart.coupledTo] : undefined;
   const lp = lifePlayer(p);
   switch (command.command) {
+    case 'waygate-link': {
+      if (!owner || kind!=='waygate' || !device || typeof command.value!=='string') return false;
+      if (command.value==='') { delete device.waygate; break; }
+      if (!positionKey.test(command.value) || command.value===key || kindAt(w,command.value)!=='waygate' ||
+        !sameOwner(w,command.value,p.id) || !sandboxAllows(w,p.id,fromKey(command.value),'device')) return false;
+      device.waygate=command.value;
+      break;
+    }
+    case 'waygate-travel': {
+      if (w.gameMode!=='COOP'||kind!=='waygate'||!device?.signal||!device.waygate||ridingCart(w,p.id)) return false;
+      const destination=fromKey(device.waygate);
+      if (!allowedCell(w,destination) || kindAt(w,device.waygate)!=='waygate' || !state.devices[device.waygate]?.signal ||
+        w.voxels?.placedBy?.[device.waygate]!==w.voxels?.placedBy?.[key] ||
+        !sandboxAllows(w,p.id,destination,'device')) return false;
+      const rot=rotationAt(w,device.waygate);
+      const arrival=[rot,(rot+1)%4,(rot+3)%4,(rot+2)%4].flatMap(direction=>{
+        const cell=offset(destination,horizontal[direction]), floor=floorAt(w,cell.x,cell.z,destination.y+1);
+        const pool=voxelWater(w,cell.x,cell.z,floor??undefined);
+        return floor!==null&&floor>=destination.y-1&&(!pool||floor>=pool.surface)&&!movingGateOccupied(w,{...cell,y:Math.floor(floor)})&&
+          sandboxAllows(w,p.id,cell,'device') ? [{...cell,y:floor}] : [];
+      })[0];
+      if (!arrival) return false;
+      const surface2D=p.position3D?.surface2D??true;
+      p.position3D={x:arrival.x+.5,y:arrival.y,z:arrival.z+.5,surface2D,layered2D:surface2D};
+      p.x=arrival.x;p.y=arrival.z;p.lastMove=now;
+      break;
+    }
     case 'cart-place': {
       const item = command.value ?? 'minecart';
       if (typeof item !== 'string' || !Object.hasOwn(CART_NAMES,item) ||
@@ -1071,7 +1121,7 @@ export function applyMachineCommand(w: World, p: Adventurer, command: MachineCom
       break;
     case 'use':
       if (!device) return false;
-      if (kind === 'crystal_lever') device.enabled = !device.enabled;
+      if (kind === 'crystal_lever' || manuallyOpenedGate(kind)) device.enabled = !device.enabled;
       else if (kind === 'crystal_button' || kind === 'wooden_button') device.until = state.tick + (kind === 'wooden_button' ? 8 : 4);
       else if (kind === 'crystal_beacon' && owner) {
         if (device.enabled) device.enabled = false;
@@ -1169,6 +1219,8 @@ export function restoreMachinery(w: World) {
     if (whole(state.note, 0, 24)) device.note = state.note;
     if (block==='note_block'&&whole(state.noteGain,0,100)) device.noteGain=state.noteGain;
     if (block==='note_block'&&NOTE_REPEATS.some(period=>period===state.notePeriod)) device.notePeriod=state.notePeriod;
+    if (block==='waygate'&&typeof state.waygate==='string'&&state.waygate!==key&&positionKey.test(state.waygate)&&
+      voxels.edits[state.waygate]==='waygate'&&voxels.placedBy?.[state.waygate]===voxels.placedBy?.[key]) device.waygate=state.waygate;
     if (state.instrument && ['bell','wood','reed'].includes(state.instrument)) device.instrument = state.instrument;
     if (whole(state.played, 0, tick)) device.played = state.played;
     if (state.mode === 'compare' || state.mode === 'subtract') device.mode = state.mode;

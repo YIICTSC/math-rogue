@@ -93,6 +93,10 @@ function icon(ctx: CanvasRenderingContext2D, w: World, x: number, y: number, z: 
       ctx.rotate(-rotation * Math.PI / 2);
       ctx.font='bold 10px sans-serif'; ctx.textAlign='center'; ctx.fillText('⇧',0,3);
       ctx.rotate(rotation * Math.PI / 2);
+    } else if (shape==='portal') {
+      ctx.strokeStyle=active?'#a5e4f5':'#436876';ctx.lineWidth=2;
+      ctx.strokeRect(-4.3,-5.7,8.6,11.4);
+      ctx.fillStyle=active?'#dafbf2':'#6c8fa1';ctx.fillRect(-1.5,-1.5,3,3);
     } else if (shape === 'lamp' || shape === 'crystal') {
       ctx.beginPath(); ctx.moveTo(0, -5); ctx.lineTo(5, 0); ctx.lineTo(0, 5); ctx.lineTo(-5, 0);
       ctx.closePath(); ctx.fill(); ctx.stroke();

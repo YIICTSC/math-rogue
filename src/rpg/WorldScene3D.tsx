@@ -3,7 +3,7 @@ import { CreatureModels } from './lifestyle/creatureModels';
 import { MachineryEffects } from './machineryRendering';
 import MachineryInspector, { sandboxItemName, sandboxText } from './MachineryInspector';
 import { inspectMachine, machineCarts, machineStorage, poweredGateOpen, type MachineCell } from './machinery';
-import { isMachinePart } from './machineryParts';
+import { isGatePart, isMachinePart } from './machineryParts';
 import { fluidCanScoop, type FluidAction } from './placedFluids';
 import { blueprintPoint, type BlueprintPreview } from './blueprints';
 import { multiTouchAction } from '../utils/multiTouchAction';
@@ -23,6 +23,7 @@ import {VoxelWorkshopPanel} from './VoxelWorkshopPanel';
 import {createConstructionGeometry,orientVoxel,voxelMaterial} from './voxelRendering';
 import { TransportModels } from './transportRendering';
 import { CAVERNS, cavernCache, cavernEntrance, cavernWater, currentCavern } from './subsurface';
+import { isSign } from './buildingPhysics';
 import {fullCube} from './voxelCatalog';
 import {furnitureImage,furnitureSize,furnishing} from './homeCatalog';
 import {plotPosition} from './farm/land';
@@ -887,7 +888,7 @@ export default function WorldScene3D(props: SceneProps) {
       const ridden = machineCarts(w).find(cart=>cart.rider===current.selfId);
       if (ridden) { setDeviceTarget({x:ridden.x,y:ridden.y,z:ridden.z}); return; }
       const target = buildHit(w);
-      if (target && (isMachinePart(target.block) || machineStorage(target.block) || inspectMachine(w,target.x,target.y,target.z).cart)) {
+      if (target && (isMachinePart(target.block) || machineStorage(target.block) || isSign(target.block) || inspectMachine(w,target.x,target.y,target.z).cart)) {
         setDeviceTarget({ x: target.x, y: target.y, z: target.z });
       }
     };
@@ -1049,7 +1050,7 @@ export default function WorldScene3D(props: SceneProps) {
         }
         // Device motion changes its nearby instance without rebuilding the terrain mesh.
         for (const mesh of voxelGroup.children) {
-          if (!(mesh instanceof THREE.InstancedMesh) || mesh.userData.block !== 'signal_gate') continue;
+          if (!(mesh instanceof THREE.InstancedMesh) || !isGatePart(mesh.userData.block)) continue;
           const matrix = new THREE.Matrix4();
           const positions = mesh.userData.voxels as MachineCell[];
           const flags = (mesh.userData.opened ??= new Array<boolean>(positions.length));
@@ -1057,7 +1058,7 @@ export default function WorldScene3D(props: SceneProps) {
             const opened = poweredGateOpen(w,x,y,z);
             if (flags[index] === opened) return;
             flags[index] = opened;
-            orientVoxel(w,'signal_gate',x,y,z,matrix);
+            orientVoxel(w,mesh.userData.block,x,y,z,matrix);
             mesh.setMatrixAt(index,matrix);
             mesh.instanceMatrix.needsUpdate = true;
           });

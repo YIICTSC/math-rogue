@@ -9,7 +9,7 @@ import BuildingGoalsPanel from './BuildingGoalsPanel';
 import {residentAppearance} from './town/wardrobe';
 import {findLandscapeRoute} from './voxel';
 import { traveling } from './transport';
-import { cavernSiteReachable } from './subsurface';
+import { cavernSiteReachable, currentCavern } from './subsurface';
 import {legacyRegion,landscapeEnvironment,LANDSCAPE_BIOME_NAMES,LANDMARKS} from './worldLandscape';
 import InviteJoin from '../mini-games/shared/InviteJoin';
 import {initialTransport,shareRoomCode} from '../services/onlineTransport';
@@ -480,7 +480,7 @@ export default function RpgOnline({
     void audioService.preloadRpgFishingSounds();
     room.current?.send({type:'life-cast',tile});
   };
-  const quickTiles=compact&&world&&me&&!exterior&&!spectating&&!me.life?.indoors?nearbyResources(world,me).filter((tile,index,all)=>world.tiles[tile]!=='water'||all.find(t=>world.tiles[t]==='water')===tile):[];
+  const quickTiles=compact&&world&&me&&!exterior&&!spectating&&!me.life?.indoors&&!currentCavern(world,me)?nearbyResources(world,me).filter((tile,index,all)=>world.tiles[tile]!=='water'||all.find(t=>world.tiles[t]==='water')===tile):[];
   useEffect(()=>{if(compact&&me?.life?.work){destination.current=null;walkingRoute.current=[];setDetail(null);setLifeOpen(false);}},[compact,me?.life?.work?.started]);
   const openLife=()=>{destination.current=null;walkingRoute.current=[];setDetail(null);setLifeTarget(null);if(exterior)setLifeInitialTab('craft');setLifeOpen(true);};
   const move=(dx:number,dy:number)=>{if(!latest.current.active)return;destination.current=null;walkingRoute.current=[];const step=navigation.current.threeD?relativeMove(dx,dy,navigation.current.facing):{dx,dy};if(!navigation.current.threeD)lastDirection.current={dx,dy};room.current?.send(navigation.current.threeD?{type:'voxel-move',dx:step.dx*.32,dy:step.dy*.32}:{type:'move',...step});};

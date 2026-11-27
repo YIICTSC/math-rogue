@@ -1,4 +1,5 @@
 import { isMachinePart } from '../src/rpg/machineryParts';
+import { ARCHITECTURAL_MATERIALS, DETAIL_BLOCKS } from '../src/rpg/architecturalMaterials';
 import { closeSecretMissionRooms, secretMissionUpgrade } from './secretMissionRooms';
 import{basketballUpgrade,closeBasketRooms}from'./basketballRooms';
 import {quizShowUpgrade,closeQuizShowRooms} from './quizShowRooms';
@@ -76,7 +77,7 @@ sockets.on('connection',(socket,request)=>{
         const minutes=d.minutes===0?0:Number.isFinite(d.minutes)?Math.min(180,Math.max(1,d.minutes)):30;
         const world=createWorld(randomInt(0x100000000),setup,minutes,now,d.gameMode==='BATTLE_ROYALE'?'BATTLE_ROYALE':'COOP');world.started=false;
         const machineryProtocol=d.machineryProtocol===1?1:undefined;
-        if(!machineryProtocol){delete world.machineGeology;delete world.caverns;world.sites=world.sites.filter(site=>!site.subsurface);}
+        if(!machineryProtocol){delete world.machineGeology;delete world.buildingPhysics;delete world.caverns;world.sites=world.sites.filter(site=>!site.subsurface);}
         if(machineryProtocol)world.hostId=m.id;
         room={world,host:m.id,members:new Map(),revision:-1,emptyAt:0,machineryProtocol,reservations:new Map()};
         rooms.set(code,room);
@@ -129,8 +130,8 @@ sockets.on('connection',(socket,request)=>{
     }
     if(d.type==='spectator' && room.host===m.id)setSpectator(room.world,m.id,d.enabled);
     if(d.type==='action' && d.action){
-      if(!room.machineryProtocol&&(['voxel-device','voxel-fluid','voxel-research','voxel-blueprint','voxel-tools','voxel-potion','voxel-admin','voxel-transport','voxel-cave'].includes(d.action.type)||
-        d.action.type==='voxel-place'&&(isMachinePart(d.action.block)||['warehouse_chest','lift_platform','bubbling_stone','magma_block','anvil','whetstone','imprint_table','brew_table'].includes(d.action.block))))return;
+      if(!room.machineryProtocol&&(['voxel-device','voxel-fluid','voxel-research','voxel-blueprint','voxel-tools','voxel-potion','voxel-admin','voxel-transport','voxel-cave','voxel-climb','voxel-sign'].includes(d.action.type)||
+        d.action.type==='voxel-place'&&(isMachinePart(d.action.block)||Object.hasOwn(ARCHITECTURAL_MATERIALS,d.action.block)||Object.hasOwn(DETAIL_BLOCKS,d.action.block)||['warehouse_chest','lift_platform','bubbling_stone','magma_block','anvil','whetstone','imprint_table','brew_table'].includes(d.action.block))))return;
       try{applyAction(room.world,m.id,d.action);}catch{fail(m,'操作を処理できませんでした。');}}
     if(d.type==='dungeon-event' && d.event && typeof d.event.type==='string'){
       const dungeon=room.world.activities.dungeons.find(x=>x.status==='active'&&x.members.includes(m.id));

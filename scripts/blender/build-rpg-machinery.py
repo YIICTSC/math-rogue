@@ -200,6 +200,17 @@ for x in (-.30,.30):
 gem(0,0,-.04,.55,.55,.73)
 chisel("crystal")
 
+# Support braces leave a clear path through the travel aperture.
+box(0,0,-.46,.91,.63,.075,"slate",.022)
+for x in (-.37,.37):
+    box(x,0,-.04,.13,.35,.87,"slate",.032)
+    box(x,.19,.02,.05,.035,.66,"patina",.005)
+    for z in (-.29,.28):
+        box(x,0,z,.16,.39,.074,"brass",.018)
+box(0,0,.38,.80,.32,.17,"slate",.03)
+gem(0,.015,.38,.22,.27,.21,"crystal")
+chisel("portal")
+
 # Cart is anchored at wheel contact. Its open center remains visually readable.
 box(0,0,.29,.73,.82,.18,"slate")
 for y in (-.29,.29):

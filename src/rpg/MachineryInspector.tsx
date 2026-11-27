@@ -2,15 +2,17 @@ import React from 'react';
 import { CornerDownLeft, Play, RotateCw, Square, TrainFront } from 'lucide-react';
 import type { LanguageMode } from '../types';
 import type { World } from './engine';
-import { canAutomate, canStore, cargoCart, circuitConnections, connectedStations, inspectMachine, machineCarts, machineStorage, NOTE_REPEATS, railConnections, storageLimits, type MachineCell, type MachineCommand } from './machinery';
+import { canAutomate, canStore, cargoCart, circuitConnections, connectedStations, inspectMachine, machineCarts, machineStorage, NOTE_REPEATS, railConnections, storageLimits, waygateEndpoints, type MachineCell, type MachineCommand } from './machinery';
 import { validFarmMachineJob } from './farm/model';
 import { CROPS } from './farm/catalog';
 import { copy } from './town/catalog';
-import { isFilteredPart, isMachinePart, isProcessor, isRail, MACHINE_PARTS, PROCESSOR } from './machineryParts';
+import { isFilteredPart, isMachinePart, isProcessor, isRail, manuallyOpenedGate, MACHINE_PARTS, PROCESSOR } from './machineryParts';
 import { ALL_MATERIAL_NAMES, CART_NAMES, WORKSHOP_RECIPES, type CartItem, type VoxelItem } from './voxelCatalog';
 import { blockAt, voxelKey } from './voxel';
 import { trans } from '../utils/textUtils';
 import { isWatercraftItem, WATERCRAFT } from './transportCatalog';
+import { ARCHITECTURAL_MATERIALS, DETAIL_BLOCKS, type ArchitecturalBlock } from './architecturalMaterials';
+import { isSign, type BuildingAction } from './buildingPhysics';
 
 const extraNames = {
   crystal_powder: ['魔晶回路粉', 'Crystal powder', 'ましょうかいろこ'],
@@ -47,10 +49,15 @@ const buckets: VoxelItem[] = ['bucket','water_bucket','lava_bucket'];
 export const sandboxText = (lang: LanguageMode | undefined, ja: string, en: string, hi: string) =>
   lang === 'ENGLISH' ? en : lang === 'HIRAGANA' ? hi : ja;
 
-export const hasSandboxItemName = (id: string) => isMachinePart(id) || isWatercraftItem(id) || Object.hasOwn(extraNames,id);
+function architecturalName(id:string) {
+  return Object.hasOwn(DETAIL_BLOCKS,id)?DETAIL_BLOCKS[id as keyof typeof DETAIL_BLOCKS].name:
+    Object.hasOwn(ARCHITECTURAL_MATERIALS,id)?ARCHITECTURAL_MATERIALS[id as ArchitecturalBlock].name:undefined;
+}
+
+export const hasSandboxItemName = (id: string) => isMachinePart(id) || isWatercraftItem(id) || !!architecturalName(id) || Object.hasOwn(extraNames,id);
 
 export function sandboxItemName(id: string, lang: LanguageMode | undefined) {
-  const name = isMachinePart(id) ? MACHINE_PARTS[id] : isWatercraftItem(id) ? WATERCRAFT[id].name : extraNames[id as keyof typeof extraNames];
+  const name = isMachinePart(id) ? MACHINE_PARTS[id] : isWatercraftItem(id) ? WATERCRAFT[id].name : architecturalName(id)??extraNames[id as keyof typeof extraNames];
   if (name) return sandboxText(lang, name[0], name[1], name[2]);
   if (lang === 'ENGLISH') return id.replaceAll('_', ' ');
   return trans(ALL_MATERIAL_NAMES[id as VoxelItem] || id, lang || 'JAPANESE');
@@ -61,7 +68,7 @@ type Props = {
   selfId: string;
   position: MachineCell;
   languageMode?: LanguageMode;
-  send: (a: MachineCommand | { type: 'voxel-storage'; x: number; y: number; z: number; item: VoxelItem; amount: number; direction: 'deposit' | 'withdraw' }) => void;
+  send: (a: MachineCommand | BuildingAction | { type: 'voxel-storage'; x: number; y: number; z: number; item: VoxelItem; amount: number; direction: 'deposit' | 'withdraw' }) => void;
 };
 
 type Operation = MachineCommand extends infer Action ? Action extends MachineCommand ? Omit<Action, 'type' | 'x' | 'y' | 'z'> : never : never;
@@ -103,6 +110,7 @@ export default function MachineryInspector({ world, selfId, position, languageMo
   const { x, y, z } = position;
   const block = blockAt(world, x, y, z);
   const { device, cart, cartId, trailer, locomotive, owner, rotation } = inspectMachine(world, x, y, z);
+  const key=voxelKey(x,y,z), inscription=world.voxels?.details?.signs?.[key];
   const owned = owner === selfId, mine = cart?.rider === selfId || !cart?.rider && cart?.owner === selfId;
   const bag = world.players[selfId]?.life?.bag ?? {};
   const inventory = world.voxels?.containers?.[voxelKey(x, y, z)]?.items ?? {};
@@ -116,15 +124,30 @@ export default function MachineryInspector({ world, selfId, position, languageMo
   const candidates=carts.filter(candidate=>candidate.id!==cartId && candidate.owner===selfId && neighbors?.has(candidate.cell) &&
     !candidate.rider && !candidate.moving && !candidate.waiting && !candidate.coupledTo && !carts.some(other=>other.coupledTo===candidate.id));
   const wiring=device ? circuitConnections(world,position) : [];
+  const endpoints=block==='waygate'&&owner?waygateEndpoints(world,owner,key):[];
+  const destination=endpoints.find(point=>point.key===device?.waygate);
   const dispatch = (op: Operation) => send({ type: 'voxel-device', ...position, ...op } as MachineCommand);
-  if (!device && !cart && !machineStorage(block)) return null;
+  if (!device && !cart && !machineStorage(block) && !isSign(block)) return null;
   return <section className="rpg-device-inspector" aria-label={L('装置の調査', 'Inspect device', 'そうちのちょうさ')}>
     <header><strong>{block ? sandboxItemName(block, languageMode) : sandboxItemName('minecart', languageMode)}</strong>
       {device && <b data-signal={device.signal}>◆ {device.signal} / 15 · {['↑', '→', '↓', '←'][rotation]}</b>}
     </header>
+    {isSign(block) && (world.voxels?.placedBy?.[key]===selfId ? <form className="rpg-device-actions" key={key} onSubmit={event=>{
+      event.preventDefault();send({type:'voxel-sign',...position,text:String(new FormData(event.currentTarget).get('inscription')??'')});
+    }}><input name="inscription" maxLength={48} defaultValue={inscription ?? ''} aria-label={L('看板の文字','Sign text','かんばんのもじ')}/>
+      <button type="submit">{L('書き込む','Inscribe','かきこむ')}</button></form> : <p>{inscription}</p>)}
     {device && block && <div className="rpg-device-actions">
-      {['crystal_lever', 'crystal_button', 'wooden_button', 'crystal_beacon'].includes(block) &&
+      {(['crystal_lever', 'crystal_button', 'wooden_button', 'crystal_beacon'].includes(block)||manuallyOpenedGate(block)) &&
         <button onClick={() => dispatch({ command: 'use' })} disabled={block === 'crystal_beacon' && !owned}>{device.enabled ? L('切る', 'Switch off', 'きる') : L('起動', 'Activate', 'きどう')}</button>}
+      {block==='waygate' && <>
+        {owned && <label>{L('転送先','Destination','てんそうさき')}
+          <select value={destination?.key??''} onChange={e=>dispatch({command:'waygate-link',value:e.target.value})}>
+            <option value="">{L('未接続','Unlinked','つながっていない')}</option>
+            {endpoints.map(point=><option key={point.key} value={point.key}>{point.x}, {point.y}, {point.z}{point.active?' ◆':''}</option>)}
+          </select></label>}
+        <button disabled={!destination?.active||!device.signal} onClick={()=>dispatch({command:'waygate-travel'})}>
+          {L('転送する','Travel','てんそうする')}</button>
+      </>}
       {owned && <button onClick={() => dispatch({ command: 'rotate' })} aria-label={L('装置を回転', 'Rotate device', 'そうちをかいてん')}><RotateCw size={15} /></button>}
       {owned && (block==='piston' || block==='sticky_piston') && <button disabled={device.opened} onClick={()=>dispatch({command:'piston-axis'})}>
         {device.vertical ? L('↑ 上向き','↑ Upward','↑ うえむき') : L('→ 横向き','→ Horizontal','→ よこむき')}

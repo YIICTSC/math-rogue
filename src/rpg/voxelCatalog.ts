@@ -1,7 +1,8 @@
-import { MACHINE_PARTS, isLogisticsPart, isMachinePart, type MachinePart } from './machineryParts';
+import { MACHINE_PARTS, isGatePart, isLogisticsPart, isMachinePart, type MachinePart } from './machineryParts';
 import { WATERCRAFT, type WatercraftItem } from './transportCatalog';
+import { ARCHITECTURAL_MATERIALS, DETAIL_BLOCKS, type ArchitecturalBlock } from './architecturalMaterials';
 /** Shared by the authoritative simulation, recipes and the Three.js palette. */
-export type BlockShape='cube'|'slab'|'stairs'|'fence'|'pane'|'workbench'|'furnace'|'chest'|'torch'|'lantern'|'composter'|'irrigator';
+export type BlockShape='cube'|'slab'|'stairs'|'fence'|'pane'|'workbench'|'furnace'|'chest'|'torch'|'lantern'|'composter'|'irrigator'|typeof DETAIL_BLOCKS[keyof typeof DETAIL_BLOCKS]['shape'];
 export type BlockGroup='natural'|'wood'|'stone'|'color'|'glass'|'workshop'|'farm'|'circuit'|'machines'|'railway'|'logistics'|'fluids'|'alchemy';
 type Definition={name:string;color:string;group:BlockGroup;shape:BlockShape;pattern:string;transparent?:boolean;light?:boolean};
 const b=(name:string,color:string,group:BlockGroup,pattern='grain',shape:BlockShape='cube',extra:Partial<Definition>={}):Definition=>({name,color,group,pattern,shape,...extra});
@@ -10,13 +11,21 @@ const machineGroup = (id: MachinePart): BlockGroup => {
  if (id==='farm_machine'||id==='farm_sensor') return 'farm';
  if (id.endsWith('rail')) return 'railway';
  if (isLogisticsPart(id)) return 'logistics';
- if (['crystal_lamp','copper_lamp','signal_gate','piston','sticky_piston','crystal_beacon','note_block'].includes(id)) return 'machines';
+ if (isGatePart(id)||['crystal_lamp','copper_lamp','piston','sticky_piston','crystal_beacon','note_block','waygate'].includes(id)) return 'machines';
  return 'circuit';
 };
 const machineBlocks = Object.fromEntries(Object.entries(MACHINE_PARTS).map(([id, [name,,,color]]) =>
  [id,b(name,color,machineGroup(id as MachinePart),'metal')])) as Record<MachinePart,Definition>;
+const architecture = Object.fromEntries(Object.entries(ARCHITECTURAL_MATERIALS).map(([id,def])=>
+ [id,b(def.name[0],def.color,def.group,def.pattern,def.shape)])) as Record<ArchitecturalBlock,Definition>;
+const details = Object.fromEntries(Object.entries(DETAIL_BLOCKS).map(([id,def])=>
+ [id,b(def.name[0],def.color,def.group,def.pattern,def.shape,{
+  light:'light' in def&&def.light,transparent:'transparent' in def&&def.transparent,
+ })])) as Record<keyof typeof DETAIL_BLOCKS,Definition>;
 export const VOXEL_CATALOG={
  ...machineBlocks,
+ ...architecture,
+ ...details,
  red_crystal_ore:b('赤魔晶石鉱石','#bd5578','natural','ore'),
  wood:b('木材','#98704a','wood','log'),stone:b('石材','#829096','stone','stone'),plank:b('木の板','#c39a63','wood','plank'),brick:b('レンガ','#ae6550','stone','brick'),
  frostwood:b('霜木','#c5dee0','wood','log'),ore:b('鉄鉱石','#a99177','natural','ore'),crystal:b('魔晶石','#9e75ce','natural','ore','cube',{light:true}),dirt:b('土','#89734e','natural'),sand:b('砂','#d7ba79','natural'),snow:b('雪','#dbe9ef','natural'),steel:b('鋼材','#648c9a','stone','metal'),
@@ -69,6 +78,10 @@ export const WORKSHOP_RECIPES:WorkshopRecipe[]=[
  r('crystal_comparator',1,{crystal_inverter:3,quartz:1,stone:1}),r('crystal_observer',1,{crystal_powder:2,quartz:1,cobble:3}),
  r('crystal_lamp',1,{glass:2,crystal_powder:2,copper_ingot:1}),r('copper_lamp',1,{glass:1,crystal_powder:1,copper_ingot:2}),
  r('signal_gate',1,{plank:4,iron_ingot:2,crystal_powder:1}),
+ r('fence_gate',1,{fence:2,stick:1,iron_ingot:1}),r('trapdoor',2,{plank:4,iron_ingot:1}),
+ r('iron_door',1,{iron_ingot:6,crystal_powder:1}),r('steel_shutter',1,{steel:3,chain:2,crystal_powder:2}),
+ r('drawbridge',2,{plank:8,chain:2,crystal_powder:1}),
+ r('waygate',1,{obsidian:5,crystal_powder:4,lapis:2,steel:2}),
  r('piston',1,{plank:3,cobble:4,iron_ingot:1,crystal_powder:1}),r('sticky_piston',1,{piston:1,fruit:2,thread:1}),
  r('lift_platform',2,{plank:4,steel:1,iron_ingot:2}),
  r('crystal_beacon',1,{crystal:4,glass:5,obsidian:3,quartz:1}),r('rail',12,{iron_ingot:4,stick:2}),r('powered_rail',6,{gold_ingot:4,stick:2,crystal_powder:2}),
@@ -81,6 +94,9 @@ export const WORKSHOP_RECIPES:WorkshopRecipe[]=[
  r('rowboat',1,{plank:6,stick:2}),r('cargo_boat',1,{rowboat:1,chest:1}),
  r('bamboo_raft',1,{bamboo:6,thread:2}),r('cargo_raft',1,{bamboo_raft:1,chest:2}),
  r('glider_wing',1,{wool:4,stick:4,thread:4,crystal:1}),r('glider_boost',2,{paper:2,copper_ingot:1,crystal_powder:1}),
+ ...Object.entries(ARCHITECTURAL_MATERIALS).map(([id,{recipe:[base,n,output],shape}])=>
+  r(id as ArchitecturalBlock,output,{[base]:n,...(shape==='fence'?{stick:2}:{})})),
+ ...Object.entries(DETAIL_BLOCKS).map(([id,def])=>r(id as keyof typeof DETAIL_BLOCKS,def.count,def.cost)),
  r('bucket',1,{iron_ingot:3}),r('lava_bucket',1,{bucket:1,obsidian:1,crystal:1},'furnace'),
  r('water_pump',1,{copper_ingot:4,glass:1,crystal_powder:2}),
  r('water_drain',1,{copper_ingot:2,gravel:2,crystal_powder:1}),

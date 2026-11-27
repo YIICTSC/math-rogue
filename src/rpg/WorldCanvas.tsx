@@ -319,6 +319,7 @@ export default function WorldCanvas({
           if (!p.voxelDiscoveries?.includes(cacheRecord(cavern.id))) drawCavernMark(c,cache.x,cache.z,'#f8db9c','◆');
           for (const site of w.sites.filter(site=>site.subsurface===cavern.id && !site.cleared)) drawCavernMark(c,site.x,site.y,'#e48898','!');
           for (const guest of Object.values(w.players)) if (guest.id!==p.id&&currentCavern(w,guest)?.id===cavern.id) person(c,guest,prefs.reducedMotion?0:time);
+          person(c,p,prefs.reducedMotion?0:time);
         }
         const onLayer = Math.abs(playerHeight(w, p) - layer.height) < .65;
         c.strokeStyle = onLayer ? '#ffdf89' : '#79bbc0';
@@ -444,6 +445,14 @@ export default function WorldCanvas({
       if (!overview && prefs.labels) {
         c.textAlign = "center";
         c.font = "bold 12px sans-serif";
+        for(const [key,label] of Object.entries(w.voxels?.details?.signs ?? {})) {
+          const [x,y,z]=key.split(',').map(Number);
+          if(Math.abs(x-pos.x)+Math.abs(z-pos.z)>6||Math.abs(y-playerHeight(w,p))>3)continue;
+          const tx=((x+.5)*T-cx)*scale,tz=((z+.45)*T-cy)*scale;
+          const width=Math.min(sw-16,c.measureText(label).width+16);
+          c.fillStyle='#112526ef';c.fillRect(tx-width/2,tz-35,width,19);
+          c.fillStyle='#ffe4ac';c.fillText(label,tx,tz-21,width-8);
+        }
       for(const h of (prefs.labels?w.life?.houses:[])||[]){const x=(h.x*T+8-cx)*scale,y=(h.y*T-34-cy)*scale;if(x<0||x>sw||y<0||y>sh)continue;c.fillStyle='#10272bdd';c.fillRect(x-55,y-13,110,21);c.fillStyle='#ffdc94';c.fillText('⌂ '+h.ownerName,x,y+2);}
         for(const r of w.town?.customResidents||[]){if(w.town?.bonds.some(b=>b.people.includes(r.id)&&(b.houseId||b.visitHouse?.day===w.town?.day)))continue;const x=(r.x*T+8-cx)*scale,y=(r.y*T+25-cy)*scale;if(x<0||x>sw||y<0||y>sh)continue;const width=c.measureText(r.name).width+12;c.fillStyle='#112526d9';c.fillRect(x-width/2,y-12,width,18);c.fillStyle='#e5dcba';c.fillText(r.name,x,y);}
         visibleSites.forEach((s) => {

@@ -4,9 +4,10 @@ import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {assetUrl} from '../utils/assetPaths';
 import {VOXEL_CATALOG,shapeOf,type CatalogBlock,type BlockShape} from './voxelCatalog';
 import {VOXEL_COLORS,type TerrainBlock} from './voxel';
-import { isMachinePart, MACHINE_PARTS, type MachineShape } from './machineryParts';
+import { isGatePart, isMachinePart, MACHINE_PARTS, type MachineShape } from './machineryParts';
 import type { World } from './engine';
 import { poweredGateOpen } from './machinery';
+import { architecturalGeometry } from './architecturalGeometry';
 
 /** One instanced mesh per block; procedural pixels are original, never external game textures. */
 export function voxelMaterial(block:TerrainBlock){
@@ -33,7 +34,7 @@ export function voxelMaterial(block:TerrainBlock){
 export function createConstructionGeometry(onReady:()=>void){
  let disposed=false;
  const box=(x:number,y:number,z:number,sx:number,sy:number,sz:number)=>new T.BoxGeometry(sx,sy,sz).translate(x,y,z);
- const geometry=new Map<BlockShape,T.BufferGeometry>();
+ const geometry=architecturalGeometry();
  geometry.set('cube',new T.BoxGeometry(1,1,1));geometry.set('slab',box(0,-.25,0,1,.5,1));
  const pieces=[box(0,-.25,0,1,.5,1),box(0,.25,-.25,1,.5,.5)];geometry.set('stairs',mergeGeometries(pieces));pieces.forEach(g=>g.dispose());
  geometry.set('pane',new T.BoxGeometry(1,1,.08));
@@ -94,9 +95,14 @@ export function orientVoxel(w:World,block:TerrainBlock,x:number,y:number,z:numbe
  const machine=isMachinePart(block)||block==='piston_head';
  if(machine&&w.voxels?.machinery?.devices[reference]?.vertical) matrix.makeRotationX(Math.PI/2);
  else matrix.makeRotationY((machine?-1:1)*rotation*Math.PI/2);
- const open=block==='signal_gate'&&poweredGateOpen(w,x,y,z);
- if(open)matrix.scale(new T.Vector3(1,.19,1));
- matrix.setPosition(x+.5,open?y+.11:y+.5,z+.5);
+ const open=isGatePart(block)&&poweredGateOpen(w,x,y,z);
+ const flat=block==='trapdoor'?!open:block==='drawbridge'&&open;
+ const raisedHatch=block==='trapdoor'&&open||block==='drawbridge'&&!open;
+ const retract=open&&!raisedHatch&&!flat;
+ if(flat)matrix.multiply(new T.Matrix4().makeRotationX(-Math.PI/2));
+ else if(retract)matrix.scale(new T.Vector3(1,.19,1));
+ const hinge=raisedHatch?.39:0;
+ matrix.setPosition(x+.5+Math.sin(rotation*Math.PI/2)*hinge,flat||retract?y+.11:y+.5,z+.5-Math.cos(rotation*Math.PI/2)*hinge);
 }
 
 function tintGeometry(geometry:T.BufferGeometry, color:T.Color) {

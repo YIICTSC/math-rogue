@@ -48,6 +48,31 @@
   background: #17383e;
 }
 
+.rpg-climbing-controls {
+  position: absolute;
+  z-index: 8;
+  left: 50%;
+  bottom: 104px;
+  display: flex;
+  gap: 5px;
+  transform: translateX(-50%);
+}
+
+.rpg-climbing-controls button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  padding: 5px 8px;
+  color: #fff0cc;
+  background: #17383e;
+  border: 1px solid #87afa4;
+  border-radius: 7px;
+  font-size: 13px;
+}
+
+.rpg-climbing-controls button:disabled { opacity: .55; }
+
 .rpg-transport-dock button:disabled { opacity: .55; }
 .rpg-transport-dock button:focus-visible,
 .rpg-transport-dock select:focus-visible { outline: 2px solid #ffe59a; }

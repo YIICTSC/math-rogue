@@ -5,6 +5,7 @@ import WorldCanvas from "./WorldCanvas";
 import MachineLayerView from "./MachineLayerView";
 import TransportDock from './TransportDock';
 import CavernDock from './CavernDock';
+import ClimbingControls from './ClimbingControls';
 import "./machinery.css";
 import { useRpgPreferences, updateRpgPreferences } from "./preferences";
 import "./world3d.css";
@@ -56,6 +57,8 @@ export default function WorldView(
         languageMode={props.languageMode} facing={props.facing} disabled={props.inputBlocked} send={props.onVoxelAction}/>}
       {!props.overview && props.onVoxelAction && <CavernDock world={props.world} selfId={props.selfId}
         languageMode={props.languageMode} disabled={props.inputBlocked} send={props.onVoxelAction}/>}
+      {!props.overview && props.onVoxelAction && <ClimbingControls world={props.world} selfId={props.selfId}
+        languageMode={props.languageMode} disabled={props.inputBlocked} send={props.onVoxelAction} twoD={prefs.mapView==='2D'}/>}
       {failed && (
         <button className="rpg-3d-fallback" onClick={() => setFailed(false)}>
           WebGL · 2D ✓

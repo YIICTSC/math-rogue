@@ -2,10 +2,11 @@ import { advanceFluids, fluidAt } from './placedFluids';
 import { advanceWildlife } from './lifestyle/wildlife';
 import { potionSeconds } from './explorationEquipment';
 import type { SandboxState } from './sandboxAccess';
-import { advanceMachinery, ridingCart } from './machinery';
+import { advanceMachinery, poweredGateOpen, ridingCart } from './machinery';
 import { advanceTransport, steerTransport, traveling, type Gliding, type TransportState } from './transport';
 import { cavernGuardianId, cavernGuardians, cavernSiteReachable, currentCavern, planCaverns, type Cavern, type CavernId } from './subsurface';
-import { hasClosedSignalGate, terrainHeight } from './voxel';
+import { advanceBuildPhysics, terrainMoveFactor } from './buildingPhysics';
+import { blockAt, hasClosedSignalGate, playerHeight, terrainHeight } from './voxel';
 import {planAdventurePeaks,type AdventurePeak} from './adventureTerrain';
 import {homeBattleBonus,type HomeBattleBonus} from './furnitureBenefits';
 import type {BuildingGoalReward} from './buildingGoals';
@@ -158,6 +159,7 @@ export interface World {
   /** New games only; absent on existing saves to preserve all elevations. */
   terrainStyle?:1;
   machineGeology?:1;
+  buildingPhysics?:1;
   sandbox?:SandboxState;
   transport?:TransportState;
   caverns?:Cavern[];
@@ -633,6 +635,7 @@ export function createWorld(
   const world:World={
     terrainStyle: 1,
     machineGeology: 1,
+    ...(gameMode==='COOP'?{buildingPhysics:1 as const}:{}),
     terrainPeaks: planAdventurePeaks(tiles,sites,WIDTH,HEIGHT),
     campaignVersion: 2,
     endingProgress: {},
@@ -797,17 +800,27 @@ export function applyAction(
   }
   if (action.type === "move") {
     if (ridingCart(w,p.id)) return false;
+    const movement=w.buildingPhysics?terrainMoveFactor(blockAt(w,p.x,Math.ceil(playerHeight(w,p))-1,p.y)):1;
     if (
       !Number.isInteger(action.dx) ||
       !Number.isInteger(action.dy) ||
       Math.abs(action.dx) + Math.abs(action.dy) !== 1 ||
-      now - p.lastMove < (potionSeconds(w,p,'stride_draught')>0?80:100)
+      now - p.lastMove < (potionSeconds(w,p,'stride_draught')>0?80:100)/movement
     )
       return false;
+    if(p.position3D?.surface2D&&p.position3D.vy){
+      const moved=applyVoxel(w,p,{type:'voxel-move',dx:action.dx*.32,dy:action.dy*.32},now);
+      if(moved&&p.position3D){p.position3D.surface2D=true;p.position3D.layered2D=true;}
+      return moved;
+    }
     if(p.position3D&&(p.position3D.surface2D||!legacyRegion(p.position3D.x,p.position3D.z)))return moveLandscape2D(w,p,action.dx,action.dy,now);
     const x = p.x + action.dx,
       y = p.y + action.dy,
       tile = w.tiles[y * WIDTH + x];
+    if(tile==='water'&&blockAt(w,x,0,y)==='drawbridge'&&poweredGateOpen(w,x,0,y)) {
+      p.position3D={x:p.x+.5,z:p.y+.5,y:playerHeight(w,p),surface2D:true,layered2D:true};
+      return moveLandscape2D(w,p,action.dx,action.dy,now);
+    }
     if(landscapeGate(x,y)&&(x<=0||y<=0||x>=WIDTH-1||y>=HEIGHT-1)){p.position3D={x:p.x+.5,z:p.y+.5,y:0,surface2D:true};return moveLandscape2D(w,p,action.dx,action.dy,now);}
     if (
       x < 1 ||
@@ -916,6 +929,7 @@ export function advanceWorld(w: World, now = Date.now()) {
   advanceLife(w,now);
   advanceMachinery(w,now);
   advanceFluids(w);
+  advanceBuildPhysics(w,now);
   advanceTransport(w,now);
   advanceSocial(w,now);
   advanceTown(w,now);

@@ -14,6 +14,17 @@
   font-size: inherit;
 }
 .rpg-layer-dock button:disabled, .rpg-device-inspector button:disabled { opacity: .55; }
+.rpg-device-actions input {
+  flex: 1 1 10em;
+  min-width: 0;
+  min-height: 35px;
+  padding: 5px 8px;
+  color: #fff0cc;
+  background: #112a32;
+  border: 1px solid #85aaa3;
+  border-radius: 7px;
+  font: inherit;
+}
 .rpg-layer-dock :focus-visible, .rpg-device-inspector :focus-visible, [data-machine-layer]:focus-visible {
   outline: 2px solid #ffe59a; outline-offset: -2px;
 }
