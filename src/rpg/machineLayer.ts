@@ -4,6 +4,7 @@ import { isMachinePart, isRail, isTransportLane, MACHINE_PARTS } from './machine
 import { fluidAt } from './placedFluids';
 import { blueprintPoint, type BlueprintPreview } from './blueprints';
 import { blockAt, terrainHeight, voxelKey, VOXEL_COLORS } from './voxel';
+import { cavernBlock, cavernWater } from './subsurface';
 
 export type MachineLayerView = 'slice' | 'circuit' | 'rail' | 'logistics' | 'fluids';
 export type MachineLayer = {
@@ -127,7 +128,10 @@ function icon(ctx: CanvasRenderingContext2D, w: World, x: number, y: number, z: 
 
 export function drawMachineLayer(ctx: CanvasRenderingContext2D, w: World, tile: number, bounds: Bounds, layer: MachineLayer) {
   for (let z = bounds.minY; z < bounds.maxY; z++) for (let x = bounds.minX; x < bounds.maxX; x++) {
-    ctx.fillStyle = (x + z) % 2 ? '#20383b' : '#253f41';
+    const cave=layer.height<0 ? cavernBlock(w,x,layer.height,z) : undefined;
+    const pool=cave!==undefined&&cavernWater(w,x,z,layer.height);
+    ctx.fillStyle = pool&&layer.height>=pool.surface-pool.depth ? '#347981' : cave===null
+      ? (x+z)%2?'#464653':'#4b4c57' : (x + z) % 2 ? '#20383b' : '#253f41';
     ctx.fillRect(x * tile, z * tile, tile, tile);
     icon(ctx, w, x, layer.height, z, tile, layer.view);
   }

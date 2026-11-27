@@ -8,6 +8,8 @@ import {currentVoxelRoom} from './voxelRooms';
 import BuildingGoalsPanel from './BuildingGoalsPanel';
 import {residentAppearance} from './town/wardrobe';
 import {findLandscapeRoute} from './voxel';
+import { traveling } from './transport';
+import { cavernSiteReachable } from './subsurface';
 import {legacyRegion,landscapeEnvironment,LANDSCAPE_BIOME_NAMES,LANDMARKS} from './worldLandscape';
 import InviteJoin from '../mini-games/shared/InviteJoin';
 import {initialTransport,shareRoomCode} from '../services/onlineTransport';
@@ -272,7 +274,7 @@ export default function RpgOnline({
   const near =
     world && me
       ? world.sites
-          .filter((s) => distance(s, me) <= 2)
+          .filter((s) => distance(s, me) <= 2 && cavernSiteReachable(world,me,s))
           .sort((a, b) => distance(a, me) - distance(b, me))[0]
       : undefined;
   useEffect(() => () => room.current?.close(), []);
@@ -384,7 +386,7 @@ export default function RpgOnline({
     const home=w.life?.houses.find(h=>distance(h,p)<=2);
     if(home){destination.current=null;room.current?.send({type:'life-enter',houseId:home.id});setLifeOpen(true);return;}
     const site = w.sites
-      .filter((s) => distance(s, p) <= 2)
+      .filter((s) => distance(s, p) <= 2 && cavernSiteReachable(w,p,s))
       .sort((a, b) => distance(a, p) - distance(b, p))[0];
     if (site) {
       destination.current = null;
@@ -397,6 +399,8 @@ export default function RpgOnline({
     if(roamingNpcSiteId && world?.players[selfId]?.npcEventResults?.[roamingNpcSiteId])setNpcChoicePending(false);
   },[roamingNpcSiteId,selfId,world?.players]);
   useEffect(()=>{if(prefs.mapView==='2D'&&me?.position3D&&!me.position3D.surface2D)room.current?.send({type:'voxel-snap',preserveHeight:true});},[prefs.mapView,!!me?.position3D]);
+  const usingTransport=!!world&&!!me&&traveling(world,me);
+  useEffect(()=>{if(usingTransport){destination.current=null;walkingRoute.current=[];}},[usingTransport]);
   const [facing,setFacing]=useState(0);
   const lastDirection=useRef({dx:0,dy:-1});
   const navigation=useRef({facing,threeD:false});navigation.current={facing,threeD:prefs.mapView==='3D'&&!overview};
@@ -660,7 +664,7 @@ export default function RpgOnline({
                       visualTheme={previewTheme}
                       onPlayer={spectating ? undefined : id=>{setSelectedPeer(id);if(compact)openDetail('team');}}
                       onTile={(x, y) => {
-                        if(prefs.mapView==='3D')return;
+                        if(prefs.mapView==='3D'||usingTransport)return;
                         if (!prefs.tapMove||settingsOpen||cityOpen||farmOpen||!latest.current.active || spectating || lifeOpen || me.life?.indoors || me.life?.work) return;
                         if(me.position3D&&(me.position3D.surface2D||!legacyRegion(me.position3D.x,me.position3D.z))){const route=findLandscapeRoute(world,me,x,y);walkingRoute.current=route;destination.current=route.at(-1)||null;return;}
                         const tile=y*WIDTH+x;

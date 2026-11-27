@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { sandboxAllows } from './sandboxAccess';
 import { Axe, Droplet, Layers3, RotateCw, Wrench, X } from 'lucide-react';
 import WorldCanvas from './WorldCanvas';
@@ -11,6 +11,7 @@ import { fluidAt, fluidCanScoop } from './placedFluids';
 import type { BlueprintPreview } from './blueprints';
 import { blockAt, MAX_HEIGHT, MIN_DEPTH, miningCost, playerHeight, protectedVoxel, type Block, type VoxelAction } from './voxel';
 import { VoxelWorkshopPanel } from './VoxelWorkshopPanel';
+import { currentCavern } from './subsurface';
 
 type Props = React.ComponentProps<typeof WorldCanvas> & {
   onEnergyRequest?: () => void;
@@ -21,7 +22,7 @@ type Props = React.ComponentProps<typeof WorldCanvas> & {
 export default function MachineLayerView(props: Props) {
   const { world, selfId, languageMode, onVoxelAction, inputBlocked, overview } = props;
   const player = world.players[selfId];
-  const [height, setHeight] = useState<number | null>(null);
+  const [chosenHeight, setHeight] = useState<number | null>(null);
   const [filter, setFilter] = useState<LayerFilter>('slice');
   const [position, setPosition] = useState<{ x: number; z: number } | null>(null);
   const [selectedBlock, setSelectedBlock] = useState<Block>('wood');
@@ -30,11 +31,14 @@ export default function MachineLayerView(props: Props) {
   const [inspecting, setInspecting] = useState(false);
   const [blueprint,setBlueprint]=useState<BlueprintPreview|null>(null);
   const L = (ja: string, en: string, hi: string) => sandboxText(languageMode, ja, en, hi);
+  const inside=player&&currentCavern(world,player);
+  useEffect(()=>{setHeight(null);setPosition(null);setInspecting(false);},[inside?.id]);
   if (!player || overview || !onVoxelAction) return <WorldCanvas {...props} />;
   const feet = playerHeight(world, player);
   const playerX = player.position3D?.x ?? player.x + .5;
   const playerZ = player.position3D?.z ?? player.y + .5;
   const ground = Math.floor(feet);
+  const height=chosenHeight??(inside?ground:null);
   const limit = (y: number) => Math.min(MAX_HEIGHT, Math.max(MIN_DEPTH + 1, y));
   const select = (x: number, z: number) => setPosition({ x, z });
   const layer = height === null ? undefined : { height, view: filter, selected: position, blueprint, onSelect: select,
@@ -72,8 +76,9 @@ export default function MachineLayerView(props: Props) {
     <WorldCanvas {...props} machineLayer={layer} />
     <div className="rpg-layer-dock" aria-label={L('建築の高さ', 'Building layers', 'けんちくのたかさ')}>
       <div className="rpg-layer-toolbar">
-        <button aria-expanded={height !== null} disabled={inputBlocked} onClick={toggleLayer}><Layers3 size={17} /> {height === null
-          ? L('高さ断面', 'Layers', 'たかさだんめん') : L('地表に戻る', 'Surface view', 'ちひょうにもどる')}</button>
+        <button aria-expanded={height !== null} disabled={inputBlocked} onClick={toggleLayer}><Layers3 size={17} /> {inside
+          ? L('地下断面','Underground layers','ちかだんめん') : height === null
+            ? L('高さ断面', 'Layers', 'たかさだんめん') : L('地表に戻る', 'Surface view', 'ちひょうにもどる')}</button>
         {height !== null && <>
           <button aria-label={L('高さを下げる', 'Lower layer', 'たかさをさげる')} disabled={height <= MIN_DEPTH + 1} onClick={() => setHeight(limit(height - 1))}>−</button>
           <output aria-live="polite">Y {height}</output>

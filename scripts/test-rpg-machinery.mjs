@@ -389,6 +389,27 @@ try {
   assert.equal(f.pantry.turnip.normal,3,'Automation cannot harvest again or skip growing time.');
   console.log('PASS automatic harvest and sow use the same crop state and seed costs as manual farming');
 
+  place('crystal_lever',42,31);
+  place('note_block',43,31);
+  moveNear(a,42,32);
+  assert(command('instrument',43,31,0,'wood'));
+  assert(command('note-volume',43,31,0,50));
+  assert(command('note-repeat',43,31,0,2));
+  assert(!command('note-volume',43,31,0,101));
+  assert(command('use',42,31));
+  step(1);
+  const note=()=>M.inspectMachine(w,43,0,31).device;
+  const played=note().played;
+  assert.equal(note().noteGain,50);
+  step(2);
+  assert.equal(note().played,played+2);
+  assert(command('use',42,31));
+  step(1);
+  const stopped=note().played;
+  step(6);
+  assert.equal(note().played,stopped);
+  console.log('PASS note instrument, volume, repeat interval and power-off behavior');
+
   place('crystal_lever',35,25);
   place('crystal_wire',36,25);
   place('crystal_lamp',37,25);

@@ -2,7 +2,7 @@ import React from 'react';
 import { CornerDownLeft, Play, RotateCw, Square, TrainFront } from 'lucide-react';
 import type { LanguageMode } from '../types';
 import type { World } from './engine';
-import { canAutomate, canStore, cargoCart, circuitConnections, connectedStations, inspectMachine, machineCarts, machineStorage, railConnections, storageLimits, type MachineCell, type MachineCommand } from './machinery';
+import { canAutomate, canStore, cargoCart, circuitConnections, connectedStations, inspectMachine, machineCarts, machineStorage, NOTE_REPEATS, railConnections, storageLimits, type MachineCell, type MachineCommand } from './machinery';
 import { validFarmMachineJob } from './farm/model';
 import { CROPS } from './farm/catalog';
 import { copy } from './town/catalog';
@@ -10,6 +10,7 @@ import { isFilteredPart, isMachinePart, isProcessor, isRail, MACHINE_PARTS, PROC
 import { ALL_MATERIAL_NAMES, CART_NAMES, WORKSHOP_RECIPES, type CartItem, type VoxelItem } from './voxelCatalog';
 import { blockAt, voxelKey } from './voxel';
 import { trans } from '../utils/textUtils';
+import { isWatercraftItem, WATERCRAFT } from './transportCatalog';
 
 const extraNames = {
   crystal_powder: ['魔晶回路粉', 'Crystal powder', 'ましょうかいろこ'],
@@ -26,6 +27,7 @@ const extraNames = {
   lift_platform: ['昇降床','Lift platform','しょうこうゆか'],
   bubbling_stone: ['泡の石','Bubble stone','あわのいし'],
   magma_block: ['マグマブロック','Magma block','マグマブロック'],
+  'cave-lava': ['地底の溶岩','Cavern lava','ちていのようがん'],
   warehouse_chest: ['大型チェスト','Warehouse chest','おおがたチェスト'],
   anvil: ['金床','Anvil','かなとこ'],
   whetstone: ['砥石','Grindstone','といし'],
@@ -36,6 +38,8 @@ const extraNames = {
   stride_draught: ['風脚のしずく','Windstep draught','かぜあしのしずく'],
   miner_draught: ['石砕きのしずく','Stonebreaker draught','いしくだきのしずく'],
   smoked_fish: ['魚の燻製','Smoked fish','さかなのくんせい'],
+  glider_wing: ['滑空翼','Glider wing','かっくうよく'],
+  glider_boost: ['風の加速筒','Glider booster','かぜのかそくとう'],
 } as const;
 
 const buckets: VoxelItem[] = ['bucket','water_bucket','lava_bucket'];
@@ -43,10 +47,10 @@ const buckets: VoxelItem[] = ['bucket','water_bucket','lava_bucket'];
 export const sandboxText = (lang: LanguageMode | undefined, ja: string, en: string, hi: string) =>
   lang === 'ENGLISH' ? en : lang === 'HIRAGANA' ? hi : ja;
 
-export const hasSandboxItemName = (id: string) => isMachinePart(id) || Object.hasOwn(extraNames,id);
+export const hasSandboxItemName = (id: string) => isMachinePart(id) || isWatercraftItem(id) || Object.hasOwn(extraNames,id);
 
 export function sandboxItemName(id: string, lang: LanguageMode | undefined) {
-  const name = isMachinePart(id) ? MACHINE_PARTS[id] : extraNames[id as keyof typeof extraNames];
+  const name = isMachinePart(id) ? MACHINE_PARTS[id] : isWatercraftItem(id) ? WATERCRAFT[id].name : extraNames[id as keyof typeof extraNames];
   if (name) return sandboxText(lang, name[0], name[1], name[2]);
   if (lang === 'ENGLISH') return id.replaceAll('_', ' ');
   return trans(ALL_MATERIAL_NAMES[id as VoxelItem] || id, lang || 'JAPANESE');
@@ -150,7 +154,15 @@ export default function MachineryInspector({ world, selfId, position, languageMo
         <option value="bell">{L('ベル','Bell','ベル')}</option>
         <option value="wood">{L('木琴','Wood bar','もっきん')}</option>
         <option value="reed">{L('リード','Reed','リード')}</option>
-      </select></>}
+      </select><label>{L('音量','Volume','おんりょう')}
+        <select value={device.noteGain ?? 100} onChange={e=>dispatch({command:'note-volume',value:Number(e.target.value)})}>
+          {[...new Set([0,25,50,75,100,device.noteGain ?? 100])].sort((a,b)=>a-b).map(n=><option key={n} value={n}>{n}%</option>)}
+        </select>
+      </label><label>{L('演奏間隔','Play interval','えんそうかんかく')}
+        <select value={device.notePeriod ?? 0} onChange={e=>dispatch({command:'note-repeat',value:Number(e.target.value)})}>
+          {NOTE_REPEATS.map(n=><option key={n} value={n}>{n ? `${n*.25} s` : L('信号が入ったとき','On a new signal','しんごうがはいったとき')}</option>)}
+        </select>
+      </label></>}
       {owned && block==='farm_machine' && <label>{L('作業','Operation','さぎょう')}
         <select value={device.farmJob ?? 'harvest'} onChange={e=>{const value=e.target.value;if(validFarmMachineJob(value))dispatch({command:'farm-job',value});}}>
           <option value="harvest">{L('収穫','Harvest','しゅうかく')}</option>

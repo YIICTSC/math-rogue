@@ -21,6 +21,8 @@ import {LandscapeScene} from './landscapeScene';
 import {WORLD_SCALE,legacyRegion,landscapeEnvironment,waterProfile,landmarkBlock} from './worldLandscape';
 import {VoxelWorkshopPanel} from './VoxelWorkshopPanel';
 import {createConstructionGeometry,orientVoxel,voxelMaterial} from './voxelRendering';
+import { TransportModels } from './transportRendering';
+import { CAVERNS, cavernCache, cavernEntrance, cavernWater, currentCavern } from './subsurface';
 import {fullCube} from './voxelCatalog';
 import {furnitureImage,furnitureSize,furnishing} from './homeCatalog';
 import {plotPosition} from './farm/land';
@@ -141,7 +143,7 @@ export default function WorldScene3D(props: SceneProps) {
     scene.add(sun,hemisphere);
     const voxelGeometry=new THREE.BoxGeometry(1,1,1);
     const voxelGroup=new THREE.Group();scene.add(voxelGroup);
-    const renderBlocks:TerrainBlock[]=[...BLOCKS,'bedrock','oasis-water','door-top','piston_head'];
+    const renderBlocks:TerrainBlock[]=[...BLOCKS,'bedrock','oasis-water','cave-lava','door-top','piston_head'];
     const windClock={value:0};
     const voxelMaterials=renderBlocks.map(b=>adventureSurface(voxelMaterial(b),['leaves','frostleaves','bush','fruit'].includes(b),windClock));
     for(const material of voxelMaterials)if(material.map){material.map.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());material.map.needsUpdate=true;}
@@ -162,6 +164,7 @@ export default function WorldScene3D(props: SceneProps) {
     let placements:Placement[]=[];
     const models=new StorybookModels(scene,()=>{key='';});
     const machineryEffects=new MachineryEffects(scene,construction.cart);
+    const transportModels=new TransportModels(scene, count=>{renderer.domElement.dataset.rpgTransportModels=String(count);});
     const creatures=new CreatureModels(scene,profile.low);
     const landscape=new LandscapeScene(scene,profile.low?'low':'high',construction,b=>voxelMaterials[renderBlocks.indexOf(b)]);
     const animatedWater=adventureWater();
@@ -303,11 +306,12 @@ export default function WorldScene3D(props: SceneProps) {
     const siteImages = new Map<string, string>();
     function siteBillboard(s: World["sites"][number], parent = terrain) {
       const portrait =
+        s.subsurface?creaturePortrait(s.subsurface==='ruins'?'crystal-slime':'stone-golem'):
         s.kind === "npc"
           ? getRoamingNpcEvent(s.npcEventId)?.portrait
           : s.kind==="story"&&s.storyRole==="npc"?storyForSite(s)?.portrait:undefined;
       let src = portrait
-        ? assetUrl(npcAppearance(latest.current.world,portrait))
+        ? (s.subsurface?assetUrl(portrait):assetUrl(npcAppearance(latest.current.world,portrait)))
         : siteImages.get(s.id + ":" + s.cleared);
       if (!src) {
         const canvas = document.createElement("canvas");
@@ -357,9 +361,9 @@ export default function WorldScene3D(props: SceneProps) {
         parent,
         src,
         s.x + 0.5,
-        size / 2,
+        size / 2+(s.subsurface?CAVERNS[s.subsurface].floor:0),
         s.y + 0.5,
-        size,
+        size,undefined,!!s.subsurface,
       );
       sprite.userData.tile = { x: s.x, y: s.y };
     }
@@ -600,6 +604,7 @@ export default function WorldScene3D(props: SceneProps) {
       for (const s of w.sites.filter(
         (s) =>
           near(s) &&
+          !(s.subsurface&&s.cleared) &&
           (s.kind !== "fragment" ||
             w.activities.secretsFound.includes(s.id) ||
             Math.abs(s.x - x) + Math.abs(s.y - y) <= 4),
@@ -625,6 +630,20 @@ export default function WorldScene3D(props: SceneProps) {
           }
         } else {
           if (s.kind !== "npc") siteBillboard(s);
+        }
+      }
+      for (const cave of w.caverns ?? []) {
+        if (!near({x:cave.x,y:cave.z+3})) continue;
+        const entry=cavernEntrance(cave),cache=cavernCache(cave);
+        const ground=terrainHeight(w,entry.x,entry.z);
+        for (const side of [-1,1]) mesh(terrain,box,stone,entry.x+.5+side*.6,ground+.60,entry.z+.5,.31,1.2,.43);
+        mesh(terrain,box,stone,entry.x+.5,ground+1.28,entry.z+.5,1.55,.24,.5);
+        mesh(terrain,box,gold,entry.x+.5,ground+1.29,entry.z+.77,.32,.15,.08);
+        mesh(terrain,box,stone,cache.x+.5,cache.y+.13,cache.z+.5,.9,.26,.85);
+        mesh(terrain,box,gold,cache.x+.5,cache.y+.43,cache.z+.5,.58,.35,.49);
+        if (cave.id==='mirrorlake') for(let dz=-2;dz<=2;dz++)for (const dx of [-4,-3,-2,2,3,4]) {
+          const pool=cavernWater(w,cave.x+dx,cave.z+dz,cache.y);
+          if(pool)mesh(terrain,box,water,cave.x+dx+.5,pool.surface-.045,cave.z+dz+.5,1,.06,1);
         }
       }
       for (const h of w.life.houses.filter(near))
@@ -996,6 +1015,7 @@ export default function WorldScene3D(props: SceneProps) {
       if (a) {
         const focusPoint=new THREE.Vector3(a.position3D?.x??a.x,a.position3D?.y??0,a.position3D?.z??a.y);
         machineryEffects.update(w,focusPoint,dt,options.current.reducedMotion);
+        transportModels.update(w,focusPoint,time/1000,dt,options.current.reducedMotion,thirdRef.current?undefined:a.id);
         creatures.update(w,focusPoint,time/1000,dt,options.current.reducedMotion);
         renderer.domElement.dataset.creatureModels=String(creatures.count);
         if (
@@ -1160,7 +1180,11 @@ export default function WorldScene3D(props: SceneProps) {
       for(const g of distantBuildings.children){const s=g.userData.site,dx=Math.abs(s.x-avatar.root.position.x),dz=Math.abs(s.y-avatar.root.position.z);g.visible=(dx>=detailRadius||dz>=detailRadius)&&Math.hypot(dx,dz)<170;}
       ambience?.update(camera.position.y,underwater||!!pool,landscape.group.userData.stats.weather==='rain');
       renderer.domElement.dataset.landscape=JSON.stringify(landscape.group.userData.stats);renderer.domElement.dataset.underwater=String(underwater);
-      const underground=!underwater&&camera.position.y<terrainHeight(w,Math.floor(camera.position.x),Math.floor(camera.position.z))-.5;lamp.position.copy(camera.position);lamp.intensity=underground?3:0;const nearest=oasisCenters(w).reduce((a,b)=>Math.hypot(b.x-camera.position.x,b.z-camera.position.z)<Math.hypot(a.x-camera.position.x,a.z-camera.position.z)?b:a);oasisLight.position.set(nearest.x,nearest.depth+1,nearest.z);oasisLight.intensity=underground?2.5:0;
+      const underground=!underwater&&camera.position.y<terrainHeight(w,Math.floor(camera.position.x),Math.floor(camera.position.z))-.5;
+      lamp.position.copy(camera.position);lamp.intensity=underground?3:0;
+      const cave=currentCavern(w,a);
+      const nearest=cave?{x:cave.x+.5,z:cave.z+.5,depth:CAVERNS[cave.id].floor}:oasisCenters(w).reduce((a,b)=>Math.hypot(b.x-camera.position.x,b.z-camera.position.z)<Math.hypot(a.x-camera.position.x,a.z-camera.position.z)?b:a);
+      oasisLight.color.set(cave?CAVERNS[cave.id].color:'#6cf1d7');oasisLight.position.set(nearest.x,nearest.depth+1.8,nearest.z);oasisLight.intensity=underground?(cave?3.7:2.5):0;
       if(!underwater){const haze=(scene.fog as THREE.FogExp2).color;haze.lerp(new THREE.Color(phase===3?'#354863':phase===2?'#dca88d':skyMaterial.uniforms.tone.value),phase===3?.7:phase===2?.35:0);}
       const brightness = underground?.1:phase === 3 ? 0.48 : phase === 2 ? 0.8 : 1;
       skyMaterial.uniforms.dark.value = brightness;
@@ -1193,6 +1217,7 @@ export default function WorldScene3D(props: SceneProps) {
       unlock();
       window.removeEventListener('keydown', inspectKey);
       machineryEffects.dispose();
+      transportModels.dispose();
       creatures.dispose();
       lockTarget.current = null;
       document.removeEventListener('pointerlockchange', lockChanged);

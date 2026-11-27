@@ -10,10 +10,12 @@ import { blockAt, bodyClear, floorAt, playerHeight, protectedVoxel, solid, terra
 import { DAY_SECONDS } from './town/catalog';
 import { legacyRegion } from './worldLandscape';
 import { sandboxAllows } from './sandboxAccess';
+import { occupiedByBoat } from './transport';
 
 export type MachineCell = { x: number; y: number; z: number };
 export type MachineMode = 'compare' | 'subtract';
 export type NoteInstrument = 'bell' | 'wood' | 'reed';
+export const NOTE_REPEATS = [0,1,2,3,4,6,8,12,16] as const;
 export type MachineCommand =
   | (MachineCell & { type: 'voxel-device'; command: 'use' | 'rotate' | 'piston-axis' | 'cart-ride' | 'cart-drive' | 'cart-stop' | 'cart-remove' | 'station-signal' })
   | (MachineCell & { type: 'voxel-device'; command: 'cart-place'; value?: CartItem })
@@ -23,7 +25,7 @@ export type MachineCommand =
   | (MachineCell & { type: 'voxel-device'; command: 'cart-couple'; value: string })
   | (MachineCell & { type: 'voxel-device'; command: 'cart-timetable'; value: CartTimetable | null })
   | (MachineCell & { type: 'voxel-device'; command: 'farm-job'; value: FarmMachineJob })
-  | { type: 'voxel-device'; x: number; y: number; z: number; command: 'delay' | 'note' | 'sensor-range'; value: number }
+  | { type: 'voxel-device'; x: number; y: number; z: number; command: 'delay' | 'note' | 'note-volume' | 'note-repeat' | 'sensor-range'; value: number }
   | { type: 'voxel-device'; x: number; y: number; z: number; command: 'mode'; value: MachineMode }
   | { type: 'voxel-device'; x: number; y: number; z: number; command: 'filter' | 'recipe' | 'instrument'; value: string };
 
@@ -44,6 +46,8 @@ interface Device {
   progress?: number;
   requested?: boolean;
   note?: number;
+  noteGain?: number;
+  notePeriod?: number;
   instrument?: NoteInstrument;
   played?: number;
   stationName?: string;
@@ -129,7 +133,7 @@ function workFor(w: World, state: MachineryState) {
     work = {
       state,
       dirty: new Set(keys),
-      active: new Set(keys.filter(key => needsTick.has(kindAt(w, key) as MachinePart))),
+      active: new Set(keys.filter(key => needsTick.has(kindAt(w, key) as MachinePart)||!!state.devices[key].notePeriod)),
       receivedItems: new Set(),
       last: undefined,
     };
@@ -208,7 +212,7 @@ function movingGateOccupied(w: World, cell: MachineCell, carrying: Adventurer[] 
     const dz = Math.abs((player.position3D?.z ?? player.y + .5) - cell.z - .5);
     const y = playerHeight(w, player);
     return dx < .77 && dz < .77 && y < cell.y + 1 && y + 1.72 > cell.y;
-  }) || Object.values(stateOf(w)?.carts ?? {}).some(cart=>cart!==replaced&&cart.cell===keyOf(cell));
+  }) || occupiedByBoat(w,cell.x,cell.y,cell.z) || Object.values(stateOf(w)?.carts ?? {}).some(cart=>cart!==replaced&&cart.cell===keyOf(cell));
 }
 
 const trailerFor=(state:MachineryState,id:string)=>Object.values(state.carts).find(cart=>cart.coupledTo===id);
@@ -674,7 +678,10 @@ function updateDevice(w: World, state: MachineryState, work: CircuitWork, key: s
       break;
     case 'note_block':
       signal = rawInput();
-      if (signal && !device.signal) device.played = state.tick;
+      if (signal && (!device.signal || device.notePeriod && state.tick-(device.played ?? 0)>=device.notePeriod)) {
+        device.played=state.tick;
+        changed=true;
+      }
       break;
     default: signal = rawInput();
   }
@@ -1120,6 +1127,16 @@ export function applyMachineCommand(w: World, p: Adventurer, command: MachineCom
         command.value < 0 || command.value > 24) return false;
       device.note = command.value;
       break;
+    case 'note-volume':
+      if (kind!=='note_block'||!device||!owner||!Number.isInteger(command.value)||command.value<0||command.value>100) return false;
+      device.noteGain=command.value;
+      break;
+    case 'note-repeat':
+      if (kind!=='note_block'||!device||!owner||!NOTE_REPEATS.some(period=>period===command.value)) return false;
+      device.notePeriod=command.value;
+      if (device.notePeriod) workFor(w,state).active.add(key);
+      else workFor(w,state).active.delete(key);
+      break;
     default: return false;
   }
   p.voxelDeviceAt = now;
@@ -1150,6 +1167,8 @@ export function restoreMachinery(w: World) {
     if ((block==='piston' || block==='sticky_piston') && state.vertical===true) device.vertical=true;
     if (isMachinePart(block)&&isProcessor(block)&&whole(state.progress,0,PROCESSOR[block].ticks)) device.progress=state.progress;
     if (whole(state.note, 0, 24)) device.note = state.note;
+    if (block==='note_block'&&whole(state.noteGain,0,100)) device.noteGain=state.noteGain;
+    if (block==='note_block'&&NOTE_REPEATS.some(period=>period===state.notePeriod)) device.notePeriod=state.notePeriod;
     if (state.instrument && ['bell','wood','reed'].includes(state.instrument)) device.instrument = state.instrument;
     if (whole(state.played, 0, tick)) device.played = state.played;
     if (state.mode === 'compare' || state.mode === 'subtract') device.mode = state.mode;

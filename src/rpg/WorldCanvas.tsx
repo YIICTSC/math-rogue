@@ -1,4 +1,6 @@
 import { drawMachineCarts, drawMachineLayer, drawSurfaceMachines, type MachineLayer } from './machineLayer';
+import { drawGlider, drawWatercraft } from './transportDrawing';
+import { CAVERNS, cacheRecord, cavernCache, cavernEntrance, currentCavern } from './subsurface';
 import { isMachinePart } from './machineryParts';
 import { visibleWildlife, WILDLIFE } from './lifestyle/wildlife';
 import { drawCreature } from './lifestyle/creatureArt';
@@ -170,6 +172,7 @@ function person(
     c.strokeStyle = coat;
     c.strokeRect(x + 1, y + 12, 15, 5);
   }
+  drawGlider(c,p,x+8,y-6);
 }
 function landmarkPortrait(c:CanvasRenderingContext2D,path:string,x:number,y:number){let image=characterImages.get(path);if(!image){image=new Image();image.src=assetUrl(path);characterImages.set(path,image);}if(!image.complete||!image.naturalWidth)return false;const height=28,width=Math.min(24,height*image.naturalWidth/image.naturalHeight);c.drawImage(image,x-width/2,y+10-height,width,height);return true;}
 export function landmark(c: CanvasRenderingContext2D, s: Site, time: number, world?:World) {
@@ -308,6 +311,15 @@ export default function WorldCanvas({
       if (layer && !overview) {
         drawMachineLayer(c, w, T, viewBounds, layer);
         drawMachineCarts(c, w, T, viewBounds, layer.height);
+        drawWatercraft(c,w,T,viewBounds,time,layer.height);
+        const cavern=currentCavern(w,p);
+        if (cavern && Math.abs(layer.height-CAVERNS[cavern.id].floor)<=1) {
+          const cache=cavernCache(cavern), entry=cavernEntrance(cavern);
+          drawCavernMark(c,entry.x,entry.z,CAVERNS[cavern.id].color,'↑');
+          if (!p.voxelDiscoveries?.includes(cacheRecord(cavern.id))) drawCavernMark(c,cache.x,cache.z,'#f8db9c','◆');
+          for (const site of w.sites.filter(site=>site.subsurface===cavern.id && !site.cleared)) drawCavernMark(c,site.x,site.y,'#e48898','!');
+          for (const guest of Object.values(w.players)) if (guest.id!==p.id&&currentCavern(w,guest)?.id===cavern.id) person(c,guest,prefs.reducedMotion?0:time);
+        }
         const onLayer = Math.abs(playerHeight(w, p) - layer.height) < .65;
         c.strokeStyle = onLayer ? '#ffdf89' : '#79bbc0';
         c.lineWidth = 1.2; c.setLineDash(onLayer ? [] : [2, 2]);
@@ -382,6 +394,7 @@ export default function WorldCanvas({
       if (!overview) {
         drawSurfaceMachines(c, w, T, viewBounds);
         drawMachineCarts(c, w, T, viewBounds);
+        drawWatercraft(c,w,T,viewBounds,prefs.reducedMotion?0:time);
       }
       for(const room of w.voxelRooms||[]){for(const f of room.furniture){const path=assetUrl(furnitureImage(f.item));let img=characterImages.get(path);if(!img){img=new Image();img.src=path;characterImages.set(path,img);}if(img?.complete&&img.naturalWidth)c.drawImage(img,f.x*T,f.y*T-12,24,24);}for(const farm of Object.values(w.farm?.people||{}))for(const pet of farm.pets)if(pet.homeId===room.id&&pet.roomPos)drawFarmSprite(c,'pet',pet.kind,pet.roomPos.x*T+8,pet.roomPos.y*T+15,22);}
       drawFarms(c,w,time,!prefs.reducedMotion,{minX,maxX,minY,maxY});
@@ -408,9 +421,13 @@ export default function WorldCanvas({
         if(work?.kind==='fish'){const x=work.tile%WIDTH*T+8,y=Math.floor(work.tile/WIDTH)*T+8;c.strokeStyle='#ddd3ad';c.lineWidth=.5;c.beginPath();c.moveTo(q.x*T+8,q.y*T+4);c.lineTo(x,y);c.stroke();rect(c,x-1,y+Math.sin(time/130)*1.5,3,3,w.life.now>=work.target?'#ffcf62':'#ec826f');}
         if(effect&&w.life.now-effect.at<600){const x=effect.tile%WIDTH*T+8,y=Math.floor(effect.tile/WIDTH)*T+6,age=(w.life.now-effect.at)/600;for(let i=0;i<6;i++)rect(c,x+Math.cos(i)*age*14,y+Math.sin(i)*age*12,2,2,effect.perfect?'#ffdf7b':'#ddd7bb');}
       }
-      const visibleSites = w.sites.filter(s => s.kind !== "fragment" || w.activities.secretsFound.includes(s.id) || Math.abs(s.x-p.x)+Math.abs(s.y-p.y)<=4);
+      for (const cave of w.caverns ?? []) {
+        const entry=cavernEntrance(cave);
+        if (entry.x>=minX&&entry.x<maxX&&entry.z>=minY&&entry.z<maxY) drawCavernMark(c,entry.x,entry.z,CAVERNS[cave.id].color,'↓');
+      }
+      const visibleSites = w.sites.filter(s => !s.subsurface && (s.kind !== "fragment" || w.activities.secretsFound.includes(s.id) || Math.abs(s.x-p.x)+Math.abs(s.y-p.y)<=4));
       visibleSites.forEach((s) => landmark(c, s, time,w));
-      Object.values(w.players).filter(p => !p.spectator && !p.life?.indoors)
+      Object.values(w.players).filter(p => !p.spectator && !p.life?.indoors && !currentCavern(w,p))
         .sort((a, b) => mapPosition(a).z - mapPosition(b).z)
         .forEach((q) => person(c, q, prefs.reducedMotion?0:time));
       c.restore();
@@ -444,7 +461,7 @@ export default function WorldCanvas({
               : "#eee6c5";
           c.fillText(label, x, y + 2);
         });
-        Object.values(w.players).filter(q => !q.spectator && !q.life?.indoors).forEach((q) => {
+        Object.values(w.players).filter(q => !q.spectator && !q.life?.indoors && !currentCavern(w,q)).forEach((q) => {
           const qp=mapPosition(q);
           const x = (qp.x * T - cx) * scale,
             y = (qp.z * T + 17 - cy) * scale;
@@ -492,4 +509,14 @@ export default function WorldCanvas({
       }}
     />
   );
+}
+
+function drawCavernMark(c:CanvasRenderingContext2D,x:number,z:number,color:string,symbol:string) {
+  c.save();
+  const cx=(x+.5)*T,cz=(z+.5)*T;
+  c.fillStyle='#18272c';c.fillRect(cx-5,cz-5,10,10);
+  c.strokeStyle=color;c.lineWidth=1.1;c.strokeRect(cx-5,cz-5,10,10);
+  c.fillStyle=color;c.textAlign='center';c.font='bold 9px sans-serif';
+  c.fillText(symbol,cx,cz+3);
+  c.restore();
 }

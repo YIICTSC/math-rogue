@@ -1,6 +1,7 @@
 import {DedicatedConnection} from '../services/dedicatedConnection';
 import {createHostRoomCode,roomAddress,type OnlineTransport} from '../services/onlineTransport';
 import {changedResidentAssets,stripResidentAssets,type ResidentAssets} from './town/residentTransport';
+import {applyWorldDelta,WorldDeltaWriter,type DeltaPacket,type SharedWorldState} from './worldDelta';
 import type {CreatedResident} from './town/residents';
 import type { P2PEvent } from "../services/p2pService";
 import Peer, { type DataConnection, type PeerOptions } from "peerjs";
@@ -103,7 +104,7 @@ export class RpgRoom {
         this.world=unpackWorld(d.world);this.emit();this.status('');return true;
       }
       if(this.receiveResidentAssets(d)||this.receiveHeroAssets(d))return false;
-      if(d.type==='state'&&d.state&&this.world){this.restoreHeroAssets(d.state);this.world={...d.state,tiles:this.world.tiles};this.emit();}return false;
+      this.receiveSharedWorld(d,()=>this.serverSend({type:'state-resync'}));return false;
     },()=>{
       if(this.closed)return;
       const token=this.resumeToken;
@@ -114,13 +115,25 @@ export class RpgRoom {
         });
       }else{this.world=null;this.status('通信が切断されました。部屋に入り直してください。');}
     });
-    this.serverConnection=connection;await connection.open('online',{...packet,machineryProtocol:1},reconnecting?20_000:180_000);
+    this.serverConnection=connection;await connection.open('online',{...packet,machineryProtocol:1,sandboxDeltas:1},reconnecting?20_000:180_000);
   }
   private residentAssets=new Map<string,ResidentAssets>();
   private receiveResidentAssets(packet:{type?:string;residents?:ResidentAssets[]}){if(packet.type!=='resident-assets'||!Array.isArray(packet.residents))return false;for(const r of packet.residents){this.residentAssets.set(r.id,r);const target=this.world?.town?.customResidents?.find(x=>x.id===r.id);if(target)Object.assign(target,r);}this.emit();return true;}
   private heroAssets = new Map<string,World['players'][string]['hero']>();
   private receiveHeroAssets(packet: {type?:string;heroes?:Record<string,World['players'][string]['hero']|null>}){if(packet.type!=='heroes'||!packet.heroes)return false;for(const [id,hero]of Object.entries(packet.heroes)){this.heroAssets.set(id,hero||undefined);if(this.world?.players[id])this.world.players[id].hero=hero||undefined;}this.emit();return true;}
   private restoreHeroAssets(state:Omit<World,'tiles'>){for(const r of state.town?.customResidents||[]){const old=this.world?.town?.customResidents?.find(x=>x.id===r.id),assets=this.residentAssets.get(r.id)||old;if(assets){r.portrait=assets.portrait;r.hero=assets.hero;}}for(const [id,p]of Object.entries(state.players)){if('hero' in p)this.heroAssets.set(id,p.hero);else p.hero=this.heroAssets.has(id)?this.heroAssets.get(id):this.world?.players[id]?.hero;}for(const id of this.heroAssets.keys())if(!state.players[id])this.heroAssets.delete(id);}
+  private receiveSharedWorld(raw:unknown,resync:()=>void){
+    const current=this.world;
+    if(!current||!raw||typeof raw!=='object')return;
+    const packet=raw as DeltaPacket|{type:'state';state:SharedWorldState};
+    if(packet.type!=='state'&&packet.type!=='state-delta')return;
+    const state=packet.type==='state-delta'?applyWorldDelta(current,packet):packet.state;
+    if(!state){resync();return;}
+    if(state.revision<current.revision)return;
+    this.restoreHeroAssets(state);
+    this.world={...state,tiles:current.tiles};
+    this.emit();
+  }
   private commands = new Map<string, { time: number; count: number }>();
   constructor(
     private update: (world: World) => void,
@@ -216,6 +229,14 @@ export class RpgRoom {
     );
     this.world.started = false;
     addPlayer(this.world, this.selfId, name);
+    const sent=new Map<string,number>();
+    const deltas=new WorldDeltaWriter();
+    const init=(conn:DataConnection)=>{
+      const world=this.world;
+      if(!world)return;
+      conn.send({type:'init',world:{...world,tiles:world.tiles.join(',')}});
+      sent.set(conn.peer,world.revision);
+    };
     peer.on("connection", (conn) => {
       // Bound even unauthenticated/pending channels.
       if (this.connections.size >= 39) {
@@ -286,7 +307,7 @@ export class RpgRoom {
             conn.send({ type: "error", message: "部屋が満員です。" });
             return;
           }
-          conn.send({ type: "init", world: {...this.world,tiles:this.world.tiles.join(",")} });
+          init(conn);
           this.emit();
         } else if (
           data.type === "enter" &&
@@ -311,8 +332,10 @@ export class RpgRoom {
           participant.hp = data.profile.hp;
           participant.maxHp = data.profile.maxHp;
           participant.gold = data.profile.gold;
-          conn.send({ type: "init", world: {...this.world,tiles:this.world.tiles.join(",")} });
+          init(conn);
           this.emit();
+        } else if(data.type==='state-resync'&&this.world.players[conn.peer]) {
+          sent.delete(conn.peer);
         } else if (
           data.type === "action" &&
           data.action &&
@@ -330,6 +353,7 @@ export class RpgRoom {
         clearTimeout(handshake);
         this.pendingInviteNames.delete(conn.peer);
         this.connections.delete(conn.peer);
+        sent.delete(conn.peer);
         this.commands.delete(conn.peer);
         if (this.world) {
           removePlayer(this.world, conn.peer);
@@ -344,7 +368,8 @@ export class RpgRoom {
     this.timer = setInterval(() => {
       if (!this.world) return;
       advanceWorld(this.world);
-      if (this.world.revision === this.lastRevision) return;
+      const revision=this.world.revision;
+      if(revision===this.lastRevision&&[...this.connections.values()].every(conn=>!conn.open||!this.world?.players[conn.peer]||sent.get(conn.peer)===revision))return;
       this.lastRevision = this.world.revision;
       this.emit();
       const { tiles, ...rest } = this.world;
@@ -353,9 +378,15 @@ export class RpgRoom {
       for(const id of heroCache.keys())if(!this.world.players[id])heroCache.delete(id);
       const residents=changedResidentAssets(this.world,residentCache);
       const state=stripResidentAssets({...rest,players:Object.fromEntries(Object.entries(rest.players).map(([id,p])=>{const {hero,...player}=p;return [id,player];}))});
-      for (const conn of this.connections.values())
-        if (conn.open && this.world.players[conn.peer])
-          {if(residents.length)conn.send({type:'resident-assets',residents});if(Object.keys(heroes).length)conn.send({type:"heroes",heroes});conn.send({ type: "state", state });}
+      const delta=deltas.capture(state);
+      for(const conn of this.connections.values()){
+        if(!conn.open||!this.world.players[conn.peer])continue;
+        if(residents.length)conn.send({type:'resident-assets',residents});
+        if(Object.keys(heroes).length)conn.send({type:'heroes',heroes});
+        if(conn.dataChannel.bufferedAmount>131072||sent.get(conn.peer)===revision)continue;
+        conn.send(delta&&sent.get(conn.peer)===delta.base?delta:{type:'state',state});
+        sent.set(conn.peer,revision);
+      }
     }, 250);
     this.emit();
   }
@@ -418,11 +449,7 @@ export class RpgRoom {
           resolve();
         }
         if(this.receiveResidentAssets(data)||this.receiveHeroAssets(data))return;
-        if (data.type === "state" && data.state && this.world) {
-          this.restoreHeroAssets(data.state);
-          this.world = { ...data.state, tiles: this.world.tiles };
-          this.emit();
-        }
+        this.receiveSharedWorld(data,()=>conn.send({type:'state-resync'}));
       });
       conn.on("close", () => {
         clearTimeout(timeout);
@@ -517,11 +544,7 @@ export class RpgRoom {
           finish();
         }
         if(this.receiveResidentAssets(data)||this.receiveHeroAssets(data))return;
-        if (data.type === "state" && data.state && this.world) {
-          this.restoreHeroAssets(data.state);
-          this.world = { ...data.state, tiles: this.world.tiles };
-          this.emit();
-        }
+        this.receiveSharedWorld(data,()=>conn.send({type:'state-resync'}));
       });
       conn.on("close", () => {
         finish(new Error("ホストとの接続が終了しました。"));

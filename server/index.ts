@@ -12,14 +12,15 @@ import { randomInt, randomUUID } from 'node:crypto';
 import { WebSocket, WebSocketServer } from 'ws';
 import { addPlayer, applyAction, advanceWorld, createWorld, removePlayer, setSpectator, validProfile, type World } from '../src/rpg/engine';
 import { normalizeRpgAdventureSetup } from '../src/rpg/setup';
+import { WorldDeltaWriter } from '../src/rpg/worldDelta';
 import {miniUpgrade,closeMiniRooms} from './miniRooms';
 import {golfUpgrade,closeGolfRooms} from './golfRooms';
 import {sessionResult} from '../src/services/sessionResults';
 import {endSession} from './sessionEnd';
 
-type Member = { socket: WebSocket; id: string; admitted: boolean; name: string; alive: boolean; at: number; count: number; stateRevision?:number; resumeToken?:string };
+type Member = { socket: WebSocket; id: string; admitted: boolean; name: string; alive: boolean; at: number; count: number; stateRevision?:number; resumeToken?:string; sandboxDeltas?:true };
 type Reservation = {id:string; spectator?:boolean; expiresAt:number};
-type Room = {machineryProtocol?:1; world: World; host: string; members: Map<string, Member>; revision: number; emptyAt: number; reservations:Map<string,Reservation>; residentCache?:Map<string,CreatedResident>; heroCache?: Map<string,World["players"][string]["hero"]> };
+type Room = {machineryProtocol?:1; world: World; host: string; members: Map<string, Member>; revision: number; emptyAt: number; reservations:Map<string,Reservation>; residentCache?:Map<string,CreatedResident>; heroCache?: Map<string,World["players"][string]["hero"]>; deltas?:WorldDeltaWriter };
 const REJOIN_MS = 120_000;
 const rooms = new Map<string, Room>();
 const allowed = new Set((process.env.ALLOWED_ORIGINS || '').split(',').map(s=>s.trim()).filter(Boolean));
@@ -75,7 +76,7 @@ sockets.on('connection',(socket,request)=>{
         const minutes=d.minutes===0?0:Number.isFinite(d.minutes)?Math.min(180,Math.max(1,d.minutes)):30;
         const world=createWorld(randomInt(0x100000000),setup,minutes,now,d.gameMode==='BATTLE_ROYALE'?'BATTLE_ROYALE':'COOP');world.started=false;
         const machineryProtocol=d.machineryProtocol===1?1:undefined;
-        if(!machineryProtocol)delete world.machineGeology;
+        if(!machineryProtocol){delete world.machineGeology;delete world.caverns;world.sites=world.sites.filter(site=>!site.subsurface);}
         if(machineryProtocol)world.hostId=m.id;
         room={world,host:m.id,members:new Map(),revision:-1,emptyAt:0,machineryProtocol,reservations:new Map()};
         rooms.set(code,room);
@@ -90,6 +91,7 @@ sockets.on('connection',(socket,request)=>{
         return;
       }
       if(room.world.ended){room=undefined;fail(m,'冒険は終了しています。');return;}
+      if(room.machineryProtocol&&d.sandboxDeltas===1){m.sandboxDeltas=true;room.deltas??=new WorldDeltaWriter();}
       const saved=room.machineryProtocol&&typeof d.resumeToken==='string' ? room.reservations.get(d.resumeToken) : undefined;
       if(d.resumeToken && (!saved || saved.expiresAt<=now || !room.world.players[saved.id])){
         room=undefined;fail(m,'再接続できる時間を過ぎました。');return;
@@ -117,6 +119,7 @@ sockets.on('connection',(socket,request)=>{
       return;
     }
     if(!m.admitted)return;
+    if(d.type==='state-resync'&&m.sandboxDeltas){m.stateRevision=-1;return;}
     if(d.type==='session-end'){
       if(room.host===m.id && endSession(sessionResult('rpg',room.world),room.members.values())){
         room.world.ended=true;
@@ -126,7 +129,7 @@ sockets.on('connection',(socket,request)=>{
     }
     if(d.type==='spectator' && room.host===m.id)setSpectator(room.world,m.id,d.enabled);
     if(d.type==='action' && d.action){
-      if(!room.machineryProtocol&&(['voxel-device','voxel-fluid','voxel-research','voxel-blueprint','voxel-tools','voxel-potion','voxel-admin'].includes(d.action.type)||
+      if(!room.machineryProtocol&&(['voxel-device','voxel-fluid','voxel-research','voxel-blueprint','voxel-tools','voxel-potion','voxel-admin','voxel-transport','voxel-cave'].includes(d.action.type)||
         d.action.type==='voxel-place'&&(isMachinePart(d.action.block)||['warehouse_chest','lift_platform','bubbling_stone','magma_block','anvil','whetstone','imprint_table','brew_table'].includes(d.action.block))))return;
       try{applyAction(room.world,m.id,d.action);}catch{fail(m,'操作を処理できませんでした。');}}
     if(d.type==='dungeon-event' && d.event && typeof d.event.type==='string'){
@@ -169,9 +172,16 @@ const tick=setInterval(()=>{
     for(const id of room.heroCache.keys())if(!room.world.players[id])room.heroCache.delete(id);
     room.residentCache??=new Map();const residentAssets=changedResidentAssets(room.world,room.residentCache);if(residentAssets.length)for(const m of room.members.values())if(m.admitted)send(m,{type:'resident-assets',residents:residentAssets});
     const state=stripResidentAssets({...rest,players:Object.fromEntries(Object.entries(rest.players).map(([id,p])=>{const {hero,...player}=p;return [id,player];}))});
-    // Encode shared state once for all 40 players. Slow receivers get the next state.
-    const packet=JSON.stringify({type:'state',state});
-    for(const m of room.members.values())if(m.admitted && m.socket.readyState===WebSocket.OPEN && m.socket.bufferedAmount<65536){m.socket.send(packet);m.stateRevision=room.world.revision;}
+    const delta=room.deltas?.capture(state);
+    const incremental=delta&&JSON.stringify(delta);
+    let full:string|undefined;
+    for(const m of room.members.values()){
+      if(!m.admitted||m.socket.readyState!==WebSocket.OPEN||m.socket.bufferedAmount>=65536||m.stateRevision===room.world.revision)continue;
+      // A receiver that missed the baseline gets a complete snapshot as soon as it drains.
+      if(m.sandboxDeltas&&incremental&&m.stateRevision===delta?.base)m.socket.send(incremental);
+      else m.socket.send(full??=JSON.stringify({type:'state',state}));
+      m.stateRevision=room.world.revision;
+    }
     room.revision=room.world.revision;
   }
 },100);

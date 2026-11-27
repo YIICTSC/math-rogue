@@ -3,6 +3,8 @@ import {legacyRegion} from './worldLandscape';
 import React, { lazy, Suspense, useState } from "react";
 import WorldCanvas from "./WorldCanvas";
 import MachineLayerView from "./MachineLayerView";
+import TransportDock from './TransportDock';
+import CavernDock from './CavernDock';
 import "./machinery.css";
 import { useRpgPreferences, updateRpgPreferences } from "./preferences";
 import "./world3d.css";
@@ -50,6 +52,10 @@ export default function WorldView(
         <MachineLayerView {...props} />
       )}{" "}
       {prefs.mapView==='2D'&&props.world.players[props.selfId]?.position3D&&(()=>{const pos=props.world.players[props.selfId].position3D!;return !legacyRegion(pos.x,pos.z)?<LandscapeCompass x={pos.x} z={pos.z} languageMode={props.languageMode}/>:null;})()}
+      {!props.overview && props.onVoxelAction && <TransportDock world={props.world} selfId={props.selfId}
+        languageMode={props.languageMode} facing={props.facing} disabled={props.inputBlocked} send={props.onVoxelAction}/>}
+      {!props.overview && props.onVoxelAction && <CavernDock world={props.world} selfId={props.selfId}
+        languageMode={props.languageMode} disabled={props.inputBlocked} send={props.onVoxelAction}/>}
       {failed && (
         <button className="rpg-3d-fallback" onClick={() => setFailed(false)}>
           WebGL · 2D ✓

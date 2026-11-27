@@ -27,7 +27,8 @@ export function voxelMaterial(block:TerrainBlock){
  if(pattern==='bookshelf'){for(let y=4;y<32;y+=15){for(let i=0;i<6;i++){c.fillStyle=['#687eab','#cf8a68','#87a77c','#e0c77e','#a17f9d','#658e95'][i];c.fillRect(3+i*4,y,3,11);}c.fillStyle='#543c2c';c.fillRect(0,y+11,32,2);}}
  const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;map.magFilter=T.LinearFilter;map.minFilter=T.LinearMipmapLinearFilter;
  const transparent=def?.transparent||block==='oasis-water';
- return new T.MeshStandardMaterial({map,vertexColors:isMachinePart(block),color:'#ffffff',roughness:transparent?.2:.86,metalness:pattern==='metal'?.35:0,transparent,opacity:block==='oasis-water'?.65:1,depthWrite:!transparent,side:transparent?T.DoubleSide:T.FrontSide,emissive:def?.light?color:block==='oasis-water'?'#17877e':'#000000',emissiveIntensity:def?.light?.65:.1});
+ const lava=block==='cave-lava';
+ return new T.MeshStandardMaterial({map,vertexColors:isMachinePart(block),color:'#ffffff',roughness:transparent?.2:.86,metalness:pattern==='metal'?.35:0,transparent,opacity:block==='oasis-water'?.65:1,depthWrite:!transparent,side:transparent?T.DoubleSide:T.FrontSide,emissive:def?.light||lava?color:block==='oasis-water'?'#17877e':'#000000',emissiveIntensity:lava?.88:def?.light?.65:.1});
 }
 export function createConstructionGeometry(onReady:()=>void){
  let disposed=false;

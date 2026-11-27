@@ -1430,6 +1430,20 @@ const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
             if (turn % 3 === 1) return { type: EnemyIntentType.ATTACK_DEBUFF, value: 4, secondaryValue: 1, debuffType: 'POISON' };
             return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 2, debuffType: 'WEAK' };
 
+        case 'RPG_STONE_WARDEN': {
+            const pattern = turn % 4;
+            if (pattern === 1) return { type: EnemyIntentType.DEFEND, value: 14 };
+            if (pattern === 2) return { type: EnemyIntentType.ATTACK_DEBUFF, value: 13, secondaryValue: 2, debuffType: 'VULNERABLE' };
+            if (pattern === 3) return { type: EnemyIntentType.ATTACK, value: 19 };
+            return { type: EnemyIntentType.ATTACK_DEFEND, value: 10, secondaryValue: 10 };
+        }
+        case 'RPG_CRYSTAL_WARDEN': {
+            const pattern = turn % 4;
+            if (pattern === 1) return { type: EnemyIntentType.ATTACK_DEBUFF, value: 10, secondaryValue: 2, debuffType: 'WEAK' };
+            if (pattern === 2) return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: 3 };
+            if (pattern === 3) return { type: EnemyIntentType.PIERCE_ATTACK, value: 16 };
+            return { type: EnemyIntentType.ATTACK_DEFEND, value: 12, secondaryValue: 6 };
+        }
         case 'RPG_EXAMINER':
         case 'GUARDIAN':
             const bossTurn = turn % 6;
@@ -9563,7 +9577,9 @@ const App: React.FC = () => {
 
                     enemies = enemies.map(e => {
                         const isRpgHeadmaster = rpgEncounter?.site.kind === 'boss';
-                        const type = isRpgHeadmaster ? 'RPG_DEMON' : rpgEncounter?.site.kind==='guardian'?'RPG_EXAMINER':determineEnemyType(e.name, node.type === NodeType.BOSS);
+                        const cavernType = rpgEncounter?.site.subsurface === 'ruins' ? 'RPG_CRYSTAL_WARDEN'
+                            : rpgEncounter?.site.subsurface === 'shrine' ? 'RPG_STONE_WARDEN' : null;
+                        const type = cavernType ?? (isRpgHeadmaster ? 'RPG_DEMON' : rpgEncounter?.site.kind==='guardian'?'RPG_EXAMINER':determineEnemyType(e.name, node.type === NodeType.BOSS));
                         if (!nextState.rpgOnline) storageService.saveDefeatedEnemy(e.name);
                         const scaledEnemy = { ...e, ...(rpgEncounter?.site.kind==='guardian'?{name:rpgEncounter.site.name}:{}), enemyType: type, strength: e.strength + difficulty.enemyStrengthBonus, ...(isRpgHeadmaster ? {phase:1} : {}) };
                         return { ...scaledEnemy, nextIntent: getNextEnemyIntent(scaledEnemy, 1) };

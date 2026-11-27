@@ -3,6 +3,8 @@ import { advanceWildlife } from './lifestyle/wildlife';
 import { potionSeconds } from './explorationEquipment';
 import type { SandboxState } from './sandboxAccess';
 import { advanceMachinery, ridingCart } from './machinery';
+import { advanceTransport, steerTransport, traveling, type Gliding, type TransportState } from './transport';
+import { cavernGuardianId, cavernGuardians, cavernSiteReachable, currentCavern, planCaverns, type Cavern, type CavernId } from './subsurface';
 import { hasClosedSignalGate, terrainHeight } from './voxel';
 import {planAdventurePeaks,type AdventurePeak} from './adventureTerrain';
 import {homeBattleBonus,type HomeBattleBonus} from './furnitureBenefits';
@@ -64,6 +66,7 @@ export interface RpgRankingAward {
   score: number;
 }
 export interface Site {
+  subsurface?: CavernId;
   storyVariant?:number;
   storyId?: string;
   storyRole?: "npc" | "goal";
@@ -105,6 +108,8 @@ export interface NativeScene {
   teamPower: number;
 }
 export interface Adventurer {
+  gliding?: Gliding;
+  transportAt?: number;
   position3D?: {x:number;z:number;y?:number;vy?:number;swimming?:boolean;surface2D?:boolean;layered2D?:boolean;oxygen?:number;waterAt?:number};
   voxelDiscoveries?:string[];
   wildlifeSeen?:Record<string,number>;
@@ -154,6 +159,8 @@ export interface World {
   terrainStyle?:1;
   machineGeology?:1;
   sandbox?:SandboxState;
+  transport?:TransportState;
+  caverns?:Cavern[];
   terrainPeaks?:AdventurePeak[];
  buildingGoalRewards?:Record<string,BuildingGoalReward>;
  compactMapVersion?:1;
@@ -229,7 +236,7 @@ export const distance = (
 export const isBattleSite = (s: Site) =>
   ["enemy", "guardian", "boss"].includes(s.kind);
 export const isSharedSite = (s: Site) =>
-  s.kind === "guardian" || s.kind === "boss";
+  s.kind === "guardian" || s.kind === "boss" || !!s.subsurface;
 export function siteUnavailable(
   w: World,
   p: Adventurer,
@@ -325,7 +332,8 @@ function applyNativeAction(
   }
   if (action.type === "native-enter") {
     const site = w.sites.find((s) => s.id === action.siteId);
-    if (!site || !["enemy","guardian","boss","town","rest","event","treasure"].includes(site.kind) || distance(site, p) > 2) return false;
+    if (!site || !["enemy","guardian","boss","town","rest","event","treasure"].includes(site.kind) ||
+      distance(site, p) > 2 || !cavernSiteReachable(w,p,site)) return false;
     const reason = siteUnavailable(w, p, site);
     if (reason) return tell(reason);
     if (["town", "rest", "event"].includes(site.kind))
@@ -424,12 +432,13 @@ function applyNativeAction(
     ) {
       if (isSharedSite(site) && !site.cleared) return false;
       p.completedBattles = (p.completedBattles || 0) + 1;
-      if (site.kind === "enemy") rotateEnemyName(w, site);
+      if (site.kind === "enemy" && !site.subsurface) rotateEnemyName(w, site);
     }
     if (action.outcome === "defeat") {
       const town = w.sites.find(s=>s.kind === "town")!;
       p.x = town.x;
       p.y = town.y;
+      if(site.subsurface)delete p.position3D;
     }
     if (Number.isFinite(action.battleDamage) && action.battleDamage! >= 0)
       p.totalDamage =
@@ -621,7 +630,7 @@ export function createWorld(
     1,
     Math.min(180, Math.floor(Number.isFinite(timeLimitMinutes) ? timeLimitMinutes : 30)),
   );
-  return {
+  const world:World={
     terrainStyle: 1,
     machineGeology: 1,
     terrainPeaks: planAdventurePeaks(tiles,sites,WIDTH,HEIGHT),
@@ -652,6 +661,11 @@ export function createWorld(
       BONUS_RANKING_KINDS[Math.floor(rng() * BONUS_RANKING_KINDS.length)],
     revision: 0,
   };
+  if(gameMode==='COOP') {
+    world.caverns=planCaverns(world);
+    world.sites.push(...cavernGuardians(world.caverns));
+  }
+  return world;
 }
 export function addPlayer(w: World, id: string, name: string) {
   if (w.ended || w.players[id] || Object.keys(w.players).length >= CAPACITY) return false;
@@ -740,6 +754,19 @@ export function applyAction(
     w.revision++;
     return true;
   }
+  if(traveling(w,p)) {
+    if(action.type==='move'||action.type==='voxel-move') {
+      return steerTransport(w,p,action.dx,action.dy,action.type==='voxel-move',now);
+    }
+    if(action.type==='voxel-snap'&&p.position3D) {
+      p.position3D.surface2D=true;
+      p.position3D.layered2D=true;
+      w.revision++;
+      return true;
+    }
+    if(!['voxel-transport','native-profile','native-learning'].includes(action.type)) return false;
+  }
+  if(currentCavern(w,p)&&(['life-enter','life-cast','life-build','secret-search'].includes(action.type)||action.type.startsWith('town-')))return false;
   const beyondLegacy=p.position3D&&(p.position3D.x<0||p.position3D.z<0||p.position3D.x>=WIDTH||p.position3D.z>=HEIGHT);
   if(beyondLegacy&&!action.type.startsWith('voxel-')&&action.type!=='native-profile'&&action.type!=='native-learning'&&action.type!=='life-craft'&&action.type!=='move'&&!(action.type.startsWith('farm-pet-')&&currentVoxelRoom(w,p)))return false;
   if (action.type.startsWith('town-'))return applyTown(w,p,action as TownAction,now);
@@ -760,6 +787,9 @@ export function applyAction(
   if (action.type.startsWith("trade-") || action.type.startsWith("dungeon-") || action.type === "arcade-play" || action.type === "arcade-finish" || action.type === "secret-search" || action.type === "npc-event-choice")
     return applyActivity(w,p,action as ActivityAction,now);
   if (w.ended || p.nativeScene || activityBusy(w,p)) return false;
+  if(action.type==='voxel-cave'&&action.command==='challenge') {
+    return applyNativeAction(w,p,{type:'native-enter',siteId:cavernGuardianId(action.id)},tell);
+  }
   if(action.type.startsWith("voxel-")){
     const changed=applyVoxel(w,p,action as VoxelAction,now);
     if(changed&&action.type==='voxel-move'&&(!p.position3D||(p.position3D.x>=0&&p.position3D.x<WIDTH&&p.position3D.z>=0&&p.position3D.z<HEIGHT))){const house=w.life.houses.find(h=>h.x===p.x&&h.y===p.y);if(house)applyLifeAction(w,p,{type:'life-enter',houseId:house.id},now);}
@@ -886,6 +916,7 @@ export function advanceWorld(w: World, now = Date.now()) {
   advanceLife(w,now);
   advanceMachinery(w,now);
   advanceFluids(w);
+  advanceTransport(w,now);
   advanceSocial(w,now);
   advanceTown(w,now);
   advanceWildlife(w,now);

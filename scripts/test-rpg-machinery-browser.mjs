@@ -19,11 +19,33 @@ try {
     import {farmOf} from './src/rpg/farm/model';
     import {recordMachineEdit} from './src/rpg/machinery';
     import {readWorldSave} from './src/rpg/worldSave';
+    import {terrainHeight} from './src/rpg/voxel';
+    import {cavernEntrance} from './src/rpg/subsurface';
     const player={id:'WARRIOR',currentHp:72,maxHp:72,gold:100,deck:[],relics:[],imageData:''};
     localStorage.setItem('rpg-preferences-v1',JSON.stringify({mapView:'2D',mapQuality:'low'}));
     window.readSandboxSave=readWorldSave;
     function setup(r) {
       window.room=r;
+      window.seedHarbor=()=>{
+        const w=r.world,p=w.players.local;
+        for(let z=21;z<=25;z++)for(let x=16;x<=26;x++){
+          w.tiles[z*WIDTH+x]='water';w.voxels.edits[x+',-1,'+z]=null;
+        }
+        p.x=20;p.y=20;p.position3D={x:20.5,y:0,z:20.5,surface2D:true,layered2D:true};
+        p.life.bag.cargo_boat=1;p.life.bag.wood=8;w.voxels.revision++;w.revision++;r.emit();
+      };
+      window.seedGlider=()=>{
+        const w=r.world,p=w.players.local;
+        w.voxels.edits['15,11,20']='stone';w.voxels.revision++;
+        p.x=15;p.y=20;p.position3D={x:15.5,y:12,z:20.5,surface2D:true,layered2D:true};
+        p.life.bag.glider_wing=1;p.life.bag.glider_boost=1;w.revision++;r.emit();
+      };
+      window.atCavernEntrance=()=>{
+        const w=r.world,p=w.players.local,cave=w.caverns.find(cave=>cave.id==='railvault');
+        const {x,z}=cavernEntrance(cave);
+        p.x=x;p.y=z;p.position3D={x:x+.5,y:terrainHeight(w,x,z),z:z+.5,surface2D:true,layered2D:true};
+        w.revision++;r.emit();
+      };
       window.seedSandbox=()=>{
       const w=r.world,p=w.players.local;
       w.sites=w.sites.filter(s=>Math.abs(s.x-20)+Math.abs(s.y-20)>12);
@@ -206,8 +228,67 @@ try {
   await page.reload({waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>window.snapshot?.world?.voxels?.edits['20,0,19']==='crystal_lever');
   assert.equal(await page.evaluate(()=>window.snapshot.world.voxels.machinery.devices['22,0,19'].signal),0);
+  await page.evaluate(()=>window.seedHarbor());
+  const transport=page.getByRole('button',{name:'乗り物',exact:true});
+  await transport.click();
+  await page.getByRole('button',{name:'チェスト付きボート',exact:true}).click();
+  await page.locator('.rpg-boat-hold summary').click();
+  await page.getByLabel('積む素材').selectOption('wood');
+  const waitTransport=()=>page.waitForFunction(()=>Date.now()-window.snapshot.world.players.local.transportAt>190);
+  await waitTransport();
+  await page.getByRole('button',{name:'積む ×8',exact:true}).click();
+  await page.waitForFunction(()=>window.snapshot.world.transport.boats['boat-1'].cargo.wood===8);
+  const hold=await page.getByRole('dialog',{name:'乗り物',exact:true}).boundingBox();
+  assert(hold.width>300&&hold.height>=160,'Cargo controls use the full mobile panel.');
+  await page.screenshot({path:`${out}/boat-cargo-mobile.png`});
+  await waitTransport();
+  await page.getByRole('button',{name:'乗る',exact:true}).click();
+  await page.waitForFunction(()=>window.snapshot.world.transport.boats['boat-1'].rider==='local');
+  const earlier=await page.evaluate(()=>window.snapshot.world.transport.boats['boat-1'].z);
+  await page.keyboard.press('ArrowDown');
+  await page.waitForFunction(z=>window.snapshot.world.transport.boats['boat-1'].z>z,earlier);
+  await page.screenshot({path:`${out}/boat-2d-mobile.png`});
+  await page.setViewportSize({width:1024,height:640});
+  await page.getByRole('button',{name:'2D / 3D'}).click();
+  await scene.waitFor();
+  await page.waitForFunction(()=>document.querySelector('[data-testid=rpg-world-3d]')?.dataset.rpgTransportModels==='5');
+  assert.equal(await page.evaluate(()=>window.snapshot.world.transport.boats['boat-1'].rider),'local');
+  await page.screenshot({path:`${out}/boat-3d.png`});
+  await page.getByRole('button',{name:'2D / 3D'}).click();
+  await page.getByRole('button',{name:'下船',exact:true}).click();
+  await page.waitForFunction(()=>!window.snapshot.world.transport.boats['boat-1'].rider);
+  await page.evaluate(()=>window.seedGlider());
+  await transport.click();
+  await page.getByLabel('滑空方向').selectOption('1');
+  await waitTransport();
+  await page.getByRole('button',{name:'滑空を始める',exact:true}).click();
+  await page.getByLabel('滑空計器').waitFor();
+  await waitTransport();
+  await page.getByRole('button',{name:'加速',exact:true}).click();
+  await page.waitForFunction(()=>window.snapshot.world.players.local.gliding?.usedBoost===true);
+  await page.screenshot({path:`${out}/glider-2d.png`});
+  await page.waitForFunction(()=>!window.snapshot.world.players.local.gliding);
+  await page.evaluate(()=>window.atCavernEntrance());
+  await page.getByRole('button',{name:'地下へ降りる',exact:true}).click();
+  await canvas.waitFor();
+  await page.waitForFunction(()=>document.querySelector('.rpg-canvas')?.dataset.machineLayer==='-8');
+  await page.screenshot({path:`${out}/frostiron-mine-2d.png`});
+  await page.getByRole('button',{name:'2D / 3D'}).click();
+  await scene.waitFor();
+  await page.waitForFunction(()=>document.querySelector('[data-testid=rpg-world-3d]')?.dataset.landscape);
+  assert.equal(await page.evaluate(()=>window.snapshot.world.players.local.position3D.y),-8);
+  await page.screenshot({path:`${out}/frostiron-mine-3d.png`});
+  await page.getByRole('button',{name:'2D / 3D'}).click();
+  for(let i=0;i<7;i++) {
+    const z=await page.evaluate(()=>window.snapshot.world.players.local.y);
+    await page.waitForFunction(()=>Date.now()-window.snapshot.world.players.local.lastMove>120);
+    await page.keyboard.press('ArrowUp');
+    await page.waitForFunction(z=>window.snapshot.world.players.local.y===z-1,z);
+  }
+  await page.getByRole('button',{name:'宝箱を開ける',exact:true}).click();
+  await page.waitForFunction(()=>window.snapshot.world.players.local.voxelDiscoveries.includes('cache-railvault'));
   assert.deepEqual(errors,[]);
-  console.log('PASS RPG UI, blueprint place/undo, circuit across modes, mouse lock and drag, juvenile model journal and IndexedDB restore.');
+  console.log('PASS RPG UI, blueprint place/undo, circuit across modes, mouse lock and drag, creature journal, IndexedDB, cargo boat, glider and underground exploration.');
 } catch (error) {
   console.error('Browser errors:', errors, (await page?.locator('body').innerText({timeout:3000}).catch(() => ''))?.slice(0,1600));
   console.error(await page?.evaluate(() => {

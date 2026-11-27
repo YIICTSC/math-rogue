@@ -1,4 +1,5 @@
 import { MACHINE_PARTS, isLogisticsPart, isMachinePart, type MachinePart } from './machineryParts';
+import { WATERCRAFT, type WatercraftItem } from './transportCatalog';
 /** Shared by the authoritative simulation, recipes and the Three.js palette. */
 export type BlockShape='cube'|'slab'|'stairs'|'fence'|'pane'|'workbench'|'furnace'|'chest'|'torch'|'lantern'|'composter'|'irrigator';
 export type BlockGroup='natural'|'wood'|'stone'|'color'|'glass'|'workshop'|'farm'|'circuit'|'machines'|'railway'|'logistics'|'fluids'|'alchemy';
@@ -43,7 +44,8 @@ export type CatalogBlock=keyof typeof VOXEL_CATALOG;
 export const CATALOG_BLOCKS=Object.keys(VOXEL_CATALOG) as CatalogBlock[];
 export const CART_NAMES={minecart:'トロッコ',minecart_chest:'貨物トロッコ',minecart_hopper:'集荷トロッコ',minecart_engine:'動力トロッコ',minecart_work:'作業トロッコ'} as const;
 export type CartItem=keyof typeof CART_NAMES;
-export const RESOURCE_NAMES={fish:'魚',housekit:'家の建築キット',stick:'棒',coal:'石炭',charcoal:'木炭',iron_ingot:'鉄インゴット',copper_ingot:'銅インゴット',gold_ingot:'金インゴット',diamond:'ダイヤ',lapis:'青金石',quartz:'水晶',paper:'紙',thread:'糸',fertilizer:'有機肥料',crystal_powder:'魔晶回路粉',...CART_NAMES,bucket:'バケツ',water_bucket:'水入りバケツ',lava_bucket:'溶岩入りバケツ',imprint_book:'魔刻の書',air_draught:'水肺のしずく',stride_draught:'風脚のしずく',miner_draught:'石砕きのしずく',smoked_fish:'魚の燻製'} as const;
+const watercraftNames=Object.fromEntries(Object.entries(WATERCRAFT).map(([id,def])=>[id,def.name[0]])) as Record<WatercraftItem,string>;
+export const RESOURCE_NAMES={fish:'魚',housekit:'家の建築キット',stick:'棒',coal:'石炭',charcoal:'木炭',iron_ingot:'鉄インゴット',copper_ingot:'銅インゴット',gold_ingot:'金インゴット',diamond:'ダイヤ',lapis:'青金石',quartz:'水晶',paper:'紙',thread:'糸',fertilizer:'有機肥料',crystal_powder:'魔晶回路粉',...CART_NAMES,...watercraftNames,glider_wing:'滑空翼',glider_boost:'風の加速筒',bucket:'バケツ',water_bucket:'水入りバケツ',lava_bucket:'溶岩入りバケツ',imprint_book:'魔刻の書',air_draught:'水肺のしずく',stride_draught:'風脚のしずく',miner_draught:'石砕きのしずく',smoked_fish:'魚の燻製'} as const;
 export type VoxelItem=CatalogBlock|keyof typeof RESOURCE_NAMES;
 export const ALL_MATERIAL_NAMES={...Object.fromEntries(CATALOG_BLOCKS.map(k=>[k,VOXEL_CATALOG[k].name])) as Record<CatalogBlock,string>,...RESOURCE_NAMES};
 export const BLOCK_GROUPS:Record<BlockGroup,string>={natural:'天然素材',wood:'木材・建具',stone:'石材・鉱物',color:'色付き素材',glass:'ガラス',workshop:'作業設備',farm:'農業資材',circuit:'魔晶回路',machines:'信号装置',railway:'鉄道',logistics:'物流・加工',fluids:'流体',alchemy:'魔法設備'};
@@ -76,6 +78,9 @@ export const WORKSHOP_RECIPES:WorkshopRecipe[]=[
  r('minecart',1,{iron_ingot:5,plank:2}),
  r('minecart_chest',1,{minecart:1,chest:1}),r('minecart_hopper',1,{minecart:1,hopper:1}),
  r('minecart_engine',1,{minecart:1,furnace:1,gold_ingot:2,crystal_powder:3}),r('minecart_work',1,{minecart:1,workbench:1,iron_ingot:2}),
+ r('rowboat',1,{plank:6,stick:2}),r('cargo_boat',1,{rowboat:1,chest:1}),
+ r('bamboo_raft',1,{bamboo:6,thread:2}),r('cargo_raft',1,{bamboo_raft:1,chest:2}),
+ r('glider_wing',1,{wool:4,stick:4,thread:4,crystal:1}),r('glider_boost',2,{paper:2,copper_ingot:1,crystal_powder:1}),
  r('bucket',1,{iron_ingot:3}),r('lava_bucket',1,{bucket:1,obsidian:1,crystal:1},'furnace'),
  r('water_pump',1,{copper_ingot:4,glass:1,crystal_powder:2}),
  r('water_drain',1,{copper_ingot:2,gravel:2,crystal_powder:1}),

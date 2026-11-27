@@ -24,8 +24,8 @@ export function useMachineNotes(world: World | null | undefined, selfId: string,
       if (!active || newWorld || state.tick - played > 2 || voices >= 6) continue;
       const [mx, my, mz] = key.split(',').map(Number);
       const distance = Math.hypot(mx+.5-x, mz+.5-z, player.position3D?.y !== undefined ? my-player.position3D.y : 0);
-      if (distance >= 18) continue;
-      audioService.playRpgNote(device.note ?? 12, device.instrument || 'bell', 1 - distance / 18);
+      if (distance >= 18 || device.noteGain===0) continue;
+      audioService.playRpgNote(device.note ?? 12, device.instrument || 'bell', (1 - distance / 18)*(device.noteGain ?? 100)/100);
       voices++;
     }
     for (const key of heard.current.keys()) if (!state.devices[key]) heard.current.delete(key);

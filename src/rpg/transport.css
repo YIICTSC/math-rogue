@@ -1,0 +1,83 @@
+.rpg-transport-dock {
+  position: absolute;
+  z-index: 8;
+  right: 8px;
+  top: 96px;
+  color: #fff0cc;
+  font-size: 13px;
+}
+
+.rpg-cavern-dock {
+  position: absolute;
+  z-index: 8;
+  top: 96px;
+  right: 8px;
+  display: grid;
+  gap: 5px;
+  max-width: min(225px,48%);
+  padding: 8px;
+  color: #fff0cc;
+  background: #123038ed;
+  border: 1px solid #8eb5a0;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.rpg-transport-dock + .rpg-cavern-dock { top: 140px; }
+
+.rpg-transport-actions,
+.rpg-glider-instruments div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.rpg-transport-dock button,
+.rpg-transport-dock select,
+.rpg-cavern-dock button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 36px;
+  padding: 5px 9px;
+  border: 1px solid #87afa4;
+  border-radius: 7px;
+  color: #fff0cc;
+  background: #17383e;
+}
+
+.rpg-transport-dock button:disabled { opacity: .55; }
+.rpg-transport-dock button:focus-visible,
+.rpg-transport-dock select:focus-visible { outline: 2px solid #ffe59a; }
+.rpg-transport-panel {
+  width: min(520px,100%);
+  height: auto;
+  max-height: 100%;
+  grid-template-rows: auto minmax(0,1fr);
+}
+.rpg-transport-panel .voxel-workshop-scroll { display: grid; gap: 12px; }
+.rpg-transport-panel h2,
+.rpg-transport-panel h3,
+.rpg-transport-panel p { margin: 0; }
+.rpg-transport-panel h3,
+.rpg-boat-hold summary { display: flex; align-items: center; gap: 7px; }
+.rpg-transport-panel section { display: grid; gap: 7px; }
+.rpg-transport-boat { padding: 10px; border: 1px solid #6b9c935c; border-radius: 8px; }
+.rpg-boat-hold ul { margin: 5px 0; padding: 0; list-style: none; }
+.rpg-boat-hold li { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 3px 0; }
+.rpg-glider-instruments {
+  display: grid;
+  gap: 5px;
+  padding: 7px;
+  border: 1px solid #87afa4;
+  border-radius: 8px;
+  background: #123038ee;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .rpg-transport-dock, .rpg-cavern-dock { top: 51px; }
+  .rpg-transport-dock + .rpg-cavern-dock { top: 94px; }
+}

@@ -151,6 +151,7 @@ class AudioService {
   private bgmDuckMultiplier: number = 1;
   private bgmSilencers = new Set<symbol>();
   private sfxVolume: number = 0.6;
+  private rpgNotesPlaying: number[] = [];
   private voiceVolume: number = 0.8;
   private audioBuffers: Record<string, AudioBuffer> = {};
   private sfxBuffers: Record<string, AudioBuffer> = {};
@@ -619,14 +620,18 @@ class AudioService {
 
   public playRpgNote(note: number, instrument: 'bell' | 'wood' | 'reed', gain: number) {
     const context = this.ctx;
-    if (!context || context.state !== 'running' || !this.sfxGain || this.isMuted || gain <= 0) return;
+    if (!context || context.state !== 'running' || !this.sfxGain || this.isMuted || gain <= 0 || !this.isPlaybackActive()) return;
     const frequency = 261.6256 * 2 ** ((note - 12) / 12);
     const now = context.currentTime;
+    this.rpgNotesPlaying=this.rpgNotesPlaying.filter(end=>end>now&&end<=now+.48);
+    if (this.rpgNotesPlaying.length>=6) return;
+    const duration=instrument==='bell'?.47:instrument==='wood'?.17:.28;
+    this.rpgNotesPlaying.push(now+duration);
     if (instrument === 'bell') {
-      this.playOsc(frequency, now, .47, 'sine', gain * .16, this.sfxGain);
+      this.playOsc(frequency, now, duration, 'sine', gain * .16, this.sfxGain);
       this.playOsc(frequency * 2.01, now, .24, 'sine', gain * .055, this.sfxGain);
     } else {
-      this.playOsc(frequency, now, instrument === 'wood' ? .17 : .28,
+      this.playOsc(frequency, now, duration,
         instrument === 'wood' ? 'triangle' : 'sawtooth', gain * .105, this.sfxGain);
     }
   }

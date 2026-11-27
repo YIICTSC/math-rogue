@@ -13,6 +13,7 @@ const processServer=spawn(process.execPath,['server/dist/index.mjs'],{
 });
 processServer.stderr.on('data',data=>console.error(String(data)));
 const errors=[];
+const deltas=[];
 let browser,vite,host,guest;
 try {
   let listening=false;
@@ -66,7 +67,15 @@ try {
   for(const page of [host,guest]) {
     page.setDefaultTimeout(45_000);
     page.on('pageerror',error=>errors.push(error.message));
-    page.on('websocket',ws=>ws.on('socketerror',error=>errors.push(error)));
+    page.on('websocket',ws=>{
+      ws.on('socketerror',error=>errors.push(error));
+      ws.on('framereceived',frame=>{
+        if(typeof frame.payload==='string'){
+          const packet=JSON.parse(frame.payload);
+          if(packet.type==='state-delta')deltas.push(packet.changes);
+        }
+      });
+    });
   }
   await host.goto(url,{waitUntil:'domcontentloaded'});
   await host.getByLabel('冒険者の名前').fill('工房の冒険者');
@@ -122,8 +131,10 @@ try {
   await host.waitForFunction(key=>window.snapshot.world.voxels.machinery.devices[key].signal===15,key);
   await host.getByRole('button',{name:'調べる',exact:true}).click();
   assert.equal(await host.locator('.rpg-device-inspector [data-signal]').getAttribute('data-signal'),'15');
+  assert(deltas.some(changes=>changes.devices?.set?.[key]?.signal===15),'The server relays the changed device as a delta.');
+  assert(deltas.some(changes=>changes.bags?.set && Object.keys(changes.bags.set).length===1),'Only the updated inventory is sent.');
   assert.deepEqual(errors,[]);
-  console.log('PASS invitation in a real browser, a 2D placement relayed by the server, and 3D operation reflected in the 2D HUD.');
+  console.log('PASS invitation and versioned device/inventory deltas in two browsers, including 3D operation reflected in the 2D HUD.');
 } catch(error) {
   console.error('Browser errors:',errors);
   for(const page of [host,guest]) console.error((await page?.locator('body').innerText({timeout:2500}).catch(()=>''))?.slice(0,1100));

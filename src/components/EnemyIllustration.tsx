@@ -6,6 +6,7 @@ import { isLegacySpriteModeEnabled } from '../utils/legacySpriteMode';
 import { getThemedHumanoidEnemySpritePath, getThemedMajorBossEnemySpritePath, getThemedMonsterEnemySpritePath, type HighSchoolEnemyAction, type VisualThemeId } from '../data/visualThemes';
 import { assetUrl } from '../utils/assetPaths';
 import { ENDLESS_BOSSES, getEndlessBossById, getEndlessBossSpritePath } from '../data/endlessMode';
+import { creaturePortrait } from '../rpg/lifestyle/creatureArt';
 
 interface EnemyIllustrationProps {
   name: string;
@@ -63,7 +64,11 @@ const EnemyIllustration: React.FC<EnemyIllustrationProps> = ({ name, seed, alias
   const standardMajorBossPath = appearanceMode === 'VACATION'
     ? getThemedMajorBossEnemySpritePath(enemyRef, visualTheme, action, 'STANDARD')
     : null;
-  const imagePaths = endlessSpritePath
+  const cavernWarden = enemyType === 'RPG_STONE_WARDEN' ? 'stone-golem'
+    : enemyType === 'RPG_CRYSTAL_WARDEN' ? 'crystal-slime' : null;
+  const imagePaths = cavernWarden
+    ? [assetUrl(creaturePortrait(cavernWarden))]
+    : endlessSpritePath
     ? [endlessSpritePath, getEndlessBossSpritePath(endlessBoss!, 'idle')]
     : majorBossPath
     ? Array.from(new Set([majorBossPath, standardMajorBossPath].filter(Boolean) as string[]))
