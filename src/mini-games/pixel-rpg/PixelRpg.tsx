@@ -5,6 +5,9 @@ import type { MiniGameComponentProps } from '../../components/MiniGameRouter';
 import { PAD, useGameplayGamepad } from '../../hooks/useGameplayGamepad';
 import { audioService } from '../../services/audioService';
 import { assetUrl } from '../../utils/assetPaths';
+import { abyssHero } from '../../components/school-dungeon/dungeons2/roster';
+import { isProtagonistId } from '../../components/school-dungeon/student/content';
+import { studentSpriteUrl } from '../../components/school-dungeon/student/sprites';
 import type { KartQuestion } from '../gakuro-kart/learning';
 import { GROUPS, applyStudy, climate, completeBattle, currentLandmark, currentRegion, escape, interact, introScenes, maxHp, mount, newAdventure, recover, step, type Adventure, type Change, type Encounter, type Scene } from './adventure';
 import { heroSelectionIllustration, illustration, type Animation } from './art';
@@ -35,17 +38,24 @@ type Overlay =
   | {type:'exit'};
 type TitlePanel = 'hero'|'new'|'load'|'replace'|'help'|undefined;
 
+function HeroChoiceArt({id}:{id:string}){
+  const abyss=abyssHero(id);
+  if(abyss)return <img src={assetUrl(abyss.portrait)} alt="" />;
+  if(isProtagonistId(id))return <span className="pr-hero-dungeon-sprite" aria-hidden="true" style={{backgroundImage:`url("${studentSpriteUrl(id)}")`}} />;
+  return <img src={heroSelectionIllustration(id)} alt="" />;
+}
+
 function HeroChoice({selected,onSelect}:{selected:string;onSelect:(id:string)=>void}){
   const {t,l}=useWords(),[group,setGroup]=useState<WorldOfOrigin>(HEROES[selected].origin);
   const hero=HEROES[selected];
   return <div className="pr-hero-select">
     <div className="pr-hero-feature">
-      <div><img className="pr-feature-pixel" src={heroSelectionIllustration(hero.id)} alt="" /></div>
+      <div><HeroChoiceArt id={hero.id} /></div>
       <section><span>{l(GROUPS[hero.origin])}</span><h3>{l(hero.name)}</h3><strong>{l(JOBS[hero.job].name)}</strong><p>{l(PASSIVES[hero.passive])}</p><p>{l(hero.voice)}</p></section>
     </div>
     <nav className="pr-tabs" aria-label={t('出身編','School worlds')}>{(Object.keys(GROUPS) as WorldOfOrigin[]).map(g=><button key={g} aria-pressed={group===g} onClick={()=>setGroup(g)}>{l(GROUPS[g])}</button>)}</nav>
     <div className="pr-hero-grid">{HERO_LIST.filter(h=>h.origin===group).map(h=><button key={h.id} aria-pressed={selected===h.id} onClick={()=>onSelect(h.id)}>
-      <img src={heroSelectionIllustration(h.id)} alt="" /><span>{l(h.name)}</span></button>)}</div>
+      <HeroChoiceArt id={h.id} /><span>{l(h.name)}</span></button>)}</div>
   </div>;
 }
 function FieldView({state,dash,setDash,move,hold,stop,activate,open,travel,message,covered}:{
@@ -399,7 +409,11 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
 
   return <main className="pixel-rpg" lang={language==='ENGLISH'?'en':'ja'} data-gamepad-navigation-root
     data-allow-japanese={language!=='ENGLISH'&&props.languageMode==='ENGLISH'?true:undefined} data-pr-theme={state?climate(state):'meadow'} data-pr-playing={!!state}>
-    {!state&&<section className="pr-title" aria-label={l(TITLE)} style={{'--pr-title-art':`url("${assetUrl(titleAsset)}")`} as React.CSSProperties}>
+    {!state&&<section className="pr-title" aria-label={l(TITLE)}>
+      <img className="pr-title-art" src={`${import.meta.env.BASE_URL}${titleAsset}`} alt="" fetchPriority="high" onError={event=>{
+        const image=event.currentTarget, fallback=assetUrl(titleAsset);
+        if(image.getAttribute('src')!==fallback)image.src=fallback;
+      }}/>
       <button className="pr-title-back" data-gamepad-back onClick={onBack}><ArrowLeft size={18}/> {t('ゲーム一覧','Games')}</button>
       <section className="pr-title-copy">
         <div className="pr-title-brand"><Compass size={23}/><span>{t('学習ローグ','Learning Rogue')}</span></div>

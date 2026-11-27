@@ -1,11 +1,12 @@
 import { battleActionForActor, drawBattleActor } from './battleActionArt';
 import generatedArt from './generatedHeroArt.json';
 import { drawJobPixels, jobPixelColors } from './jobPixelArt';
+import { drawStudentSprite } from '../../components/school-dungeon/student/sprites';
 import { assetUrl } from '../../utils/assetPaths';
 import { HEROES, JOBS, ELEMENT_COLOR, type Hero, type Job } from './catalog';
 import { type Climate } from './campaign';
 import { activeTile, visible, worldSymbol, type Adventure } from './adventure';
-import { Tile, WORLD_ID, area, climateAt, noise, same, tileAt, type Direction, type Landmark, type Point } from './world';
+import { OFFSETS, Tile, WORLD_ID, area, climateAt, noise, same, tileAt, type Direction, type Landmark, type Point } from './world';
 import type { Battle, Enemy, Pulse } from './battle';
 
 type Canvas = CanvasRenderingContext2D;
@@ -420,7 +421,10 @@ export function fieldFrame(c:Canvas,s:Adventure,width:number,height:number,now:n
     front.push({y:y+2,draw:()=>{
       if(s.vehicle!=='foot'){vessel(c,x,y-5,s.vehicle,now,p);return;}
       ellipse(c,'#303942',Math.round(x),Math.round(y),6,2);
-      heroSprite(c,id,s.heroes[id].job,x,y,dir,t<1?(dash?'dash':'walk'):'idle',now,.67);
+      const spriteSize=32;
+      if(!drawStudentSprite(c,id,OFFSETS[dir],Math.round(x-spriteSize/2),Math.round(y-spriteSize*.95),spriteSize)){
+        heroSprite(c,id,s.heroes[id].job,x,y,dir,t<1?(dash?'dash':'walk'):'idle',now,.67);
+      }
     }});
   });
   front.sort((x,y)=>x.y-y.y).forEach(t=>t.draw());
@@ -619,6 +623,9 @@ export function battleFrame(c:Canvas,b:Battle,width:number,height:number,now:num
     c.drawImage(image,Math.round(x-45*mag+lunge),Math.round(y-69*mag),Math.round(90*mag),Math.round(78*mag));
     c.globalAlpha=1;
   });
+  c.save();
+  c.imageSmoothingEnabled=true;
+  c.imageSmoothingQuality='high';
   b.party.forEach((unit,i)=>{
     const p0=arenaPosition('party',i,compact), x=p0.x*width,y=p0.y*height-5;
     const acting=livePulse.find(a=>a.from===unit.id), hit=livePulse.find(a=>a.to===unit.id);
@@ -632,6 +639,7 @@ export function battleFrame(c:Canvas,b:Battle,width:number,height:number,now:num
     if((unit.hp>0||action==='damage')&&drawBattleActor(c,unit.id,unit.hero.job,illustration(unit.id,unit.hero.job),x,y,size*.94,action,Math.min(1,time),reduced))return;
     heroSprite(c,unit.id,unit.hero.job,x+lunge,y,'left',pose,acting?time*410:now,size*.94);
   });
+  c.restore();
   if(!reduced&&time<1){
     livePulse.forEach((pulse,i)=>{
       const dest=centers[pulse.to],source=pulse.from?centers[pulse.from]:undefined;

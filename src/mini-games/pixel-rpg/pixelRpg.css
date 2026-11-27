@@ -66,10 +66,12 @@
   inset: 0;
   display: grid;
   align-items: center;
-  background-image: linear-gradient(90deg, #0b1924ee 0%, #10232aac 37%, #10192216 69%), linear-gradient(0deg, #10212aeb, transparent 46%), var(--pr-title-art);
-  background-size: cover;
-  background-position: center, center, 52% center;
+  isolation: isolate;
+  background: #0b1924;
 }
+.pr-title-art,.pr-title::before { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.pr-title-art { z-index: -2; object-fit: cover; object-position: 52% center; }
+.pr-title::before { content: ''; z-index: -1; background: linear-gradient(90deg, #0b1924ee 0%, #10232aac 37%, #10192216 69%), linear-gradient(0deg, #10212aeb, transparent 46%); }
 .pr-title-back { position: absolute; top: var(--pr-top); left: var(--pr-left); z-index: 1; }
 .pr-title-copy { padding: max(62px, var(--pr-top)) max(24px, var(--pr-right)) max(22px, var(--pr-bottom)) max(var(--pr-left), min(8vw, 126px)); max-width: 760px; }
 .pr-title-brand { display: flex; align-items: center; gap: 9px; color: var(--pr-gold-pale); font-size: clamp(13px, 2.1vw, 18px); font-weight: 750; letter-spacing: .11em; }
@@ -88,6 +90,7 @@
 .pr-title-help { background: #20333bbd !important; }
 
 .pr-scene { display: block; width: 100%; height: 100%; position: absolute; inset: 0; image-rendering: pixelated; }
+.pr-battle-scene { image-rendering: auto; }
 .pr-field { width: 100%; height: 100%; isolation: isolate; position: relative; background: #344a47; }
 .pr-field::before,.pr-field::after { position: absolute; z-index: 1; pointer-events: none; content: ""; inset-inline: 0; }
 .pr-field::before { top: 0; height: min(27%, 160px); background: linear-gradient(#0d2025c9,#111d2b00); }
@@ -260,14 +263,17 @@
 .pr-hero-feature { display: grid; grid-template-columns: 112px minmax(0,1fr); gap: 12px; align-items: center; padding: 8px; border: 1px solid #697e71; border-radius: 4px; background: linear-gradient(120deg,#43564d,#24363b); }
 .pr-hero-feature>div { height: min(17vh,125px); display: grid; place-items: center; overflow: hidden; }
 .pr-hero-feature img { width: auto; max-width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(1px 2px 5px #0b1a23); }
-.pr-hero-feature img.pr-feature-pixel { image-rendering: pixelated; }
+.pr-hero-dungeon-sprite { display: block; aspect-ratio: 1; background-size: 400% 200%; background-position: left top; background-repeat: no-repeat; image-rendering: pixelated; }
+.pr-hero-feature .pr-hero-dungeon-sprite { width: min(100%, 17vh, 125px); }
+.pr-hero-grid .pr-hero-dungeon-sprite { width: 34px; }
 .pr-hero-feature h3 { font: 800 clamp(17px,3vw,26px)/1.2 var(--pr-serif); }
 .pr-hero-feature section>span { color: var(--pr-gold-pale); font-size: .75em; }
 .pr-hero-feature strong,.pr-hero-feature p { font-size: .8em; }
 .pr-hero-feature p:last-child { color: #f1dcab; margin-top: 4px; }
 .pr-hero-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(93px,1fr)); gap: 6px; }
 .pixel-rpg .pr-hero-grid button { display: grid; justify-items: center; padding: 4px; font-size: .78em; min-height: 59px; }
-.pr-hero-grid button img,.pr-job-preview { width: 27px; height: 34px; image-rendering: pixelated; }
+.pr-hero-grid button img,.pr-job-preview { width: 27px; height: 34px; }
+.pr-job-preview { image-rendering: pixelated; }
 .pr-save-list article { display: grid; grid-template-columns: minmax(0,1fr) minmax(110px,auto); }
 .pr-save-list article>div:first-child span { font-size: .84em; color: var(--pr-gold-pale); }
 .pr-save-list .pr-inline { justify-content: flex-end; }
@@ -324,7 +330,9 @@
 .pr-study-feedback button { margin: 2px 5px 0 0; }
 
 @media(max-width: 640px) and (orientation: portrait) {
-  .pr-title { align-items: end; background-image: linear-gradient(0deg,#11212bee 0%,#13242cdb 32%,#111d2c00 73%),var(--pr-title-art); background-position: center,62% center; }
+  .pr-title { align-items: end; }
+  .pr-title-art { object-position: 62% center; }
+  .pr-title::before { background: linear-gradient(0deg,#11212bee 0%,#13242cdb 32%,#111d2c00 73%); }
   .pr-title-copy { padding: 13px max(20px,var(--pr-right)) max(32px,calc(var(--pr-bottom) + 14px)) max(20px,var(--pr-left)); }
   .pr-title h1 { font-size: clamp(33px,9.4vw,56px); }
   .pr-title-copy nav { flex-direction: column; align-items: stretch; }
@@ -375,5 +383,4 @@
 }
 @media (prefers-reduced-motion: reduce) { .pr-cut { animation: none; } }
 
-.pixel-rpg .pr-cut img { image-rendering: pixelated; }
 .pr-hero-grid button img,.pr-job-preview,.pr-person img { object-fit: contain; }

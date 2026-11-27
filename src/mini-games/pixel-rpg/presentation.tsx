@@ -3,6 +3,8 @@ import type { LanguageMode } from '../../types';
 import type { Copy } from './campaign';
 import { trans } from '../../utils/textUtils';
 import { arenaPosition, battleFrame, fieldFrame, type Animation } from './art';
+import { cueStudentAction } from '../../components/school-dungeon/dungeons1/heroActions';
+import { isProtagonistId } from '../../components/school-dungeon/student/content';
 import type { Adventure } from './adventure';
 import type { Battle } from './battle';
 import { type Direction, type Point, same } from './world';
@@ -72,6 +74,9 @@ export function FieldCanvas({state,dash}:{state:Adventure;dash:boolean}){
       if(prev.map!==s.map||prev.vehicle!==s.vehicle||s.trail.length===1)movement=undefined;
       else if(!same(prev.at,s.at)){
         const previous=s.party.map((_,i)=>at(prev,i)),next=s.party.map((_,i)=>at(s,i));
+        if(s.vehicle==='foot')s.party.forEach((id,i)=>{
+          if(!same(previous[i],next[i])&&isProtagonistId(id))cueStudentAction(id,'walk');
+        });
         movement={lead:s.at,at:time,speed:dash?78:118,prev:previous,next,map:s.map,faces:previous.map((p,i)=>direction(p,next[i],movement?.faces[i]??s.direction))};
       }
       prev=s;
@@ -91,14 +96,18 @@ export function BattleCanvas({battle,animation,reduced}:{battle:Battle;animation
     if(!canvas)return;
     const ctx=canvas.getContext('2d',{alpha:false});
     if(!ctx)return;
-    let raf=0,last=0;
+    let raf=0,last=0,sceneWidth=1,sceneHeight=1;
     const compact=window.matchMedia('(max-height: 500px) and (orientation: landscape)');
     const resize=()=>{
       const {width,height}=canvas.getBoundingClientRect();
       if(width<8||height<8)return;
       const ratio=width/height;
-      canvas.height=Math.round(Math.min(270,Math.max(104,height/1.75)));
-      canvas.width=Math.round(Math.min(800,canvas.height*ratio));
+      sceneHeight=Math.round(Math.min(270,Math.max(104,height/1.75)));
+      sceneWidth=Math.round(Math.min(800,sceneHeight*ratio));
+      const pixelRatio=Math.min(2,window.devicePixelRatio||1,2560/Math.max(width,height));
+      canvas.width=Math.round(width*pixelRatio);
+      canvas.height=Math.round(height*pixelRatio);
+      ctx.setTransform(canvas.width/sceneWidth,0,0,canvas.height/sceneHeight,0,0);
       ctx.imageSmoothingEnabled=false;
     };
     const observer=new ResizeObserver(resize);observer.observe(canvas);resize();
@@ -106,12 +115,12 @@ export function BattleCanvas({battle,animation,reduced}:{battle:Battle;animation
       raf=requestAnimationFrame(tick);
       if(time-last<23||document.hidden||!canvas.isConnected)return;
       const {battle,animation,reduced}=current.current;
-      last=time;battleFrame(ctx,battle,canvas.width,canvas.height,time,animation,reduced,compact.matches);
+      last=time;battleFrame(ctx,battle,sceneWidth,sceneHeight,time,animation,reduced,compact.matches);
     };
     raf=requestAnimationFrame(tick);
     return()=>{observer.disconnect();cancelAnimationFrame(raf);};
   },[]);
-  return <canvas ref={ref} className="pr-scene" aria-hidden="true" />;
+  return <canvas ref={ref} className="pr-scene pr-battle-scene" aria-hidden="true" />;
 }
 
 export function positionStyle(side:'party'|'enemy',index:number){
