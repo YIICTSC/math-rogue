@@ -1,0 +1,78 @@
+import assert from 'node:assert/strict';
+import { createServer } from 'vite';
+
+const server=await createServer({optimizeDeps:{noDiscovery:true,entries:[]},server:{middlewareMode:true,hmr:false},appType:'custom',logLevel:'error'});
+try{
+  const E=await server.ssrLoadModule('/src/rpg/engine.ts');
+  const V=await server.ssrLoadModule('/src/rpg/voxel.ts');
+  const S=await server.ssrLoadModule('/src/rpg/worldSave.ts');
+  const M=await server.ssrLoadModule('/src/rpg/machinery.ts');
+  let now=1791150000000;
+  const w=E.createWorld(43,undefined,0,now);
+  E.addPlayer(w,'a','Host');E.addPlayer(w,'b','Guest');
+  w.sites=[];
+  w.voxels={edits:{},revision:1,terrainVersion:2,legacyFlat:[],placedBy:{}};
+  for(let z=24;z<36;z++)for(let x=24;x<40;x++){
+    w.tiles[z*E.WIDTH+x]='grass';w.voxels.legacyFlat.push(`${x},${z}`);
+    w.voxels.edits[`${x},0,${z}`]=null;w.voxels.edits[`${x},1,${z}`]=null;
+  }
+  const a=w.players.a,b=w.players.b;
+  const move=(p,x,z)=>{p.x=x;p.y=z;p.position3D={x:x+.5,y:0,z:z+.5};};
+  move(a,27,26);move(b,28,26);
+  const send=(action,p=a)=>E.applyAction(w,p.id,action,now+=300);
+  const option=(option,enabled=true,p=a)=>send({type:'voxel-admin',command:'option',option,enabled},p);
+  const zone=(zone,p=a)=>send({type:'voxel-admin',command:'zone',zone},p);
+  const place=(block,x,z,p=a)=>{
+    p.life.bag[block]=(p.life.bag[block]||0)+1;
+    const changed=send({type:'voxel-place',block,x,y:0,z},p);
+    return changed&&V.blockAt(w,x,0,z)===block;
+  };
+  const tick=(n=1)=>{for(let i=0;i<n;i++)E.advanceWorld(w,now+=300);};
+  const privateZone={name:'Research',access:'private',owner:'a',left:27,right:29,front:28,back:29};
+  assert(!zone(privateZone,b));
+  assert(zone(privateZone));
+  assert(!zone({...privateZone,name:'Overlapping'}));
+  assert(!place('wood',28,28,b));
+  assert(place('crystal_lever',28,28));
+  const lever={type:'voxel-device',command:'use',x:28,y:0,z:28};
+  assert(!send(lever,b));
+  assert(place('crystal_lamp',29,28));
+  assert(option('pauseMachines'));
+  assert(send(lever));tick(3);
+  assert.equal(M.machineSignal(w,29,0,28),0);
+  assert(option('pauseMachines',false));tick(3);
+  assert.equal(M.machineSignal(w,29,0,28),15);
+  assert(option('ownerEdits'));
+  move(a,32,28);move(b,33,28);
+  assert(place('wood',33,29,b));
+  assert(!send({type:'voxel-break',x:33,y:0,z:29}));
+  const placed=w.sandbox.history.findLast(row=>row.kind==='place'&&row.actor==='b');
+  const count=b.life.bag.wood;
+  assert(!send({type:'voxel-admin',command:'undo',id:placed.id},b));
+  assert(send({type:'voxel-admin',command:'undo',id:placed.id}));
+  assert.equal(b.life.bag.wood,count+1);
+  assert(!send({type:'voxel-admin',command:'undo',id:placed.id}));
+  assert(!V.blockAt(w,33,0,29));
+  assert(zone({name:'Stage',access:'shared',left:33,right:35,front:29,back:30}));
+  assert(place('wood',33,29,b));
+  assert(send({type:'voxel-break',x:33,y:0,z:29}));
+  assert(zone({name:'Square',access:'protected',left:32,right:34,front:31,back:31}));
+  assert(!place('plank',32,31));
+  a.life.bag.water_bucket=1;
+  assert(!send({type:'voxel-fluid',command:'water',x:32,y:0,z:31}));
+  assert(send({type:'voxel-fluid',command:'water',x:31,y:0,z:29}));
+  assert(w.voxels.fluids.cells['31,0,29']);
+  assert(option('noFluids'));tick();
+  assert(!w.voxels.fluids.cells['31,0,29']);
+  const player={id:'WARRIOR',currentHp:60,maxHp:60,gold:0,deck:[],relics:[]};
+  a.profile={hp:60,maxHp:60,gold:0,deck:[],deckSize:0,character:'WARRIOR',image:''};
+  const resumed=S.restoreWorldSave(S.makeWorldSave(w,a.id,player,now),now+1000);
+  assert(resumed.sandbox.options.noFluids);
+  assert(resumed.voxels.fluids.sources['31,0,29']);
+  assert.equal(resumed.sandbox.zones.length,3);
+  assert(option('noFluids',false));tick();
+  assert(w.voxels.fluids.cells['31,0,29']);
+  assert(option('noDuels'));
+  assert(!send({type:'duel-request',target:'b'}));
+  console.log('PASS host-only settings, zone permissions, protected placement and fluid, machine pause, refunds, history, and saved controls.');
+}finally{await server.close();}

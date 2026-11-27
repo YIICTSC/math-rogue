@@ -617,6 +617,20 @@ class AudioService {
       });
   }
 
+  public playRpgNote(note: number, instrument: 'bell' | 'wood' | 'reed', gain: number) {
+    const context = this.ctx;
+    if (!context || context.state !== 'running' || !this.sfxGain || this.isMuted || gain <= 0) return;
+    const frequency = 261.6256 * 2 ** ((note - 12) / 12);
+    const now = context.currentTime;
+    if (instrument === 'bell') {
+      this.playOsc(frequency, now, .47, 'sine', gain * .16, this.sfxGain);
+      this.playOsc(frequency * 2.01, now, .24, 'sine', gain * .055, this.sfxGain);
+    } else {
+      this.playOsc(frequency, now, instrument === 'wood' ? .17 : .28,
+        instrument === 'wood' ? 'triangle' : 'sawtooth', gain * .105, this.sfxGain);
+    }
+  }
+
   public getSfxVolume() {
       return this.sfxVolume;
   }

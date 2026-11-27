@@ -381,6 +381,7 @@ export interface MagicRuleState {
 }
 
 export interface Player {
+  completedSpecialEducation?: boolean;
   customHero?:import('./rpg/customHero').CustomHero;
   rpgMutationRevision?: number;
   id?: string;

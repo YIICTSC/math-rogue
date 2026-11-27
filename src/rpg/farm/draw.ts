@@ -1,4 +1,6 @@
+import { drawCreature, type CreatureFacing } from '../lifestyle/creatureArt';
 import {plotPosition} from './land';
+import {ranchArt,ranchPosition} from './animalLook';
 import {animalPose} from '../lifestyle/animalMotion';
 import type { World } from "../engine";
 import { assetUrl } from "../../utils/assetPaths";
@@ -13,9 +15,11 @@ export function drawFarmSprite(
   y: number,
   size: number,
   pose?:ReturnType<typeof animalPose>,
+  appearance=id,
+  facing?:CreatureFacing,
+  time=0,
 ) {
-  const row=['retriever','graytabby','cow','chicken'].indexOf(id);
-  if(pose&&row>=0){const path=assetUrl('sprites/rpg/lifestyle/animal-poses.webp');let sheet=images.get(path);if(!sheet){sheet=new Image();sheet.src=path;images.set(path,sheet);}if(sheet.complete&&sheet.naturalWidth){const col=['greet','roll','sleep','hop'].indexOf(pose);c.drawImage(sheet,col*sheet.naturalWidth/4,row*sheet.naturalHeight/4,sheet.naturalWidth/4,sheet.naturalHeight/4,x-size/2,y-size,size,size);return;}}
+  if ((kind==='animal'||kind==='pet')&&drawCreature(c,appearance,x,y,size,pose,facing,time)) return;
   const path = farmImage(kind, id);
   let image = images.get(path);
   if (!image) {
@@ -39,8 +43,6 @@ export function drawFarms(
       f.y === undefined
     )
       continue;
-    const x = f.x * 16,
-      y = f.y * 16;
     for (const plot of f.plots) {
       const xy=plotPosition(f,plot);if(!xy)continue;const px=xy.x*16,py=xy.y*16;
       c.fillStyle = plot.water === (w.town?.day || 0) ? "#61472f" : "#89633e";
@@ -59,16 +61,20 @@ export function drawFarms(
       }
     }
     f.animals.forEach((animal, i) => {
-      const px = x + 8 + (i % 6) * 16,
-        py = y + (i < 6 ? 13 : 95);
+      const pos=ranchPosition(w,f,animal,i);
+      if (!pos || bounds&&(pos.x<bounds.minX-1||pos.x>bounds.maxX+1||pos.z<bounds.minY-1||pos.z>bounds.maxY+1)) return;
+      const px=pos.x*16, py=pos.z*16+5;
       drawFarmSprite(
         c,
         "animal",
         animal.kind,
         px,
         py + (motion ? Math.sin(time / 500 + i) * 0.4 : 0),
-        20,
+        pos.size,
         motion?animalPose(animal,w.life.time):undefined,
+        ranchArt(w,animal),
+        motion?pos.facing:undefined,
+        time,
       );
       if (animal.ready) {
         c.fillStyle = "#ffe187";

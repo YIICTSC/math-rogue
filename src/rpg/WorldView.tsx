@@ -2,6 +2,8 @@ import LandscapeCompass from './LandscapeCompass';
 import {legacyRegion} from './worldLandscape';
 import React, { lazy, Suspense, useState } from "react";
 import WorldCanvas from "./WorldCanvas";
+import MachineLayerView from "./MachineLayerView";
+import "./machinery.css";
 import { useRpgPreferences, updateRpgPreferences } from "./preferences";
 import "./world3d.css";
 const Scene = lazy(() => import("./WorldScene3D"));
@@ -24,6 +26,7 @@ export default function WorldView(
     onEnergyRequest?:()=>void;
     onVoxelAction?: (a:import("./voxel").VoxelAction)=>void;
     paused?: boolean;
+    inputBlocked?: boolean;
     facing: number;
     onFacing: (n: number) => void;
   },
@@ -44,7 +47,7 @@ export default function WorldView(
           </Suspense>
         </Boundary>
       ) : (
-        <WorldCanvas {...props} />
+        <MachineLayerView {...props} />
       )}{" "}
       {prefs.mapView==='2D'&&props.world.players[props.selfId]?.position3D&&(()=>{const pos=props.world.players[props.selfId].position3D!;return !legacyRegion(pos.x,pos.z)?<LandscapeCompass x={pos.x} z={pos.z} languageMode={props.languageMode}/>:null;})()}
       {failed && (

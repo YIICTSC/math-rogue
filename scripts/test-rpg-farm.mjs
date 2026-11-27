@@ -17,7 +17,8 @@ try {
     L = await server.ssrLoadModule("/src/rpg/life.ts"),
     H = await server.ssrLoadModule("/src/rpg/homeCatalog.ts"),
     S = await server.ssrLoadModule("/src/rpg/worldSave.ts"),
-    Y = await server.ssrLoadModule("/src/rpg/city/model.ts");
+    Y = await server.ssrLoadModule("/src/rpg/city/model.ts"),
+    Looks = await server.ssrLoadModule('/src/rpg/farm/animalLook.ts');
   let now = 1791150000000;
   const w = E.createWorld(42, undefined, 0, now);
   E.addPlayer(w, "a", "Farmer");
@@ -119,6 +120,9 @@ try {
   assert.ok(send({ type: "farm-animal-buy", kind: "chicken", name: "コッコ" }));
   assert.ok(send({ type: "farm-animal-buy", kind: "cow", name: "ミルク" }));
   const hen = f.animals[0];
+  assert.equal(Looks.ranchStage(w,hen),'young');
+  w.town.elapsed+=110;
+  assert.equal(Looks.ranchStage(w,hen),'growing');
   assert.ok(send({ type: "farm-animal-care", id: hen.id, care: "feed" }));
   assert.equal(
     send({ type: "farm-animal-care", id: hen.id, care: "feed" }),
@@ -127,6 +131,7 @@ try {
   assert.ok(send({ type: "farm-animal-care", id: hen.id, care: "brush" }));
   assert.ok(send({ type: "farm-animal-care", id: hen.id, care: "clean" }));
   day(2);
+  assert.equal(Looks.ranchStage(w,hen),'adult');
   assert.equal(hen.ready, 1);
   assert.ok(send({ type: "farm-animal-care", id: hen.id, care: "collect" }));
   assert.ok(f.pantry.egg.normal > 0);
@@ -136,6 +141,15 @@ try {
   );
   day(3);
   assert.equal(hen.ready, 0, "unfed animals do not produce");
+  const cow=f.animals.find(animal=>animal.kind==='cow');
+  cow.bond=70;cow.health=90;cow.variant='rare';f.feed=20;
+  assert.ok(send({type:'farm-animal-breed',id:cow.id,name:'ココア'}));
+  const calf=f.animals.at(-1);
+  assert.equal(calf.parentId,cow.id);
+  assert.equal(Looks.ranchStage(w,calf),'young');
+  const motherPos=Looks.ranchPosition(w,f,cow,f.animals.indexOf(cow));
+  const calfPos=Looks.ranchPosition(w,f,calf,f.animals.indexOf(calf));
+  assert(Math.hypot(motherPos.x-calfPos.x,motherPos.z-calfPos.z)<.8,'The juvenile stays by its parent in the shared map.');
   assert.equal(
     send({ type: "farm-animal-care", id: hen.id, care: "hack" }),
     false,
@@ -237,6 +251,8 @@ try {
     "closed-app crop, pet and animal clocks remain frozen",
   );
   assert.deepEqual(resume.life.time, w.life.time);
+  assert.equal(resume.farm.people.a.animals.find(animal=>animal.id===calf.id).parentId,cow.id);
+  assert.equal(Looks.ranchArt(resume,resume.farm.people.a.animals.find(animal=>animal.id===cow.id)),'cow-rare');
   const before = f.coins;
   p.nativeScene = { token: "busy" };
   assert.equal(send({ type: "farm-seed", crop: "carrot", amount: 1 }), false);

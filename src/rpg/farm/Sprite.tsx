@@ -1,3 +1,4 @@
+import { creatureHasArt, creaturePortrait } from '../lifestyle/creatureArt';
 import React from "react";
 import { assetUrl } from "../../utils/assetPaths";
 import { cropById, ingredientById, animalById, petById } from "./catalog";
@@ -5,6 +6,7 @@ export const farmImage = (
   kind: "crop" | "ingredient" | "animal" | "pet" | "food",
   id: string | number,
 ) =>
+  ((kind==='pet'||kind==='animal')&&creatureHasArt(String(id))) ? creaturePortrait(String(id)) :
   `sprites/rpg/farm/${kind === "crop" || (kind === "ingredient" && cropById(String(id))) ? "crops" : kind === "ingredient" ? "products" : kind === "animal" ? "animals" : kind === "pet" ? "pets" : "food"}/${id}.webp`;
 export default function FarmSprite({
   kind,

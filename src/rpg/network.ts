@@ -21,11 +21,15 @@ import {
   type RpgAdventureSetup,
 } from "./setup";
 
-// Arcade result presentation requires the authoritative outcome payload.
-const RPG_PROTOCOL_VERSION = 25;
+// Host worlds share equipment and signal state with participants on the same schema.
+const RPG_PROTOCOL_VERSION = 27;
 // Avoid BinaryPack's recursive encoding of 16,896 individual terrain cells.
 // Retain binary transport so PeerJS can still chunk large room snapshots.
 type WireWorld = Omit<World, "tiles"> & { tiles: World["tiles"] | string };
+type ServerHello = {name:string}&(
+  {create:true;setup:RpgAdventureSetup|null;minutes:number;gameMode:World['gameMode']} |
+  {code:string;prepare?:true;resumeToken?:string}
+);
 function unpackWorld(world: WireWorld): World {
   return {...world,tiles:typeof world.tiles === "string" ? world.tiles.split(",") as World["tiles"] : world.tiles};
 }
@@ -79,25 +83,38 @@ export class RpgRoom {
   private closed = false;
   private serverSocket: WebSocket | null = null;
   private serverConnection:DedicatedConnection|null=null;
+  private resumeToken?:string;
   private serverSend(packet: unknown) {
     if(this.serverConnection)return this.serverConnection.send(packet);
     if(this.serverSocket?.readyState!==WebSocket.OPEN)return false;
     this.serverSocket.send(JSON.stringify(packet));return true;
   }
   private serverUrl() {return import.meta.env.VITE_ONLINE_SERVER_URL as string | undefined;}
-  private async connectServer(packet:object,onSetup?:(setup:RpgAdventureSetup)=>void){
-    this.status('サーバーを起動しています。初回は最大3分お待ちください。');
+  private async connectServer(packet:ServerHello,onSetup?:(setup:RpgAdventureSetup)=>void,reconnecting=false){
+    this.status(reconnecting?'部屋に再接続しています。':'サーバーを起動しています。初回は最大3分お待ちください。');
     const connection=new DedicatedConnection(d=>{
       if(this.sessionEnd.receive(d))return true;
       if(d.type==='connected'){this.selfId=d.id;this.code=d.code;this.host=d.host;}
       if(d.type==='error'){this.status(d.message);return false;}
       if(this.receiveDungeon(d))return false;
       if(d.type==='lobby'){const setup=normalizeRpgAdventureSetup(d.setup);if(!setup)throw new Error('冒険設定を受け取れませんでした。');onSetup?.(setup);this.status('');return true;}
-      if(d.type==='init'&&d.world){this.world=unpackWorld(d.world);this.emit();this.status('');return true;}
+      if(d.type==='init'&&d.world){
+        this.resumeToken=typeof d.resumeToken==='string'?d.resumeToken:undefined;
+        this.world=unpackWorld(d.world);this.emit();this.status('');return true;
+      }
       if(this.receiveResidentAssets(d)||this.receiveHeroAssets(d))return false;
       if(d.type==='state'&&d.state&&this.world){this.restoreHeroAssets(d.state);this.world={...d.state,tiles:this.world.tiles};this.emit();}return false;
-    },()=>{if(!this.closed){this.world=null;this.status('通信が切断されました。部屋に入り直してください。');}});
-    this.serverConnection=connection;await connection.open('online',packet);
+    },()=>{
+      if(this.closed)return;
+      const token=this.resumeToken;
+      if(token&&this.code){
+        void this.connectServer({name:packet.name,code:this.code,resumeToken:token},undefined,true).catch(()=>{
+          if(this.closed)return;
+          this.world=null;this.resumeToken=undefined;this.status('通信が切断されました。部屋に入り直してください。');
+        });
+      }else{this.world=null;this.status('通信が切断されました。部屋に入り直してください。');}
+    });
+    this.serverConnection=connection;await connection.open('online',{...packet,machineryProtocol:1},reconnecting?20_000:180_000);
   }
   private residentAssets=new Map<string,ResidentAssets>();
   private receiveResidentAssets(packet:{type?:string;residents?:ResidentAssets[]}){if(packet.type!=='resident-assets'||!Array.isArray(packet.residents))return false;for(const r of packet.residents){this.residentAssets.set(r.id,r);const target=this.world?.town?.customResidents?.find(x=>x.id===r.id);if(target)Object.assign(target,r);}this.emit();return true;}

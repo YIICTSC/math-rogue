@@ -6586,6 +6586,9 @@ const App: React.FC = () => {
             });
             const p = { ...prev.player, relicCounters: { ...prev.player.relicCounters } };
             const completedNode = prev.map.find(node => node.id === prev.currentMapNodeId);
+            if (!prev.rpgOnline && !prev.isEndless && completedNode?.type === NodeType.REST) {
+                p.completedSpecialEducation = true;
+            }
             if (completedNode?.type === NodeType.EVENT) {
                 if (hasRelic(p, 'FIELD_TRIP_BADGE')) p.gold += 15;
                 if (hasRelic(p, 'SECRET_BASE_MAP')) p.currentHp = Math.min(p.maxHp, p.currentHp + 3);
@@ -8846,6 +8849,7 @@ const App: React.FC = () => {
 
         const initialPlayerState = {
             ...gameState.player,
+            completedSpecialEducation: false,
             id: char.id,
             appearanceMode: selectedAppearanceMode,
             magicProtagonistId: char.magicProtagonistId,
@@ -17237,8 +17241,20 @@ const App: React.FC = () => {
 
     const handleRestLeave = () => {
         if (gameState.challengeMode === 'COOP' && coopSession && coopSelfPeerId) {
+            const state = stateRef.current;
+            const completedRest = !state.rpgOnline && !state.isEndless &&
+                state.map.some(node => node.id === state.currentMapNodeId && node.type === NodeType.REST);
+            const player = completedRest && !state.player.completedSpecialEducation
+                ? { ...state.player, completedSpecialEducation: true }
+                : state.player;
+            if (player !== state.player) {
+                setGameState(prev => ({
+                    ...prev,
+                    player: { ...prev.player, completedSpecialEducation: true }
+                }));
+            }
             if (!coopSession.isHost) {
-                p2pService.send({ type: 'COOP_PLAYER_SNAPSHOT', player: stateRef.current.player });
+                p2pService.send({ type: 'COOP_PLAYER_SNAPSHOT', player });
             }
             setCoopSession(prev => {
                 if (!prev) return prev;
@@ -22033,7 +22049,14 @@ const App: React.FC = () => {
                             onLeave={handleRestLeave}
                             languageMode={languageMode}
                             typingMode={gameState.challengeMode === 'TYPING'}
-                            scienceRoomChance={getDifficultyConfig(gameState.difficultyLevel).scienceRoomChance}
+                            scienceRoomChance={
+                                !gameState.rpgOnline && !gameState.isEndless &&
+                                !gameState.player.completedSpecialEducation &&
+                                gameState.map.some(node => node.id === gameState.currentMapNodeId && node.type === NodeType.REST) &&
+                                !gameState.map.some(node => node.type === NodeType.REST && node.completed)
+                                    ? 1
+                                    : getDifficultyConfig(gameState.difficultyLevel).scienceRoomChance
+                            }
                             interactionDisabled={coopLocalProgressInteractionDisabled}
                             interactionDisabledMessage={coopInteractionDisabledMessage}
                             visualTheme={gameState.visualTheme || visualTheme}

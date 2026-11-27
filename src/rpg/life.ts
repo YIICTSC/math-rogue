@@ -1,3 +1,6 @@
+import { isThinMachinePart } from './machineryParts';
+import type { BlueprintReceipt } from './blueprints';
+import { poweredGateOpen } from './machinery';
 import type {FurnitureLearner} from '../mini-games/gakuro-craft/furnitureLearning';
 import {GameMode} from '../types';
 import {isHomeTrack,MUSIC_FURNITURE} from './homeTracks';
@@ -46,14 +49,14 @@ export function natureAt(w:World,tile:number):NatureNode|null {
  if(natureCache.size>25000)natureCache.clear();natureCache.set(key,result);return result;
 }
 export interface Work {tile:number;kind:'gather'|'fish';started:number;target:number;expires:number;fishing?:FishingRun}
-export interface LifePlayer {buildingGoals?:string[];buildingSurvey?:BuildingSurvey;relicEquipment?:string[];tools?:Partial<Record<ToolKind,ToolTier>>;workshopAt?:number;hoe?:boolean;pickaxe?:ToolTier;fishRecords?:FishRecords;fishCastCount?:number;lastCatch?:FishCatch;energy?:number;bag:Bag;homeId?:string;indoors?:string;roomPos?:{x:number;y:number};roomMoveAt?:number;work?:Work;lastAction:number;crafted:string[];effect?:{tile:number;at:number;kind:string;perfect:boolean}}
+export interface LifePlayer {blueprintReceipt?:BlueprintReceipt[];research?:string[];buildingGoals?:string[];buildingSurvey?:BuildingSurvey;relicEquipment?:string[];tools?:Partial<Record<ToolKind,ToolTier>>;toolWear?:Partial<Record<ToolKind,number>>;toolImprints?:Partial<Record<ToolKind,import('./explorationEquipment').ToolImprint>>;potionUntil?:Partial<Record<import('./explorationEquipment').ExplorationPotion,number>>;imprintStudy?:number;workshopAt?:number;hoe?:boolean;pickaxe?:ToolTier;fishRecords?:FishRecords;fishCastCount?:number;lastCatch?:FishCatch;energy?:number;bag:Bag;homeId?:string;indoors?:string;roomPos?:{x:number;y:number};roomMoveAt?:number;work?:Work;lastAction:number;crafted:string[];effect?:{tile:number;at:number;kind:string;perfect:boolean}}
 export interface House {id:string;owner:string;ownerName:string;x:number;y:number;biome:BiomeId;home:Home;interior?:Interior;invitedAt:number}
 export interface LifeWorld {furnitureLearning?:Record<string,FurnitureLearner>;nodes:Record<number,{hits:number;regrowAt:number}>;houses:House[];games:Record<string,HomeGame>;now:number;time:number;lastTick:number}
 export type LifeAction = {type:'life-home-music';id:string;track:string}|{type:'life-work'|'life-cast';tile:number}|{type:'life-reel';phaseTarget?:number}|{type:'life-hit'|'life-cancel'|'life-leave'|'life-build'|'life-invite'}|{type:'life-craft';recipe:string}|{type:'life-enter';houseId:string}|{type:'life-game';command:GameCommand}|{type:'life-room-move';dx:number;dy:number}|{type:'life-furniture-craft';item:string}|{type:'life-place';item:string;x:number;y:number;rotation:0|1|2|3;flipped?:boolean}|{type:'life-pack';id:string}|{type:'life-rotate';id:string;direction?:1|-1;flip?:boolean};
 export const createLife=(now:number):LifeWorld=>({nodes:{},houses:[],games:{},now,time:0,lastTick:now});
 export const lifePlayer=(p:Adventurer):LifePlayer=>p.life??={energy:GATHER_ENERGY_MAX,bag:{wood:4,stone:2},lastAction:0,crafted:[]};
 export const resourceReady=(w:World,tile:number)=>!(w.life?.nodes[tile]?.regrowAt);
-export function lifeWalkable(w:World,x:number,y:number){const tile=y*WIDTH+x;return x>0&&y>0&&x<WIDTH-1&&y<HEIGHT-1&&!landmarkBlock(x,landscapeHeight(w.seed,x,y)+1,y)&&w.tiles[tile]!=='water'&&!([0,1].some(h=>!!w.voxels?.edits[`${x},${h},${y}`]&&w.voxels?.edits[`${x},${h},${y}`]!=='door'))&&(w.tiles[tile]!=='forest'||occupiedCityTile(w,tile)||occupiedFarmTile(w,tile)||!!w.life?.nodes[tile]?.regrowAt);}
+export function lifeWalkable(w:World,x:number,y:number){const tile=y*WIDTH+x;return x>0&&y>0&&x<WIDTH-1&&y<HEIGHT-1&&!landmarkBlock(x,landscapeHeight(w.seed,x,y)+1,y)&&w.tiles[tile]!=='water'&&!([0,1].some(h=>{const b=w.voxels?.edits[`${x},${h},${y}`];return !!b&&b!=='door'&&!isThinMachinePart(b)&&(b!=='signal_gate'||!poweredGateOpen(w,x,h,y));}))&&(w.tiles[tile]!=='forest'||occupiedCityTile(w,tile)||occupiedFarmTile(w,tile)||!!w.life?.nodes[tile]?.regrowAt);}
 export const RECIPES = [
  {id:'door',name:'ドア',cost:{plank:3,ore:1} as Bag,kind:'material',description:'囲った空間を自宅や共用施設にする入口。',sprite:0},
  {id:'hoe',name:'クワ',cost:{wood:2,ore:2} as Bag,kind:'tool',description:'前の1マスを耕して農地にする道具。',sprite:2},

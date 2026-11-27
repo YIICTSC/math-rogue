@@ -1,4 +1,5 @@
 import { animalPose } from "./animalMotion";
+import { creatureHasArt, creaturePoseIndex, creaturePoseSheet } from './creatureArt';
 import { useRpgPreferences } from "../preferences";
 import React from "react";
 import type { World, Action } from "../engine";
@@ -14,27 +15,28 @@ export default function AnimalStage({
   animal,
   kind,
   time,
+  appearance=animal.kind,
 }: {
   animal: FarmAnimal | FarmPet;
   kind: "animal" | "pet";
   time: number;
+  appearance?:string;
 }) {
   const prefs = useRpgPreferences();
-  const pose = animalPose(animal, time),
-    species = ["retriever", "graytabby", "cow", "chicken"].indexOf(animal.kind),
-    column = ["greet", "roll", "sleep", "hop"].indexOf(pose);
+  const pose = animalPose(animal, time);
   return (
     <div
       className={`life-pet-stage life-pose-${pose}`}
       data-pose={pose}
       style={prefs.reducedMotion ? { animation: "none" } : undefined}
     >
-      {species >= 0 ? (
+      {creatureHasArt(appearance) ? (
         <div
           className="life-pet-pose"
           style={{
-            backgroundImage: `url(${assetUrl("sprites/rpg/lifestyle/animal-poses.webp")})`,
-            backgroundPosition: `${(column / 3) * 100}% ${(species / 3) * 100}%`,
+            backgroundImage: `url(${assetUrl(creaturePoseSheet(appearance))})`,
+            backgroundPosition: `${creaturePoseIndex(pose) / 3 * 100}% 0`,
+            backgroundSize: '400% 100%',
           }}
         />
       ) : (

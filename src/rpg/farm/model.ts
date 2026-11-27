@@ -6,6 +6,7 @@ import {energyOf} from '../energy';
 import {farmMapTargets,type FarmQuickAction} from './mapTargets';
 import {PET_TRICKS} from '../lifestyle/catalog';
 import type {AnimalMoment} from '../lifestyle/animalMotion';
+import { hasRareCoat } from './animalLook';
 import type { World, Adventurer } from "../engine";
 import { WIDTH, HEIGHT } from "../engine";
 import { lifePlayer, canAfford } from "../life";
@@ -19,6 +20,7 @@ import {
   PET_SPECIES,
   petById,
   ingredientById,
+  type Crop,
 } from "./catalog";
 
 export interface PantryStack {
@@ -38,6 +40,9 @@ export interface FarmPlot {
 }
 export interface FarmAnimal {
   moment?:AnimalMoment;pat?:number;bredDay?:number;
+  bornAt?:number;
+  parentId?:string;
+  variant?:'rare';
   id: string;
   kind: string;
   name: string;
@@ -311,6 +316,99 @@ function harvest(f: FarmPlayer, plot: FarmPlot) {
   if (!c.regrow) delete plot.crop;
   return amount;
 }
+
+function plant(f: FarmPlayer, plot: FarmPlot, crop: Crop, season: number) {
+  if (plot.crop || plot.slot >= plotLimit(f) || !(f.seeds[crop.id]>0) ||
+      (crop.season!==season && !f.upgrades.includes('greenhouse'))) return false;
+  f.seeds[crop.id]--;
+  Object.assign(plot,{
+    crop:crop.id,growth:0,water:-1,fertilizer:false,harvests:0,
+    quality:60+(plot.previousFamily>=0 && plot.previousFamily!==crop.family ? 10 : 0),
+  });
+  return true;
+}
+
+function fertilize(f: FarmPlayer, plot: FarmPlot) {
+  if (!f.compost || plot.fertilizer) return false;
+  f.compost--;
+  plot.fertilizer=true;
+  plot.quality=Math.min(100,plot.quality+15);
+  return true;
+}
+
+function collectAnimal(f: FarmPlayer, animal: FarmAnimal) {
+  const kind=animalById(animal.kind);
+  if (!animal.ready || !kind) return false;
+  const quality=Math.min(100,50+animal.bond/2+animal.health/10);
+  const stock=f.pantry[kind.product]?.[quality>=80?'quality':'normal'] ?? 0;
+  if (stock+animal.ready>999) return false;
+  record(f,kind.product,animal.ready,quality);
+  f.products+=animal.ready;
+  f.xp+=animal.ready*8;
+  animal.ready=0;
+  return true;
+}
+
+function feedAnimal(w: World, f: FarmPlayer, animal: FarmAnimal, day: number) {
+  if (!f.feed || animal.feed===day) return false;
+  f.feed--;
+  animal.health=Math.min(100,animal.health+5);
+  animal.feed=day;
+  animal.bond=Math.min(100,animal.bond+2);
+  animal.moment={pose:'eat',until:w.life.time+7};
+  return true;
+}
+
+function findFarmPlot(f: FarmPlayer, x: number, z: number) {
+  return f.plots.find(plot=>{
+    const site=plotPosition(f,plot);
+    return site?.x===x && site.y===z;
+  });
+}
+
+export function farmMachineSignal(w: World, owner: string, x: number, z: number) {
+  const farm=w.farm?.people[owner], plot=farm && findFarmPlot(farm,x,z);
+  const crop=plot?.crop && cropById(plot.crop);
+  return crop && plot.growth>=crop.days ? 15 : 0;
+}
+
+export type FarmMachineJob = 'harvest' | 'water' | 'fertilize' | 'ranch' | `plant:${string}`;
+export function validFarmMachineJob(value: unknown): value is FarmMachineJob {
+  return typeof value==='string' && (['harvest','water','fertilize','ranch'].includes(value) ||
+    value.startsWith('plant:') && !!cropById(value.slice(6)));
+}
+
+/** Equipment works on one owner-matched farm tile through the usual crop and husbandry rules. */
+export function operateFarmMachine(w: World, owner: string, x: number, z: number, job: FarmMachineJob) {
+  const farm=w.farm?.people[owner];
+  if (!farm) return false;
+  const {day,season}=calendar(w);
+  if (job==='ranch') {
+    if (farm.x===undefined || farm.y===undefined) return false;
+    const animal=farm.animals.find((_,i)=>x===farm.x!+i%6 && z===farm.y!+(i<6?0:5));
+    return !!animal && (collectAnimal(farm,animal) || feedAnimal(w,farm,animal,day));
+  }
+  const plot=findFarmPlot(farm,x,z);
+  if (!plot) return false;
+  if (job.startsWith('plant:')) {
+    const crop=cropById(job.slice(6));
+    return !!crop && plant(farm,plot,crop,season);
+  }
+  if (!plot.crop) return false;
+  if (job==='harvest') {
+    const crop=cropById(plot.crop);
+    if (!crop) return false;
+    const stack=farm.pantry[crop.id]?.[plot.quality>=80?'quality':'normal'] ?? 0;
+    if (stack+crop.yield+(plot.quality>=80?1:0)>999) return false;
+    return !!harvest(farm,plot);
+  }
+  if (job==='fertilize') return fertilize(farm,plot);
+  if (job==='water' && plot.water!==day && irrigatedPlot(w,x,z)) {
+    plot.water=day;
+    return true;
+  }
+  return false;
+}
 export const FARM_UPGRADES = [
   { id: "irrigation", level: 2, coins: 120, cost: { wood: 8, ore: 2 } },
   { id: "greenhouse", level: 3, coins: 220, cost: { wood: 12, crystal: 3 } },
@@ -511,23 +609,9 @@ export function applyFarm(w: World, p: Adventurer, a: FarmAction): boolean {
       !plot ||
       !plotPosition(f,plot)||
       Math.abs(plotPosition(f,plot)!.x-p.x)+Math.abs(plotPosition(f,plot)!.y-p.y)>2||
-      a.slot >= plotLimit(f) ||
-      plot.crop ||
-      !(f.seeds[c.id] > 0) ||
-      (c.season !== calendar(w).season && !f.upgrades.includes("greenhouse"))
+      !plant(f,plot,c,calendar(w).season)
     )
       return false;
-    f.seeds[c.id]--;
-    Object.assign(plot, {
-      crop: c.id,
-      growth: 0,
-      water: -1,
-      fertilizer: false,
-      quality:
-        60 +
-        (plot.previousFamily >= 0 && plot.previousFamily !== c.family ? 10 : 0),
-      harvests: 0,
-    });
     return success();
   }
   if (
@@ -542,10 +626,7 @@ export function applyFarm(w: World, p: Adventurer, a: FarmAction): boolean {
       plot.water = day;
     }
     if (a.type === "farm-fertilize") {
-      if (!f.compost || plot.fertilizer) return false;
-      f.compost--;
-      plot.fertilizer = true;
-      plot.quality = Math.min(100, plot.quality + 15);
+      if (!fertilize(f,plot)) return false;
     }
     if (a.type === "farm-harvest") {
       const amount = harvest(f, plot);
@@ -600,11 +681,15 @@ export function applyFarm(w: World, p: Adventurer, a: FarmAction): boolean {
     )
       return false;
     f.coins -= k.price;
+    const id=`animal-${++f.sequence}`;
+    const rare=hasRareCoat(k.id)&&hash(`coat:${p.id}:${id}`,w.seed)%32===0;
     f.animals.push({
-      id: `animal-${++f.sequence}`,
+      id,
       kind: k.id,
       name: a.name.trim(),
       born: day,
+      bornAt:w.town?.elapsed,
+      variant:rare?'rare':undefined,
       feed: -1,
       brush: -1,
       clean: -1,
@@ -619,7 +704,10 @@ export function applyFarm(w: World, p: Adventurer, a: FarmAction): boolean {
     const parent=f.animals.find(v=>v.id===a.id),kind=parent&&animalById(parent.kind);
     if(!parent||!kind||!validName(a.name)||parent.bond<50||parent.health<80||day-parent.born<2||day-(parent.bredDay??-100)<7||f.animals.length>=animalLimit(f)||f.feed<8||f.coins<Math.ceil(kind.price/2))return false;
     f.feed-=8;f.coins-=Math.ceil(kind.price/2);parent.bredDay=day;parent.moment={pose:'greet',until:w.life.time+10};
-    f.animals.push({id:`animal-${++f.sequence}`,kind:parent.kind,name:a.name.trim(),born:day,feed:-1,brush:-1,clean:-1,bond:10,health:90,progress:0,ready:0,moment:{pose:'hop',until:w.life.time+10}});f.xp+=12;
+    const id=`animal-${++f.sequence}`;
+    const rare=hasRareCoat(parent.kind)&&hash(`coat:${p.id}:${id}`,w.seed)%(parent.variant==='rare'?4:32)===0;
+    f.animals.push({id,kind:parent.kind,name:a.name.trim(),born:day,bornAt:w.town?.elapsed,parentId:parent.id,
+      variant:rare?'rare':undefined,feed:-1,brush:-1,clean:-1,bond:10,health:90,progress:0,ready:0,moment:{pose:'hop',until:w.life.time+10}});f.xp+=12;
     return tell('牧場に新しい家族が生まれました。');
   }
   if (a.type === "farm-animal-care") {
@@ -627,25 +715,11 @@ export function applyFarm(w: World, p: Adventurer, a: FarmAction): boolean {
     if (!animal || !["feed", "brush", "clean", "collect", "pat"].includes(a.care))
       return false;
     if (a.care === "collect") {
-      if (!animal.ready) return false;
-      const n = animal.ready;
-      record(
-        f,
-        animalById(animal.kind)!.product,
-        n,
-        Math.min(100, 50 + animal.bond / 2 + animal.health / 10),
-      );
-      f.products += n;
-      f.xp += n * 8;
-      animal.ready = 0;
+      if (!collectAnimal(f,animal)) return false;
       return tell("牧場の恵みを受け取りました。食材庫を確認しましょう。");
     }
     if (animal[a.care] === day) return false;
-    if (a.care === "feed") {
-      if (!f.feed) return false;
-      f.feed--;
-      animal.health = Math.min(100, animal.health + 5);
-    }
+    if (a.care === "feed") return feedAnimal(w,f,animal,day) && success();
     animal.moment={pose:a.care==="brush"?"roll":a.care==="clean"?"hop":"greet",until:w.life.time+7};
     animal[a.care] = day;
     animal.bond = Math.min(100, animal.bond + (a.care === "brush" ? 5 : 2));

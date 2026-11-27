@@ -1,3 +1,8 @@
+import { drawMachineCarts, drawMachineLayer, drawSurfaceMachines, type MachineLayer } from './machineLayer';
+import { isMachinePart } from './machineryParts';
+import { visibleWildlife, WILDLIFE } from './lifestyle/wildlife';
+import { drawCreature } from './lifestyle/creatureArt';
+import { playerHeight } from './voxel';
 import {residentAppearance,npcAppearance} from './town/wardrobe';
 import {mapPosition,drawLandscapeTile,drawLandscapeVegetation,drawLandscapeBuildings,landscapeGate} from './landscapeMap';
 import {legacyRegion,WORLD_SCALE,landscapeEnvironment,landscapeColor,LANDMARKS} from './worldLandscape';
@@ -246,6 +251,7 @@ export default function WorldCanvas({
   onTile,
   onPlayer,
   overview = false,
+  machineLayer,
   languageMode = "JAPANESE",
   visualTheme = world.setup?.visualTheme || "elementary",
 }: {
@@ -254,13 +260,15 @@ export default function WorldCanvas({
   onTile: (x: number, y: number) => void;
   onPlayer?: (id: string) => void;
   overview?: boolean;
+  machineLayer?: MachineLayer;
   languageMode?: LanguageMode;
   visualTheme?: VisualThemeId;
 }) {
   const ref = useRef<HTMLCanvasElement>(null),
     camera = useRef({ x: 0, y: 0, scale: 1 }),
-    latest = useRef(world);
+    latest = useRef(world), layerRef = useRef(machineLayer);
   latest.current = world;
+  layerRef.current = machineLayer;
   useEffect(() => {
     const canvas = ref.current!;
     const c = canvas.getContext("2d")!;
@@ -294,7 +302,20 @@ export default function WorldCanvas({
       c.scale(scale, scale);
       c.translate(-cx, -cy);
       const minX = Math.max(WORLD_SCALE.min, Math.floor(cx / T) - 2), maxX = Math.min(WORLD_SCALE.max, Math.ceil((cx + sw / scale) / T) + 2);
-      const minY = Math.max(WORLD_SCALE.min, Math.floor(cy / T) - 3), maxY = Math.min(HEIGHT, Math.ceil((cy + sh / scale) / T) + 2);
+      const minY = Math.max(WORLD_SCALE.min, Math.floor(cy / T) - 3), maxY = Math.min(WORLD_SCALE.max, Math.ceil((cy + sh / scale) / T) + 2);
+      const viewBounds = { minX, maxX, minY, maxY };
+      const layer = layerRef.current;
+      if (layer && !overview) {
+        drawMachineLayer(c, w, T, viewBounds, layer);
+        drawMachineCarts(c, w, T, viewBounds, layer.height);
+        const onLayer = Math.abs(playerHeight(w, p) - layer.height) < .65;
+        c.strokeStyle = onLayer ? '#ffdf89' : '#79bbc0';
+        c.lineWidth = 1.2; c.setLineDash(onLayer ? [] : [2, 2]);
+        c.beginPath(); c.arc(pos.x*T, pos.z*T, T*.36, 0, 2*Math.PI); c.stroke();
+        c.restore();
+        frame = requestAnimationFrame(paint);
+        return;
+      }
       const season=calendar(w);
       const stride=overview&&expanded?16:1;
       for (let y = minY; y < maxY; y+=stride)
@@ -356,10 +377,28 @@ export default function WorldCanvas({
       for(let y=Math.max(0,minY);!overview&&y<Math.min(HEIGHT,maxY);y++)for(let x=Math.max(0,minX);x<Math.min(WIDTH,maxX);x++){if(!legacyRegion(x,y))continue;const f=flowerAt(w,y*WIDTH+x);if(f)prop(c,f.index,x*T,y*T,18,flowerAtlases[f.season],4,3);}
       for(const plot of w.town?.garden||[]){const h=w.life.houses.find(h=>h.owner===plot.owner);if(!h)continue;const f=FLOWERS_FOR_GARDEN.find(f=>f.id===plot.flower);if(!f)continue;const x=h.x-2+plot.slot%3,y=h.y+2+Math.floor(plot.slot/3);rect(c,x*T+2,y*T+9,12,6,'#796744');prop(c,f.index,x*T,y*T,w.town!.day-plot.plantedDay>=2?19:11,flowerAtlases[f.season],4,3);}
       const built=new Map<string,{x:number;z:number;height:number;block:string}>();
-      for(const [key,block] of Object.entries(w.voxels?.edits||{})){if(!block)continue;const [x,y,z]=key.split(',').map(Number);const k=`${x},${z}`,old=built.get(k);if(!old||old.height<y)built.set(k,{x,z,height:y,block});}
+      for(const [key,block] of Object.entries(w.voxels?.edits||{})){if(!block||isMachinePart(block))continue;const [x,y,z]=key.split(',').map(Number);const k=`${x},${z}`,old=built.get(k);if(!old||old.height<y)built.set(k,{x,z,height:y,block});}
       for(const b of built.values()){if(!legacyRegion(b.x,b.z)||b.x<minX||b.x>=maxX||b.z<minY||b.z>=maxY)continue;rect(c,b.x*T+1,b.z*T-3,14,18,VOXEL_COLORS[b.block as TerrainBlock]);rect(c,b.x*T+2,b.z*T-2,12,4,'#ffffff44');rect(c,b.x*T+2,b.z*T+12,12,2,'#00000044');}
+      if (!overview) {
+        drawSurfaceMachines(c, w, T, viewBounds);
+        drawMachineCarts(c, w, T, viewBounds);
+      }
       for(const room of w.voxelRooms||[]){for(const f of room.furniture){const path=assetUrl(furnitureImage(f.item));let img=characterImages.get(path);if(!img){img=new Image();img.src=path;characterImages.set(path,img);}if(img?.complete&&img.naturalWidth)c.drawImage(img,f.x*T,f.y*T-12,24,24);}for(const farm of Object.values(w.farm?.people||{}))for(const pet of farm.pets)if(pet.homeId===room.id&&pet.roomPos)drawFarmSprite(c,'pet',pet.kind,pet.roomPos.x*T+8,pet.roomPos.y*T+15,22);}
       drawFarms(c,w,time,!prefs.reducedMotion,{minX,maxX,minY,maxY});
+      if (!overview) {
+        const viewer=mapPosition(p);
+        const feet=playerHeight(w,p);
+        for (const animal of visibleWildlife(w,viewer.x,viewer.z,18,feet)) {
+          if (animal.x<minX || animal.x>=maxX || animal.z<minY || animal.z>=maxY) continue;
+          const art=WILDLIFE[animal.kind].art;
+          const size=art==='aquatic'?12:art==='flying'?15:['horse','deer','bear'].includes(animal.kind)?26:20;
+          const lift=art==='flying' && !prefs.reducedMotion ? 5+Math.sin(time/250)*2 : 0;
+          c.save();
+          if (art==='aquatic') c.globalAlpha=.62;
+          drawCreature(c,animal.kind,animal.x*T,animal.z*T+5-lift,size,animal.moment.pose,animal.facing,prefs.reducedMotion?0:time);
+          c.restore();
+        }
+      }
       for(const h of w.life?.houses||[]){if(h.biome==='snow'||h.biome==='desert')prop(c,h.biome==='snow'?19:20,h.x*T,h.y*T,48);else prop(c,7,h.x*T,h.y*T,48,craftAtlas,4,3);rect(c,h.x*T+5,h.y*T+13,6,3,'#f5d28d');}
       for(const lot of w.city?.lots||[]){if(lot.x<minX||lot.x>=maxX||lot.y<minY||lot.y>=maxY)continue;const b=cityBuilding(lot.kind);if(b&&cityAtlas?.complete&&cityAtlas.naturalWidth){const r=CITY_SPRITES[b.index],size=24,ratio=r[2]/r[3];c.drawImage(cityAtlas,r[0],r[1],r[2],r[3],lot.x*T+8-size*ratio/2,lot.y*T+16-size,size*ratio,size);}if(lot.damage)rect(c,lot.x*T+4,lot.y*T,8,8,'#e66d43');}
       for(const resident of residentsOf(w)){const pos=residentPosition(w,resident.id);if(pos.siteId)continue;if(pos.x<minX||pos.x>=maxX||pos.y<minY||pos.y>=maxY)continue;const custom=w.town?.customResidents?.find(r=>r.id===resident.id),path=custom?.hero?.frames.idle[(prefs.reducedMotion?0:Math.floor(time/240))%Math.max(1,custom.hero.frames.idle.length)]||residentAppearance(w,resident.id,resident.portrait);let image=characterImages.get(path);if(!image){image=new Image();image.src=assetUrl(path);characterImages.set(path,image);}if(image.complete&&image.naturalWidth){const height=28,width=Math.min(24,height*image.naturalWidth/image.naturalHeight);c.drawImage(image,pos.x*T+8-width/2,pos.y*T+16-height,width,height);}if(prefs.labels&&Math.abs(pos.x-p.x)+Math.abs(pos.y-p.y)<=4){c.fillStyle='#fff0c1';c.font='bold 9px sans-serif';c.textAlign='center';c.fillText(resident.name[languageMode==='ENGLISH'?'en':languageMode==='HIRAGANA'?'hi':'ja'],pos.x*T+8,pos.y*T-15);}}
@@ -424,6 +463,16 @@ export default function WorldCanvas({
     <canvas
       ref={ref}
       className="rpg-canvas"
+      data-machine-layer={machineLayer?.height}
+      tabIndex={machineLayer ? 0 : undefined}
+      onKeyDown={event => {
+        if (!machineLayer) return;
+        const step = { ArrowUp: [0,-1], ArrowRight: [1,0], ArrowDown: [0,1], ArrowLeft: [-1,0] }[event.key];
+        if (!step) return;
+        event.preventDefault();
+        event.stopPropagation();
+        machineLayer.onNudge(step[0], step[1]);
+      }}
       aria-label={trans(
         "探索マップ。矢印キーまたはWASDで移動し、Eキーで調べます。",
         languageMode,
@@ -433,6 +482,7 @@ export default function WorldCanvas({
           v = camera.current;
         const tx = Math.floor((e.clientX-r.left)/v.scale/16+v.x/16);
         const ty = Math.floor((e.clientY-r.top)/v.scale/16+v.y/16);
+        if (machineLayer) { machineLayer.onSelect(tx, ty); return; }
         const target = Object.values((latest.current as World).players).find(p => p.id !== selfId && p.x === tx && p.y === ty);
         if (target && onPlayer) onPlayer(target.id);
         onTile(

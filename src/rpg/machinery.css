@@ -1,0 +1,56 @@
+.rpg-layer-dock {
+  position: absolute; z-index: 5; top: 94px; left: 8px; display: grid; gap: 5px;
+  max-width: min(290px, calc(100% - 72px)); color: #fff0cc; font-size: 13px;
+  pointer-events: none;
+}
+.rpg-layer-dock > *, .rpg-world-3d .rpg-device-inspector { pointer-events: auto; }
+.rpg-layer-toolbar, .rpg-device-actions { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.rpg-layer-toolbar output { min-width: 38px; padding: 6px; border-radius: 6px; background: #132e32ec; text-align: center; }
+.rpg-blueprint-tools { padding: 5px; background: #132f35f5; border: 1px solid #67a8a3; border-radius: 7px; }
+.rpg-blueprint-tools span { margin-inline-end: auto; padding-inline: 5px; max-width: 100%; overflow-wrap: anywhere; }
+.rpg-layer-dock button, .rpg-device-inspector button, .rpg-device-inspector select, .rpg-layer-toolbar select {
+  min-height: 35px; display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+  padding: 4px 7px; color: #fff0cc; background: #17383e; border: 1px solid #85aaa3; border-radius: 7px;
+  font-size: inherit;
+}
+.rpg-layer-dock button:disabled, .rpg-device-inspector button:disabled { opacity: .55; }
+.rpg-layer-dock :focus-visible, .rpg-device-inspector :focus-visible, [data-machine-layer]:focus-visible {
+  outline: 2px solid #ffe59a; outline-offset: -2px;
+}
+.rpg-layer-selection, .rpg-device-inspector {
+  min-width: 0; display: grid; gap: 6px; padding: 8px; background: #132f35f5;
+  border: 1px solid #84a39b; border-radius: 9px; color: #fff0cc; font-size: 12px;
+  max-height: 43vh; overflow: auto;
+}
+.rpg-layer-selection header, .rpg-device-inspector header { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.rpg-layer-selection header button { margin-left: auto; }
+.rpg-device-inspector b { color: #a9c8ba; white-space: nowrap; }
+.rpg-device-inspector b:not([data-signal="0"]) { color: #ffd77a; }
+.rpg-device-inspector label { display: flex; align-items: center; gap: 3px; max-width: 100%; }
+.rpg-device-inspector select { max-width: 162px; min-width: 0; display: inline-block; }
+.rpg-device-inspector progress { width: 48px; }
+.rpg-device-inspector input { min-width: 60px; width: 124px; padding: 6px; background: #0c272a; border: 1px solid #85aaa3; border-radius: 5px; color: #fff0cc; }
+.rpg-device-inventory { max-height: 132px; overflow: auto; }
+.rpg-device-inventory > div { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.rpg-device-inventory span { flex: 1; }
+.rpg-world-3d > .rpg-device-inspector {
+  position: absolute; z-index: 8; left: 9px; top: 94px; width: min(260px, calc(100% - 82px));
+}
+@media (max-height: 500px) { .rpg-layer-selection, .rpg-device-inspector { max-height: 35vh; } }
+.rpg-3d-device-panel {
+  position: absolute; z-index: 8; left: 9px; top: 94px; width: min(260px, calc(100% - 82px));
+  display: grid; gap: 4px; justify-items: stretch;
+}
+.rpg-3d-device-panel > button { justify-self: end; min-width: 37px; min-height: 32px; border-radius: 6px; background: #17383e; color: #fff0cc; border: 1px solid #85aaa3; }
+.rpg-map-container:has(> .rpg-landscape-compass) > .rpg-layer-dock { left: auto; right: 8px; }
+@media (orientation: landscape) and (max-height: 600px) and (max-width: 1100px) {
+  .rpg-root--compact .rpg-layer-dock,
+  .rpg-root--compact .rpg-3d-device-panel {
+    top: calc(var(--rpg-hud-height, 48px) + 102px);
+    left: calc(var(--rpg-safe-left, 0px) + 8px);
+    max-height: max(60px, calc(100dvh - var(--rpg-hud-height, 48px) - 162px));
+    overflow: auto;
+    pointer-events: auto;
+  }
+  .rpg-layer-dock .rpg-layer-toolbar > select { width: auto; }
+}

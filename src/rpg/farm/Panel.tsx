@@ -33,6 +33,7 @@ import {
   type FarmPlayer,
 } from "./model";
 import FarmSprite from "./Sprite";
+import { ranchArt, ranchStage } from './animalLook';
 import { useRpgPreferences } from "../preferences";
 import "../life.css";
 import "./farm.css";
@@ -444,15 +445,17 @@ export function FarmContent({
           <div className="farm-grid">
             {f.animals.map((a) => {
               const k = animalById(a.kind)!;
+              const stage=ranchStage(world,a);
               return (
                 <article className="farm-card" key={a.id}>
-                  <AnimalStage animal={a} kind="animal" time={world.life.time}/>
+                  <AnimalStage animal={a} kind="animal" time={world.life.time} appearance={ranchArt(world,a)}/>
                   <h3>{a.name}</h3>
                   <small>
                     {C(k.name)} ·{" "}
-                    {cal.day - a.born >= k.days
+                    {stage==='adult'
                       ? L("おとな", "Adult", "おとな")
-                      : L("育成中", "Growing", "いくせいちゅう")}
+                      : stage==='young' ? L('子ども','Young','こども') : L("育成中", "Growing", "いくせいちゅう")}
+                    {a.variant==='rare'&&` · ${L('珍しい毛色','Rare coat','めずらしいけいろ')}`}
                   </small>
                   {meter(a.health, L("健康", "Health", "けんこう"))}
                   {meter(a.bond, L("絆", "Bond", "きずな"))}

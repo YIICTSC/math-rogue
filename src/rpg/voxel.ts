@@ -1,9 +1,16 @@
+import { applyFluidAction, fluidAt, placedWater, type FluidAction, type PlacedFluids } from './placedFluids';
+import { applyResearch, type ResearchAction } from './technologyResearch';
+import { applyBlueprint, type BlueprintAction } from './blueprints';
+import { potionSeconds, toolLimit, wearTool } from './explorationEquipment';
+import { applySandboxSettings, recordSandboxEvent, sandboxAllows, sandboxHost, type SandboxAction } from './sandboxAccess';
+import { isMachinePart, isThinMachinePart, isRail } from './machineryParts';
+import { activeBeaconAt, applyMachineCommand, canAddMachinePart, cartWorkbench, hasPistonHead, machineStorage, poweredGateOpen, recordMachineEdit, ridingCart, type MachineCommand, type MachineryState } from './machinery';
 import {traceAdventureSprings,type SpringWater} from './adventureHydrology';
 import {adventureElevation,adventureRoadGrades} from './adventureTerrain';
 import {BUILDING_GOALS,buildingMeetsGoal,surveyBuildings,distributeBuildingGoalRewards} from './buildingGoals';
 import {originalRegion,ORIGINAL_WIDTH,ORIGINAL_HEIGHT} from './worldDimensions';
 import {landscapeGate} from './landscapeMap';
-import {WORLD_SCALE,legacyRegion,landscapeRegion,landscapeHeight,landscapeBlock,waterProfile,STRUCTURES,LANDMARKS,mountainHeight,landmarkBlock,roadAt} from './worldLandscape';
+import {WORLD_SCALE,legacyRegion,landscapeRegion,landscapeHash,landscapeHeight,landscapeBlock,waterProfile,STRUCTURES,LANDMARKS,mountainHeight,landmarkBlock,roadAt} from './worldLandscape';
 import {WIDTH,HEIGHT,type World,type Adventurer} from './engine';
 import {natureAt,lifePlayer,lifeWalkable,type Material} from './life';
 import {energyOf} from './energy';
@@ -14,11 +21,11 @@ import {CATALOG_BLOCKS,VOXEL_CATALOG,BLOCK_DROPS,shapeOf,TOOL_RANK,type CatalogB
 import {applyWorkshop,activeTools,type WorkshopAction,type VoxelContainer} from './voxelWorkshop';
 export const BLOCKS=CATALOG_BLOCKS;
 export type Block=typeof BLOCKS[number];
-export const VOXEL_COLORS:Record<TerrainBlock,string>={...Object.fromEntries(BLOCKS.map(b=>[b,VOXEL_CATALOG[b].color])) as Record<Block,string>,'door-top':'#b38958',bedrock:'#424954','oasis-water':'#3de1cf'};
-export type TerrainBlock=Block|'bedrock'|'oasis-water'|'door-top';
+export const VOXEL_COLORS:Record<TerrainBlock,string>={...Object.fromEntries(BLOCKS.map(b=>[b,VOXEL_CATALOG[b].color])) as Record<Block,string>,'door-top':'#b38958',bedrock:'#424954','oasis-water':'#3de1cf',piston_head:'#9f8495'};
+export type TerrainBlock=Block|'bedrock'|'oasis-water'|'door-top'|'piston_head';
 export const MIN_DEPTH=-18,MAX_HEIGHT=WORLD_SCALE.ceiling,EYE_HEIGHT=WORLD_SCALE.eyeHeight;
-export interface VoxelWorld {edits:Record<string,Block|null>;revision:number;placedBy?:Record<string,string>;terrainVersion?:2;legacyFlat?:string[];rotations?:Record<string,number>;containers?:Record<string,VoxelContainer>}
-export type VoxelAction=WorkshopAction|{type:'voxel-landmark'}|{type:'voxel-building-survey'}|{type:'voxel-move';dx:number;dy:number}|{type:'voxel-snap'}|{type:'voxel-jump'}|{type:'voxel-dive'}|{type:'voxel-break'|'voxel-place';x:number;y:number;z:number;block?:Block;rotation?:number};
+export interface VoxelWorld {edits:Record<string,Block|null>;revision:number;placedBy?:Record<string,string>;terrainVersion?:2;legacyFlat?:string[];rotations?:Record<string,number>;containers?:Record<string,VoxelContainer>;machinery?:MachineryState;fluids?:PlacedFluids}
+export type VoxelAction=WorkshopAction|MachineCommand|FluidAction|ResearchAction|BlueprintAction|SandboxAction|{type:'voxel-landmark'}|{type:'voxel-building-survey'}|{type:'voxel-move';dx:number;dy:number}|{type:'voxel-snap';preserveHeight?:true}|{type:'voxel-jump'}|{type:'voxel-dive'}|{type:'voxel-break'|'voxel-place';x:number;y:number;z:number;block?:Block;rotation?:number};
 export const voxelKey=(x:number,y:number,z:number)=>`${x},${y},${z}`;
 const springCache=new WeakMap<World,{revision:number;cells:Map<string,SpringWater>}>();
 function springWater(w:World,x:number,z:number){
@@ -31,13 +38,16 @@ function springWater(w:World,x:number,z:number){
  }
  return cached.cells.get(Math.floor(x)+','+Math.floor(z))||null;
 }
-export function voxelWater(w:World,x:number,z:number){
+export function naturalVoxelWater(w:World,x:number,z:number){
  const spring=springWater(w,x,z);if(spring)return spring;
  if(!originalRegion(x,z)&&legacyRegion(x,z)&&waterProfile(x,z))return waterProfile(x,z);
  if(!legacyRegion(x,z))return waterProfile(x,z);
  x=Math.floor(x);z=Math.floor(z);if(w.tiles[z*WIDTH+x]!=='water')return null;
  let depth=6;for(let r=1;r<=6;r++)if([[x-r,z],[x+r,z],[x,z-r],[x,z+r]].some(([tx,tz])=>!legacyRegion(tx,tz)||w.tiles[tz*WIDTH+tx]!=='water')){depth=r;break;}
  return {surface:0,depth,flowX:.15,flowZ:.3,kind:'river' as const};
+}
+export function voxelWater(w:World,x:number,z:number,feet?:number){
+ return naturalVoxelWater(w,x,z) || placedWater(w,x,z,feet);
 }
 /** Grid traversal ray uses the authoritative blocks, including unloaded chunks. */
 export function traceVoxel(w:World,origin:{x:number;y:number;z:number},direction:{x:number;y:number;z:number},reach=4.5){
@@ -113,6 +123,7 @@ function vegetationAt(w:World,x:number,y:number,z:number):Block|null{
 }
 export function blockAt(w:World,x:number,y:number,z:number):TerrainBlock|null {
  if(y>MAX_HEIGHT)return null;
+ if(hasPistonHead(w,voxelKey(x,y,z)))return 'piston_head';
  if(!legacyRegion(x,z)){if(!landscapeRegion(x,z))return null;const key=voxelKey(x,y,z);if(w.voxels&&Object.hasOwn(w.voxels.edits,key))return w.voxels.edits[key];if(w.voxels?.edits[voxelKey(x,y-1,z)]==='door')return 'door-top';return y<=MIN_DEPTH?'bedrock':landscapeBlock(w.seed,x,y,z);}
  const key=voxelKey(x,y,z);if(w.voxels&&Object.hasOwn(w.voxels.edits,key))return w.voxels.edits[key];
  if(w.voxels?.edits[voxelKey(x,y-1,z)]==='door')return 'door-top';
@@ -131,6 +142,7 @@ export function blockAt(w:World,x:number,y:number,z:number):TerrainBlock|null {
   if(y===h-1)return w.terrainStyle===1&&h>=34?'snow':w.terrainStyle===1&&h>=22?'stone':biomeAt(x,z).id==='snow'?'snow':biomeAt(x,z).id==='desert'?'sand':'dirt';
   if(y>=h-3)return 'dirt';
   const hash=(Math.imul(x+1,374761393)^Math.imul(z+1,668265263)^Math.imul(y+31,1274126177)^w.seed)>>>0;
+  if(w.machineGeology===1&&y<=-5&&hash%73===0)return 'red_crystal_ore';
   if(y<=-7&&hash%23<3)return 'steel';if(y<=-4&&hash%19<2)return 'crystal';if(hash%17<2)return 'ore';
   if(y<=-10&&hash%61<2)return 'diamond_ore';if(y<=-6&&hash%43<2)return 'gold_ore';if(y<=-5&&hash%37<2)return 'lapis_ore';if(hash%29<2)return 'copper_ore';if(hash%13<2)return 'coal_ore';if(hash%47===0)return 'quartz_ore';
   if(hash%31===0)return 'clay';if(hash%23===0)return 'gravel';if(y<=-14)return hash%3?'deepslate':'obsidian';
@@ -139,24 +151,102 @@ export function blockAt(w:World,x:number,y:number,z:number):TerrainBlock|null {
  if(protectedCell||landscapeGate(x,z)||w.tiles[z*WIDTH+x]==='water')return null;
  return vegetationAt(w,x,y,z);
 }
-export const solid=(b:TerrainBlock|null)=>!!b&&b!=='oasis-water'&&b!=='door'&&b!=='door-top';
+export const solid=(b:TerrainBlock|null)=>!!b&&b!=='oasis-water'&&b!=='door'&&b!=='door-top'&&!isThinMachinePart(b);
+const cellSolid=(w:World,x:number,y:number,z:number,b:TerrainBlock|null)=>
+ solid(b)&&(b!=='signal_gate'||!poweredGateOpen(w,x,y,z));
+export function hasClosedSignalGate(w:World,x:number,z:number) {
+ const y=Math.floor(terrainHeight(w,x,z));
+ return !!w.voxels?.machinery&&[y,y+1].some(level=>blockAt(w,x,level,z)==='signal_gate'&&!poweredGateOpen(w,x,level,z));
+}
 const blockTop=(b:TerrainBlock)=>shapeOf(b)==='slab'?.5:1;
 export function bodyClear(w:World,x:number,z:number,feet:number,top=feet+WORLD_SCALE.playerHeight){
- for(let y=Math.floor(feet);y<Math.ceil(top);y++){const b=blockAt(w,x,y,z);if(b&&solid(b)&&y+blockTop(b)>feet+.001&&y<top-.001)return false;}return true;
+ for(let y=Math.floor(feet);y<Math.ceil(top);y++){if(fluidAt(w,x,y,z)?.kind==='lava')return false;const b=blockAt(w,x,y,z);if(b&&cellSolid(w,x,y,z,b)&&y+blockTop(b)>feet+.001&&y<top-.001)return false;}return true;
 }
 export function floorAt(w:World,x:number,z:number,maxTop:number):number|null {
  if(!legacyRegion(x,z)&&!landscapeRegion(x,z))return null;
- for(let y=Math.min(MAX_HEIGHT,Math.ceil(maxTop)-1);y>=MIN_DEPTH;y--){const b=blockAt(w,x,y,z);if(b&&solid(b)){const top=y+blockTop(b);if(top<=maxTop+.001&&bodyClear(w,x,z,top))return top;}}
+ for(let y=Math.min(MAX_HEIGHT,Math.ceil(maxTop)-1);y>=MIN_DEPTH;y--){const b=blockAt(w,x,y,z);if(b&&cellSolid(w,x,y,z,b)){const top=y+blockTop(b);if(top<=maxTop+.001&&bodyClear(w,x,z,top))return top;}}
  return null;
 }
 export function playerHeight(w:World,p:Adventurer){return p.position3D?.y??floorAt(w,p.x,p.y,terrainHeight(w,p.x,p.y)+1)??0;}
-export function miningCost(block:TerrainBlock,p:Adventurer){const def=VOXEL_CATALOG[block as CatalogBlock],tool=['dirt','sand','snow','clay','gravel'].includes(block)?'shovel':def?.group==='wood'||['workbench','chest','composter'].includes(block)?'axe':'pickaxe';const rank=TOOL_RANK.indexOf(activeTools(p)[tool]!);const base=({stone:.3,brick:.2,ore:.6,crystal:.8,steel:1.2,obsidian:1.5,diamond_ore:1,bedrock:Infinity,'oasis-water':Infinity} as Partial<Record<TerrainBlock,number>>)[block]??(block.endsWith('_ore')?.6:def?.group==='stone'?.3:.1);return Math.max(rank>=0&&tool!=='pickaxe'?.02:.1,Math.round(base*([1,.75,.5,.3,.18][rank+1])*100)/100);}
+const miningTool=(block:TerrainBlock)=>['dirt','sand','snow','clay','gravel'].includes(block)?'shovel':
+  VOXEL_CATALOG[block as CatalogBlock]?.group==='wood'||['workbench','chest','composter'].includes(block)?'axe':'pickaxe';
+export function miningCost(block:TerrainBlock,p:Adventurer,w?:World){
+  if(block==='piston_head')return Infinity;
+  const tool=miningTool(block), tier=activeTools(p)[tool];
+  const worn=tier&&(p.life?.toolWear?.[tool]??0)>=toolLimit(p,tool,tier);
+  const rank=worn?-1:TOOL_RANK.indexOf(tier!);
+  const def=VOXEL_CATALOG[block as CatalogBlock];
+  const base=({stone:.3,brick:.2,ore:.6,crystal:.8,steel:1.2,obsidian:1.5,diamond_ore:1,bedrock:Infinity,'oasis-water':Infinity} as Partial<Record<TerrainBlock,number>>)[block]
+    ??(block.endsWith('_ore')?.6:def?.group==='stone'?.3:.1);
+  const bonus=w&&w.gameMode==='COOP'?activeBeaconAt(w,p):0;
+  const mark=rank>=0?p.life?.toolImprints?.[tool]:undefined;
+  const pool=w&&mark==='tide'?voxelWater(w,p.position3D?.x??p.x,p.position3D?.z??p.y,playerHeight(w,p)):null;
+  const enchantment=mark==='sharpness'?.83:pool&&w&&playerHeight(w,p)<pool.surface?.65:1;
+  const potion=w&&potionSeconds(w,p,'miner_draught')>0?.78:1;
+  return Math.max(rank>=0&&tool!=='pickaxe'?.02:.1,Math.round(base*[1,.75,.5,.3,.18][rank+1]*(1-bonus*.06)*enchantment*potion*100)/100);
+}
 export function voxelWalkable(w:World,x:number,z:number,maxTop=terrainHeight(w,Math.floor(x),Math.floor(z))+1){return floorAt(w,Math.floor(x),Math.floor(z),maxTop)!==null;}
 function upgrade(w:World){const v=w.voxels??={edits:{},revision:0,terrainVersion:2};if(!v.terrainVersion){v.legacyFlat=[...new Set(Object.keys(v.edits).map(k=>{const [x,,z]=k.split(',');return `${x},${z}`;}))];v.terrainVersion=2;}return v;}
+function undoSandboxPlacement(w:World,p:Adventurer,number:number) {
+ const recent=w.sandbox?.history, voxels=w.voxels;
+ if(!recent||!voxels||!sandboxHost(w,p.id)||!Number.isSafeInteger(number))return false;
+ const event=recent.find(row=>row.id===number);
+ if(event?.kind!=='place'||event.undone||!event.tile||!event.block)return false;
+ const {x,y,z}=event.tile, id=voxelKey(x,y,z), block=voxels.edits[id], builder=w.players[event.actor];
+ if(!builder||!block||block!==event.block||isMachinePart(block)||machineStorage(block)||block==='door'||
+  protectedVoxel(w,x,z)||voxels.placedBy?.[id]!==event.actor||!sandboxAllows(w,builder.id,event.tile,'build'))return false;
+ if(recent.some(row=>row.id>number&&row.tile&&voxelKey(row.tile.x,row.tile.y,row.tile.z)===id))return false;
+ if(Object.values(w.players).some(other=>Math.floor(other.position3D?.x??other.x)===x&&
+  Math.floor(other.position3D?.z??other.y)===z&&Math.abs(playerHeight(w,other)-y)<2.1))return false;
+ if([[0,1,0],[-1,0,0],[1,0,0],[0,0,-1],[0,0,1]].some(([dx,dy,dz])=>!!voxels.placedBy?.[voxelKey(x+dx,y+dy,z+dz)]))return false;
+ if(event.before===null)voxels.edits[id]=null;
+ else delete voxels.edits[id];
+ delete voxels.placedBy![id];if(voxels.rotations)delete voxels.rotations[id];
+ const inventory=lifePlayer(builder).bag;
+ inventory[block]=(inventory[block]??0)+1;
+ event.undone=true;voxels.revision++;w.revision++;
+ recordSandboxEvent(w,p,{kind:'undo',tile:event.tile,block});
+ return true;
+}
 export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
- if(a.type==='voxel-craft'||a.type==='voxel-storage'||a.type==='voxel-compost'||a.type==='voxel-seeds')return applyWorkshop(w,p,a,now);
+ if(a.type==='voxel-admin')return a.command==='undo'?undoSandboxPlacement(w,p,a.id):applySandboxSettings(w,p,a);
+ if(a.type==='voxel-blueprint'){
+  const changed=!ridingCart(w,p.id)&&applyBlueprint(w,p,a,now);
+  if(changed)recordSandboxEvent(w,p,{kind:'blueprint',tile:a.command==='undo'?undefined:{x:a.x,y:a.y,z:a.z}});
+  return changed;
+ }
+ if(a.type==='voxel-research')return !farmBusy(w,p)&&applyResearch(w,p,a);
+ if(a.type==='voxel-fluid'){
+  const changed=!ridingCart(w,p.id)&&!farmBusy(w,p)&&applyFluidAction(w,p,a,now);
+  if(changed)recordSandboxEvent(w,p,{kind:'fluid',tile:{x:a.x,y:a.y,z:a.z}});
+  return changed;
+ }
+ if(a.type==='voxel-device'){
+  const changed=!farmBusy(w,p)&&applyMachineCommand(w,p,a,now);
+  if(changed)recordSandboxEvent(w,p,{kind:'device',tile:{x:a.x,y:a.y,z:a.z}});
+  return changed;
+ }
+ if(ridingCart(w,p.id)){
+  if(a.type==='voxel-craft'&&cartWorkbench(w,p.id))return applyWorkshop(w,p,a,now);
+  if(a.type!=='voxel-snap'||!p.position3D||p.position3D.surface2D)return false;
+  p.position3D.surface2D=true;w.revision++;return true;
+ }
+ if(a.type==='voxel-craft'||a.type==='voxel-storage'||a.type==='voxel-compost'||a.type==='voxel-seeds'||a.type==='voxel-tools'||a.type==='voxel-potion'){
+  const revision=w.voxels?.revision;
+  const changed=applyWorkshop(w,p,a,now);
+  if(changed&&a.type==='voxel-storage'&&w.voxels?.revision!==revision)recordSandboxEvent(w,p,{kind:'storage',tile:{x:a.x,y:a.y,z:a.z}});
+  return changed;
+ }
  const tell=(text:string)=>{p.message=text;w.revision++;return true;};
  if(a.type==='voxel-snap'){
+  const current=p.position3D;
+  if(a.preserveHeight===true&&current&&!current.vy){
+   const x=Math.floor(current.x),z=Math.floor(current.z),feet=playerHeight(w,p);
+   const top=floorAt(w,x,z,feet+.05);
+   if(top!==null&&Math.abs(top-feet)<.08){
+    current.surface2D=true;current.layered2D=true;w.revision++;return true;
+   }
+  }
   if(p.position3D&&legacyRegion(p.position3D.x,p.position3D.z)){const pos=p.position3D,pool=voxelWater(w,pos.x,pos.z);if(pool&&bodyClear(w,Math.floor(pos.x),Math.floor(pos.z),pool.surface-1.3)){p.x=Math.floor(pos.x);p.y=Math.floor(pos.z);pos.y=pool.surface-1.3;pos.surface2D=true;pos.swimming=false;delete pos.vy;w.revision++;return true;}}
   if(p.position3D&&!legacyRegion(p.position3D.x,p.position3D.z)){
    const pos=p.position3D,x=Math.floor(pos.x),z=Math.floor(pos.z);
@@ -193,7 +283,7 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
  }
  if(a.type==='voxel-jump'||a.type==='voxel-dive'){
   const pos=p.position3D??{x:p.x+.5,z:p.y+.5,y:terrainHeight(w,p.x,p.y)};
-  const water=voxelWater(w,pos.x,pos.z);
+  const water=voxelWater(w,pos.x,pos.z,pos.y);
   if(water&&(pos.y??0)<water.surface){const y=Math.max(water.surface-water.depth,Math.min(water.surface-.25,(pos.y??0)+(a.type==='voxel-dive'?-.5:.5)));if(bodyClear(w,Math.floor(pos.x),Math.floor(pos.z),y)){pos.y=y;pos.swimming=true;w.revision++;return true;}return false;}
   if(a.type==='voxel-dive'||pos.vy||now-(p.voxelAt||0)<400)return false;
   const floor=floorAt(w,Math.floor(pos.x),Math.floor(pos.z),(pos.y??0)+.05);if(floor===null||Math.abs(floor-(pos.y??0))>.1)return false;
@@ -203,43 +293,58 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
   if(farmBusy(w,p))return false;
   if(!Number.isFinite(a.dx)||!Number.isFinite(a.dy)||Math.hypot(a.dx,a.dy)>.45||now-p.lastMove<45)return false;
   let {x,z}=p.position3D??{x:p.x+.5,z:p.y+.5},feet=playerHeight(w,p);
-  const water=voxelWater(w,x,z);
+  const water=voxelWater(w,x,z,feet);
   const dt=Math.min(.1,Math.max(0,(now-p.lastMove)/1000)),speed=water?WORLD_SCALE.swimSpeed:WORLD_SCALE.walkSpeed;
-  const travel=Math.min(.4,dt*speed),length=Math.hypot(a.dx,a.dy);
+  const boost=w.gameMode==='BATTLE_ROYALE'?1:1+activeBeaconAt(w,p)*.055+(potionSeconds(w,p,'stride_draught')>0?.22:0);
+  const travel=Math.min(.4,dt*speed*boost),length=Math.hypot(a.dx,a.dy);
   let vy=p.position3D?.vy||0;
   if(!length&&!vy)return false;
   if(vy){const next=feet+vy*dt;vy-=WORLD_SCALE.gravity*dt;
    if(next>feet){if(bodyClear(w,Math.floor(x),Math.floor(z),feet,next+WORLD_SCALE.playerHeight))feet=next;else vy=-.1;}
    else {const ground=floorAt(w,Math.floor(x),Math.floor(z),feet+.01);if(ground!==null&&next<=ground){feet=ground;vy=0;}else feet=next;}
   }
-  const dx=a.dx*Math.min(1,travel/(length||1)),dz=a.dy*Math.min(1,travel/(length||1));
-  const step=(nx:number,nz:number)=>{if(!legacyRegion(nx,nz)&&!landscapeRegion(nx,nz))return false;const r=WORLD_SCALE.radius;const corners=[[-r,-r],[-r,r],[r,-r],[r,r]].map(([ox,oz])=>({x:Math.floor(nx+ox),z:Math.floor(nz+oz)}));const heights=corners.map(c=>floorAt(w,c.x,c.z,feet+1));if(heights.some(h=>h===null))return false;let next=Math.max(...heights as number[]);const pool=voxelWater(w,nx,nz);if(pool&&next<pool.surface){next=Math.max(next,p.position3D?.swimming?Math.min(feet,pool.surface-.25):pool.surface-1.3);}else if(vy)next=Math.max(next,feet);if(corners.some(c=>!bodyClear(w,c.x,c.z,next)))return false;if(next<feet&&corners.some(c=>!bodyClear(w,c.x,c.z,next,feet+WORLD_SCALE.playerHeight)))return false;x=nx;z=nz;feet=next;return true;};
+  const dx=a.dx*Math.min(boost,travel/(length||1)),dz=a.dy*Math.min(boost,travel/(length||1));
+  const step=(nx:number,nz:number)=>{if(!legacyRegion(nx,nz)&&!landscapeRegion(nx,nz))return false;const r=WORLD_SCALE.radius;const corners=[[-r,-r],[-r,r],[r,-r],[r,r]].map(([ox,oz])=>({x:Math.floor(nx+ox),z:Math.floor(nz+oz)}));const heights=corners.map(c=>floorAt(w,c.x,c.z,feet+1));if(heights.some(h=>h===null))return false;let next=Math.max(...heights as number[]);const pool=voxelWater(w,nx,nz,feet);if(pool&&next<pool.surface){next=Math.max(next,p.position3D?.swimming?Math.min(feet,pool.surface-.25):pool.surface-1.3);}else if(vy)next=Math.max(next,feet);if(corners.some(c=>!bodyClear(w,c.x,c.z,next)))return false;if(next<feet&&corners.some(c=>!bodyClear(w,c.x,c.z,next,feet+WORLD_SCALE.playerHeight)))return false;x=nx;z=nz;feet=next;return true;};
   if(dx)step(x+dx,z);if(dz)step(x,z+dz);p.position3D={x,z,y:feet,oxygen:p.position3D?.oxygen,waterAt:p.position3D?.waterAt,...(vy?{vy}:{}),...(water?{swimming:!!p.position3D?.swimming}:{})};if(legacyRegion(x,z)){p.x=Math.max(1,Math.min(WIDTH-2,Math.floor(x)));p.y=Math.max(1,Math.min(HEIGHT-2,Math.floor(z)));}p.lastMove=now;p.moveCount++;w.revision++;
   const oasis=legacyRegion(x,z)?undergroundOasis(w,p.x,feet,p.y):undefined;if(oasis&&!p.voxelDiscoveries?.includes(oasis.id)){(p.voxelDiscoveries??=[]).push(oasis.id);p.message='地下のオアシスを発見しました！';}
   return true;
  }
- let {x,y,z}=a;if(a.type==='voxel-break'&&blockAt(w,x,y,z)==='door-top')y--;if(![x,y,z].every(Number.isInteger)||y<=MIN_DEPTH||y>MAX_HEIGHT||protectedVoxel(w,x,z)||now-(p.voxelAt||0)<220)return false;
+ let {x,y,z}=a;if(![x,y,z].every(Number.isInteger))return false;if(a.type==='voxel-break'&&blockAt(w,x,y,z)==='door-top')y--;if(![x,y,z].every(Number.isInteger)||y<=MIN_DEPTH||y>MAX_HEIGHT||protectedVoxel(w,x,z)||now-(p.voxelAt||0)<220)return false;
  const pos=p.position3D??{x:p.x+.5,z:p.y+.5};if(Math.hypot(x+.5-pos.x,y+.5-(playerHeight(w,p)+EYE_HEIGHT),z+.5-pos.z)>4.5)return false;
- const lp=lifePlayer(p),existing=blockAt(w,x,y,z),state=upgrade(w);const cost=a.type==='voxel-break'&&existing?miningCost(existing,p):.1;
+ if(!sandboxAllows(w,p.id,{x,y,z},a.type==='voxel-break'?'break':'build'))return false;
+ const lp=lifePlayer(p),existing=blockAt(w,x,y,z),state=upgrade(w);const cost=a.type==='voxel-break'&&existing?miningCost(existing,p,w):.1;
+ const before=state.edits[voxelKey(x,y,z)]===null?null:undefined;
  if(Object.keys(state.edits).length>=18000&&!Object.hasOwn(state.edits,voxelKey(x,y,z)))return tell('このワールドのブロック編集上限に達しました。');
  if(a.type==='voxel-break'){
-  if(!existing||existing==='bedrock'||existing==='oasis-water')return false;
+  if(!existing||existing==='bedrock'||existing==='oasis-water'||existing==='piston_head')return false;
+  if((isMachinePart(existing)||existing==='warehouse_chest')&&state.placedBy?.[voxelKey(x,y,z)]!==p.id)return false;
   if(energyOf(lp)+1e-8<cost)return tell('エネルギーが足りません。問題に正解して回復しましょう。');
-  if(existing==='chest'&&Object.values(state.containers?.[voxelKey(x,y,z)]?.items||{}).some(n=>n!>0))return tell('チェストの中身を取り出してから壊してください。');
-  const drop=BLOCK_DROPS[existing as Block]??existing as Material;lp.bag[drop]=(lp.bag[drop]||0)+1;state.edits[voxelKey(x,y,z)]=null;if(state.placedBy)delete state.placedBy[voxelKey(x,y,z)];
+  if(machineStorage(existing)&&Object.values(state.containers?.[voxelKey(x,y,z)]?.items||{}).some(n=>n!>0))return tell('チェストの中身を取り出してから壊してください。');
+  const tool=miningTool(existing),tier=activeTools(p)[tool],id=voxelKey(x,y,z);
+  const fortune=w.gameMode==='COOP'&&tier&&lp.toolImprints?.[tool]==='fortune'&&
+   (lp.toolWear?.[tool]??0)<toolLimit(p,tool,tier)&&!Object.hasOwn(state.edits,id)&&
+   (existing==='ore'||existing==='crystal'||existing.endsWith('_ore'))&&(landscapeHash(x+y*17,z,w.seed)<.25);
+  const drop=BLOCK_DROPS[existing as Block]??existing as Material;
+  lp.bag[drop]=(lp.bag[drop]||0)+(fortune?2:1);
+  if(w.gameMode==='COOP')wearTool(p,tool,tier);
+  state.edits[id]=null;if(state.placedBy)delete state.placedBy[id];
   if(state.rotations)delete state.rotations[voxelKey(x,y,z)];if(state.containers)delete state.containers[voxelKey(x,y,z)];
   // Do not erase an entire crown when only its trunk or one leaf was harvested.
   for(const [dx,dz] of [[0,0],[-1,0],[1,0],[0,-1],[0,1]]){const tx=x+dx,tz=z+dz,tile=tz*WIDTH+tx,cells=vegetationCells(w,tx,tz);if(cells.length&&cells.every(c=>!solid(blockAt(w,c.x,c.y,c.z))))w.life.nodes[tile]={hits:0,regrowAt:Number.MAX_SAFE_INTEGER};}
   if(existing==='steel'&&!p.voxelDiscoveries?.includes('steel'))(p.voxelDiscoveries??=[]).push('steel');
  }else{
+  if(isMachinePart(a.block)&&!canAddMachinePart(w))return tell('このワールドの装置数上限に達しました。');
+  if(isRail(a.block)&&!solid(blockAt(w,x,y-1,z)))return false;
   if(a.block==='door'&&(y>=MAX_HEIGHT||blockAt(w,x,y+1,z)||!solid(blockAt(w,x,y-1,z))))return false;
-  if(existing||!a.block||!BLOCKS.includes(a.block)||(lp.bag[a.block]||0)<1||(legacyRegion(x,z)&&w.tiles[z*WIDTH+x]==='water'))return false;
+  if(existing||state.fluids?.sources[voxelKey(x,y,z)]||!a.block||!BLOCKS.includes(a.block)||(lp.bag[a.block]||0)<1||(legacyRegion(x,z)&&w.tiles[z*WIDTH+x]==='water'))return false;
   if(energyOf(lp)+1e-8<cost)return tell('エネルギーが足りません。問題に正解して回復しましょう。');
   if(![[x,y-1,z],[x-1,y,z],[x+1,y,z],[x,y,z-1],[x,y,z+1]].some(([bx,by,bz])=>solid(blockAt(w,bx,by,bz))))return false;
   if(Object.values(w.players).some(q=>Math.floor(q.position3D?.x??q.x+.5)===x&&Math.floor(q.position3D?.z??q.y+.5)===z&&y>=playerHeight(w,q)&&y<playerHeight(w,q)+2))return false;
   if(a.rotation!==undefined&&(!Number.isInteger(a.rotation)||a.rotation<0||a.rotation>3))return false;
   lp.bag[a.block]=(lp.bag[a.block]||0)-1;state.edits[voxelKey(x,y,z)]=a.block;(state.placedBy??={})[voxelKey(x,y,z)]=p.id;(state.rotations??={})[voxelKey(x,y,z)]=a.rotation??0;
  }
+ recordMachineEdit(w,x,y,z,existing,a.type==='voxel-place'?a.block!:null);
+ recordSandboxEvent(w,p,{kind:a.type==='voxel-place'?'place':'break',tile:{x,y,z},block:existing??a.block,before});
  lp.energy=Math.round((energyOf(lp)-cost)*100)/100;p.message=a.type==='voxel-break'?(existing==='steel'?'未知の鋼材ブロックを発見しました！':'ブロックから素材を獲得しました。'):'ブロックを設置しました。';p.voxelAt=now;state.revision++;w.revision++;
  // Mining under one's feet causes a fall to the next solid floor.
  for(const q of Object.values(w.players))if(q.position3D){const next=floorAt(w,Math.floor(q.position3D.x),Math.floor(q.position3D.z),playerHeight(w,q));if(next!==null&&!q.position3D.vy&&!voxelWater(w,q.position3D.x,q.position3D.z))q.position3D.y=next;}
@@ -247,18 +352,18 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
 }
 
 /** Surface tile movement shares the solid/air map with 3D walking. */
-export function landscapeStep(w:World,pos:{x:number;z:number;y?:number},dx:number,dz:number){
+export function landscapeStep(w:World,pos:{x:number;z:number;y?:number;layered2D?:boolean},dx:number,dz:number){
  const x=Math.floor(pos.x)+dx,z=Math.floor(pos.z)+dz;
  if(!legacyRegion(x,z)&&!landscapeRegion(x,z))return null;
- let top=floorAt(w,x,z,(pos.y??0)+1);const water=voxelWater(w,x,z);
+ let top=floorAt(w,x,z,(pos.y??0)+1);const water=voxelWater(w,x,z,top??pos.y);
  if(water&&(top===null||top<water.surface)){top=water.surface-1.3;if(!bodyClear(w,x,z,top))return null;}if(top===null)return null;
- if(legacyRegion(x,z)&&!water&&!lifeWalkable(w,x,z)&&!landscapeGate(x,z))return null;
+ if(legacyRegion(x,z)&&!pos.layered2D&&!water&&!lifeWalkable(w,x,z)&&!landscapeGate(x,z))return null;
  return {x:x+.5,z:z+.5,y:top};
 }
 export function moveLandscape2D(w:World,p:Adventurer,dx:number,dz:number,now:number){
  const pos=p.position3D??{x:p.x+.5,z:p.y+.5,y:terrainHeight(w,p.x,p.y)};const next=landscapeStep(w,pos,dx,dz);if(!next)return false;
- p.position3D={...next,surface2D:true,oxygen:pos.oxygen,waterAt:pos.waterAt};p.lastMove=now;p.moveCount++;w.revision++;
- if(legacyRegion(next.x,next.z)){p.x=Math.floor(next.x);p.y=Math.floor(next.z);if(!voxelWater(w,next.x,next.z))delete p.position3D;}
+ p.position3D={...next,surface2D:true,layered2D:pos.layered2D,oxygen:pos.oxygen,waterAt:pos.waterAt};p.lastMove=now;p.moveCount++;w.revision++;
+ if(legacyRegion(next.x,next.z)){p.x=Math.floor(next.x);p.y=Math.floor(next.z);if(!pos.layered2D&&!voxelWater(w,next.x,next.z))delete p.position3D;}
  return true;
 }
 /** Bounded A* uses the same height/body test as authoritative movement. */
@@ -278,10 +383,11 @@ export function findLandscapeRoute(w:World,p:Adventurer,x:number,z:number){
 export function advanceVoxelWater(w:World,now:number){
  if(!w.started||w.ended)return;
  for(const p of Object.values(w.players)){
-  const pos=p.position3D;if(!pos||p.spectator||p.nativeScene||p.life?.indoors)continue;
+  const pos=p.position3D;if(!pos||p.spectator||p.nativeScene||p.life?.indoors||ridingCart(w,p.id))continue;
   const dt=Math.min(1,Math.max(0,(now-(pos.waterAt??now))/1000));pos.waterAt=now;
-  const pool=voxelWater(w,pos.x,pos.z),submerged=!!pool&&(pos.y??0)+EYE_HEIGHT<pool.surface;
-  const oxygen=Math.min(20,Math.max(0,(pos.oxygen??20)+(submerged?-dt:dt*4)));
+  const pool=voxelWater(w,pos.x,pos.z,pos.y),submerged=!!pool&&(pos.y??0)+EYE_HEIGHT<pool.surface;
+  const air=potionSeconds(w,p,'air_draught')>0;
+  const oxygen=Math.min(20,Math.max(0,(pos.oxygen??20)+(submerged&&!air?-dt:dt*4)));
   if(pos.oxygen!==oxygen){pos.oxygen=oxygen;w.revision++;}
   if(oxygen===0&&pool){
    // Find a clear surface, including beside a bridge; never push into a solid deck.
@@ -293,6 +399,13 @@ export function advanceVoxelWater(w:World,now:number){
   }
   if(pool&&!pos.surface2D&&(pos.y??0)<pool.surface&&dt){const nx=pos.x+pool.flowX*dt*.3,nz=pos.z+pool.flowZ*dt*.3;
    if(voxelWater(w,nx,nz)&&bodyClear(w,Math.floor(nx),Math.floor(nz),pos.y??0)){pos.x=nx;pos.z=nz;w.revision++;if(legacyRegion(nx,nz)){p.x=Math.floor(nx);p.y=Math.floor(nz);}}
+  }
+  if(pool&&'lift' in pool&&typeof pool.lift==='number'&&pool.lift&&dt&&pos.y!==undefined&&pos.y<pool.surface&&pos.y>=pool.surface-pool.depth){
+   const y=Math.max(pool.surface-pool.depth,Math.min(pool.surface-.22,pos.y+pool.lift*dt));
+   const x=Math.floor(pos.x),z=Math.floor(pos.z);
+   if(y!==pos.y&&bodyClear(w,x,z,y)&&bodyClear(w,x,z,Math.min(y,pos.y),Math.max(y,pos.y)+WORLD_SCALE.playerHeight)){
+    pos.y=y;pos.swimming=true;delete pos.vy;w.revision++;
+   }
   }
  }
 }

@@ -4,6 +4,9 @@ import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {assetUrl} from '../utils/assetPaths';
 import {VOXEL_CATALOG,shapeOf,type CatalogBlock,type BlockShape} from './voxelCatalog';
 import {VOXEL_COLORS,type TerrainBlock} from './voxel';
+import { isMachinePart, MACHINE_PARTS, type MachineShape } from './machineryParts';
+import type { World } from './engine';
+import { poweredGateOpen } from './machinery';
 
 /** One instanced mesh per block; procedural pixels are original, never external game textures. */
 export function voxelMaterial(block:TerrainBlock){
@@ -24,7 +27,7 @@ export function voxelMaterial(block:TerrainBlock){
  if(pattern==='bookshelf'){for(let y=4;y<32;y+=15){for(let i=0;i<6;i++){c.fillStyle=['#687eab','#cf8a68','#87a77c','#e0c77e','#a17f9d','#658e95'][i];c.fillRect(3+i*4,y,3,11);}c.fillStyle='#543c2c';c.fillRect(0,y+11,32,2);}}
  const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;map.magFilter=T.LinearFilter;map.minFilter=T.LinearMipmapLinearFilter;
  const transparent=def?.transparent||block==='oasis-water';
- return new T.MeshStandardMaterial({map,color:'#ffffff',roughness:transparent?.2:.86,metalness:pattern==='metal'?.35:0,transparent,opacity:block==='oasis-water'?.65:1,depthWrite:!transparent,side:transparent?T.DoubleSide:T.FrontSide,emissive:def?.light?color:block==='oasis-water'?'#17877e':'#000000',emissiveIntensity:def?.light?.65:.1});
+ return new T.MeshStandardMaterial({map,vertexColors:isMachinePart(block),color:'#ffffff',roughness:transparent?.2:.86,metalness:pattern==='metal'?.35:0,transparent,opacity:block==='oasis-water'?.65:1,depthWrite:!transparent,side:transparent?T.DoubleSide:T.FrontSide,emissive:def?.light?color:block==='oasis-water'?'#17877e':'#000000',emissiveIntensity:def?.light?.65:.1});
 }
 export function createConstructionGeometry(onReady:()=>void){
  let disposed=false;
@@ -39,5 +42,64 @@ export function createConstructionGeometry(onReady:()=>void){
   gltf.scene.traverse(o=>{if(!(o instanceof T.Mesh))return;const target=geometry.get(o.name as BlockShape);if(target&&!disposed){const source=o.geometry.clone().applyMatrix4(o.matrixWorld);target.dispose();target.copy(source);target.userData.blenderShape=o.name;source.dispose();}o.geometry.dispose();(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.dispose());});
   if(!disposed)onReady();
  },undefined,()=>{});
- return {get:(block:string)=>geometry.get(shapeOf(block))!,get readyShapes(){return [...geometry.values()].filter(g=>g.userData.blenderShape).length;},dispose:()=>{disposed=true;geometry.forEach(g=>g.dispose());}};
+ const machinery = new Map<string,T.BufferGeometry>();
+ const machineShapes = [...new Set(Object.values(MACHINE_PARTS).map(entry=>entry[4]))];
+ for (const shape of [...machineShapes, 'cart', 'head'] as (MachineShape | 'cart' | 'head')[]) {
+  const thin = ['trace','rail','plate','circuit','lever','torch','conveyor'].includes(shape);
+  const fallback = thin ? box(0,-.43,0,.8,.14,.8) : shape==='cart' ? box(0,.3,0,.82,.6,.85)
+   : shape==='head' ? box(0,0,-.27,.8,.72,.35) : box(0,0,0,.82,shape==='gate'?1:.84,shape==='gate'?.18:.83);
+  tintGeometry(fallback, new T.Color('white'));
+  machinery.set(shape, fallback);
+ }
+ new GLTFLoader().load(assetUrl('models/storybook/sandbox-machinery.glb'), gltf=>{
+  gltf.scene.updateMatrixWorld(true);
+  for (const object of gltf.scene.children) {
+   const target = machinery.get(object.name.replace(/^machine_/,''));
+   if (!target || disposed) continue;
+   const parts: T.BufferGeometry[] = [];
+   object.traverse(part=>{
+    if (!(part instanceof T.Mesh)) return;
+    const copy = (part.geometry.index ? part.geometry.toNonIndexed() : part.geometry.clone()).applyMatrix4(part.matrixWorld);
+    const material = part.material as T.MeshStandardMaterial;
+    tintGeometry(copy, material.color || new T.Color('white'));
+    parts.push(copy);
+   });
+   const merged = parts.length && mergeGeometries(parts);
+   if (merged) { target.dispose();target.copy(merged);target.userData.blenderShape=object.name;merged.dispose(); }
+   parts.forEach(part=>part.dispose());
+  }
+  gltf.scene.traverse(part=>{
+   if (!(part instanceof T.Mesh)) return;
+   part.geometry.dispose();
+   (Array.isArray(part.material)?part.material:[part.material]).forEach(material=>material.dispose());
+  });
+  if(!disposed)onReady();
+ },undefined,()=>{});
+ return {
+  get:(block:string)=>isMachinePart(block)?machinery.get(MACHINE_PARTS[block][4])!:
+   block==='piston_head'?machinery.get('head')!:geometry.get(shapeOf(block))!,
+  cart: machinery.get('cart')!,
+  get readyShapes(){return [...geometry.values()].filter(g=>g.userData.blenderShape).length;},
+  dispose:()=>{disposed=true;geometry.forEach(g=>g.dispose());machinery.forEach(g=>g.dispose());}
+ };
+
+}
+
+export function orientVoxel(w:World,block:TerrainBlock,x:number,y:number,z:number,matrix:T.Matrix4) {
+ const key=`${x},${y},${z}`;
+ const reference=block==='piston_head' ? w.voxels?.machinery?.heads[key] ?? key
+  : block==='door-top' ? `${x},${y-1},${z}` : key;
+ const rotation=w.voxels?.rotations?.[reference]||0;
+ const machine=isMachinePart(block)||block==='piston_head';
+ if(machine&&w.voxels?.machinery?.devices[reference]?.vertical) matrix.makeRotationX(Math.PI/2);
+ else matrix.makeRotationY((machine?-1:1)*rotation*Math.PI/2);
+ const open=block==='signal_gate'&&poweredGateOpen(w,x,y,z);
+ if(open)matrix.scale(new T.Vector3(1,.19,1));
+ matrix.setPosition(x+.5,open?y+.11:y+.5,z+.5);
+}
+
+function tintGeometry(geometry:T.BufferGeometry, color:T.Color) {
+ const colors = new Float32Array(geometry.attributes.position.count*3);
+ for(let i=0;i<colors.length;i+=3)color.toArray(colors,i);
+ geometry.setAttribute('color',new T.BufferAttribute(colors,3));
 }

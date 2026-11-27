@@ -1,3 +1,9 @@
+import { advanceFluids, fluidAt } from './placedFluids';
+import { advanceWildlife } from './lifestyle/wildlife';
+import { potionSeconds } from './explorationEquipment';
+import type { SandboxState } from './sandboxAccess';
+import { advanceMachinery, ridingCart } from './machinery';
+import { hasClosedSignalGate, terrainHeight } from './voxel';
 import {planAdventurePeaks,type AdventurePeak} from './adventureTerrain';
 import {homeBattleBonus,type HomeBattleBonus} from './furnitureBenefits';
 import type {BuildingGoalReward} from './buildingGoals';
@@ -99,9 +105,11 @@ export interface NativeScene {
   teamPower: number;
 }
 export interface Adventurer {
-  position3D?: {x:number;z:number;y?:number;vy?:number;swimming?:boolean;surface2D?:boolean;oxygen?:number;waterAt?:number};
+  position3D?: {x:number;z:number;y?:number;vy?:number;swimming?:boolean;surface2D?:boolean;layered2D?:boolean;oxygen?:number;waterAt?:number};
   voxelDiscoveries?:string[];
+  wildlifeSeen?:Record<string,number>;
   voxelAt?:number;
+  voxelDeviceAt?:number;
   hero?:CustomHero;
   memory?:SocialMemory;
   lastPlayerTalk?:number;
@@ -141,8 +149,11 @@ export interface Adventurer {
   npcEventResults?: Record<string, { choiceId: string; outcome: 'normal' | 'win' | 'lose' | 'fallback' }>;
 }
 export interface World {
+  hostId?:string;
   /** New games only; absent on existing saves to preserve all elevations. */
   terrainStyle?:1;
+  machineGeology?:1;
+  sandbox?:SandboxState;
   terrainPeaks?:AdventurePeak[];
  buildingGoalRewards?:Record<string,BuildingGoalReward>;
  compactMapVersion?:1;
@@ -612,6 +623,7 @@ export function createWorld(
   );
   return {
     terrainStyle: 1,
+    machineGeology: 1,
     terrainPeaks: planAdventurePeaks(tiles,sites,WIDTH,HEIGHT),
     campaignVersion: 2,
     endingProgress: {},
@@ -716,12 +728,12 @@ export function applyAction(
     return true;
   };
   if(action.type==='rpg-setup'){
-    if(w.started||Object.keys(w.players)[0]!==id||!isRpgAdventureSetup(action.setup))return false;
+    if(w.started||(w.hostId??Object.keys(w.players)[0])!==id||!isRpgAdventureSetup(action.setup))return false;
     const setup=normalizeRpgAdventureSetup({...action.setup,assignment:w.setup?.assignment});
     if(!setup)return false;w.setup=cloneRpgAdventureSetup(setup);w.revision++;return true;
   }
   if (action.type === "rpg-start") {
-    if (w.started || Object.keys(w.players)[0] !== id) return false;
+    if (w.started || (w.hostId??Object.keys(w.players)[0]) !== id) return false;
     w.started = true;
     w.deadlineAt = w.timeLimitMinutes ? now + w.timeLimitMinutes * 60 * 1000 : 0;
     log(w, "参加者が集合し、冒険が始まりました！");
@@ -742,7 +754,7 @@ export function applyAction(
   if (action.type.startsWith("life-")) return applyLifeAction(w,p,action as LifeAction,now);
   if ((p.life?.work || p.life?.indoors) && action.type !== "native-profile" && action.type !== "native-learning") return false;
   if (action.type === "story-choice") return applyStory(w,p,action);
-  if (action.type.startsWith("duel-"))return applyDuel(w,p,action as DuelAction,now);
+  if (action.type.startsWith("duel-"))return (!['duel-request','duel-accept'].includes(action.type)||!w.sandbox?.options.noDuels)&&applyDuel(w,p,action as DuelAction,now);
   if (action.type.startsWith("native-"))
     return applyNativeAction(w, p, action, tell);
   if (action.type.startsWith("trade-") || action.type.startsWith("dungeon-") || action.type === "arcade-play" || action.type === "arcade-finish" || action.type === "secret-search" || action.type === "npc-event-choice")
@@ -754,11 +766,12 @@ export function applyAction(
     return changed;
   }
   if (action.type === "move") {
+    if (ridingCart(w,p.id)) return false;
     if (
       !Number.isInteger(action.dx) ||
       !Number.isInteger(action.dy) ||
       Math.abs(action.dx) + Math.abs(action.dy) !== 1 ||
-      now - p.lastMove < 100
+      now - p.lastMove < (potionSeconds(w,p,'stride_draught')>0?80:100)
     )
       return false;
     if(p.position3D&&(p.position3D.surface2D||!legacyRegion(p.position3D.x,p.position3D.z)))return moveLandscape2D(w,p,action.dx,action.dy,now);
@@ -771,6 +784,7 @@ export function applyAction(
       x >= WIDTH - 1 ||
       y < 1 ||
       y >= HEIGHT - 1 ||
+      hasClosedSignalGate(w,x,y) || w.voxels?.fluids&&fluidAt(w,x,Math.floor(terrainHeight(w,x,y)),y)?.kind==='lava' ||
       (!lifeWalkable(w,x,y)&&!landscapeGate(x,y))
     )
       return false;
@@ -870,8 +884,11 @@ export function advanceWorld(w: World, now = Date.now()) {
   if (w.started && !w.ended && w.timeLimitMinutes > 0 && now >= w.deadlineAt) endWorld(w, "timeout", now);
   advanceVoxelWater(w,now);
   advanceLife(w,now);
+  advanceMachinery(w,now);
+  advanceFluids(w);
   advanceSocial(w,now);
   advanceTown(w,now);
+  advanceWildlife(w,now);
   advanceFarm(w);
   advanceCity(w);
   advanceActivities(w,now);

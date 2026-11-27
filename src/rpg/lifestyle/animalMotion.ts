@@ -1,5 +1,5 @@
 export type AnimalMoment = {
-  pose: "greet" | "roll" | "sleep" | "hop";
+  pose: "greet" | "roll" | "sleep" | "hop" | "walk" | "run" | "eat";
   until: number;
 };
 export function animalPose(

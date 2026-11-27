@@ -1,0 +1,12 @@
+.rpg-creature-journal { margin: 6px 0 12px; padding: 10px; border: 1px solid #91aa955e; border-radius: 9px; }
+.rpg-creature-journal summary { cursor: pointer; min-height: 32px; padding: 6px 0; color: #ffe4ac; }
+.rpg-creature-journal label { display: grid; gap: 5px; margin: 6px 0; }
+.rpg-creature-journal select { max-width: 100%; padding: 8px; border: 1px solid #91aa95; border-radius: 6px; background: #15343c; color: #fff0cf; font: inherit; }
+.rpg-creature-journal .rpg-creature-display { display: grid; justify-items: center; gap: 7px; padding: 7px; border-radius: 7px; background: radial-gradient(#325e59,#17333b); }
+.rpg-creature-display img { width: 112px; height: 112px; object-fit: contain; }
+.rpg-creature-display canvas { display: block; max-width: 100%; height: auto !important; margin: auto; }
+.rpg-creature-journal h3 { margin: 9px 0 2px; color: #fff1cb; }
+.rpg-creature-journal dl { display: grid; grid-template-columns: max-content minmax(0,1fr); gap: 4px 8px; margin: 7px 0; }
+.rpg-creature-journal dt { color: #bad4c5; }
+.rpg-creature-journal dd { margin: 0; }
+.rpg-creature-preview { width: min(264px,100%); }

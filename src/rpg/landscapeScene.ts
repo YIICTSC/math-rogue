@@ -1,5 +1,7 @@
 import {adventureSurface,adventureWater} from './adventureStyle';
-import {voxelWater} from './voxel';
+import {naturalVoxelWater,voxelWater} from './voxel';
+import { orientVoxel } from './voxelRendering';
+import { poweredGateOpen } from './machinery';
 import * as T from 'three';
 import {WIDTH,HEIGHT,type World} from './engine';
 import {WORLD_SCALE,STRUCTURES,landscapeRegion,legacyRegion,landscapeHeight,landscapeEnvironment,landscapeTree,landmarkBlock,landscapeHash,landscapeColor,waterProfile,mountainHeight} from './worldLandscape';
@@ -11,8 +13,8 @@ export class LandscapeScene {
  readonly group=new T.Group();readonly buildings=new T.Group();
  private chunks=new Map<string,T.Group>();private queue:{x:number;z:number}[]=[];private center='';private revision=-1;private edits=new Map<string,string>();private pending=new Set<string>();
  private box=new T.BoxGeometry(1,1,1);private sphere=new T.SphereGeometry(1,8,6);private materials=new Map<string,T.MeshStandardMaterial>();private far?:T.Mesh;
- private sky=new T.Group();private clouds?:T.InstancedMesh;private cloudMaterial=new T.MeshBasicMaterial({color:'#edf1ec',transparent:true,opacity:.68,depthWrite:false});private precipitation?:T.Points;private animals:{object:T.Group;home:T.Vector3;phase:number;species:string;last:number;legs:T.Object3D[];wings:T.Object3D[];state:string}[]=[];
- private geometries:T.BufferGeometry[]=[];private animalCell='';private farTiles=new Map<string,number[]>();private coreView={x:0,z:0};private detailRadius=0;private farMask='';private farWater?:T.InstancedMesh;private farWaterPoints:number[][]=[];
+ private sky=new T.Group();private clouds?:T.InstancedMesh;private cloudMaterial=new T.MeshBasicMaterial({color:'#edf1ec',transparent:true,opacity:.68,depthWrite:false});private precipitation?:T.Points;
+ private geometries:T.BufferGeometry[]=[];private farTiles=new Map<string,number[]>();private coreView={x:0,z:0};private detailRadius=0;private farMask='';private farWater?:T.InstancedMesh;private farWaterPoints:number[][]=[];
  setDetailRegion(x:number,z:number,radius:number){this.coreView={x,z};this.detailRadius=radius;}
  constructor(parent:T.Scene,private quality:string,private construction?:{get:(block:string)=>T.BufferGeometry},private blockMaterial?:(block:TerrainBlock)=>T.Material){this.water.transparent=true;this.water.opacity=.78;this.water.depthWrite=false;parent.add(this.group);this.group.name='ExplorationLandscape';this.group.add(this.buildings,this.sky);
   // Ocean surrounds the existing playable footprint; never covers interior caves or edits.
@@ -96,9 +98,16 @@ export class LandscapeScene {
    const list=edits.get(b)||[];list.push({x,y,z});edits.set(b,list);
    if(b==='door'&&blockAt(w,x,y+1,z)==='door-top'){const tops=edits.get('door-top')||[];tops.push({x,y:y+1,z});edits.set('door-top',tops);}
   }
+  const heads:{x:number;y:number;z:number}[]=[];
+  for(const key of Object.keys(w.voxels?.machinery?.heads ?? {})){
+   const [x,y,z]=key.split(',').map(Number);
+   if(x>=x0&&x<x0+16&&z>=z0&&z<z0+16&&!legacyRegion(x,z))heads.push({x,y,z});
+  }
+  if(heads.length)edits.set('piston_head',heads);
   for(const [b,points]of edits){const mesh=new T.InstancedMesh(this.construction?.get(b)||this.box,this.blockMaterial?.(b)||this.material(VOXEL_COLORS[b]),points.length),matrix=new T.Matrix4();
-   points.forEach(({x,y,z},i)=>{matrix.makeRotationY((w.voxels?.rotations?.[[x,b==='door-top'?y-1:y,z].join(',')]||0)*Math.PI/2);matrix.setPosition(x+.5,y+.5,z+.5);
+   points.forEach(({x,y,z},i)=>{orientVoxel(w,b,x,y,z,matrix);
     if(b==='door'||b==='door-top'){const base=b==='door-top'?y-1:y,alongX=solid(blockAt(w,x-1,base,z))||solid(blockAt(w,x+1,base,z));matrix.scale(new T.Vector3(alongX?1:.16,1,alongX?.16:1));}mesh.setMatrixAt(i,matrix);});
+   if(b==='signal_gate')mesh.userData.gates=points.map(point=>({...point,open:poweredGateOpen(w,point.x,point.y,point.z)}));
    mesh.userData.sharedGeometry=true;mesh.computeBoundingSphere();mesh.castShadow=this.quality==='high';mesh.receiveShadow=true;g.add(mesh);
   }
   return g;
@@ -119,23 +128,7 @@ export class LandscapeScene {
    for(const dx of [-10,10]){this.part(this.buildings,'#806143',l.x+dx,base+.65,front,3,.3,.8);this.part(this.buildings,'#bd775c',l.x+dx,base+2.7,front,3.6,.2,2.2);for(const sx of [-1.4,1.4])this.part(this.buildings,'#806143',l.x+dx+sx,base+1.3,front,.12,2.6,.12);}
   }
  }
- private spawnAnimals(w:World,x:number,z:number){
-  for(const a of this.animals)a.object.removeFromParent();this.animals=[];
-  // Shared simple rounded anatomy with species-specific ears, horns, wings and proportions.
-  for(let i=0;i<(this.quality==='low'?12:30);i++){const ax=Math.floor(x)+(landscapeHash(Math.floor(i/3),5,w.seed)-.5)*100+(i%3)*2,az=Math.floor(z)+(landscapeHash(Math.floor(i/3),9,w.seed)-.5)*100;if(!legacyRegion(ax,az))continue;
-   const e=landscapeEnvironment(w.seed,ax,az);e.height=terrainHeight(w,Math.floor(ax),Math.floor(az));e.water=voxelWater(w,ax,az);if(e.road)continue;const species=e.water?(i%3?'fish':'duck'):e.height>30?'eagle':e.height>22?'goat':e.biome==='forest'?(i%3?'deer':'rabbit'):i%4===0?'owl':['sheep','cow','horse'][i%3];
-   const group=new T.Group(),color=species==='fish'?'#deaf78':species==='sheep'?'#e8ddc7':species==='cow'?'#815647':species==='owl'?'#8b819c':'#ad8057';
-   const small=['fish','duck','rabbit','owl','eagle'].includes(species),scale=small?.45:1;
-   this.part(group,color,0,.8,0,.42,.45,.75,true);this.part(group,color,0,1.22,.52,.24,.3,.28,true);
-   const legs:T.Object3D[]=[],wings:T.Object3D[]=[];
-   if(!['fish','owl','eagle'].includes(species))for(const dx of [-.26,.26])for(const dz of [-.45,.45])legs.push(this.part(group,'#685642',dx,.35,dz,.12,.7,.12));
-   if(['owl','eagle','fish'].includes(species))for(const side of [-1,1])wings.push(this.part(group,color,side*.55,.85,0,.8,.06,.4));
-   if(['deer','goat','rabbit','horse'].includes(species))for(const side of [-1,1])this.part(group,color,side*.17,1.62,.5,.08,species==='rabbit'?.7:.35,.09);
-   for(const side of [-1,1])this.part(group,'#20272a',side*.17,1.30,.75,.045,.05,.035,true);
-   group.scale.setScalar(scale);const y=e.water?e.water.surface-(species==='duck'?.35:e.water.depth*.6):terrainHeight(w,Math.floor(ax),Math.floor(az))+(['owl','eagle'].includes(species)?9:0);group.position.set(ax,y,az);this.group.add(group);this.animals.push({object:group,home:new T.Vector3(ax,y,az),phase:i*.7,species,last:0,legs,wings,state:'graze'});
-  }
- }
- update(w:World,position:T.Vector3,time:number,night:boolean,reduced:boolean){
+ update(w:World,position:T.Vector3,time:number,night:boolean,reduced:boolean,creatureCount=0){
 
   this.waterEffect.update(reduced?0:time);this.wind.value=reduced?0:time;if(this.clouds&&!reduced)this.clouds.position.x=Math.sin(time*.008)*8;
   const snowy=w.terrainStyle===1?position.y>=34:position.y>190;
@@ -143,13 +136,14 @@ export class LandscapeScene {
   this.cloudMaterial.color.set(night?'#65758a':weather?'#adb8bc':'#edf1ec');
   const cx=Math.floor(position.x/16),cz=Math.floor(position.z/16),radius=this.quality==='low'?2:3,center=cx+':'+cz,revision=w.voxels?.revision||0;
   if(!this.far){this.far=this.terrainMesh(w,0,0,WIDTH,1,true);this.far.position.y=-.03;this.group.add(this.far);this.landmarks(w);
-   const pools:number[][]=[];for(let z=0;z<HEIGHT;z++)for(let x=0;x<WIDTH;x++){const p=voxelWater(w,x,z);if(p){pools.push([x+.5,p.surface-.03,z+.5,1,.025,1]);if(p.kind==='waterfall'){const dx=Math.sign(p.flowX),dz=Math.sign(p.flowZ),next=voxelWater(w,x+dx,z+dz);if(next&&next.surface<p.surface)pools.push([x+.5+dx*.5,(p.surface+next.surface)/2-.03,z+.5+dz*.5,dx?.035:1,p.surface-next.surface,dz?.035:1]);}}}
+   const pools:number[][]=[];for(let z=0;z<HEIGHT;z++)for(let x=0;x<WIDTH;x++){const p=naturalVoxelWater(w,x,z);if(p){pools.push([x+.5,p.surface-.03,z+.5,1,.025,1]);if(p.kind==='waterfall'){const dx=Math.sign(p.flowX),dz=Math.sign(p.flowZ),next=naturalVoxelWater(w,x+dx,z+dz);if(next&&next.surface<p.surface)pools.push([x+.5+dx*.5,(p.surface+next.surface)/2-.03,z+.5+dz*.5,dx?.035:1,p.surface-next.surface,dz?.035:1]);}}}
    this.instances(this.group,pools,'#4da3b3');if(pools.length){const mesh=this.group.children[this.group.children.length-1] as T.Mesh;mesh.material=this.water;mesh.castShadow=false;this.farWater=mesh as T.InstancedMesh;this.farWaterPoints=pools;}
   }
   this.refreshFar();
   const dirty=new Set<string>();
   if(revision!==this.revision){
-   const next=new Map(Object.entries(w.voxels?.edits||{}).map(([k,b])=>[k,String(b)+':'+(w.voxels?.rotations?.[k]||0)]));
+   const next=new Map(Object.entries(w.voxels?.edits||{}).map(([k,b])=>[k,String(b)+':'+(w.voxels?.rotations?.[k]||0)+':'+Number(!!w.voxels?.machinery?.devices[k]?.vertical)]));
+   for(const [k,body] of Object.entries(w.voxels?.machinery?.heads ?? {}))next.set(k,'piston_head:'+body);
    for(const key of new Set([...next.keys(),...this.edits.keys()]))if(next.get(key)!==this.edits.get(key)){const [x,,z]=key.split(',').map(Number);for(const [dx,dz]of [[0,0],[1,0],[-1,0],[0,1],[0,-1]])dirty.add(Math.floor((x+dx)/16)+':'+Math.floor((z+dz)/16));}
    this.edits=next;this.revision=revision;
   }
@@ -163,18 +157,18 @@ export class LandscapeScene {
 
   }
   const job=this.queue.shift();if(job){const k=job.x+':'+job.z,g=this.chunk(w,job.x,job.z),old=this.chunks.get(k);if(old)this.releaseChunk(old);this.chunks.set(k,g);this.pending.delete(k);this.group.add(g);this.refreshFar();}
-  const animalCell=Math.floor(position.x/64)+':'+Math.floor(position.z/64);if(animalCell!==this.animalCell){this.animalCell=animalCell;this.spawnAnimals(w,position.x,position.z);}
-  for(const a of this.animals){if(time-a.last<.15||reduced)continue;const dt=Math.min(.3,time-a.last);a.last=time;const nocturnal=a.species==='owl';a.state=night!==nocturnal?'rest':Math.sin(time*.18+a.phase)>.1?'walk':'graze';
-   if(['fish','duck','eagle'].includes(a.species))a.state='walk';const scared=a.object.position.distanceTo(position)<8;if(scared)a.state='flee';
-   const moving=a.state==='walk'||a.state==='flee',angle=time*.08+a.phase,nx=a.home.x+Math.sin(angle)*7,nz=a.home.z+Math.cos(angle)*7;
-   let dx=nx-a.object.position.x,dz=nz-a.object.position.z;if(scared){dx=a.object.position.x-position.x;dz=a.object.position.z-position.z;}
-   const len=Math.hypot(dx,dz)||1,speed=a.state==='flee'?3:1.1,tx=a.object.position.x+dx/len*dt*speed,tz=a.object.position.z+dz/len*dt*speed;
-   const env=landscapeEnvironment(w.seed,tx,tz);env.height=terrainHeight(w,Math.floor(tx),Math.floor(tz));env.water=voxelWater(w,tx,tz);const flying=['owl','eagle'].includes(a.species);
-   if(moving&&legacyRegion(tx,tz)&&(['fish','duck'].includes(a.species)?!!env.water:flying||!env.water&&Math.abs(env.height-a.object.position.y)<1.5)&&!landmarkBlock(Math.floor(tx),env.height+1,Math.floor(tz))){a.object.position.x=tx;a.object.position.z=tz;a.object.rotation.y=Math.atan2(dx,dz);a.object.position.y=['fish','duck'].includes(a.species)?env.water!.surface-(a.species==='duck'?.35:Math.max(.5,env.water!.depth*.6)):env.height+(flying?9+Math.sin(time+a.phase):0);}
-   a.legs.forEach((leg,i)=>leg.rotation.x=moving?Math.sin(time*(scared?12:6)+i%2*Math.PI)*.45:0);a.wings.forEach((wing,i)=>wing.rotation.z=Math.sin(time*5+a.phase)*(i?1:-1)*.45);
-   a.object.userData.behavior=a.state;
+  const gatePose=new T.Matrix4();
+  for(const chunk of this.chunks.values())for(const mesh of chunk.children){
+   if(!(mesh instanceof T.InstancedMesh)||!mesh.userData.gates)continue;
+   const gates=mesh.userData.gates as {x:number;y:number;z:number;open:boolean}[];
+   gates.forEach((gate,i)=>{
+    const {x,y,z}=gate,open=poweredGateOpen(w,x,y,z);
+    if(open===gate.open)return;
+    gate.open=open;orientVoxel(w,'signal_gate',x,y,z,gatePose);mesh.setMatrixAt(i,gatePose);
+    mesh.instanceMatrix.needsUpdate=true;
+   });
   }
-  this.group.userData.stats={chunks:this.chunks.size,queued:this.queue.length,animals:this.animals.length,weather:snowy?'snow':weather?'rain':'clear'};
+  this.group.userData.stats={chunks:this.chunks.size,queued:this.queue.length,animals:creatureCount,weather:snowy?'snow':weather?'rain':'clear'};
  }
  dispose(){for(const o of this.group.children)if(o instanceof T.InstancedMesh)o.dispose();for(const g of this.chunks.values())this.releaseChunk(g);this.buildings.traverse(o=>{if(o instanceof T.InstancedMesh)o.dispose();});this.far?.geometry.dispose();this.clouds?.dispose();this.cloudMaterial.dispose();this.precipitation?.geometry.dispose();(this.precipitation?.material as T.Material)?.dispose();this.box.dispose();this.sphere.dispose();this.surface.dispose();this.water.dispose();this.materials.forEach(m=>m.dispose());this.geometries.forEach(g=>g.dispose());this.group.removeFromParent();}
 }

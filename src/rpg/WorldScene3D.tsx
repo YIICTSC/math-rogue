@@ -1,3 +1,11 @@
+import { sandboxAllows } from './sandboxAccess';
+import { CreatureModels } from './lifestyle/creatureModels';
+import { MachineryEffects } from './machineryRendering';
+import MachineryInspector, { sandboxItemName, sandboxText } from './MachineryInspector';
+import { inspectMachine, machineCarts, machineStorage, poweredGateOpen, type MachineCell } from './machinery';
+import { isMachinePart } from './machineryParts';
+import { fluidCanScoop, type FluidAction } from './placedFluids';
+import { blueprintPoint, type BlueprintPreview } from './blueprints';
 import { multiTouchAction } from '../utils/multiTouchAction';
 import {ProtagonistModel} from '../three/protagonistModel';
 import {rpgProtagonist} from '../three/protagonistCatalog';
@@ -12,15 +20,16 @@ import {audioService} from '../services/audioService';
 import {LandscapeScene} from './landscapeScene';
 import {WORLD_SCALE,legacyRegion,landscapeEnvironment,waterProfile,landmarkBlock} from './worldLandscape';
 import {VoxelWorkshopPanel} from './VoxelWorkshopPanel';
-import {createConstructionGeometry,voxelMaterial} from './voxelRendering';
+import {createConstructionGeometry,orientVoxel,voxelMaterial} from './voxelRendering';
 import {fullCube} from './voxelCatalog';
 import {furnitureImage,furnitureSize,furnishing} from './homeCatalog';
 import {plotPosition} from './farm/land';
+import { ranchArt, ranchPosition } from './farm/animalLook';
+import { creaturePortrait } from './lifestyle/creatureArt';
 import {trans} from '../utils/textUtils';
 import type {LanguageMode} from '../types';
 import {energyOf} from './energy';
-import {BLOCKS,voxelWater,traceVoxel,blockAt,protectedVoxel,terrainHeight,oasisCenters,playerHeight,solid,miningCost,MIN_DEPTH,MAX_HEIGHT,EYE_HEIGHT,VOXEL_COLORS,type TerrainBlock,type Block,type VoxelAction} from './voxel';
-import {MATERIAL_NAMES} from './life';
+import {BLOCKS,voxelWater,naturalVoxelWater,traceVoxel,blockAt,protectedVoxel,terrainHeight,oasisCenters,playerHeight,solid,miningCost,MIN_DEPTH,MAX_HEIGHT,EYE_HEIGHT,VOXEL_COLORS,type TerrainBlock,type Block,type VoxelAction} from './voxel';
 import { StorybookModels, type Placement, type StorybookModel } from '../three/storybookModels';
 import { configureStorybook } from '../three/storybookStyle';
 import {storyForSite} from './stories';
@@ -49,6 +58,7 @@ export interface SceneProps {
   onVoxelAction?:(a:VoxelAction)=>void;
   onEnergyRequest?:()=>void;
   hiddenActors?: string[];
+  inputBlocked?: boolean;
   presentation?: "conversation";
   world: World;
   selfId: string;
@@ -62,10 +72,17 @@ export interface SceneProps {
 export default function WorldScene3D(props: SceneProps) {
   const [slots,setSlots]=useState<Block[]>(()=>{try{const a=JSON.parse(localStorage.getItem('rpg-voxel-slots-v1')||'null');if(Array.isArray(a)&&a.length===4&&a.every(b=>BLOCKS.includes(b)))return a;}catch{}return ['wood','stone','dirt','plank'];}),[selectedSlot,setSelectedSlot]=useState(0),[editSlot,setEditSlot]=useState(false),[rotation,setRotation]=useState(0),[pitch,setPitch]=useState(-.18),[target,setTarget]=useState<{block:TerrainBlock;cost:number}|null>(null);
   const [thirdPerson,setThirdPerson]=useState(true);
+  const [deviceTarget, setDeviceTarget] = useState<MachineCell|null>(null);
+  const [blueprint,setBlueprint]=useState<BlueprintPreview|null>(null);
+  const preview=useRef(blueprint);
+  preview.current=blueprint;
+  const [mouseLook, setMouseLook] = useState(false);
+  const [pointerLockAvailable, setPointerLockAvailable] = useState(false);
+  const lockTarget = useRef<HTMLCanvasElement | null>(null);
   const thirdRef=useRef(thirdPerson);thirdRef.current=thirdPerson;
   const selected=slots[selectedSlot],building=!!props.onVoxelAction&&props.presentation!=='conversation';
   useEffect(()=>{try{localStorage.setItem('rpg-voxel-slots-v1',JSON.stringify(slots));}catch{}},[slots]);
-  const buildRef=useRef({building,selected,pitch,rotation,panel:editSlot});buildRef.current={building,selected,pitch,rotation,panel:editSlot};
+  const buildRef=useRef({building,selected,pitch,rotation,panel:editSlot});buildRef.current={building,selected,pitch,rotation,panel:editSlot||deviceTarget!==null};
   const host = useRef<HTMLDivElement>(null),
     latest = useRef(props),
     prefs = useRpgPreferences(),
@@ -99,6 +116,12 @@ export default function WorldScene3D(props: SceneProps) {
     renderer.shadowMap.enabled = profile.shadows;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.domElement.dataset.testid = "rpg-world-3d";
+    lockTarget.current = renderer.domElement;
+    setPointerLockAvailable(
+      (!import.meta.env.VITE_APP_PLATFORM || import.meta.env.VITE_APP_PLATFORM === 'web') &&
+      typeof renderer.domElement.requestPointerLock === 'function' &&
+      window.matchMedia('(any-pointer: fine)').matches,
+    );
     renderer.domElement.setAttribute("aria-label", "3D");
     element.appendChild(renderer.domElement);
     const scene = new THREE.Scene();
@@ -118,7 +141,7 @@ export default function WorldScene3D(props: SceneProps) {
     scene.add(sun,hemisphere);
     const voxelGeometry=new THREE.BoxGeometry(1,1,1);
     const voxelGroup=new THREE.Group();scene.add(voxelGroup);
-    const renderBlocks:TerrainBlock[]=[...BLOCKS,'bedrock','oasis-water','door-top'];
+    const renderBlocks:TerrainBlock[]=[...BLOCKS,'bedrock','oasis-water','door-top','piston_head'];
     const windClock={value:0};
     const voxelMaterials=renderBlocks.map(b=>adventureSurface(voxelMaterial(b),['leaves','frostleaves','bush','fruit'].includes(b),windClock));
     for(const material of voxelMaterials)if(material.map){material.map.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());material.map.needsUpdate=true;}
@@ -128,11 +151,18 @@ export default function WorldScene3D(props: SceneProps) {
     const outline=new THREE.Mesh(voxelGeometry,outlineMaterial);outline.scale.setScalar(1.012);outline.visible=false;outline.renderOrder=10;scene.add(outline);
     const ghostMaterial=new THREE.MeshBasicMaterial({color:'#89e0ac',transparent:true,opacity:.36,depthWrite:false});
     const ghost=new THREE.Mesh<THREE.BufferGeometry>(voxelGeometry,ghostMaterial);ghost.visible=false;ghost.renderOrder=9;scene.add(ghost);
+    const plannedMaterial=new THREE.MeshBasicMaterial({color:'white',wireframe:true,transparent:true,opacity:.72,depthWrite:false});
+    const planned=new THREE.InstancedMesh(voxelGeometry,plannedMaterial,48);
+    planned.count=0;planned.frustumCulled=false;planned.renderOrder=8;scene.add(planned);
+    const planMatrix=new THREE.Matrix4(),planColor=new THREE.Color();
+    let shownBlueprint:BlueprintPreview|null=null,previewRevision=-1;
     const terrain = new THREE.Group(),
       actors = new THREE.Group();
     scene.add(terrain, actors);
     let placements:Placement[]=[];
     const models=new StorybookModels(scene,()=>{key='';});
+    const machineryEffects=new MachineryEffects(scene,construction.cart);
+    const creatures=new CreatureModels(scene,profile.low);
     const landscape=new LandscapeScene(scene,profile.low?'low':'high',construction,b=>voxelMaterials[renderBlocks.indexOf(b)]);
     const animatedWater=adventureWater();
     const geometries: THREE.BufferGeometry[] = [],
@@ -450,6 +480,10 @@ export default function WorldScene3D(props: SceneProps) {
       const blocks=renderBlocks.map(()=>[] as {x:number;y:number;z:number}[]),cache=new Map<string,TerrainBlock|null>();
       const vr=profile.low?12:19;
       const editedTops=new Map<string,number>();for(const [k,b]of Object.entries(w.voxels?.edits||{})){if(!b)continue;const [ex,ey,ez]=k.split(',').map(Number),col=ex+','+ez;editedTops.set(col,Math.max(editedTops.get(col)||0,ey));}
+      for (const key of Object.keys(w.voxels?.machinery?.heads ?? {})) {
+        const [hx,hy,hz]=key.split(',').map(Number), column=`${hx},${hz}`;
+        editedTops.set(column,Math.max(editedTops.get(column)??MIN_DEPTH,hy));
+      }
       const get=(bx:number,by:number,bz:number)=>{const k=`${bx},${by},${bz}`;if(!cache.has(k))cache.set(k,blockAt(w,bx,by,bz));return cache.get(k)!;};
       for(let vz=Math.max(1,y-vr);vz<=Math.min(HEIGHT-2,y+vr);vz++)for(let vx=Math.max(1,x-vr);vx<=Math.min(WIDTH-2,x+vr);vx++)for(let vy=MIN_DEPTH;vy<=Math.max(terrainHeight(w,vx,vz)+4,editedTops.get(vx+','+vz)||0);vy++){
         const b=get(vx,vy,vz);if(!b)continue;
@@ -457,7 +491,7 @@ export default function WorldScene3D(props: SceneProps) {
         if(fullCube(b)&&[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]].every(([dx,dy,dz])=>{const neighbor=get(vx+dx,vy+dy,vz+dz);return !!neighbor&&fullCube(neighbor);}))continue;
         blocks[renderBlocks.indexOf(b)].push({x:vx,y:vy,z:vz});
       }
-      blocks.forEach((positions,i)=>{if(!positions.length)return;const m=new THREE.InstancedMesh(construction.get(renderBlocks[i]),voxelMaterials[i],positions.length),matrix=new THREE.Matrix4();positions.forEach((v,j)=>{matrix.makeRotationY((w.voxels?.rotations?.[`${v.x},${v.y},${v.z}`]||0)*Math.PI/2);matrix.setPosition(v.x+.5,v.y+.5,v.z+.5);if(renderBlocks[i]==='door'||renderBlocks[i]==='door-top'){const y=renderBlocks[i]==='door-top'?v.y-1:v.y;const alongX=solid(get(v.x-1,y,v.z))||solid(get(v.x+1,y,v.z));matrix.scale(new THREE.Vector3(alongX?1:.16,1,alongX?.16:1));}m.setMatrixAt(j,matrix);});m.userData.voxels=positions;m.castShadow=true;m.receiveShadow=true;voxelGroup.add(m);});
+      blocks.forEach((positions,i)=>{if(!positions.length)return;const block=renderBlocks[i],m=new THREE.InstancedMesh(construction.get(block),voxelMaterials[i],positions.length),matrix=new THREE.Matrix4();positions.forEach((v,j)=>{orientVoxel(w,block,v.x,v.y,v.z,matrix);if(block==='door'||block==='door-top'){const y=block==='door-top'?v.y-1:v.y;const alongX=solid(get(v.x-1,y,v.z))||solid(get(v.x+1,y,v.z));matrix.scale(new THREE.Vector3(alongX?1:.16,1,alongX?.16:1));}m.setMatrixAt(j,matrix);});m.userData.voxels=positions;m.userData.block=block;m.castShadow=true;m.receiveShadow=true;voxelGroup.add(m);});
       groundMaterial?.dispose();
       const radius = profile.low ? 12 : 19,
         cells: { x: number; y: number; tile: string }[] = [];
@@ -514,11 +548,11 @@ export default function WorldScene3D(props: SceneProps) {
           node = natureAt(w, ty * WIDTH + tx),
           removed =
             (w.life.nodes[ty * WIDTH + tx]?.regrowAt || 0) > w.life.time;
-        if (tile === "water" || voxelWater(w,tx,ty)) {
-          mesh(terrain, box, water, tx + 0.5, (voxelWater(w,tx,ty)?.surface||0)-0.015, ty + 0.5, 1, 0.025, 1);
-          const pool=voxelWater(w,tx,ty);
+        const pool=naturalVoxelWater(w,tx,ty);
+        if (tile === "water" || pool) {
+          mesh(terrain, box, water, tx + 0.5, (pool?.surface||0)-0.015, ty + 0.5, 1, 0.025, 1);
           if(pool?.kind==='waterfall'){
-            const dx=Math.sign(pool.flowX),dz=Math.sign(pool.flowZ),next=voxelWater(w,tx+dx,ty+dz);
+            const dx=Math.sign(pool.flowX),dz=Math.sign(pool.flowZ),next=naturalVoxelWater(w,tx+dx,ty+dz);
             if(next&&next.surface<pool.surface)mesh(terrain,box,water,tx+.5+dx*.5,(pool.surface+next.surface)/2-.015,ty+.5+dz*.5,dx?.04:1,pool.surface-next.surface,dz?.04:1);
           }
         } else if (tile === "forest" && !removed && (!natureAt(w,ty*WIDTH+tx) || protectedVoxel(w,tx,ty))) {
@@ -659,7 +693,7 @@ export default function WorldScene3D(props: SceneProps) {
       }
       for(const room of w.voxelRooms||[]){
         for(const f of room.furniture){const size=furnitureSize(f);if(!near({x:f.x,y:f.y}))continue;if(furnishing(f.item)?.floor){let material=floorFurnitureMaterials.get(f.item);if(!material){material=new THREE.MeshBasicMaterial({map:texture(assetUrl(furnitureImage(f.item))),transparent:true,alphaTest:.08,side:THREE.DoubleSide});floorFurnitureMaterials.set(f.item,material);materials.push(material);}const rug=new THREE.Mesh(floorFurnitureGeometry,material);rug.rotation.x=-Math.PI/2;rug.position.set(f.x+size.width/2,room.floor+.03,f.y+size.height/2);rug.scale.set(size.width,size.height,1);terrain.add(rug);}else billboard(terrain,assetUrl(furnitureImage(f.item)),f.x+size.width/2,room.floor+.55,f.y+size.height/2,Math.max(size.width,size.height)*.85,undefined,true);}
-        for(const farm of Object.values(w.farm?.people||{}))for(const pet of farm.pets)if(pet.homeId===room.id){const pos=pet.roomPos||room.cells[0];billboard(terrain,assetUrl(farmImage('pet',pet.kind)),pos.x+.5,room.floor+.35,('y' in pos?pos.y:pos.z)+.5,.7,undefined,true);}
+        for(const [owner,farm] of Object.entries(w.farm?.people||{}))for(const pet of farm.pets)if(pet.homeId===room.id){const pos=pet.roomPos||room.cells[0];const sprite=billboard(terrain,assetUrl(farmImage('pet',pet.kind)),pos.x+.5,room.floor+.35,('y' in pos?pos.y:pos.z)+.5,.7,undefined,true);sprite.userData.creatureId=owner+':'+pet.id;}
       }
       for(const c of oasisCenters(w))if(Math.abs(c.x-x)<radius&&Math.abs(c.z-y)<radius){for(const [dx,dz] of [[4,0],[-4,0],[0,4],[0,-4]])if(!protectedVoxel(w,c.x+dx,c.z+dz))placements.push({model:'mushrooms',x:c.x+dx+.5,z:c.z+dz+.5,y:c.depth-1,scale:.55});}
       models.set(placements.map(v=>({...v,y:v.y!==undefined&&v.y<0?v.y:(v.y||0)+terrainHeight(w,Math.floor(v.x),Math.floor(v.z))})));
@@ -720,19 +754,23 @@ export default function WorldScene3D(props: SceneProps) {
       for (const [id, f] of Object.entries(w.farm?.people || {})) {
         if (f.x !== undefined && f.y !== undefined) {
           for (const [i, a] of f.animals.entries()) {
+            const position=ranchPosition(w,f,a,i);
+            if (!position) continue;
+            const size=position.size*.035;
             const sprite = billboard(
               actors,
-              assetUrl(farmImage("animal", a.kind)),
-              f.x + (i % 6) + 0.5,
-              0.35,
-              f.y + (i < 6 ? 0 : 5) + 0.5,
-              0.7,
+              assetUrl(creaturePortrait(ranchArt(w,a))),
+              position.x,
+              size/2,
+              position.z,
+              size,
             );
             sprite.userData.animal = a;
+            sprite.userData.creatureId = id + ':' + a.id;
             sprite.userData.owner = id;
             sprite.userData.collection = "animals";
-            sprite.userData.base = 0.35;
-            sprite.userData.size = 0.7;
+            sprite.userData.base = sprite.position.y;
+            sprite.userData.size = size;
           }
         }
       }
@@ -784,13 +822,34 @@ export default function WorldScene3D(props: SceneProps) {
       pointer = new THREE.Vector2(),
       plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0),
       hit = new THREE.Vector3();
-    function buildHit(w:World){
+    function buildRay(w:World) {
       ray.setFromCamera(new THREE.Vector2(0,0),camera);
-      if(!thirdRef.current)return traceVoxel(w,ray.ray.origin,ray.ray.direction);
+      if(!thirdRef.current)return ray.ray;
       const a=w.players[latest.current.selfId],eye=new THREE.Vector3(a.position3D?.x??a.x+.5,playerHeight(w,a)+EYE_HEIGHT,a.position3D?.z??a.y+.5);
       const visible=traceVoxel(w,ray.ray.origin,ray.ray.direction,12);
       const point=visible?ray.ray.at(visible.distance+.01,new THREE.Vector3()):ray.ray.at(12,new THREE.Vector3());
-      return traceVoxel(w,eye,point.sub(eye).normalize());
+      return new THREE.Ray(eye,point.sub(eye).normalize());
+    }
+    function buildHit(w:World){
+      const aim=buildRay(w);
+      return traceVoxel(w,aim.origin,aim.direction);
+    }
+    function performFluid(command: FluidAction['command']) {
+      const current = latest.current, w = current.world;
+      if (buildRef.current.panel || current.inputBlocked) return;
+      const aim = buildRay(w), hit = traceVoxel(w,aim.origin,aim.direction);
+      if (command !== 'scoop') {
+        if (hit) current.onVoxelAction?.({type:'voxel-fluid',command,x:hit.x+hit.normal.x,y:hit.y+hit.normal.y,z:hit.z+hit.normal.z});
+        return;
+      }
+      for (let distance=.12; distance<=(hit?.distance ?? 4.5)+.02; distance+=.12) {
+        const point = aim.at(distance, new THREE.Vector3());
+        const cell = { x: Math.floor(point.x), y: Math.floor(point.y), z: Math.floor(point.z) };
+        if (fluidCanScoop(w, cell, current.selfId)) {
+          current.onVoxelAction?.({type:'voxel-fluid',command,...cell});
+          return;
+        }
+      }
     }
     function performBuild(kind:'voxel-break'|'voxel-place'='voxel-break') {
       if(buildRef.current.panel)return;
@@ -798,13 +857,34 @@ export default function WorldScene3D(props: SceneProps) {
       if(energyOf(current.life)<(kind==='voxel-place'?.1:.02)){latest.current.onEnergyRequest?.();return;}
       ray.setFromCamera(new THREE.Vector2(0,0),camera);
       const h=buildHit(latest.current.world);
-      if(h){attackUntil=performance.now()+700;if(kind==='voxel-break'&&Number.isFinite(miningCost(h.block,current))&&energyOf(current.life)<miningCost(h.block,current)){latest.current.onEnergyRequest?.();return;}latest.current.onVoxelAction?.({type:kind,x:h.x+(kind==='voxel-place'?h.normal.x:0),y:h.y+(kind==='voxel-place'?h.normal.y:0),z:h.z+(kind==='voxel-place'?h.normal.z:0),block:buildRef.current.selected,rotation:buildRef.current.rotation});}
+      if(h){attackUntil=performance.now()+700;if(kind==='voxel-break'&&Number.isFinite(miningCost(h.block,current,latest.current.world))&&energyOf(current.life)<miningCost(h.block,current,latest.current.world)){latest.current.onEnergyRequest?.();return;}latest.current.onVoxelAction?.({type:kind,x:h.x+(kind==='voxel-place'?h.normal.x:0),y:h.y+(kind==='voxel-place'?h.normal.y:0),z:h.z+(kind==='voxel-place'?h.normal.z:0),block:buildRef.current.selected,rotation:buildRef.current.rotation});}
 
     }
     const vertical=(e:KeyboardEvent)=>{if(e.code==='Space'&&!e.repeat&&!buildRef.current.panel&&!document.activeElement?.closest('input,textarea,[role=dialog]')){e.preventDefault();latest.current.onVoxelAction?.({type:'voxel-jump'});}if(e.code==='KeyC'&&!e.repeat&&!buildRef.current.panel&&!document.activeElement?.closest('input,textarea,[role=dialog]'))latest.current.onVoxelAction?.({type:'voxel-dive'});};
     window.addEventListener('keydown',vertical);
     const physicsTimer=window.setInterval(()=>{const a=latest.current.world.players[latest.current.selfId];if(buildRef.current.building&&a?.position3D?.vy)latest.current.onVoxelAction?.({type:'voxel-move',dx:0,dy:0});},80);
-    const command=(e:Event)=>performBuild((e as CustomEvent).detail);
+    const openDevice = () => {
+      const current = latest.current, w = current.world;
+      const ridden = machineCarts(w).find(cart=>cart.rider===current.selfId);
+      if (ridden) { setDeviceTarget({x:ridden.x,y:ridden.y,z:ridden.z}); return; }
+      const target = buildHit(w);
+      if (target && (isMachinePart(target.block) || machineStorage(target.block) || inspectMachine(w,target.x,target.y,target.z).cart)) {
+        setDeviceTarget({ x: target.x, y: target.y, z: target.z });
+      }
+    };
+    const command=(e:Event)=>{
+      const detail=(e as CustomEvent).detail;
+      if (detail==='inspect') openDevice();
+      else if (detail==='scoop' || detail==='water' || detail==='lava') performFluid(detail);
+      else if (detail==='voxel-break' || detail==='voxel-place') performBuild(detail);
+    };
+    const inspectKey = (e:KeyboardEvent) => {
+      if (e.code !== 'KeyF' || e.repeat || !buildRef.current.building ||
+        latest.current.inputBlocked || buildRef.current.panel || document.activeElement?.closest('input,textarea,select,[role=dialog]')) return;
+      e.preventDefault();
+      openDevice();
+    };
+    window.addEventListener('keydown',inspectKey);
     element.addEventListener('voxel-command',command);
     const controllerLook=(event:Event)=>{
       if(buildRef.current.panel)return;
@@ -815,25 +895,63 @@ export default function WorldScene3D(props: SceneProps) {
     };
     window.addEventListener('learning-rogue:rpg-controller-look',controllerLook);
     let down: { id:number; x: number; y: number } | null = null;
+    const canvas = renderer.domElement;
+    const locked = () => document.pointerLockElement === canvas;
+    const lookBlocked = () => latest.current.inputBlocked || buildRef.current.panel ||
+      latest.current.presentation === 'conversation' || !!document.querySelector('[role=dialog]');
+    const lookBy = (dx: number, dy: number) => {
+      if (!dx && !dy) return;
+      const delta = cameraDelta(dx, dy, options.current);
+      if (dx) {
+        const facing = ((latest.current.facing + delta.yaw) % 4 + 4) % 4;
+        latest.current = { ...latest.current, facing };
+        latest.current.onFacing(facing);
+      }
+      if (dy) setPitch(p => Math.max(-1.45, Math.min(1.45, p + delta.pitch)));
+    };
+    const lockChanged = () => {
+      down = null;
+      setMouseLook(locked());
+    };
+    const unlock = () => {
+      if (locked()) document.exitPointerLock();
+    };
+    const lockedLook = (e: MouseEvent) => {
+      if (!locked()) return;
+      if (lookBlocked()) { unlock(); return; }
+      lookBy(e.movementX, e.movementY);
+    };
+    const exitWithEscape = (e: KeyboardEvent) => { if (e.key === 'Escape') unlock(); };
+    const suppressLockedMenu = (e: MouseEvent) => { if (locked()) e.preventDefault(); };
+    document.addEventListener('pointerlockchange', lockChanged);
+    document.addEventListener('mousemove', lockedLook);
+    window.addEventListener('keydown', exitWithEscape);
+    canvas.addEventListener('contextmenu', suppressLockedMenu);
     let ambience:ReturnType<typeof audioService.createRpgAmbience>=null;
     const enableAmbience=()=>{ambience??=audioService.createRpgAmbience();};
     element.addEventListener('pointerdown',enableAmbience);
     const start = (e: PointerEvent) => {
-      if(down||e.button!==0||options.current.lookControl==='stick'||buildRef.current.panel||document.querySelector('[role=dialog]'))return;
+      if (locked()) {
+        if (lookBlocked()) { unlock(); return; }
+        if (buildRef.current.building && (e.button === 0 || e.button === 2)) {
+          e.preventDefault();
+          performBuild(e.button === 0 ? 'voxel-break' : 'voxel-place');
+        }
+        return;
+      }
+      if(down||e.button!==0||options.current.lookControl==='stick'||lookBlocked())return;
       renderer.domElement.setPointerCapture(e.pointerId);
       down = { id:e.pointerId,x: e.clientX, y: e.clientY };
     };
     const moveLook = (e: PointerEvent) => {
       if (!down||down.id!==e.pointerId) return;
-      if(options.current.lookControl==='stick'||buildRef.current.panel||document.querySelector('[role=dialog]')){down=null;return;}
+      if(options.current.lookControl==='stick'||lookBlocked()){down=null;return;}
       const dx=e.clientX-down.x, dy=e.clientY-down.y;
       down={id:e.pointerId,x:e.clientX,y:e.clientY};
-      const delta=cameraDelta(dx,dy,options.current);
-      latest.current.onFacing(latest.current.facing+delta.yaw);
-      setPitch(p=>Math.max(-1.45,Math.min(1.45,p+delta.pitch)));
+      lookBy(dx,dy);
     };
     const end = (e:PointerEvent) => { if(down?.id===e.pointerId)down=null; };
-    const cancelLook=()=>{down=null;};
+    const cancelLook=()=>{down=null;unlock();};
     window.addEventListener("blur",cancelLook);
     document.addEventListener("visibilitychange",cancelLook);
     const lost = (e: Event) => {
@@ -849,6 +967,7 @@ export default function WorldScene3D(props: SceneProps) {
     let lastTarget="";
     const draw = (time: number) => {
       if (disposed) return;
+      if (locked() && lookBlocked()) unlock();
       if (
         latest.current.presentation === "conversation" &&
         time - last < 1000 / 15
@@ -859,8 +978,26 @@ export default function WorldScene3D(props: SceneProps) {
       renderer.domElement.dataset.facing = String(latest.current.facing);renderer.domElement.dataset.voxelBlocks=String(voxelGroup.children.reduce((n,o)=>n+(o instanceof THREE.InstancedMesh?o.count:0),0));
       const w: World = latest.current.world,
         a = w.players[latest.current.selfId];
+      const newBlueprint=preview.current;
+      if(shownBlueprint!==newBlueprint || newBlueprint && previewRevision!==w.voxels?.revision){
+        shownBlueprint=newBlueprint;
+        previewRevision=w.voxels?.revision??0;
+        planned.count=0;
+        for(const cell of newBlueprint?.pattern.cells??[]){
+          const {x,y,z}=blueprintPoint(newBlueprint!.origin,cell);
+          planMatrix.makeScale(.98,.98,.98).setPosition(x+.5,y+.5,z+.5);
+          planned.setMatrixAt(planned.count,planMatrix);
+          planned.setColorAt(planned.count++,planColor.set(blockAt(w,x,y,z)||protectedVoxel(w,x,z)?'#ff8a7a':'#84fff2'));
+        }
+        planned.instanceMatrix.needsUpdate=true;
+        if(planned.instanceColor)planned.instanceColor.needsUpdate=true;
+      }
       const dt = Math.min(0.1, (time - last) / 1000 || 0.016);
       if (a) {
+        const focusPoint=new THREE.Vector3(a.position3D?.x??a.x,a.position3D?.y??0,a.position3D?.z??a.y);
+        machineryEffects.update(w,focusPoint,dt,options.current.reducedMotion);
+        creatures.update(w,focusPoint,time/1000,dt,options.current.reducedMotion);
+        renderer.domElement.dataset.creatureModels=String(creatures.count);
         if (
           w !== lastWorld ||
           w.revision !== lastRevision ||
@@ -889,6 +1026,21 @@ export default function WorldScene3D(props: SceneProps) {
         if (nextKey !== key) {
           key = nextKey;
           rebuild(w, Math.floor(a.position3D?.x??a.x), Math.floor(a.position3D?.z??a.y));
+        }
+        // Device motion changes its nearby instance without rebuilding the terrain mesh.
+        for (const mesh of voxelGroup.children) {
+          if (!(mesh instanceof THREE.InstancedMesh) || mesh.userData.block !== 'signal_gate') continue;
+          const matrix = new THREE.Matrix4();
+          const positions = mesh.userData.voxels as MachineCell[];
+          const flags = (mesh.userData.opened ??= new Array<boolean>(positions.length));
+          positions.forEach(({x,y,z},index)=>{
+            const opened = poweredGateOpen(w,x,y,z);
+            if (flags[index] === opened) return;
+            flags[index] = opened;
+            orientVoxel(w,'signal_gate',x,y,z,matrix);
+            mesh.setMatrixAt(index,matrix);
+            mesh.instanceMatrix.needsUpdate = true;
+          });
         }
         const nextActors =
           (latest.current.hiddenActors || []).join("|") +
@@ -964,6 +1116,7 @@ export default function WorldScene3D(props: SceneProps) {
         for (const object of group.children) {
           if (!(object instanceof THREE.Sprite) || !object.userData.displaySize)
             continue;
+          if(object.userData.creatureId)object.visible=!creatures.has(object.userData.creatureId);
           const image = object.material.map?.image as
             | { width?: number; height?: number }
             | undefined;
@@ -996,12 +1149,12 @@ export default function WorldScene3D(props: SceneProps) {
       sun.target.updateMatrixWorld();
       skyDome.position.copy(camera.position);
       const phase = calendar(w).phase;
-      const exterior=!legacyRegion(camera.position.x,camera.position.z),pool=voxelWater(w,camera.position.x,camera.position.z),underwater=!!pool&&camera.position.y<pool.surface;
+      const exterior=!legacyRegion(camera.position.x,camera.position.z),pool=voxelWater(w,camera.position.x,camera.position.z,camera.position.y),underwater=!!pool&&camera.position.y<pool.surface&&camera.position.y>=pool.surface-pool.depth;
       (scene.fog as THREE.FogExp2).density=underwater?.11:camera.position.y>170?.0035:profile.low?.003:.0018;
       if(underwater){scene.background=new THREE.Color('#28748b');(scene.fog as THREE.FogExp2).color.set('#28748b');}
       renderer.domElement.dataset.actorSprites=String(actors.children.filter(o=>o instanceof THREE.Sprite).length);
       // Only the local protagonist uses a 3D model; every other actor keeps its artwork.
-      landscape.update(w,avatar.root.position,time/1000,phase===3,options.current.reducedMotion);
+      landscape.update(w,avatar.root.position,time/1000,phase===3,options.current.reducedMotion,creatures.count);
       nature.update(w,avatar.root.position,time/1000,options.current.reducedMotion,phase===3);
       const detailRadius=profile.low?12:19;
       for(const g of distantBuildings.children){const s=g.userData.site,dx=Math.abs(s.x-avatar.root.position.x),dz=Math.abs(s.y-avatar.root.position.z);g.visible=(dx>=detailRadius||dz>=detailRadius)&&Math.hypot(dx,dz)<170;}
@@ -1021,8 +1174,8 @@ export default function WorldScene3D(props: SceneProps) {
       renderer.domElement.dataset.workshopModels=String(construction.readyShapes);renderer.domElement.dataset.eyeHeight=String(EYE_HEIGHT);renderer.domElement.dataset.pitch=String(buildRef.current.pitch);renderer.domElement.dataset.facing=String(latest.current.facing);renderer.domElement.dataset.cameraY=String(camera.position.y);renderer.domElement.dataset.artStyle='storybook-fantasy';renderer.domElement.dataset.blenderModels=String(models.ready?models.group.userData.models:0);renderer.domElement.dataset.blenderAnimations=String(models.group.userData.animations||0);
       outline.visible=false;ghost.visible=false;
       if(buildRef.current.building){ray.setFromCamera(new THREE.Vector2(0,0),camera);const h=buildHit(w);let t:{block:TerrainBlock;cost:number}|null=null;
-        if(h){outline.position.set(h.x+.5,h.y+.5,h.z+.5);outline.visible=true;t={block:h.block,cost:miningCost(h.block,w.players[latest.current.selfId])};
-          if(!buildRef.current.panel){const x=h.x+h.normal.x,y=h.y+h.normal.y,z=h.z+h.normal.z,chosen=buildRef.current.selected;ghost.geometry=construction.get(chosen);ghost.position.set(x+.5,y+.5,z+.5);ghost.rotation.y=buildRef.current.rotation*Math.PI/2;ghost.visible=true;const valid=!blockAt(w,x,y,z)&&!protectedVoxel(w,x,z)&&y>MIN_DEPTH&&y<=MAX_HEIGHT&&(w.players[latest.current.selfId].life?.bag[chosen]||0)>0&&!Object.values(w.players).some(q=>Math.floor(q.position3D?.x??q.x+.5)===x&&Math.floor(q.position3D?.z??q.y+.5)===z&&y>=playerHeight(w,q)&&y<playerHeight(w,q)+2);ghostMaterial.color.set(valid?'#89e0ac':'#ed9079');}}
+        if(h){outline.position.set(h.x+.5,h.y+.5,h.z+.5);outline.visible=true;t={block:h.block,cost:miningCost(h.block,w.players[latest.current.selfId],w)};
+          if(!buildRef.current.panel){const x=h.x+h.normal.x,y=h.y+h.normal.y,z=h.z+h.normal.z,chosen=buildRef.current.selected;ghost.geometry=construction.get(chosen);ghost.position.set(x+.5,y+.5,z+.5);ghost.rotation.y=(isMachinePart(chosen)?-1:1)*buildRef.current.rotation*Math.PI/2;ghost.visible=true;const valid=!blockAt(w,x,y,z)&&!protectedVoxel(w,x,z)&&sandboxAllows(w,latest.current.selfId,{x,y,z},'build')&&y>MIN_DEPTH&&y<=MAX_HEIGHT&&(w.players[latest.current.selfId].life?.bag[chosen]||0)>0&&!Object.values(w.players).some(q=>Math.floor(q.position3D?.x??q.x+.5)===x&&Math.floor(q.position3D?.z??q.y+.5)===z&&y>=playerHeight(w,q)&&y<playerHeight(w,q)+2);ghostMaterial.color.set(valid?'#89e0ac':'#ed9079');}}
         const k=t?t.block+':'+t.cost:'';if(k!==lastTarget){lastTarget=k;setTarget(t);}}
 
       windClock.value=options.current.reducedMotion?0:time/1000;
@@ -1037,6 +1190,15 @@ export default function WorldScene3D(props: SceneProps) {
     raf = requestAnimationFrame(draw);
     return () => {
       disposed = true;window.removeEventListener('learning-rogue:rpg-controller-look',controllerLook);window.removeEventListener('keydown',vertical);clearInterval(physicsTimer);
+      unlock();
+      window.removeEventListener('keydown', inspectKey);
+      machineryEffects.dispose();
+      creatures.dispose();
+      lockTarget.current = null;
+      document.removeEventListener('pointerlockchange', lockChanged);
+      document.removeEventListener('mousemove', lockedLook);
+      window.removeEventListener('keydown', exitWithEscape);
+      canvas.removeEventListener('contextmenu', suppressLockedMenu);
       element.removeEventListener('pointerdown',enableAmbience);ambience?.dispose();
       cancelAnimationFrame(raf);
       observer.disconnect();renderer.domElement.removeEventListener('wheel',wheelZoom);
@@ -1048,7 +1210,7 @@ export default function WorldScene3D(props: SceneProps) {
       renderer.domElement.removeEventListener("lostpointercapture", end);
       window.removeEventListener("blur",cancelLook);
       document.removeEventListener("visibilitychange",cancelLook);
-      element.removeEventListener("voxel-command",command);voxelGroup.children.forEach(o=>{if(o instanceof THREE.InstancedMesh)o.dispose();});voxelGeometry.dispose();construction.dispose();voxelMaterials.forEach(m=>{m.map?.dispose();m.dispose();});outlineMaterial.dispose();ghostMaterial.dispose();
+      element.removeEventListener("voxel-command",command);voxelGroup.children.forEach(o=>{if(o instanceof THREE.InstancedMesh)o.dispose();});planned.dispose();plannedMaterial.dispose();voxelGeometry.dispose();construction.dispose();voxelMaterials.forEach(m=>{m.map?.dispose();m.dispose();});outlineMaterial.dispose();ghostMaterial.dispose();
       protagonist.dispose();landscape.dispose();models.dispose();avatar.dispose();nature.dispose();
       batches.forEach((b) => b.dispose());
       groundMaterial?.dispose();
@@ -1061,13 +1223,39 @@ export default function WorldScene3D(props: SceneProps) {
   }, [prefs.mapQuality]);
   const text=(s:string)=>trans(s,props.languageMode||"JAPANESE");
   const command=(type:string)=>host.current?.dispatchEvent(new CustomEvent('voxel-command',{detail:type}));
+  const toggleMouseLook = () => {
+    const canvas = lockTarget.current;
+    if (!canvas || props.inputBlocked || editSlot || deviceTarget || document.querySelector('[role=dialog]')) return;
+    if (document.pointerLockElement === canvas) { document.exitPointerLock(); return; }
+    // Framed hosts and browser privacy settings may deny capture. Drag remains available.
+    try { void Promise.resolve(canvas.requestPointerLock()).catch(() => setMouseLook(false)); }
+    catch { setMouseLook(false); }
+  };
   const me=props.world.players[props.selfId];
-  return <div className="rpg-world-3d" ref={host}>{props.presentation!=='conversation'&&<CameraControls languageMode={props.languageMode} building={building} disabled={editSlot} thirdPerson={thirdPerson} onView={()=>setThirdPerson(v=>!v)} onReset={()=>setPitch(0)} onLook={(x,y,dt)=>{if(buildRef.current.panel||document.querySelector('[role=dialog]'))return;const delta=cameraDelta(x,y,options.current,dt);latest.current.onFacing(latest.current.facing+delta.yaw);setPitch(p=>Math.max(-1.45,Math.min(1.45,p+delta.pitch)));}}/>}{building&&me&&me.position3D?.oxygen!==undefined&&me.position3D.oxygen<20&&<div className="rpg-oxygen-meter" aria-label="Oxygen">🫧 <meter min={0} max={20} value={me.position3D.oxygen}/><span>{Math.ceil(me.position3D.oxygen)} s</span></div>}{building&&me&&<LandscapeCompass x={me.position3D?.x??me.x} z={me.position3D?.z??me.y} languageMode={props.languageMode}/ >}{building&&<div className="rpg-voxel-dock" onPointerDown={e=>e.stopPropagation()}>
+  const ridden=machineCarts(props.world).find(cart=>cart.rider===props.selfId);
+  const showDevice=ridden||deviceTarget;
+  const L=(ja:string,en:string,hi:string)=>sandboxText(props.languageMode,ja,en,hi);
+  return <div className="rpg-world-3d" ref={host}>{props.presentation!=='conversation'&&<CameraControls languageMode={props.languageMode} building={building} disabled={editSlot||!!deviceTarget||props.inputBlocked} thirdPerson={thirdPerson} mouseLook={mouseLook} onMouseLook={pointerLockAvailable ? toggleMouseLook : undefined} onView={()=>setThirdPerson(v=>!v)} onReset={()=>setPitch(0)} onLook={(x,y,dt)=>{if(buildRef.current.panel||document.querySelector('[role=dialog]'))return;const delta=cameraDelta(x,y,options.current,dt);latest.current.onFacing(latest.current.facing+delta.yaw);setPitch(p=>Math.max(-1.45,Math.min(1.45,p+delta.pitch)));}}/>}{building&&me&&me.position3D?.oxygen!==undefined&&me.position3D.oxygen<20&&<div className="rpg-oxygen-meter" aria-label="Oxygen">🫧 <meter min={0} max={20} value={me.position3D.oxygen}/><span>{Math.ceil(me.position3D.oxygen)} s</span></div>}{building&&me&&<LandscapeCompass x={me.position3D?.x??me.x} z={me.position3D?.z??me.y} languageMode={props.languageMode}/ >}{building&&<div className="rpg-voxel-dock" onPointerDown={e=>e.stopPropagation()}>
 
     <header><span>⚡ {(me?.life?.energy??6).toFixed(2)}/6 · Y {me?playerHeight(props.world,me).toFixed(1):0}</span><button aria-label={text('スロット設定')} aria-expanded={editSlot} {...multiTouchAction(()=>setEditSlot(!editSlot))}>⚙</button></header>
-    <div className="rpg-voxel-slots">{slots.map((b,i)=><button key={i} aria-label={`${text('スロット')} ${i+1}: ${text(MATERIAL_NAMES[b])}`} aria-pressed={selectedSlot===i} {...multiTouchAction(()=>setSelectedSlot(i))}><svg viewBox="0 0 32 32" aria-hidden="true"><path fill={VOXEL_COLORS[b]} d="M16 2 30 9v15L16 31 2 24V9z"/><path fill="#ffffff40" d="m16 2 14 7-14 7L2 9z"/><path fill="#00000030" d="m16 16 14-7v15l-14 7z"/></svg><small>{text(MATERIAL_NAMES[b])}</small><b>{me?.life?.bag[b]||0}</b></button>)}</div>
-    <div className="rpg-workshop-actions"><button {...multiTouchAction(()=>setEditSlot(true))}>{text("建築工房")}</button><button aria-label={text("建材を回転")} {...multiTouchAction(()=>setRotation(r=>(r+1)%4))}>↻ {rotation*90}°</button></div>
+    <div className="rpg-voxel-slots">{slots.map((b,i)=><button key={i} aria-label={`${text('スロット')} ${i+1}: ${sandboxItemName(b,props.languageMode)}`} aria-pressed={selectedSlot===i} {...multiTouchAction(()=>setSelectedSlot(i))}><svg viewBox="0 0 32 32" aria-hidden="true"><path fill={VOXEL_COLORS[b]} d="M16 2 30 9v15L16 31 2 24V9z"/><path fill="#ffffff40" d="m16 2 14 7-14 7L2 9z"/><path fill="#00000030" d="m16 16 14-7v15l-14 7z"/></svg><small>{sandboxItemName(b,props.languageMode)}</small><b>{me?.life?.bag[b]||0}</b></button>)}</div>
+    <div className="rpg-workshop-actions"><button {...multiTouchAction(()=>setEditSlot(true))}>{text("建築工房")}</button><button {...multiTouchAction(()=>command('inspect'))}>{L('調べる','Inspect','しらべる')} <kbd>F</kbd></button><button aria-label={text("建材を回転")} {...multiTouchAction(()=>setRotation(r=>(r+1)%4))}>↻ {rotation*90}°</button></div>
     <div className="rpg-voxel-actions"><button aria-label="Jump / Swim up" {...multiTouchAction(()=>props.onVoxelAction?.({type:'voxel-jump'}))}>↑</button><button aria-label="Dive" {...multiTouchAction(()=>props.onVoxelAction?.({type:'voxel-dive'}))}>↓</button><button disabled={energyOf(me?.life)>=.1&&!!target&&!Number.isFinite(target.cost)} {...multiTouchAction(()=>command('voxel-break'))}>⛏ {text('壊す')}</button><button disabled={energyOf(me?.life)>=.1&&(me?.life?.bag[selected]||0)<1} {...multiTouchAction(()=>command('voxel-place'))}>＋ {text('置く')}</button></div>
-    <small className="rpg-voxel-target">{target?text(target.block==='bedrock'?'岩盤':target.block==='oasis-water'?'地下の水':target.block==='door-top'?'ドア':MATERIAL_NAMES[target.block]):text('照準をブロックに合わせる')} · ⚡ {target?(Number.isFinite(target.cost)?target.cost.toFixed(2):'—'):'0.10'}</small>
-  </div>}{building&&editSlot&&<VoxelWorkshopPanel world={props.world} selfId={props.selfId} languageMode={props.languageMode||"JAPANESE"} send={a=>props.onVoxelAction?.(a)} onChoose={block=>setSlots(slots=>slots.map((b,i)=>i===selectedSlot?block:b))} onClose={()=>setEditSlot(false)}/>}{building&&<span className="rpg-voxel-crosshair">＋</span>}</div>;
+    {me?.life && (me.life.bag.bucket || me.life.bag.water_bucket || me.life.bag.lava_bucket) ? <div className="rpg-workshop-actions">
+      {!!me.life.bag.bucket && <button {...multiTouchAction(()=>command('scoop'))}>{L('くむ','Fill bucket','くむ')}</button>}
+      {!!me.life.bag.water_bucket && <button {...multiTouchAction(()=>command('water'))}>{L('水を置く','Place water','みずをおく')}</button>}
+      {!!me.life.bag.lava_bucket && <button {...multiTouchAction(()=>command('lava'))}>{L('溶岩を置く','Place lava','ようがんをおく')}</button>}
+    </div> : null}
+    {blueprint&&!props.inputBlocked&&<div className="rpg-workshop-actions rpg-blueprint-tools">
+      <button onClick={()=>props.onVoxelAction?.({type:'voxel-blueprint',command:'place',...blueprint.origin,pattern:blueprint.pattern})}>{L('まとめて建築','Build blueprint','まとめてけんちく')}</button>
+      <button onClick={()=>setBlueprint(null)}>{L('仮表示を閉じる','Close preview','かりひょうじをとじる')}</button>
+    </div>}
+    <small className="rpg-voxel-target">{target?(target.block==='bedrock'||target.block==='oasis-water'||target.block==='door-top'?text(target.block==='bedrock'?'岩盤':target.block==='oasis-water'?'地下の水':'ドア'):sandboxItemName(target.block,props.languageMode)):text('照準をブロックに合わせる')} · ⚡ {target?(Number.isFinite(target.cost)?target.cost.toFixed(2):'—'):'0.10'}</small>
+  </div>}{building&&editSlot&&<VoxelWorkshopPanel world={props.world} selfId={props.selfId} languageMode={props.languageMode||"JAPANESE"} send={a=>props.onVoxelAction?.(a)} onChoose={block=>setSlots(slots=>slots.map((b,i)=>i===selectedSlot?block:b))} onBlueprintPreview={setBlueprint} onClose={()=>setEditSlot(false)}/>}{building&&showDevice&&!editSlot&&!props.inputBlocked&&<div className="rpg-3d-device-panel" onPointerDown={e=>e.stopPropagation()}>
+      {!ridden&&<button onClick={()=>setDeviceTarget(null)} aria-label={L('閉じる','Close','とじる')}>×</button>}
+      <MachineryInspector world={props.world} selfId={props.selfId} position={{x:showDevice.x,y:showDevice.y,z:showDevice.z}} languageMode={props.languageMode} send={action=>{
+        props.onVoxelAction?.(action);
+        if(action.type==='voxel-device'&&action.command==='cart-ride')setDeviceTarget(null);
+      }}/>
+    </div>}{building&&<span className="rpg-voxel-crosshair">＋</span>}</div>;
 }
