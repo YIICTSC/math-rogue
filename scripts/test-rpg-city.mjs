@@ -218,6 +218,40 @@ try {
   assert.deepEqual(restored.city, w.city);
   assert.deepEqual(restored.town.customResidents, w.town.customResidents);
   assert.equal(S.canSaveWorld(restored, "a", player), true);
+
+  const housing=w.city.lots.find(lot=>lot.kind==='cottage'&&lot.people>0);
+  const shop=w.city.lots.find(lot=>lot.kind==='market');
+  const generator=w.city.lots.find(lot=>lot.kind==='wind');
+  const M=await server.ssrLoadModule('/src/rpg/machinery.ts');
+  const W=await server.ssrLoadModule('/src/rpg/city/works.ts');
+  w.voxels??={edits:{},revision:0,terrainVersion:2};
+  w.voxels.placedBy??={};w.voxels.containers??={};
+  function install(lot,key,block){
+    assert(lot);
+    w.voxels.edits[key]=block;w.voxels.placedBy[key]='a';
+    M.recordMachineEdit(w,...key.split(',').map(Number),null,block);
+  }
+  install(shop,'25,0,19','warehouse_chest');
+  install(generator,'22,0,19','crystal_lamp');
+  install(generator,'22,0,18','crystal_lever');
+  const crate=w.voxels.containers['25,0,19']={items:{fruit:5}};
+  const link={type:'city-works-link',lot:shop.id,cell:'25,0,19',home:housing.id};
+  assert.equal(C.applyCity(w,w.players.b,link,now),false);
+  assert.equal(send({...link,home:shop.id}),false);
+  assert(send(link));
+  assert(send({...link,lot:generator.id,cell:'22,0,19'}));
+  p.x=22;p.y=19;p.position3D={x:22.5,y:0,z:19.5,surface2D:true};
+  assert(send({type:'voxel-device',command:'use',x:22,y:0,z:18}));
+  for(let i=0;i<32;i++)E.advanceWorld(w,now+=1000);
+  assert.equal(crate.items.fruit,2);
+  const bonuses=W.cityWorksBenefits(w);
+  assert(bonuses.commerce>0);
+  assert(bonuses.power.has(generator.id));
+  E.advanceWorld(w,now+=1000);
+  assert.equal(crate.items.fruit,2,'The same month cannot debit a batch twice.');
+  assert.equal(S.restoreWorldSave(S.makeWorldSave(w,'a',player,now),now).city.works.links[shop.id].units,3);
+  assert(send({type:'city-works-unlink',lot:shop.id}));
+  assert.equal(W.cityWorksBenefits(w).commerce,0);
   w.town.cooking.a = { started: now };
   assert.equal(send({ type: "city-tax", tax: 15 }), false);
   console.log(

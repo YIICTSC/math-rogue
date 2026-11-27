@@ -7,11 +7,12 @@ import {farmMapTargets,type FarmQuickAction} from './mapTargets';
 import {PET_TRICKS} from '../lifestyle/catalog';
 import type {AnimalMoment} from '../lifestyle/animalMotion';
 import { hasRareCoat } from './animalLook';
+import { terrainHeight } from '../voxel';
 import type { World, Adventurer } from "../engine";
 import { WIDTH, HEIGHT } from "../engine";
 import { lifePlayer, canAfford } from "../life";
 import { pendingMutation } from "../activities";
-import { calendar, hash } from "../town/model";
+import { calendar, flowerAt, hash } from "../town/model";
 import {
   CROPS,
   cropById,
@@ -246,6 +247,16 @@ export function farmSpots(w: World, p: Adventurer) {
   return spots;
 }
 export const nearFarm = (p:Adventurer,f:FarmPlayer)=>f.plots.some(plot=>{const xy=plotPosition(f,plot);return xy&&Math.abs(xy.x-p.x)+Math.abs(xy.y-p.y)<=4;})||(f.x!==undefined&&f.y!==undefined&&Math.abs(f.x-p.x)+Math.abs(f.y-p.y)<=4);
+
+export function apiaryHasFlowers(w:World,f:FarmPlayer) {
+  if(f.x===undefined||f.y===undefined||!f.animals.some(animal=>animal.kind==='bees'))return false;
+  for(let dz=-4;dz<=4;dz++)for(let dx=-4;dx<=4;dx++){
+    const x=f.x+dx,z=f.y+dz;
+    if(Math.abs(dx)+Math.abs(dz)>4||x<1||z<1||x>=WIDTH-1||z>=HEIGHT-1)continue;
+    if(w.voxels?.edits[`${x},${terrainHeight(w,x,z)},${z}`]==='garden_bed'||flowerAt(w,z*WIDTH+x))return true;
+  }
+  return false;
+}
 export function farmBusy(w: World, p: Adventurer) {
   return !!(
     p.spectator ||
@@ -818,6 +829,7 @@ export function advanceFarm(w: World) {
       const previous = day - 1,
         season = Math.floor(previous / 7) % 4,
         rain = hash(String(previous), w.seed) % 5 === 2;
+      const pollinating=f.animals.some(animal=>animal.kind==='bees'&&animal.feed===previous&&animal.health>=40)&&apiaryHasFlowers(w,f);
       for (const plot of f.plots) {
         const c = cropById(plot.crop || "");
         if (
@@ -832,8 +844,10 @@ export function advanceFarm(w: World) {
           f.upgrades.includes("irrigation") ||
           (()=>{const pos=plotPosition(f,plot);return !!pos&&irrigatedPlot(w,pos.x,pos.y);})()
         ) {
+          const pos=plotPosition(f,plot);
+          const visits=pollinating&&pos&&Math.abs(pos.x-f.x!)+Math.abs(pos.y-f.y!)<=5;
           plot.growth++;
-          plot.quality = Math.min(100, plot.quality + 5);
+          plot.quality = Math.min(100, plot.quality + (visits?8:5));
         } else plot.quality = Math.max(40, plot.quality - 5);
       }
       for (const animal of f.animals) {
@@ -846,7 +860,7 @@ export function advanceFarm(w: World) {
               animal.progress = 0;
               animal.ready = Math.min(
                 5,
-                animal.ready + 1 + (animal.bond >= 80 ? 1 : 0),
+                animal.ready + 1 + (animal.bond >= 80 ? 1 : 0) + (animal.kind==='bees'&&pollinating?1:0),
               );
             }
           }

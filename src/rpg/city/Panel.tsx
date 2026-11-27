@@ -1,4 +1,5 @@
 import CityLivingPanel from '../lifestyle/CityLivingPanel';
+import WorksPanel from './WorksPanel';
 import CitySprite from "./CitySprite";
 import React, { useState, useEffect, useRef } from "react";
 import type { World, Action } from "../engine";
@@ -147,6 +148,7 @@ export default function CityPanel({
             ["services", "サービス", "Services", "さーびす"],
             ["projects", "街の目標", "City goals", "まちのもくひょう"],
             ["living", "住民と地区", "People and districts", "じゅうみんとちく"],
+            ["works", "街の設備連携", "Industry and transit", "まちのせつびれんけい"],
           ].map(([id, ja, en, hi]) => (
             <button
               key={id}
@@ -158,6 +160,7 @@ export default function CityPanel({
           ))}
         </nav>
         <div className="city-scroll">
+          {tab==='works'&&<WorksPanel world={world} selfId={selfId} languageMode={languageMode} send={send}/>}
           {tab === "build" && (
             <>
               <p>

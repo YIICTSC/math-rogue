@@ -7,9 +7,10 @@ import { animalPose, type AnimalMoment } from './animalMotion';
 import { creatureHasArt } from './creatureArt';
 import { ranchArt, ranchPosition } from '../farm/animalLook';
 import { visibleWildlife, WILDLIFE } from './wildlife';
+import { packAnimals } from '../packAnimals';
 
 type Animal = { id: string; kind: string; bond: number; moment?: AnimalMoment };
-type Placement = { id: string; animal: Animal; art: string; x: number; y: number; z: number };
+type Placement = { id: string; animal: Animal; art: string; x: number; y: number; z: number; heading?:number };
 type Instance = { model: T.Object3D; art: string; parts: Map<string, T.Object3D>; pos: T.Vector3; yaw: number; walking: number };
 
 export class CreatureModels {
@@ -23,6 +24,8 @@ export class CreatureModels {
   private cell = '';
   private layoutTime = -1;
   private placements: Placement[] = [];
+  private saddlebag = new T.BoxGeometry(.19,.23,.31);
+  private saddleLeather = new T.MeshStandardMaterial({color:'#754831',roughness:.93});
 
   constructor(parent: T.Object3D, private lowQuality: boolean) {
     parent.add(this.group);
@@ -57,6 +60,11 @@ export class CreatureModels {
     for (const animal of visibleWildlife(w,focus.x,focus.z,this.lowQuality ? 13 : 23,focus.y)) {
       put('habitat',animal,animal.x,animal.y,animal.z);
     }
+    for(const companion of packAnimals(w))if(Math.hypot(focus.x-companion.x,focus.z-companion.z)<(this.lowQuality?13:23)){
+      const moving=companion.rider&&w.players[companion.rider]&&w.life.now-w.players[companion.rider].lastMove<900;
+      const animal:Animal={...companion,bond:100,moment:{pose:moving?'walk':'greet',until:w.life.time+2}};
+      list.push({id:`pack:${companion.id}`,animal,art:companion.kind,x:companion.x,y:companion.y,z:companion.z,heading:-companion.dir});
+    }
     return list.sort((a,b)=>Math.hypot(a.x-focus.x,a.z-focus.z)-Math.hypot(b.x-focus.x,b.z-focus.z))
       .slice(0,this.lowQuality ? 10 : 18);
   }
@@ -70,8 +78,14 @@ export class CreatureModels {
       if (typeof o.userData.part === 'string') parts.set(o.userData.part, o);
       if (o instanceof T.Mesh) { o.castShadow = !this.lowQuality; o.receiveShadow = true; }
     });
+    if(p.heading!==undefined)for(const side of [-1,1]){
+      const bag=new T.Mesh(this.saddlebag,this.saddleLeather);
+      bag.position.set(side*.275,companionSaddleHeight(p.art),.11);
+      bag.rotation.z=side*-.14;
+      bag.castShadow=!this.lowQuality;model.add(bag);
+    }
     const pos = new T.Vector3(p.x,p.y,p.z);
-    const q = { model, art:p.art, parts, pos, yaw: Math.PI*.56, walking: 0 };
+    const q = { model, art:p.art, parts, pos, yaw: p.heading??Math.PI*.56, walking: 0 };
     this.group.add(model);
     this.instances.set(p.id,q);
     return q;
@@ -82,7 +96,8 @@ export class CreatureModels {
     const target = new T.Vector3(p.x,p.y,p.z);
     const offset = target.clone().sub(pos);
     const speed = offset.length();
-    if (speed > .05) instance.yaw = Math.atan2(-offset.x,-offset.z);
+    if(p.heading!==undefined)instance.yaw=p.heading;
+    else if (speed > .05) instance.yaw = Math.atan2(-offset.x,-offset.z);
     instance.walking = Math.max(0, instance.walking - dt*4);
     if (speed > .07) instance.walking = Math.min(1, instance.walking+dt*8);
     pos.lerp(target, reduced || speed > 3 ? 1 : 1 - Math.exp(-dt*7));
@@ -173,5 +188,9 @@ export class CreatureModels {
     this.group.clear();
     this.group.removeFromParent();
     this.disposeAssets();
+    this.saddlebag.dispose();
+    this.saddleLeather.dispose();
   }
 }
+
+const companionSaddleHeight=(art:string)=>art==='camel'?1.01:art==='donkey'?.72:.82;

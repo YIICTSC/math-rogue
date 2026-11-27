@@ -67,6 +67,9 @@ export const DETAIL_BLOCKS={
   glowcap:{name:['光るキノコ','Glowcap','ひかるキノコ'],color:'#8cd8c6',group:'farm',pattern:'leaf',shape:'flowerpot',cost:{herb:2,crystal_powder:1},count:2,light:true},
   luminous_tile:{name:['光晶タイル','Luminous crystal tile','こうしょうタイル'],color:'#84d1c7',group:'stone',pattern:'ore',shape:'slab',cost:{quartz:2,crystal_powder:1},count:3,light:true},
   copper_block:{name:['銅のブロック','Copper block','どうのブロック'],color:'#b87057',group:'stone',pattern:'metal',shape:'cube',cost:{copper_ingot:6},count:1},
+  iron_block:{name:['鉄のブロック','Iron block','てつのブロック'],color:'#a3b9c5',group:'stone',pattern:'metal',shape:'cube',cost:{iron_ingot:6},count:1},
+  gold_block:{name:['金のブロック','Gold block','きんのブロック'],color:'#d8ab53',group:'stone',pattern:'metal',shape:'cube',cost:{gold_ingot:6},count:1},
+  diamond_block:{name:['ダイヤのブロック','Diamond block','ダイヤのブロック'],color:'#74ccd3',group:'stone',pattern:'ore',shape:'cube',cost:{diamond:4},count:1},
   patina_copper:{name:['緑青の銅','Patinated copper','ろくしょうのどう'],color:'#508d80',group:'stone',pattern:'metal',shape:'cube',cost:{copper_block:1,fruit:1},count:1},
   metal_lattice:{name:['鉄格子','Iron lattice','てつごうし'],color:'#9398a3',group:'stone',pattern:'metal',shape:'fence',cost:{iron_ingot:3},count:4},
   amberglass:{name:['琥珀色のガラス','Amber glass','こはくいろのガラス'],color:'#d3a257',group:'glass',pattern:'glass',shape:'cube',cost:{glass:4,copper_ingot:1},count:4,transparent:true},
@@ -82,6 +85,6 @@ export const DETAIL_BLOCKS={
   concrete_powder:{name:['コンクリート粉末','Concrete powder','コンクリートふんまつ'],color:'#cbc5aa',group:'color',pattern:'gravel',shape:'cube',cost:{sand:2,gravel:2,clay:1},count:5},
   packed_ice:{name:['滑る氷床','Packed ice','すべるこおりゆか'],color:'#9dd6ec',group:'stone',pattern:'glass',shape:'cube',cost:{snow:5,glass:1},count:2,transparent:true},
   slime_floor:{name:['スライム床','Slime floor','スライムゆか'],color:'#81b77f',group:'color',pattern:'glass',shape:'cube',cost:{cactus:4,fruit:2},count:2,transparent:true},
-  honey_floor:{name:['ハチミツ床','Honey floor','ハチミツゆか'],color:'#d09246',group:'color',pattern:'glass',shape:'cube',cost:{wool:2,fruit:5},count:2,transparent:true},
+  honey_floor:{name:['ハチミツ床','Honey floor','ハチミツゆか'],color:'#d09246',group:'color',pattern:'glass',shape:'cube',cost:{wool:2,bottled_honey:1},count:2,transparent:true},
   rebound_floor:{name:['反発床','Spring floor','はんぱつゆか'],color:'#d38f74',group:'machines',pattern:'metal',shape:'slab',cost:{slime_floor:1,iron_ingot:2},count:1},
 } as const;

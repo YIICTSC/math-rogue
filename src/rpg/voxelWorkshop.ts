@@ -4,7 +4,7 @@ import {WIDTH,HEIGHT} from './engine';
 import {blockAt,playerHeight,voxelKey,voxelWater} from './voxel';
 import {lifePlayer,canAfford,type Bag} from './life';
 import {energyOf} from './energy';
-import {farmBusy,farmOf} from './farm/model';
+import {consumeFarm,farmBusy,farmOf} from './farm/model';
 import {cropById} from './farm/catalog';
 import {terrainHeight} from './voxel';
 import {IMPRINTS,POTIONS,WORKSHOP_TOOLS,potionSeconds,type ExplorationPotion,type ToolImprint} from './explorationEquipment';
@@ -14,7 +14,8 @@ import {ALL_MATERIAL_NAMES,WORKSHOP_RECIPES,TOOL_RANK,type VoxelItem,type Worksh
 export type WorkshopAction={type:'voxel-craft';recipe:string;amount:number}|{type:'voxel-storage';x:number;y:number;z:number;item:VoxelItem;amount:number;direction:'deposit'|'withdraw'}|{type:'voxel-compost'}|{type:'voxel-seeds';crop:string}
  | {type:'voxel-tools';tool:ToolKind;operation:'repair'|'clean'}
  | {type:'voxel-tools';tool:ToolKind;operation:'imprint';imprint:ToolImprint}
- | {type:'voxel-potion';item:ExplorationPotion};
+ | {type:'voxel-potion';item:ExplorationPotion}
+ | {type:'voxel-bottle-honey'};
 export interface VoxelContainer{items:Bag}
 export function nearbyWorkshop(w:World,p:Adventurer,block:string){
  if(block==='workbench'&&cartWorkbench(w,p.id))return {x:p.x,y:Math.floor(playerHeight(w,p)),z:p.y};
@@ -39,6 +40,12 @@ export function workshopStatus(w:World,p:Adventurer,r:WorkshopRecipe,amount=1){
 export function applyWorkshop(w:World,p:Adventurer,a:WorkshopAction,now:number){
  if(farmBusy(w,p)||p.life?.indoors||now-(p.life?.workshopAt||0)<200)return false;
  const lp=lifePlayer(p),tell=(message:string)=>{p.message=message;w.revision++;return true;};
+ if(a.type==='voxel-bottle-honey'){
+  if(w.gameMode!=='COOP'||(lp.bag.bottled_honey??0)>=999||!consumeFarm(w,p.id,{honey:2}))return false;
+  lp.bag.bottled_honey=(lp.bag.bottled_honey??0)+1;
+  lp.workshopAt=now;
+  return tell('ハチミツを瓶に詰めました。');
+ }
  if(a.type==='voxel-potion'){
   if(w.gameMode!=='COOP'||!Object.hasOwn(POTIONS,a.item)||!lp.bag[a.item]||potionSeconds(w,p,a.item)>0)return false;
   lp.bag[a.item]!--;

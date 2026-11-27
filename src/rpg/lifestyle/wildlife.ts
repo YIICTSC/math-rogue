@@ -102,6 +102,7 @@ export function visibleWildlife(w:World, x:number, z:number, radius:number, heig
       const list=habitats.get(underground?'cave':highSky?'sky':coast?'coast':aquatic?'river':biome);
       if (!list?.length) continue;
       const kind=aquatic&&!coast ? biome==='ruins'?'reef-fish':'trout' : list[(n>>>8)%list.length];
+      if (w.packAnimals?.[`${id}:${kind}`]) continue;
       if (kind==='butterfly' && (phase===3 || season===3)) continue;
       const habitatType=WILDLIFE[kind];
       const activity=(Math.floor(w.life.time/12)+(n>>>5))%6;

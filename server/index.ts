@@ -130,7 +130,7 @@ sockets.on('connection',(socket,request)=>{
     }
     if(d.type==='spectator' && room.host===m.id)setSpectator(room.world,m.id,d.enabled);
     if(d.type==='action' && d.action){
-      if(!room.machineryProtocol&&(['voxel-device','voxel-fluid','voxel-research','voxel-blueprint','voxel-tools','voxel-potion','voxel-admin','voxel-transport','voxel-cave','voxel-climb','voxel-sign'].includes(d.action.type)||
+      if(!room.machineryProtocol&&(['voxel-device','voxel-fluid','voxel-research','voxel-blueprint','voxel-tools','voxel-potion','voxel-admin','voxel-transport','voxel-cave','voxel-climb','voxel-sign','voxel-pack-animal','voxel-bottle-honey','city-works-link','city-works-unlink'].includes(d.action.type)||
         d.action.type==='voxel-place'&&(isMachinePart(d.action.block)||Object.hasOwn(ARCHITECTURAL_MATERIALS,d.action.block)||Object.hasOwn(DETAIL_BLOCKS,d.action.block)||['warehouse_chest','lift_platform','bubbling_stone','magma_block','anvil','whetstone','imprint_table','brew_table'].includes(d.action.block))))return;
       try{applyAction(room.world,m.id,d.action);}catch{fail(m,'操作を処理できませんでした。');}}
     if(d.type==='dungeon-event' && d.event && typeof d.event.type==='string'){

@@ -10,6 +10,7 @@ import {
 import { ALL_MATERIAL_NAMES, type VoxelItem } from './voxelCatalog';
 import { bodyClear, floorAt, MIN_DEPTH, naturalVoxelWater, playerHeight, protectedVoxel } from './voxel';
 import { landscapeRegion, legacyRegion, WORLD_SCALE } from './worldLandscape';
+import { ridingAnimal, steerPackAnimal } from './packAnimals';
 
 type Point = { x: number; y: number; z: number };
 type Cargo = Partial<Record<VoxelItem, number>>;
@@ -51,7 +52,7 @@ const motionDt = .075;
 const boatValues = (w: World) => Object.values(w.transport?.boats ?? {});
 export const watercraft = boatValues;
 export const boardedBoat = (w: World, id: string) => w.transport && boatValues(w).find(boat => boat.rider === id);
-export const traveling = (w: World, p: Adventurer) => !!(p.gliding || boardedBoat(w, p.id));
+export const traveling = (w: World, p: Adventurer) => !!(p.gliding || boardedBoat(w, p.id) || ridingAnimal(w,p.id));
 const col = (x: number, z: number) => ({ x: Math.floor(x), z: Math.floor(z) });
 const inMap = (x: number, z: number) => legacyRegion(x,z) || landscapeRegion(x,z);
 const nearby = (position: Point, target: Point) => Math.hypot(position.x-target.x, position.y-target.y, position.z-target.z) <= reach;
@@ -85,7 +86,7 @@ export function occupiedByBoat(w: World, x: number, y: number, z: number) {
 }
 
 export function launchLocation(w: World, p: Adventurer): Point | null {
-  if (w.gameMode!=='COOP' || p.gliding || boardedBoat(w,p.id) || ridingCart(w,p.id)) return null;
+  if (w.gameMode!=='COOP' || traveling(w,p) || ridingCart(w,p.id)) return null;
   if (boatValues(w).length>=WATERCRAFT_LIMIT) return null;
   const pos=centerOf(w,p), origin=col(pos.x,pos.z), locations: Point[]=[];
   for (let dx=-2;dx<=2;dx++) for (let dz=-2;dz<=2;dz++) {
@@ -132,7 +133,7 @@ export function launchGlide(w: World, p: Adventurer, heading: number): Point | n
 }
 
 export function applyTransport(w: World, p: Adventurer, action: TransportAction, now: number) {
-  if (!w.started || w.ended || w.gameMode!=='COOP' || ridingCart(w,p.id) || p.spectator ||
+  if (!w.started || w.ended || w.gameMode!=='COOP' || ridingCart(w,p.id) || ridingAnimal(w,p.id) || p.spectator ||
     now-(p.transportAt ?? 0)<180) return false;
   const bag=lifePlayer(p).bag;
   if (action.command==='glide') {
@@ -196,6 +197,7 @@ export function applyTransport(w: World, p: Adventurer, action: TransportAction,
 
 export function steerTransport(w: World, p: Adventurer, dx: number, dz: number, continuous: boolean, now: number) {
   if (!w.started || w.ended || w.gameMode!=='COOP' || p.spectator) return false;
+  if(ridingAnimal(w,p.id))return steerPackAnimal(w,p,dx,dz,continuous,now);
   const length=Math.hypot(dx,dz);
   if (!Number.isFinite(length) || length<=0 || (continuous ? length>.45 || now-p.lastMove<45 :
     !Number.isInteger(dx) || !Number.isInteger(dz) || length!==1 || now-p.lastMove<145)) return false;

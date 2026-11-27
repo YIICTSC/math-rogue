@@ -1,6 +1,7 @@
-import { drawMachineCarts, drawMachineLayer, drawSurfaceMachines, type MachineLayer } from './machineLayer';
+import { drawBeaconMarkers, drawMachineCarts, drawMachineLayer, drawSurfaceMachines, type MachineLayer } from './machineLayer';
 import { drawGlider, drawWatercraft } from './transportDrawing';
 import { CAVERNS, cacheRecord, cavernCache, cavernEntrance, currentCavern } from './subsurface';
+import { packAnimals, ridingAnimal } from './packAnimals';
 import { isMachinePart } from './machineryParts';
 import { visibleWildlife, WILDLIFE } from './lifestyle/wildlife';
 import { drawCreature } from './lifestyle/creatureArt';
@@ -133,13 +134,14 @@ function person(
   c: CanvasRenderingContext2D,
   p: Adventurer,
   time: number,
+  raised = 0,
 ) {
   const pos=mapPosition(p);
   const x = (pos.x-.5) * T,
-    y = (pos.z-.5) * T,
+    y = (pos.z-.5) * T - raised,
     coat = colors[p.color],
     bob = Math.sin(time / 350 + p.color) > 0.8 ? 1 : 0;
-  rect(c, x + 3, y + 13, 11, 3, "#203b35");
+  if(!raised)rect(c, x + 3, y + 13, 11, 3, "#203b35");
   const action=p.life?.work?(p.life.work.kind==='fish'?'skill':'attack'):p.hp/p.maxHp<=.25?'low-hp':p.memory?.autoTalk&&time%10000<2200?'idle-special':'idle';
   const source = p.hero?heroFrame(p.hero,action,time):p.profile?.image;
   if (source && !characterImages.has(source)) {
@@ -428,9 +430,17 @@ export default function WorldCanvas({
       }
       const visibleSites = w.sites.filter(s => !s.subsurface && (s.kind !== "fragment" || w.activities.secretsFound.includes(s.id) || Math.abs(s.x-p.x)+Math.abs(s.y-p.y)<=4));
       visibleSites.forEach((s) => landmark(c, s, time,w));
+      drawBeaconMarkers(c,w,T,viewBounds,overview);
+      for(const animal of packAnimals(w))if(!overview&&animal.x>=minX&&animal.x<maxX&&animal.z>=minY&&animal.z<maxY){
+        const direction=['back','right','front','left'] as const;
+        const facing=direction[(Math.round(animal.dir*2/Math.PI)%4+4)%4];
+        const rider=animal.rider?w.players[animal.rider]:undefined;
+        const walking=rider&&w.life.now-rider.lastMove<900;
+        drawCreature(c,animal.kind,animal.x*T,animal.z*T+8,28,walking?'walk':'greet',facing,prefs.reducedMotion?0:time);
+      }
       Object.values(w.players).filter(p => !p.spectator && !p.life?.indoors && !currentCavern(w,p))
         .sort((a, b) => mapPosition(a).z - mapPosition(b).z)
-        .forEach((q) => person(c, q, prefs.reducedMotion?0:time));
+        .forEach((q) => person(c, q, prefs.reducedMotion?0:time, ridingAnimal(w,q.id)?11:0));
       c.restore();
       if(!overview&&!prefs.reducedMotion){c.save();const weather=season.weather;c.globalAlpha=.55;for(let i=0;i<20;i++){const x=(i*89+time/(season.season===3?55:30))%sw,y=(i*61+time/(weather===2?8:75))%sh;if(weather===2){c.strokeStyle='#afd5e3';c.beginPath();c.moveTo(x,y);c.lineTo(x-3,y+10);c.stroke();}else if(season.season===3&&weather===4){c.fillStyle='#f3f8ed';c.beginPath();c.arc(x,y,2,0,Math.PI*2);c.fill();}else if(season.season===0&&weather===1){c.fillStyle='#edb9c5';c.fillRect(x,y,3,2);}else if(season.season===2&&weather===1){c.fillStyle='#d4aa59';c.fillRect(x,y,3,2);}}if(season.phase===3){c.globalAlpha=.1;c.fillStyle='#152140';c.fillRect(0,0,sw,sh);}c.restore();}
       if(overview&&expanded){c.font='bold 12px sans-serif';c.textAlign='center';for(const l of LANDMARKS){const x=(l.x*T-cx)*scale,y=(l.z*T-cy)*scale;const text=trans(l.label,languageMode),width=c.measureText(text).width+12;c.fillStyle='#142b35';c.fillRect(x-width/2,y-14,width,20);c.fillStyle='#ffdf8c';c.fillText(text,x,y);}}

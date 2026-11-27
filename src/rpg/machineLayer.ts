@@ -1,5 +1,5 @@
 import type { World } from './engine';
-import { inspectMachine, machineCarts, machineSignal, machineStorage, railConnections } from './machinery';
+import { beaconLandmarks, beaconRadius, inspectMachine, machineCarts, machineSignal, machineStorage, railConnections } from './machinery';
 import { isMachinePart, isRail, isTransportLane, MACHINE_PARTS } from './machineryParts';
 import { fluidAt } from './placedFluids';
 import { blueprintPoint, type BlueprintPreview } from './blueprints';
@@ -109,7 +109,7 @@ function icon(ctx: CanvasRenderingContext2D, w: World, x: number, y: number, z: 
     }
     ctx.rotate(-rotation * Math.PI / 2);
     if (device?.tier) {
-      ctx.strokeStyle = '#81fff0'; ctx.lineWidth = 1.2;
+      ctx.strokeStyle = device.beamColor??'#81fff0'; ctx.lineWidth = 1.2;
       ctx.strokeRect(-tile / 2, -tile / 2, tile, tile);
     }
   } else {
@@ -168,6 +168,27 @@ export function drawMachineLayer(ctx: CanvasRenderingContext2D, w: World, tile: 
   if (layer.selected) {
     ctx.strokeStyle = '#fff198'; ctx.lineWidth = 1.7;
     ctx.strokeRect(layer.selected.x * tile + 1, layer.selected.z * tile + 1, tile - 2, tile - 2);
+  }
+  if(layer.view==='circuit')drawBeaconMarkers(ctx,w,tile,bounds,true,layer.height);
+}
+
+export function drawBeaconMarkers(ctx:CanvasRenderingContext2D,w:World,tile:number,bounds:Bounds,overview:boolean,height?:number){
+  for(const {point,tier,color} of beaconLandmarks(w)){
+    const {x,y,z}=point;
+    if(!inside(bounds,x,z))continue;
+    const distance=height===undefined?0:Math.abs(height-y),range=beaconRadius(tier);
+    if(height!==undefined&&distance>range)continue;
+    const cx=(x+.5)*tile,cz=(z+.5)*tile;
+    ctx.save();
+    if(tier&&overview){
+      ctx.globalAlpha=.55;ctx.strokeStyle=color;ctx.lineWidth=height===undefined?3:1;ctx.setLineDash([5,4]);
+      ctx.beginPath();ctx.arc(cx,cz,Math.sqrt(range*range-distance*distance)*tile,0,Math.PI*2);ctx.stroke();
+      ctx.setLineDash([]);ctx.globalAlpha=1;
+    }
+    const size=height!==undefined?3:overview?9:3;
+    ctx.fillStyle=tier?color:'#8e9b95';ctx.strokeStyle='#183637';ctx.lineWidth=overview?2:1;
+    ctx.beginPath();ctx.moveTo(cx,cz-size);ctx.lineTo(cx+size,cz);ctx.lineTo(cx,cz+size);ctx.lineTo(cx-size,cz);
+    ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
   }
 }
 

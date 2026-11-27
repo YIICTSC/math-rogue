@@ -1,6 +1,6 @@
 import { isThinMachinePart } from './machineryParts';
 import type { BlueprintReceipt } from './blueprints';
-import { poweredGateOpen } from './machinery';
+import { activeBeaconAt, poweredGateOpen } from './machinery';
 import type {FurnitureLearner} from '../mini-games/gakuro-craft/furnitureLearning';
 import {GameMode} from '../types';
 import {isHomeTrack,MUSIC_FURNITURE} from './homeTracks';
@@ -181,8 +181,10 @@ export function applyLifeAction(w:World,p:Adventurer,a:LifeAction,now:number):bo
   const x=a.tile%WIDTH,y=Math.floor(a.tile/WIDTH);if(x<1||y<1||x>=WIDTH-1||y>=HEIGHT-1||distance(p,{x,y})>2)return false;
   if(a.type==='life-work'&&(!natureAt(w,a.tile)||!resourceReady(w,a.tile)))return tell('この資源は再生を待っています。');
   if(a.type==='life-cast'&&w.tiles[a.tile]!=='water')return false;
-  if(energyOf(lp)<GATHER_ENERGY_COST)return tell('エネルギーが足りません。問題に正解して回復しましょう。');
-  lp.energy=energyOf(lp)-GATHER_ENERGY_COST;
+  const tier=a.type==='life-work'?activeBeaconAt(w,p):0;
+  const cost=Math.round(GATHER_ENERGY_COST*(1-tier*.06)*100)/100;
+  if(energyOf(lp)+1e-8<cost)return tell('エネルギーが足りません。問題に正解して回復しましょう。');
+  lp.energy=Math.round((energyOf(lp)-cost)*100)/100;
   life.now=now;const fish=a.type==='life-cast',target=now+(fish?1700+((w.seed+a.tile+w.revision)%1300):900);
   const nonce=lp.fishCastCount||0;if(fish)lp.fishCastCount=nonce+1;const species=fish?chooseFish(w.seed,a.tile,nonce):undefined;
   lp.work={tile:a.tile,kind:fish?'fish':'gather',started:now,target,expires:target+(fish?Math.max(900,reelWindow(species!.id)*2):1400),...(fish?{fishing:{id:species!.id,phase:'bite' as const,beat:0,hits:0,perfect:0,nonce}}:{})};lp.lastAction=now;return tell(fish?'浮きが沈んだら引き上げよう！':'光るタイミングで道具を振ろう！');

@@ -55,6 +55,12 @@ try {
         }
         w.voxels.revision++;w.revision++;r.emit();
       };
+      window.seedCompanion=()=>{
+        const w=r.world,p=w.players.local,id='wild-1-1:horse';
+        p.x=18;p.y=18;p.position3D={x:18.5,y:0,z:18.5,surface2D:true,layered2D:true};
+        w.packAnimals={[id]:{id,kind:'horse',owner:p.id,x:18.5,y:0,z:17.5,follow:false,dir:0,cargo:{},fedAt:w.life.time}};
+        w.revision++;r.emit();
+      };
       window.seedSandbox=()=>{
       const w=r.world,p=w.players.local;
       w.sites=w.sites.filter(s=>Math.abs(s.x-20)+Math.abs(s.y-20)>12);
@@ -311,8 +317,29 @@ try {
   await page.waitForFunction(()=>document.querySelector('[data-testid=rpg-world-3d]')?.dataset.landscape);
   assert.equal(await page.evaluate(()=>window.snapshot.world.players.local.position3D.y),1);
   await page.screenshot({path:`${out}/ladder-and-sign-3d.png`});
+  await page.getByRole('button',{name:'2D / 3D'}).click();
+  await page.evaluate(()=>window.seedCompanion());
+  await transport.click();
+  const companionDialog=page.getByRole('dialog',{name:'乗り物',exact:true});
+  await companionDialog.getByLabel('相棒の名前',{exact:true}).fill('霧風');
+  await companionDialog.getByRole('button',{name:'名札を付ける',exact:true}).click();
+  const animal=()=>Object.values(window.snapshot.world.packAnimals??{})[0];
+  await page.waitForFunction(find=>Object.values(window.snapshot.world.packAnimals??{})[0]?.name===find,'霧風');
+  await page.waitForFunction(()=>Date.now()-window.snapshot.world.players.local.transportAt>300);
+  await companionDialog.getByRole('button',{name:'騎乗',exact:true}).click();
+  await page.waitForFunction(()=>Object.values(window.snapshot.world.packAnimals??{})[0]?.rider==='local');
+  const startZ=(await page.evaluate(animal)).z;
+  await page.keyboard.press('ArrowUp');
+  await page.waitForFunction(z=>Object.values(window.snapshot.world.packAnimals??{})[0]?.z<z,startZ);
+  await page.getByRole('button',{name:'2D / 3D'}).click();
+  await scene.waitFor();
+  await page.waitForFunction(()=>document.querySelector('[data-testid=rpg-world-3d]')?.dataset.landscape);
+  assert.equal((await page.evaluate(animal)).rider,'local');
+  await page.screenshot({path:`${out}/pack-animal-3d.png`});
+  await page.getByRole('button',{name:'騎乗をやめる',exact:true}).click();
+  await page.waitForFunction(()=>!Object.values(window.snapshot.world.packAnimals??{})[0]?.rider);
   assert.deepEqual(errors,[]);
-  console.log('PASS 2D/3D circuitry, blueprints, mouse lock/drag, creature journal, IndexedDB, sailing, flight, caves, signs and climbing.');
+  console.log('PASS 2D/3D circuitry, blueprints, mouse lock/drag, creature journal, IndexedDB, sailing, flight, caves, signs, climbing and riding.');
 } catch (error) {
   console.error('Browser errors:', errors, (await page?.locator('body').innerText({timeout:3000}).catch(() => ''))?.slice(0,1600));
   console.error(await page?.evaluate(() => {

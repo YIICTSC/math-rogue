@@ -6,6 +6,7 @@ import { advanceMachinery, poweredGateOpen, ridingCart } from './machinery';
 import { advanceTransport, steerTransport, traveling, type Gliding, type TransportState } from './transport';
 import { cavernGuardianId, cavernGuardians, cavernSiteReachable, currentCavern, planCaverns, type Cavern, type CavernId } from './subsurface';
 import { advanceBuildPhysics, terrainMoveFactor } from './buildingPhysics';
+import { advancePackAnimals, type PackAnimal, type PackTraining } from './packAnimals';
 import { blockAt, hasClosedSignalGate, playerHeight, terrainHeight } from './voxel';
 import {planAdventurePeaks,type AdventurePeak} from './adventureTerrain';
 import {homeBattleBonus,type HomeBattleBonus} from './furnitureBenefits';
@@ -110,6 +111,7 @@ export interface NativeScene {
 }
 export interface Adventurer {
   gliding?: Gliding;
+  packTraining?: PackTraining;
   transportAt?: number;
   position3D?: {x:number;z:number;y?:number;vy?:number;swimming?:boolean;surface2D?:boolean;layered2D?:boolean;oxygen?:number;waterAt?:number};
   voxelDiscoveries?:string[];
@@ -162,6 +164,7 @@ export interface World {
   buildingPhysics?:1;
   sandbox?:SandboxState;
   transport?:TransportState;
+  packAnimals?:Record<string,PackAnimal>;
   caverns?:Cavern[];
   terrainPeaks?:AdventurePeak[];
  buildingGoalRewards?:Record<string,BuildingGoalReward>;
@@ -767,7 +770,7 @@ export function applyAction(
       w.revision++;
       return true;
     }
-    if(!['voxel-transport','native-profile','native-learning'].includes(action.type)) return false;
+    if(!['voxel-transport','voxel-pack-animal','native-profile','native-learning'].includes(action.type)) return false;
   }
   if(currentCavern(w,p)&&(['life-enter','life-cast','life-build','secret-search'].includes(action.type)||action.type.startsWith('town-')))return false;
   const beyondLegacy=p.position3D&&(p.position3D.x<0||p.position3D.z<0||p.position3D.x>=WIDTH||p.position3D.z>=HEIGHT);
@@ -931,6 +934,7 @@ export function advanceWorld(w: World, now = Date.now()) {
   advanceFluids(w);
   advanceBuildPhysics(w,now);
   advanceTransport(w,now);
+  advancePackAnimals(w,now);
   advanceSocial(w,now);
   advanceTown(w,now);
   advanceWildlife(w,now);

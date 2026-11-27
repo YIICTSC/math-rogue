@@ -28,6 +28,7 @@ import {
   farmSpots,
   farmBusy,
   farmAfford,
+  apiaryHasFlowers,
   FARM_UPGRADES,
   FARM_GOALS,
   type FarmPlayer,
@@ -464,6 +465,11 @@ export function FarmContent({
                     {C(ingredientById(k.product)!.name)} ×{a.ready} ·{" "}
                     {a.progress}/{k.days}
                   </p>
+                  {a.kind==='bees'&&<div className="farm-actions"><small>{apiaryHasFlowers(world,f)
+                    ? L('花を訪れるとハチミツが増え、そばの作物の品質が上がります。','Flowers yield extra honey and improve nearby crop quality.','はなをおとずれるとハチミツがふえ、そばのさくもつのひんしつがあがります。')
+                    : L('近くに花壇を置くと、ハチが花を訪れます。','Place a flower bed nearby to attract the bees.','ちかくにかだんをおくと、ハチがはなをおとずれます。')}</small>
+                    <button disabled={!canTend||!farmAfford(world,selfId,{honey:2})} onClick={()=>send({type:'voxel-bottle-honey'})}>
+                      {L('ハチミツ2個を瓶に詰める','Bottle 2 honey','ハチミツ2こをびんにつめる')}</button></div>}
                   <button disabled={!canTend||a.bond<50||a.health<80||cal.day-a.born<2||cal.day-(a.bredDay??-100)<7||f.animals.length>=animalLimit(f)||f.feed<8||f.coins<Math.ceil(k.price/2)} onClick={()=>send({type:'farm-animal-breed',id:a.id,name:a.name.slice(0,10)+' Jr.'})}>{L('新しい家族を迎える','Welcome a baby','あたらしいかぞくをむかえる')} ({Math.ceil(k.price/2)} · {L('飼料','Feed','しりょう')} 8)</button>
                   <button disabled={!canTend||a.pat===cal.day} onClick={()=>send({type:'farm-animal-care',id:a.id,care:'pat'})}>{L('なでて触れ合う','Pet and cuddle','なでてふれあう')}</button>
                   <div className="farm-actions">

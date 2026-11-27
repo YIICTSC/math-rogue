@@ -4,6 +4,7 @@ import {occupiedFarmTile} from '../farm/model';
 import type { World, Adventurer } from "../engine";
 import { WIDTH, HEIGHT } from "../engine";
 import { cityBuilding, CITY_SERVICES } from "./catalog";
+import { advanceCityWorks, applyCityWorks, cityWorksBenefits, type CityWorks, type CityWorksAction } from './works';
 export interface CityLot {
   district?:string;
   id: string;
@@ -18,6 +19,7 @@ export interface CityLot {
   damage: number;
 }
 export interface CityState {
+  works?:CityWorks;
   living?:CityLiving;
   unlocked: true;
   treasury: number;
@@ -53,7 +55,7 @@ export interface CityState {
   origin: { x: number; y: number };
   revision: number;
 }
-export type CityAction = CityLivingAction
+export type CityAction = CityLivingAction | CityWorksAction
   | { type: "ending-progress"; step: number }
   | { type: "city-continue" }
   | { type: "city-build"; kind: string; x: number; y: number }
@@ -119,6 +121,7 @@ export function cityStats(w: World, grow = false) {
     );
   const serviceLots = live.filter((l) => l.connected);
   const benefits=projectBenefits(s);
+  const works=cityWorksBenefits(w);
   let pollution = serviceLots.reduce(
     (n, l) => n + cityBuilding(l.kind)!.pollution,
     0,
@@ -143,7 +146,7 @@ export function cityStats(w: World, grow = false) {
       0,
       population / 3 +
         serviceLots.filter((l) => l.kind === "workshop").length * 7 -
-        transit * (s.policies[2] ? 28 : 18) -
+        transit * (s.policies[2] ? 28 : 18) - Math.min(30,works.transit) -
         s.roads.length * 0.25,
     ),
   );
@@ -159,7 +162,7 @@ export function cityStats(w: World, grow = false) {
           (n, l) =>
             n +
             ((["power", "water", "sewage"].includes(key) ? 120 : 80) *
-              l.level *
+              l.level * (key==='power'&&works.power.has(l.id)?1.5:1) *
               (s.budgets[key] || 100)) /
               100,
           0,
@@ -173,7 +176,7 @@ export function cityStats(w: World, grow = false) {
           return (
             b.service === key &&
             Math.abs(l.x - lot.x) + Math.abs(l.y - lot.y) <=
-              (b.range * (s.budgets[key] || 100)) / 100
+              ((b.range+(key==='power'&&works.power.has(l.id)?8:0)) * (s.budgets[key] || 100)) / 100
           );
         });
       if (coverage[key]) s.services[key]++;
@@ -193,7 +196,7 @@ export function cityStats(w: World, grow = false) {
         0,
         Math.min(
           100,
-          18 + Math.min(20,benefits.happiness) + districtPlan(lot).happiness +
+          18 + Math.min(20,benefits.happiness) + districtPlan(lot).happiness + Math.min(6,works.farm) +
             Object.values(coverage).filter(Boolean).length * 7 +
             (jobs >= population * 0.45 ? 10 : 0) +
             (s.policies[1] ? 4 : 0) +
@@ -230,7 +233,7 @@ export function cityStats(w: World, grow = false) {
   s.traffic = Math.round(traffic);
   s.pollution = Math.round(pollution);
   s.income = Math.floor(
-    s.population * s.tax * 0.32 +
+    s.population * s.tax * 0.32 + Math.min(180,works.commerce) +
       serviceLots
         .filter((l) => ["market", "workshop", "farm"].includes(l.kind))
         .reduce((n, l) => n + cityBuilding(l.kind)!.jobs * l.level * 0.9, 0),
@@ -335,6 +338,7 @@ export function applyCity(w: World, p: Adventurer, a: CityAction, now: number) {
   }
   if (!s || !w.started || w.ended) return false;
   let changed = false;
+  if(a.type==='city-works-link'||a.type==='city-works-unlink')changed=applyCityWorks(w,p,a);
   if (a.type === "city-build") {
     const b = cityBuilding(a.kind);
     if (
@@ -402,6 +406,10 @@ export function applyCity(w: World, p: Adventurer, a: CityAction, now: number) {
     const b = cityBuilding(lot.kind)!;
     if (a.type === "city-demolish") {
       s.lots = s.lots.filter((l) => l !== lot);
+      if (s.works) {
+        delete s.works.links[lot.id];
+        for (const [id,link] of Object.entries(s.works.links)) if(link.home===lot.id)delete s.works.links[id];
+      }
       s.treasury += Math.floor(b.cost * 0.35);
     } else if (a.type === "city-upgrade") {
       const cost = b.cost * lot.level;
@@ -511,6 +519,7 @@ export function advanceCity(w: World) {
   if (s.accumulator < 30) return;
   s.accumulator -= 30;
   s.month++;advanceCityLiving(s);
+  advanceCityWorks(w);
   cityStats(w, true);
   s.treasury += s.income - s.expenses;
   if (s.treasury < 0) {
@@ -519,7 +528,7 @@ export function advanceCity(w: World) {
   }
   if (s.month % 9 === 0 && s.lots.length) {
     const lot = s.lots[(w.seed + s.month) % s.lots.length],
-      safe = s.services.fire >= 75 || s.policies[3];
+      safe = s.services.fire >= 75 || s.policies[3] || cityWorksBenefits(w).defense>0;
     if (!safe) {
       lot.damage = 1;
       s.news.push({ month: s.month, kind: "fire", lot: lot.id });

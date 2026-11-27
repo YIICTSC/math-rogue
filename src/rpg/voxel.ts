@@ -3,7 +3,8 @@ import { applyResearch, type ResearchAction } from './technologyResearch';
 import { applyBlueprint, type BlueprintAction } from './blueprints';
 import { potionSeconds, toolLimit, wearTool } from './explorationEquipment';
 import { applySandboxSettings, recordSandboxEvent, sandboxAllows, sandboxHost, type SandboxAction } from './sandboxAccess';
-import { applyTransport, occupiedByBoat, traveling, type TransportAction } from './transport';
+import { applyTransport, boardedBoat, occupiedByBoat, traveling, type TransportAction } from './transport';
+import { applyPackAction, type PackAction } from './packAnimals';
 import { applyCavern, cavernBlock, cavernStructure, cavernWater, type CavernAction } from './subsurface';
 import { applyBuildingAction, buildingSupport, isClimbingBlock, openDecoration, recordBuildingEdit, terrainJumpFactor, terrainMoveFactor,
  type BuildingAction, type BuildingDetails } from './buildingPhysics';
@@ -29,7 +30,7 @@ export const VOXEL_COLORS:Record<TerrainBlock,string>={...Object.fromEntries(BLO
 export type TerrainBlock=Block|'bedrock'|'oasis-water'|'cave-lava'|'door-top'|'piston_head';
 export const MIN_DEPTH=-18,MAX_HEIGHT=WORLD_SCALE.ceiling,EYE_HEIGHT=WORLD_SCALE.eyeHeight;
 export interface VoxelWorld {edits:Record<string,Block|null>;revision:number;placedBy?:Record<string,string>;terrainVersion?:2;legacyFlat?:string[];rotations?:Record<string,number>;containers?:Record<string,VoxelContainer>;machinery?:MachineryState;fluids?:PlacedFluids;details?:BuildingDetails}
-export type VoxelAction=WorkshopAction|MachineCommand|FluidAction|ResearchAction|BlueprintAction|SandboxAction|TransportAction|CavernAction|BuildingAction|{type:'voxel-landmark'}|{type:'voxel-building-survey'}|{type:'voxel-move';dx:number;dy:number}|{type:'voxel-snap';preserveHeight?:true}|{type:'voxel-jump'}|{type:'voxel-dive'}|{type:'voxel-break'|'voxel-place';x:number;y:number;z:number;block?:Block;rotation?:number};
+export type VoxelAction=WorkshopAction|MachineCommand|FluidAction|ResearchAction|BlueprintAction|SandboxAction|TransportAction|CavernAction|BuildingAction|PackAction|{type:'voxel-landmark'}|{type:'voxel-building-survey'}|{type:'voxel-move';dx:number;dy:number}|{type:'voxel-snap';preserveHeight?:true}|{type:'voxel-jump'}|{type:'voxel-dive'}|{type:'voxel-break'|'voxel-place';x:number;y:number;z:number;block?:Block;rotation?:number};
 export const voxelKey=(x:number,y:number,z:number)=>`${x},${y},${z}`;
 const springCache=new WeakMap<World,{revision:number;cells:Map<string,SpringWater>}>();
 function springWater(w:World,x:number,z:number){
@@ -220,6 +221,7 @@ function undoSandboxPlacement(w:World,p:Adventurer,number:number) {
  return true;
 }
 export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
+ if(a.type==='voxel-pack-animal')return !farmBusy(w,p)&&applyPackAction(w,p,a,now,!!p.gliding||!!boardedBoat(w,p.id));
  if(a.type==='voxel-climb'||a.type==='voxel-sign')return !ridingCart(w,p.id)&&!farmBusy(w,p)&&applyBuildingAction(w,p,a,now);
  if(a.type==='voxel-cave')return !farmBusy(w,p)&&applyCavern(w,p,a);
  if(a.type==='voxel-transport')return !farmBusy(w,p)&&applyTransport(w,p,a,now);
@@ -245,7 +247,7 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
   if(a.type!=='voxel-snap'||!p.position3D||p.position3D.surface2D)return false;
   p.position3D.surface2D=true;w.revision++;return true;
  }
- if(a.type==='voxel-craft'||a.type==='voxel-storage'||a.type==='voxel-compost'||a.type==='voxel-seeds'||a.type==='voxel-tools'||a.type==='voxel-potion'){
+ if(a.type==='voxel-craft'||a.type==='voxel-storage'||a.type==='voxel-compost'||a.type==='voxel-seeds'||a.type==='voxel-tools'||a.type==='voxel-potion'||a.type==='voxel-bottle-honey'){
   const revision=w.voxels?.revision;
   const changed=applyWorkshop(w,p,a,now);
   if(changed&&a.type==='voxel-storage'&&w.voxels?.revision!==revision)recordSandboxEvent(w,p,{kind:'storage',tile:{x:a.x,y:a.y,z:a.z}});
@@ -304,7 +306,8 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
   if(a.type==='voxel-dive'||pos.vy||now-(p.voxelAt||0)<400)return false;
   const floor=floorAt(w,Math.floor(pos.x),Math.floor(pos.z),(pos.y??0)+.05);if(floor===null||Math.abs(floor-(pos.y??0))>.1)return false;
   const surface=blockAt(w,Math.floor(pos.x),Math.ceil(pos.y??0)-1,Math.floor(pos.z));
-  pos.vy=WORLD_SCALE.jumpSpeed*terrainJumpFactor(surface);p.position3D=pos;p.voxelAt=now;w.revision++;return true;
+  const jumpBoost=1+activeBeaconAt(w,p)*.035;
+  pos.vy=WORLD_SCALE.jumpSpeed*terrainJumpFactor(surface)*jumpBoost;p.position3D=pos;p.voxelAt=now;w.revision++;return true;
  }
  if(a.type==='voxel-move'){
   if(farmBusy(w,p))return false;
@@ -331,7 +334,8 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
  let {x,y,z}=a;if(![x,y,z].every(Number.isInteger))return false;if(a.type==='voxel-break'&&blockAt(w,x,y,z)==='door-top')y--;if(![x,y,z].every(Number.isInteger)||y<=MIN_DEPTH||y>MAX_HEIGHT||protectedVoxel(w,x,z)||cavernStructure(w,x,y,z)||now-(p.voxelAt||0)<220)return false;
  const pos=p.position3D??{x:p.x+.5,z:p.y+.5};if(Math.hypot(x+.5-pos.x,y+.5-(playerHeight(w,p)+EYE_HEIGHT),z+.5-pos.z)>4.5)return false;
  if(!sandboxAllows(w,p.id,{x,y,z},a.type==='voxel-break'?'break':'build'))return false;
- const lp=lifePlayer(p),existing=blockAt(w,x,y,z),state=upgrade(w);const cost=a.type==='voxel-break'&&existing?miningCost(existing,p,w):.1;
+ const lp=lifePlayer(p),existing=blockAt(w,x,y,z),state=upgrade(w);
+ const cost=a.type==='voxel-break'&&existing?miningCost(existing,p,w):activeBeaconAt(w,p)>=3?.08:.1;
  const before=state.edits[voxelKey(x,y,z)]===null?null:undefined;
  if(Object.keys(state.edits).length>=18000&&!Object.hasOwn(state.edits,voxelKey(x,y,z)))return tell('このワールドのブロック編集上限に達しました。');
  if(a.type==='voxel-break'){

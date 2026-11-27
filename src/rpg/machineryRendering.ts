@@ -2,7 +2,6 @@ import * as T from 'three';
 import type { World } from './engine';
 import { machineCarts, railConnections } from './machinery';
 import { isRail, isTransportLane } from './machineryParts';
-import { blockAt, MAX_HEIGHT } from './voxel';
 
 const DEVICE_VIEW_DISTANCE = 24;
 
@@ -94,13 +93,14 @@ export class MachineryEffects {
         this.box(this.signals,x+.5,y+height,z+.5,.2,.17,.22,'#ebc593');
       }
       if (block === 'crystal_beacon' && device.tier) {
-        let color = '#90fff3';
-        for (let height = y+1; height <= MAX_HEIGHT; height++) {
-          const glass = blockAt(w, x, height, z);
-          if (glass === 'pinkglass' || glass === 'blueglass') { color = glass === 'pinkglass' ? '#ff98cd' : '#88d9ff'; break; }
-        }
-        this.box(this.beams,x+.5,y+48,z+.5,.16,96,.16,color);
+        const color=device.beamColor??'#90fff3';
+        this.box(this.beams,x+.5,y+48.6,z+.5,.18,96,.18,color);
         this.box(this.signals,x+.5,y+.78,z+.5,.16,.22,.16,color);
+      }
+      if(block==='waygate'&&device.signal){
+        const sideways=(w.voxels?.rotations?.[key]??0)%2===1;
+        this.box(this.beams,x+.5,y+.48,z+.5,sideways?.035:.53,.57,sideways?.53:.035,'#72e1f1');
+        this.box(this.signals,x+.5,y+.82,z+.5,.11,.07,.11,'#bdfbde');
       }
     }
     const flows = w.voxels?.fluids?.cells ?? {};

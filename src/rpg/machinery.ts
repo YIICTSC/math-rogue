@@ -5,6 +5,7 @@ import { ranchPosition } from './farm/animalLook';
 import { exchangeFluidBucket, fluidAt } from './placedFluids';
 import { isFilteredPart, isLogisticsPart, isMachinePart, isProcessor, isRail, isTransportLane, manuallyOpenedGate, PROCESSOR, type LogisticsPart, type MachinePart, type ProcessorPart } from './machineryParts';
 import { ALL_MATERIAL_NAMES, CART_NAMES, WORKSHOP_RECIPES, type CartItem, type CatalogBlock, type VoxelItem } from './voxelCatalog';
+import { recordCityRailArrival } from './city/works';
 import { blockAt, bodyClear, floorAt, playerHeight, protectedVoxel, solid, terrainHeight, voxelKey, voxelWater,
   MAX_HEIGHT, MIN_DEPTH, type TerrainBlock } from './voxel';
 import { DAY_SECONDS } from './town/catalog';
@@ -43,6 +44,7 @@ interface Device {
   mode?: MachineMode;
   observed?: string;
   tier?: number;
+  beamColor?: string;
   filter?: VoxelItem;
   recipe?: string;
   progress?: number;
@@ -410,30 +412,51 @@ function readStorage(w: World, pos: MachineCell) {
   return amount ? Math.min(15, Math.ceil(amount / 64)) : 0;
 }
 
-const baseBlocks = new Set(['steel', 'polishedstone', 'obsidian', 'crystal']);
-function beaconTier(w: World, cell: MachineCell) {
-  for (let y = cell.y + 1; y <= MAX_HEIGHT; y++) {
-    const b = blockAt(w, cell.x, y, cell.z);
-    if (b && !['glass', 'blueglass', 'pinkglass', 'glasspane'].includes(b)) return 0;
+const baseBlocks = new Set<TerrainBlock>(['iron_block','gold_block','diamond_block','steel','polishedstone','obsidian','crystal']);
+const beamGlass: Partial<Record<TerrainBlock,string|null>> = {
+  glass:null,glasspane:null,blueglass:'#88d9ff',bluepane:'#88d9ff',pinkglass:'#ff98cd',pinkpane:'#ff98cd',
+  amberglass:'#ffc47b',amberpane:'#ffc47b',violetglass:'#c6a5ff',violetpane:'#c6a5ff',
+};
+
+const defaultBeamColor='#90fff3';
+function beaconBeamColor(w:World,cell:MachineCell) {
+  let color=defaultBeamColor;
+  for (let y=cell.y+1;y<=MAX_HEIGHT;y++) {
+    const block=blockAt(w,cell.x,y,cell.z);
+    if(!block)continue;
+    if(!Object.hasOwn(beamGlass,block))return null;
+    const tint=beamGlass[block];
+    if(tint&&color===defaultBeamColor)color=tint;
   }
+  return color;
+}
+function beaconBaseTier(w: World, cell: MachineCell) {
   let tier = 0;
   for (let level = 1; level <= 4; level++) {
     for (let x = -level; x <= level; x++) for (let z = -level; z <= level; z++) {
-      if (!baseBlocks.has(blockAt(w, cell.x + x, cell.y - level, cell.z + z) ?? '')) return tier;
+      const block=blockAt(w,cell.x+x,cell.y-level,cell.z+z);
+      if (!block || !baseBlocks.has(block)) return tier;
     }
     tier = level;
   }
   return tier;
 }
 
+export const beaconRadius=(tier:number)=>6+tier*4;
+export function beaconLandmarks(w:World) {
+  return Object.entries(stateOf(w)?.devices??{}).flatMap(([key,device])=>
+    w.voxels?.edits[key]==='crystal_beacon'?[{point:fromKey(key),tier:device.tier??0,color:device.beamColor??defaultBeamColor}]:[]);
+}
+
 export function activeBeaconAt(w: World, p: Adventurer) {
+  if(w.gameMode!=='COOP')return 0;
   let tier = 0;
   const x = p.position3D?.x ?? p.x + .5, z = p.position3D?.z ?? p.y + .5;
   const y = playerHeight(w, p);
   for (const [key, device] of Object.entries(stateOf(w)?.devices ?? {})) {
     if (!device.tier) continue;
     const cell = fromKey(key);
-    if (Math.hypot(x - cell.x - .5, y - cell.y, z - cell.z - .5) <= 6 + device.tier * 4) tier = Math.max(tier, device.tier);
+    if (Math.hypot(x - cell.x - .5, y - cell.y, z - cell.z - .5) <= beaconRadius(device.tier)) tier = Math.max(tier, device.tier);
   }
   return tier;
 }
@@ -677,8 +700,11 @@ function updateDevice(w: World, state: MachineryState, work: CircuitWork, key: s
       break;
     case 'crystal_beacon': {
       signal = 0;
-      const tier = device.enabled ? beaconTier(w, cell) : 0;
+      const color = device.enabled ? beaconBeamColor(w,cell) : null;
+      const tier = color ? beaconBaseTier(w,cell) : 0;
       if ((device.tier || 0) !== tier) { device.tier = tier; changed = true; }
+      const beamColor=tier&&color ? color : undefined;
+      if(device.beamColor!==beamColor){device.beamColor=beamColor;changed=true;}
       break;
     }
     case 'hopper':
@@ -892,6 +918,7 @@ function driveCarts(w: World, state: MachineryState) {
       cart.moving=false;
       cart.waiting=!!cart.timetable;
       if (cart.timetable) {
+        recordCityRailArrival(w,cart.cell,cart.owner);
         nextTimetableStop(cart);
         cart.next=state.tick+cart.timetable.dwellSeconds*1000/STEP_MS;
       } else {
@@ -1126,7 +1153,7 @@ export function applyMachineCommand(w: World, p: Adventurer, command: MachineCom
       else if (kind === 'crystal_beacon' && owner) {
         if (device.enabled) device.enabled = false;
         else {
-          if (!(lp.bag.diamond || 0) || !beaconTier(w, cell)) return false;
+          if (!(lp.bag.diamond || 0) || !beaconBeamColor(w,cell) || !beaconBaseTier(w,cell)) return false;
           lp.bag.diamond!--;
           device.enabled = true;
         }
@@ -1213,7 +1240,11 @@ export function restoreMachinery(w: World) {
     if (whole(state.due, 0, tick + 4)) device.due = state.due;
     if (whole(state.pending, 0, 15)) device.pending = state.pending;
     if (whole(state.delay, 1, 4)) device.delay = state.delay;
-    if (whole(state.tier, 0, 4) && block === 'crystal_beacon') device.tier = state.tier;
+    if (block === 'crystal_beacon' && device.enabled) {
+      const pos=fromKey(key),color=beaconBeamColor(w,pos);
+      device.tier=color?beaconBaseTier(w,pos):0;
+      if(device.tier&&color)device.beamColor=color;
+    }
     if ((block==='piston' || block==='sticky_piston') && state.vertical===true) device.vertical=true;
     if (isMachinePart(block)&&isProcessor(block)&&whole(state.progress,0,PROCESSOR[block].ticks)) device.progress=state.progress;
     if (whole(state.note, 0, 24)) device.note = state.note;

@@ -10,6 +10,7 @@ import { trans } from '../../utils/textUtils';
 import { sandboxText } from '../MachineryInspector';
 import { creaturePortrait } from './creatureArt';
 import { WILDLIFE } from './wildlife';
+import { ownedPackAnimal } from '../packAnimals';
 import './creatureJournal.css';
 
 const Preview = lazy(()=>import('./CreaturePreview'));
@@ -27,7 +28,8 @@ export default function CreatureJournal({world,player,languageMode}:{world:World
   const [rare,setRare]=useState(false);
   const L=(ja:string,en:string,hi:string)=>sandboxText(languageMode,ja,en,hi);
   const farm=world.farm?.people[player.id];
-  const kept=(id:string)=>(farm?.animals ?? []).filter(a=>a.kind===id).length+(farm?.pets ?? []).filter(p=>p.kind===id).length;
+  const companion=ownedPackAnimal(world,player.id);
+  const kept=(id:string)=>(farm?.animals ?? []).filter(a=>a.kind===id).length+(farm?.pets ?? []).filter(p=>p.kind===id).length+Number(companion?.kind===id);
   const owned=kept(choice);
   const discovered=catalogue.filter(({id})=>Object.hasOwn(player.wildlifeSeen ?? {},id) || kept(id)>0).length;
   const entry=catalogue.find(entry=>entry.id===choice)!;
@@ -72,6 +74,7 @@ export default function CreatureJournal({world,player,languageMode}:{world:World
         {wild?<><dt>{L('発見','Sightings','はっけん')}</dt><dd>{Object.hasOwn(player.wildlifeSeen ?? {},choice)
           ? L(`${player.wildlifeSeen![choice]+1}日目に発見`,`First seen on day ${player.wildlifeSeen![choice]+1}`,`${player.wildlifeSeen![choice]+1}にちめにはっけん`)
           : L('未発見','Undiscovered','みはっけん')}</dd></>:<><dt>{L('飼育中','Under your care','しいくちゅう')}</dt><dd>{owned}</dd></>}
+        {companion?.kind===choice&&<><dt>{L('旅の相棒','Travel companion','たびのあいぼう')}</dt><dd>{companion.name??L('同行中','Recruited','どうこうちゅう')}</dd></>}
       </dl>
       {wild && <p>{copy(wild.fact,languageMode)}</p>}
       {ranch && <p>{L('健康と親密度を上げると、牧場で繁殖できます。','Healthy animals with a strong bond can breed at your ranch.','けんこうとしんみつどをあげると、ぼくじょうではんしょくできます。')}</p>}

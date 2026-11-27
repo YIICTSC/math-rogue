@@ -85,6 +85,7 @@
 .rpg-transport-panel .voxel-workshop-scroll { display: grid; gap: 12px; }
 .rpg-transport-panel h2,
 .rpg-transport-panel h3,
+.rpg-transport-panel h4,
 .rpg-transport-panel p { margin: 0; }
 .rpg-transport-panel h3,
 .rpg-boat-hold summary { display: flex; align-items: center; gap: 7px; }

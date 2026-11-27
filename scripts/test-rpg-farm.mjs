@@ -171,6 +171,26 @@ try {
     assert.ok(f.book[crop.id]);
     delete f.plots[slot].crop;
   }
+  assert(send({type:'farm-animal-buy',kind:'bees',name:'朝露'}));
+  const hive=f.animals.find(animal=>animal.kind==='bees');
+  const V=await server.ssrLoadModule('/src/rpg/voxel.ts');
+  const bed=`${f.x},${V.terrainHeight(w,f.x,f.y-2)},${f.y-2}`;
+  w.voxels??={edits:{},revision:0,terrainVersion:2};
+  w.voxels.edits[bed]='garden_bed';
+  assert(F.apiaryHasFlowers(w,f));
+  for(let i=0;i<2;i++){
+    assert(send({type:'farm-animal-care',id:hive.id,care:'feed'}));
+    day(w.town.day+1);
+  }
+  assert.equal(hive.ready,0,'A new hive matures before producing honey.');
+  assert(send({type:'farm-animal-care',id:hive.id,care:'feed'}));
+  day(w.town.day+1);
+  assert.equal(hive.ready,2,'Flowers add a unit of honey to a full production cycle.');
+  assert(send({type:'farm-animal-care',id:hive.id,care:'collect'}));
+  assert(send({type:'voxel-bottle-honey'}));
+  assert.equal(p.life.bag.bottled_honey,1);
+  assert.equal((f.pantry.honey.normal??0)+(f.pantry.honey.quality??0),0);
+  assert(!send({type:'voxel-bottle-honey'}));
   const petHome={id:'pet-home',owner:'a',ownerName:'Farmer',x:60,y:60,biome:'meadow',home:{tile:60*E.WIDTH+60,furniture:[],stock:{}},invitedAt:0};w.life.houses.push(petHome);p.life.indoors=petHome.id;
   assert.ok(send({type:'farm-pet-adopt',kind:'shiba',name:'ポチ'}));const pet=f.pets[0];assert.equal(pet.homeId,petHome.id);
   for(const care of ['feed','pat','play','train'])assert.ok(send({type:'farm-pet-care',id:pet.id,care}));

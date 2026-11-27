@@ -2,7 +2,7 @@ import React from 'react';
 import { CornerDownLeft, Play, RotateCw, Square, TrainFront } from 'lucide-react';
 import type { LanguageMode } from '../types';
 import type { World } from './engine';
-import { canAutomate, canStore, cargoCart, circuitConnections, connectedStations, inspectMachine, machineCarts, machineStorage, NOTE_REPEATS, railConnections, storageLimits, waygateEndpoints, type MachineCell, type MachineCommand } from './machinery';
+import { beaconRadius, canAutomate, canStore, cargoCart, circuitConnections, connectedStations, inspectMachine, machineCarts, machineStorage, NOTE_REPEATS, railConnections, storageLimits, waygateEndpoints, type MachineCell, type MachineCommand } from './machinery';
 import { validFarmMachineJob } from './farm/model';
 import { CROPS } from './farm/catalog';
 import { copy } from './town/catalog';
@@ -40,6 +40,7 @@ const extraNames = {
   stride_draught: ['風脚のしずく','Windstep draught','かぜあしのしずく'],
   miner_draught: ['石砕きのしずく','Stonebreaker draught','いしくだきのしずく'],
   smoked_fish: ['魚の燻製','Smoked fish','さかなのくんせい'],
+  bottled_honey: ['ハチミツの瓶','Bottled honey','ハチミツのびん'],
   glider_wing: ['滑空翼','Glider wing','かっくうよく'],
   glider_boost: ['風の加速筒','Glider booster','かぜのかそくとう'],
 } as const;
@@ -217,8 +218,10 @@ export default function MachineryInspector({ world, selfId, position, languageMo
         <button type="submit">{L('登録','Save','とうろく')}</button>
       </form> : device?.stationName && <small>{device.stationName}</small>)}
     {block === 'crystal_beacon' && <small>{device?.tier
-      ? L(`段階 ${device.tier} · 半径 ${6 + device.tier * 4} m`, `Tier ${device.tier} · radius ${6 + device.tier * 4} m`, `${device.tier}だん · はんけい ${6 + device.tier * 4} m`)
-      : L('専用土台・空への通り道・ダイヤが必要', 'Needs a mineral pyramid, open sky and one diamond', 'どだい・そらへのとおりみち・ダイヤがひつよう')}</small>}
+      ? <><b style={{color:device.beamColor}}>{L(`稼働中 · 段階 ${device.tier} · 半径 ${beaconRadius(device.tier)} m`, `Active · Tier ${device.tier} · radius ${beaconRadius(device.tier)} m`, `さどうちゅう · ${device.tier}だん · はんけい ${beaconRadius(device.tier)} m`)}</b><br/>
+        {L('移動・ジャンプ強化、採掘と採取の消費軽減','Faster movement, higher jumps, and lower mining and gathering costs','いどう・ジャンプきょうか、さいくつとさいしゅのしょうひけいげん')}
+        {device.tier>=3&&L('、建築の消費軽減',', and lower placement cost','、けんちくのしょうひけいげん')}</>
+      : L('停止中 · 専用土台・空への通り道・ダイヤが必要', 'Inactive · needs a mineral pyramid, open sky and one diamond', 'ていしちゅう · どだい・そらへのとおりみち・ダイヤがひつよう')}</small>}
     {(cart || isRail(block)) && <div className="rpg-device-actions">
       {!cart && owned && carried.map(value=><button key={value} onClick={() => dispatch({ command: 'cart-place',value })}><TrainFront size={16} /> {sandboxItemName(value,languageMode)} {L('を置く','· Place','をおく')}</button>)}
       {cart && !locomotive?.moving && (!cart.rider || cart.rider === selfId) && <button onClick={() => dispatch({ command: 'cart-ride' })}><CornerDownLeft size={16} /> {cart.rider ? L('降りる', 'Dismount', 'おりる') : L('乗る', 'Board', 'のる')}</button>}
