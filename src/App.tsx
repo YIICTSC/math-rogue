@@ -19389,6 +19389,8 @@ const App: React.FC = () => {
         GameScreen.MINI_GAME_FLIGHT_SCHOOL,
     ].includes(gameState.screen);
 
+    const scienceRoomChance = getDifficultyConfig(gameState.difficultyLevel).scienceRoomChance;
+
     return (
         <div key={`app-shell-${languageMode}`} className={`app-shell w-full h-[100dvh] bg-black overflow-hidden ${usesIosEdgeToEdgeLayout ? 'ios-edge-active' : ''} ${appSettings.fontSize === 'large' ? 'text-[105%]' : ''} ${isUiPreviewMode ? 'gamepad-shortcuts-debug' : ''}`}>
             <GamepadVirtualKeyboard languageMode={languageMode} />
@@ -22087,12 +22089,13 @@ const App: React.FC = () => {
                             languageMode={languageMode}
                             typingMode={gameState.challengeMode === 'TYPING'}
                             scienceRoomChance={
+                                scienceRoomChance > 0 &&
                                 !gameState.rpgOnline && !gameState.isEndless &&
                                 !gameState.player.completedSpecialEducation &&
                                 gameState.map.some(node => node.id === gameState.currentMapNodeId && node.type === NodeType.REST) &&
                                 !gameState.map.some(node => node.type === NodeType.REST && node.completed)
                                     ? 1
-                                    : getDifficultyConfig(gameState.difficultyLevel).scienceRoomChance
+                                    : scienceRoomChance
                             }
                             interactionDisabled={coopLocalProgressInteractionDisabled}
                             interactionDisabledMessage={coopInteractionDisabledMessage}
