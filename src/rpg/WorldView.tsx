@@ -6,6 +6,7 @@ import MachineLayerView from "./MachineLayerView";
 import TransportDock from './TransportDock';
 import CavernDock from './CavernDock';
 import ClimbingControls from './ClimbingControls';
+import { RealmDock } from './RealmDock';
 import "./machinery.css";
 import { useRpgPreferences, updateRpgPreferences } from "./preferences";
 import "./world3d.css";
@@ -59,6 +60,8 @@ export default function WorldView(
         languageMode={props.languageMode} disabled={props.inputBlocked} send={props.onVoxelAction}/>}
       {!props.overview && props.onVoxelAction && <ClimbingControls world={props.world} selfId={props.selfId}
         languageMode={props.languageMode} disabled={props.inputBlocked} send={props.onVoxelAction} twoD={prefs.mapView==='2D'}/>}
+      {props.world.dimensionId&&props.onVoxelAction&&!props.inputBlocked&&<RealmDock world={props.world}
+        player={props.world.players[props.selfId]} languageMode={props.languageMode} send={props.onVoxelAction}/>}
       {failed && (
         <button className="rpg-3d-fallback" onClick={() => setFailed(false)}>
           WebGL · 2D ✓

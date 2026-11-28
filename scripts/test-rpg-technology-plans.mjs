@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {writeFile} from 'node:fs/promises';
 import { createServer } from 'vite';
 
 const server=await createServer({optimizeDeps:{noDiscovery:true,entries:[]},
@@ -8,10 +9,11 @@ try {
   const V=await server.ssrLoadModule('/src/rpg/voxel.ts');
   const M=await server.ssrLoadModule('/src/rpg/machinery.ts');
   const T=await server.ssrLoadModule('/src/rpg/technologyResearch.ts');
+  const B=await server.ssrLoadModule('/src/rpg/blueprints.ts');
   const F=await server.ssrLoadModule('/src/rpg/farm/model.ts');
   const {DAY_SECONDS}=await server.ssrLoadModule('/src/rpg/town/catalog.ts');
-  const resources=(plan,player)=>{
-    for(const {block} of plan.parts) player.life.bag[block]=(player.life.bag[block]||0)+1;
+  const resources=(plan,player,parts)=>{
+    for(const {block} of parts) player.life.bag[block]=(player.life.bag[block]||0)+1;
     for(const [item,count] of Object.entries(plan.supplies??{})) player.life.bag[item]=(player.life.bag[item]||0)+count;
   };
   const examples={
@@ -50,6 +52,8 @@ try {
     'rail-attraction':({rail})=>rail(),
   };
   assert.equal(Object.keys(examples).length,T.TECH_PLANS.length);
+  assert.equal(new Set(T.SHOWCASE_PROJECTS).size,22);
+  const samples=[];
 
   for(const plan of T.TECH_PLANS){
     let now=1791150000000;
@@ -57,13 +61,16 @@ try {
     E.addPlayer(world,'a','Builder');
     world.sites=[];
     const player=world.players.a;
-    const origin={x:34,z:42,y:plan.id==='metro'?-3:plan.parts.some(part=>part.y<0)?1:0};
+    const parts=T.showcaseParts(plan);
+    const origin={x:34,z:42,y:plan.id==='metro'?-3:parts.some(part=>part.y<0)?1:0};
     const at=(x=0,z=0,y=0)=>({x:x+origin.x,z:z+origin.z,y:y+origin.y});
     world.voxels={edits:{},revision:1,terrainVersion:2,legacyFlat:[],placedBy:{},rotations:{}};
+    const bottom=Math.min(...parts.map(part=>part.y))+origin.y;
     for(let z=36;z<49;z++) for(let x=26;x<46;x++){
       world.tiles[z*E.WIDTH+x]='grass';world.voxels.legacyFlat.push(`${x},${z}`);
-      for(let y=Math.min(0,origin.y);y<=2;y++) world.voxels.edits[V.voxelKey(x,y,z)]=null;
+      for(let y=Math.min(bottom,0);y<=4;y++) world.voxels.edits[V.voxelKey(x,y,z)]=null;
     }
+    const buildingSite=structuredClone(world);
     const move=(x,z,y)=>{const dest=at(x,z,y);player.x=dest.x;player.y=dest.z;player.position3D={x:dest.x+.5,y:dest.y,z:dest.z+.5};};
     const send=action=>E.applyAction(world,player.id,action,now+=300);
     const succeed=(action)=>assert(send(action),`${plan.id}: ${JSON.stringify(action)}`);
@@ -71,8 +78,8 @@ try {
     const put=(item,x,z,y,amount=1)=>succeed({type:'voxel-storage',...at(x,z,y),item,amount,direction:'deposit'});
     const rail=(board=true)=>{op('cart-place',0);if(board)op('cart-ride',0);op('cart-drive',0);};
     const bucket=(command,x,z,y)=>succeed({type:'voxel-fluid',command,...at(x,z,y)});
-    resources(plan,player);
-    const sorted=[...plan.parts].sort((a,b)=>a.y-b.y);
+    resources(plan,player,parts);
+    const sorted=[...parts].sort((a,b)=>a.y-b.y);
     for(const part of sorted){
       move(part.x-1,part.z-1,part.y);
       player.life.energy=6;
@@ -89,6 +96,25 @@ try {
     succeed({type:'voxel-research',plan:plan.id,...origin});
     assert(T.earnedBlueprint(plan,plan.title.ja),`${plan.id} has an importable design.`);
     assert.equal(player.life.research[0],plan.id);
+    if(T.SHOWCASE_PROJECTS.includes(plan.id)){
+      const pattern=T.earnedBlueprint(plan,plan.title.ja,true);
+      assert.equal(pattern?.cells.length,parts.length,`${plan.id}: the whole construction fits its blueprint`);
+      const corner={x:origin.x+Math.min(...parts.map(p=>p.x)),y:bottom,z:origin.z+Math.min(...parts.map(p=>p.z))};
+      const positions=pattern.cells.map(cell=>B.blueprintPoint(corner,cell));
+      const builder=buildingSite.players.a;
+      resources(plan,builder,parts);
+      let pasted=false;
+      for(let z=38;z<=47&&!pasted;z++)for(let x=29;x<=42&&!pasted;x++){
+        if(positions.some(cell=>Math.hypot(cell.x-x,cell.y-bottom-1.1,cell.z-z)>4.5||
+          cell.x===x&&cell.z===z&&cell.y>=bottom&&cell.y<bottom+2))continue;
+        builder.x=x;builder.y=z;builder.position3D={x:x+.5,y:bottom,z:z+.5,surface2D:true};
+        pasted=E.applyAction(buildingSite,builder.id,{type:'voxel-blueprint',command:'place',...corner,pattern},now);
+      }
+      assert(pasted,`${plan.id}: whole blueprint can be placed from a safe tile`);
+      for(const {x,y,z,block} of positions)assert.equal(V.blockAt(buildingSite,x,y,z),block);
+      if(process.env.RPG_SHOWCASE_DATA)samples.push({id:plan.id,world});
+    }
     console.log(`PASS ${plan.id}`);
   }
+  if(process.env.RPG_SHOWCASE_DATA)await writeFile(process.env.RPG_SHOWCASE_DATA,JSON.stringify(samples));
 } finally {await server.close();}

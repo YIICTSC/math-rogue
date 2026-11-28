@@ -32,7 +32,7 @@ import { creaturePortrait } from './lifestyle/creatureArt';
 import {trans} from '../utils/textUtils';
 import type {LanguageMode} from '../types';
 import {energyOf} from './energy';
-import {BLOCKS,voxelWater,naturalVoxelWater,traceVoxel,blockAt,protectedVoxel,terrainHeight,oasisCenters,playerHeight,solid,miningCost,MIN_DEPTH,MAX_HEIGHT,EYE_HEIGHT,VOXEL_COLORS,type TerrainBlock,type Block,type VoxelAction} from './voxel';
+import {BLOCKS,voxelWater,naturalVoxelWater,traceVoxel,blockAt,protectedVoxel,terrainHeight,oasisCenters,playerHeight,solid,miningCost,voxelPlaceCost,MIN_DEPTH,MAX_HEIGHT,EYE_HEIGHT,VOXEL_COLORS,type TerrainBlock,type Block,type VoxelAction} from './voxel';
 import { StorybookModels, type Placement, type StorybookModel } from '../three/storybookModels';
 import { configureStorybook } from '../three/storybookStyle';
 import {storyForSite} from './stories';
@@ -45,6 +45,7 @@ import { WIDTH, HEIGHT } from "./engine";
 import { biomeAt, biomeSurface } from "./biomes";
 import { natureAt } from "./life";
 import { occupiedCityTile } from "./city/model";
+import { cityWorkerPortrait, cityWorkers } from './city/works';
 import { occupiedFarmTile } from "./farm/model";
 import { animalPose } from "./lifestyle/animalMotion";
 import { getRoamingNpcEvent } from "./roamingNpcs";
@@ -55,6 +56,7 @@ import { farmImage } from "./farm/Sprite";
 import { assetUrl } from "../utils/assetPaths";
 import { compassAngle, shortestTurn } from "./worldViewMath";
 import { useRpgPreferences } from "./preferences";
+import { inRealm, REALMS, realmWardenArt } from './realmTerrain';
 import "./world3d.css";
 export interface SceneProps {
   languageMode?:LanguageMode;
@@ -270,6 +272,27 @@ export default function WorldScene3D(props: SceneProps) {
       return s;
     }
     const atlasMaterials = new Map<string, THREE.SpriteMaterial>();
+    const staffGroup=new THREE.Group(),staffActors=new Map<string,THREE.Sprite>();
+    scene.add(staffGroup);
+    function updateStaff(w:World,x:number,z:number){
+      const radius=profile.low?12:19;
+      const workers=cityWorkers(w,{minX:x-radius,maxX:x+radius,minY:z-radius,maxY:z+radius});
+      const present=new Set<string>();
+      for(const worker of workers){
+        present.add(worker.id);
+        const size=worker.guardian?2.4:1.45;
+        const elevation=terrainHeight(w,Math.floor(worker.x),Math.floor(worker.z));
+        let actor=staffActors.get(worker.id);
+        if(!actor){
+          actor=billboard(staffGroup,assetUrl(cityWorkerPortrait(worker.id,worker.guardian)),worker.x,elevation+size/2,worker.z,size);
+          staffActors.set(worker.id,actor);
+        }
+        actor.position.set(worker.x,elevation+size/2,worker.z);
+        const dimensions=actor.material.map?.image as {width?:number;height?:number}|undefined;
+        if(dimensions?.width&&dimensions.height)actor.scale.set(Math.min(size,dimensions.width/dimensions.height*size),size,1);
+      }
+      for(const [id,actor] of staffActors)if(!present.has(id)){actor.removeFromParent();staffActors.delete(id);}
+    }
     function atlasBillboard(
       src: string,
       index: number,
@@ -491,8 +514,9 @@ export default function WorldScene3D(props: SceneProps) {
       }
       const get=(bx:number,by:number,bz:number)=>{const k=`${bx},${by},${bz}`;if(!cache.has(k))cache.set(k,blockAt(w,bx,by,bz));return cache.get(k)!;};
       for(let vz=Math.max(1,y-vr);vz<=Math.min(HEIGHT-2,y+vr);vz++)for(let vx=Math.max(1,x-vr);vx<=Math.min(WIDTH-2,x+vr);vx++)for(let vy=MIN_DEPTH;vy<=Math.max(terrainHeight(w,vx,vz)+4,editedTops.get(vx+','+vz)||0);vy++){
+        if(w.dimensionId&&!inRealm(vx,vz))continue;
         const b=get(vx,vy,vz);if(!b)continue;
-        if(landmarkBlock(vx,vy,vz)&&!Object.hasOwn(w.voxels?.edits||{},`${vx},${vy},${vz}`))continue;
+        if(!w.dimensionId&&landmarkBlock(vx,vy,vz)&&!Object.hasOwn(w.voxels?.edits||{},`${vx},${vy},${vz}`))continue;
         if(fullCube(b)&&[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]].every(([dx,dy,dz])=>{const neighbor=get(vx+dx,vy+dy,vz+dz);return !!neighbor&&fullCube(neighbor);}))continue;
         blocks[renderBlocks.indexOf(b)].push({x:vx,y:vy,z:vz});
       }
@@ -510,7 +534,7 @@ export default function WorldScene3D(props: SceneProps) {
           tx <= Math.min(WIDTH - 1, x + radius);
           tx++
         )
-          cells.push({ x: tx, y: ty, tile: w.tiles[ty * WIDTH + tx] });
+          if(!w.dimensionId||inRealm(tx,ty))cells.push({ x: tx, y: ty, tile: w.tiles[ty * WIDTH + tx] });
       const ground = new THREE.InstancedMesh(
         box,
         adventureSurface(new THREE.MeshStandardMaterial({ roughness: .92 })),
@@ -531,7 +555,8 @@ export default function WorldScene3D(props: SceneProps) {
         dummy.updateMatrix();
         ground.setMatrixAt(i, dummy.matrix);
         color.set(
-          w.city?.roads.includes(ty * WIDTH + tx)
+          w.dimensionId ? VOXEL_COLORS[blockAt(w,tx,terrainHeight(w,tx,ty)-1,ty)??REALMS[w.dimensionId].ground]
+          : w.city?.roads.includes(ty * WIDTH + tx)
             ? "#c6b18a"
             : tile === "water"
               ? "#287a92"
@@ -550,7 +575,7 @@ export default function WorldScene3D(props: SceneProps) {
         )
           return;
         const b = biomeAt(tx, ty).id,
-          node = natureAt(w, ty * WIDTH + tx),
+          node = w.dimensionId ? null : natureAt(w, ty * WIDTH + tx),
           removed =
             (w.life.nodes[ty * WIDTH + tx]?.regrowAt || 0) > w.life.time;
         const pool=naturalVoxelWater(w,tx,ty);
@@ -757,6 +782,12 @@ export default function WorldScene3D(props: SceneProps) {
         {
           siteBillboard(site,actors);
         }
+      const self=w.players[latest.current.selfId];
+      for(const site of w.sites){
+        if(!site.dimension||site.dimensionIndex!==0||site.cleared||Math.hypot(site.x-self.x,site.y-self.y)>radius)continue;
+        const size=site.dimension==='sky'?3.7:3.2;
+        billboard(actors,assetUrl(realmWardenArt(site.dimension)),site.x+.5,terrainHeight(w,site.x,site.y)+size*.52,site.y+.5,size);
+      }
       for (const r of residentsOf(w)) {
         const pos = residentPosition(w, r.id);
         if (pos.siteId || latest.current.hiddenActors?.includes(r.id)) continue;
@@ -874,7 +905,7 @@ export default function WorldScene3D(props: SceneProps) {
     function performBuild(kind:'voxel-break'|'voxel-place'='voxel-break') {
       if(buildRef.current.panel)return;
       const current=latest.current.world.players[latest.current.selfId];
-      if(energyOf(current.life)<(kind==='voxel-place'?.1:.02)){latest.current.onEnergyRequest?.();return;}
+      if(energyOf(current.life)<(kind==='voxel-place'?voxelPlaceCost(latest.current.world,current):.02)){latest.current.onEnergyRequest?.();return;}
       ray.setFromCamera(new THREE.Vector2(0,0),camera);
       const h=buildHit(latest.current.world);
       if(h){attackUntil=performance.now()+700;if(kind==='voxel-break'&&Number.isFinite(miningCost(h.block,current,latest.current.world))&&energyOf(current.life)<miningCost(h.block,current,latest.current.world)){latest.current.onEnergyRequest?.();return;}latest.current.onVoxelAction?.({type:kind,x:h.x+(kind==='voxel-place'?h.normal.x:0),y:h.y+(kind==='voxel-place'?h.normal.y:0),z:h.z+(kind==='voxel-place'?h.normal.z:0),block:buildRef.current.selected,rotation:buildRef.current.rotation});}
@@ -1015,6 +1046,7 @@ export default function WorldScene3D(props: SceneProps) {
       const dt = Math.min(0.1, (time - last) / 1000 || 0.016);
       if (a) {
         const focusPoint=new THREE.Vector3(a.position3D?.x??a.x,a.position3D?.y??0,a.position3D?.z??a.y);
+        if(w.city?.works||staffActors.size)updateStaff(w,focusPoint.x,focusPoint.z);
         machineryEffects.update(w,focusPoint,dt,options.current.reducedMotion);
         transportModels.update(w,focusPoint,time/1000,dt,options.current.reducedMotion,thirdRef.current?undefined:a.id);
         creatures.update(w,focusPoint,time/1000,dt,options.current.reducedMotion);
@@ -1082,8 +1114,8 @@ export default function WorldScene3D(props: SceneProps) {
             .map(([id, p]) => `${id}:${p.x}:${p.y}`)
             .join("|") +
           w.sites
-            .filter((s) => s.kind === "npc")
-            .map((s) => `${s.id}:${s.x}:${s.y}`)
+            .filter((s) => s.kind === "npc"||s.dimension)
+            .map((s) => `${s.id}:${s.x}:${s.y}:${Number(s.cleared)}`)
             .join("|");
         if (nextActors !== actorKey) {
           actorKey = nextActors;
@@ -1169,18 +1201,23 @@ export default function WorldScene3D(props: SceneProps) {
       sun.target.position.set(camera.position.x, camera.position.y-1.62, camera.position.z);
       sun.target.updateMatrixWorld();
       skyDome.position.copy(camera.position);
-      const phase = calendar(w).phase;
+      const realm=w.dimensionId, phase = realm ? realm==='geode'||realm==='echo'?3:realm==='embers'?2:1 : calendar(w).phase;
       const exterior=!legacyRegion(camera.position.x,camera.position.z),pool=voxelWater(w,camera.position.x,camera.position.z,camera.position.y),underwater=!!pool&&camera.position.y<pool.surface&&camera.position.y>=pool.surface-pool.depth;
       (scene.fog as THREE.FogExp2).density=underwater?.11:camera.position.y>170?.0035:profile.low?.003:.0018;
       if(underwater){scene.background=new THREE.Color('#28748b');(scene.fog as THREE.FogExp2).color.set('#28748b');}
       renderer.domElement.dataset.actorSprites=String(actors.children.filter(o=>o instanceof THREE.Sprite).length);
       // Only the local protagonist uses a 3D model; every other actor keeps its artwork.
-      landscape.update(w,avatar.root.position,time/1000,phase===3,options.current.reducedMotion,creatures.count);
-      nature.update(w,avatar.root.position,time/1000,options.current.reducedMotion,phase===3);
+      landscape.group.visible=!realm;
+      nature.group.visible=!realm;
+      if(!realm){
+        landscape.update(w,avatar.root.position,time/1000,phase===3,options.current.reducedMotion,creatures.count);
+        nature.update(w,avatar.root.position,time/1000,options.current.reducedMotion,phase===3);
+      }
       const detailRadius=profile.low?12:19;
       for(const g of distantBuildings.children){const s=g.userData.site,dx=Math.abs(s.x-avatar.root.position.x),dz=Math.abs(s.y-avatar.root.position.z);g.visible=(dx>=detailRadius||dz>=detailRadius)&&Math.hypot(dx,dz)<170;}
-      ambience?.update(camera.position.y,underwater||!!pool,landscape.group.userData.stats.weather==='rain');
-      renderer.domElement.dataset.landscape=JSON.stringify(landscape.group.userData.stats);renderer.domElement.dataset.underwater=String(underwater);
+      ambience?.update(camera.position.y,underwater||!!pool,landscape.group.userData.stats?.weather==='rain');
+      renderer.domElement.dataset.dimension=realm??'surface';
+      renderer.domElement.dataset.landscape=JSON.stringify(landscape.group.userData.stats??{});renderer.domElement.dataset.underwater=String(underwater);
       const underground=!underwater&&camera.position.y<terrainHeight(w,Math.floor(camera.position.x),Math.floor(camera.position.z))-.5;
       lamp.position.copy(camera.position);lamp.intensity=underground?3:0;
       const cave=currentCavern(w,a);
@@ -1190,6 +1227,12 @@ export default function WorldScene3D(props: SceneProps) {
       const brightness = underground?.1:phase === 3 ? 0.48 : phase === 2 ? 0.8 : 1;
       skyMaterial.uniforms.dark.value = brightness;
       skyMaterial.uniforms.tone.value.copy((scene.fog as THREE.FogExp2).color);
+      if(realm&&!underwater){
+        const color=REALMS[realm].sky;
+        (scene.fog as THREE.FogExp2).color.set(color);
+        (scene.fog as THREE.FogExp2).density=realm==='sky'?.021:.045;
+        skyMaterial.uniforms.tone.value.set(color);
+      }
       sun.intensity = underground?.08:phase === 3 ? .35 : phase===2?1.6:2.1;
       sun.color.set(phase===3?"#a7bce8":phase===2?"#ffc58e":"#fff0cc");
       hemisphere.intensity=underground?.18:phase===3?.55:1.65;
@@ -1266,7 +1309,7 @@ export default function WorldScene3D(props: SceneProps) {
     <header><span>⚡ {(me?.life?.energy??6).toFixed(2)}/6 · Y {me?playerHeight(props.world,me).toFixed(1):0}</span><button aria-label={text('スロット設定')} aria-expanded={editSlot} {...multiTouchAction(()=>setEditSlot(!editSlot))}>⚙</button></header>
     <div className="rpg-voxel-slots">{slots.map((b,i)=><button key={i} aria-label={`${text('スロット')} ${i+1}: ${sandboxItemName(b,props.languageMode)}`} aria-pressed={selectedSlot===i} {...multiTouchAction(()=>setSelectedSlot(i))}><svg viewBox="0 0 32 32" aria-hidden="true"><path fill={VOXEL_COLORS[b]} d="M16 2 30 9v15L16 31 2 24V9z"/><path fill="#ffffff40" d="m16 2 14 7-14 7L2 9z"/><path fill="#00000030" d="m16 16 14-7v15l-14 7z"/></svg><small>{sandboxItemName(b,props.languageMode)}</small><b>{me?.life?.bag[b]||0}</b></button>)}</div>
     <div className="rpg-workshop-actions"><button {...multiTouchAction(()=>setEditSlot(true))}>{text("建築工房")}</button><button {...multiTouchAction(()=>command('inspect'))}>{L('調べる','Inspect','しらべる')} <kbd>F</kbd></button><button aria-label={text("建材を回転")} {...multiTouchAction(()=>setRotation(r=>(r+1)%4))}>↻ {rotation*90}°</button></div>
-    <div className="rpg-voxel-actions"><button aria-label="Jump / Swim up" {...multiTouchAction(()=>props.onVoxelAction?.({type:'voxel-jump'}))}>↑</button><button aria-label="Dive" {...multiTouchAction(()=>props.onVoxelAction?.({type:'voxel-dive'}))}>↓</button><button disabled={energyOf(me?.life)>=.1&&!!target&&!Number.isFinite(target.cost)} {...multiTouchAction(()=>command('voxel-break'))}>⛏ {text('壊す')}</button><button disabled={energyOf(me?.life)>=.1&&(me?.life?.bag[selected]||0)<1} {...multiTouchAction(()=>command('voxel-place'))}>＋ {text('置く')}</button></div>
+    <div className="rpg-voxel-actions"><button aria-label="Jump / Swim up" {...multiTouchAction(()=>props.onVoxelAction?.({type:'voxel-jump'}))}>↑</button><button aria-label="Dive" {...multiTouchAction(()=>props.onVoxelAction?.({type:'voxel-dive'}))}>↓</button><button disabled={energyOf(me?.life)>=.1&&!!target&&!Number.isFinite(target.cost)} {...multiTouchAction(()=>command('voxel-break'))}>⛏ {text('壊す')}</button><button disabled={me&&energyOf(me.life)>=voxelPlaceCost(props.world,me)&&(me.life?.bag[selected]||0)<1} {...multiTouchAction(()=>command('voxel-place'))}>＋ {text('置く')}</button></div>
     {me?.life && (me.life.bag.bucket || me.life.bag.water_bucket || me.life.bag.lava_bucket) ? <div className="rpg-workshop-actions">
       {!!me.life.bag.bucket && <button {...multiTouchAction(()=>command('scoop'))}>{L('くむ','Fill bucket','くむ')}</button>}
       {!!me.life.bag.water_bucket && <button {...multiTouchAction(()=>command('water'))}>{L('水を置く','Place water','みずをおく')}</button>}
@@ -1276,7 +1319,7 @@ export default function WorldScene3D(props: SceneProps) {
       <button onClick={()=>props.onVoxelAction?.({type:'voxel-blueprint',command:'place',...blueprint.origin,pattern:blueprint.pattern})}>{L('まとめて建築','Build blueprint','まとめてけんちく')}</button>
       <button onClick={()=>setBlueprint(null)}>{L('仮表示を閉じる','Close preview','かりひょうじをとじる')}</button>
     </div>}
-    <small className="rpg-voxel-target">{target?(target.block==='bedrock'||target.block==='oasis-water'||target.block==='door-top'?text(target.block==='bedrock'?'岩盤':target.block==='oasis-water'?'地下の水':'ドア'):sandboxItemName(target.block,props.languageMode)):text('照準をブロックに合わせる')} · ⚡ {target?(Number.isFinite(target.cost)?target.cost.toFixed(2):'—'):'0.10'}</small>
+    <small className="rpg-voxel-target">{target?(target.block==='bedrock'||target.block==='oasis-water'||target.block==='door-top'?text(target.block==='bedrock'?'岩盤':target.block==='oasis-water'?'地下の水':'ドア'):sandboxItemName(target.block,props.languageMode)):text('照準をブロックに合わせる')} · ⚡ {target?(Number.isFinite(target.cost)?target.cost.toFixed(2):'—'):(me?voxelPlaceCost(props.world,me):.1).toFixed(2)}</small>
   </div>}{building&&editSlot&&<VoxelWorkshopPanel world={props.world} selfId={props.selfId} languageMode={props.languageMode||"JAPANESE"} send={a=>props.onVoxelAction?.(a)} onChoose={block=>setSlots(slots=>slots.map((b,i)=>i===selectedSlot?block:b))} onBlueprintPreview={setBlueprint} onClose={()=>setEditSlot(false)}/>}{building&&showDevice&&!editSlot&&!props.inputBlocked&&<div className="rpg-3d-device-panel" onPointerDown={e=>e.stopPropagation()}>
       {!ridden&&<button onClick={()=>setDeviceTarget(null)} aria-label={L('閉じる','Close','とじる')}>×</button>}
       <MachineryInspector world={props.world} selfId={props.selfId} position={{x:showDevice.x,y:showDevice.y,z:showDevice.z}} languageMode={props.languageMode} send={action=>{

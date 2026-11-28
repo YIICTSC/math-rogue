@@ -2,11 +2,14 @@ import { advanceFluids, fluidAt } from './placedFluids';
 import { advanceWildlife } from './lifestyle/wildlife';
 import { potionSeconds } from './explorationEquipment';
 import type { SandboxState } from './sandboxAccess';
-import { advanceMachinery, poweredGateOpen, ridingCart } from './machinery';
+import { activeBeaconAt, advanceMachinery, poweredGateOpen, ridingCart } from './machinery';
 import { advanceTransport, steerTransport, traveling, type Gliding, type TransportState } from './transport';
 import { cavernGuardianId, cavernGuardians, cavernSiteReachable, currentCavern, planCaverns, type Cavern, type CavernId } from './subsurface';
 import { advanceBuildPhysics, terrainMoveFactor } from './buildingPhysics';
 import { advancePackAnimals, type PackAnimal, type PackTraining } from './packAnimals';
+import { fillCreativeStock, steerCreativeFlight, toggleCreativeFlight } from './creative';
+import { applyRealmTravel, commitRealm, realmBattleReach, realmReturn, realmView, type RealmState, type RealmVisit } from './realms';
+import type { RealmId } from './realmTerrain';
 import { blockAt, hasClosedSignalGate, playerHeight, terrainHeight } from './voxel';
 import {planAdventurePeaks,type AdventurePeak} from './adventureTerrain';
 import {homeBattleBonus,type HomeBattleBonus} from './furnitureBenefits';
@@ -27,7 +30,7 @@ import { BIOMES, biomeAt, biomeSurface, riverAt, fishingPondAt } from "./biomes"
 import { STORIES, storyForSite, applyStory, type StoryAction, type StoryProgress } from "./stories";
 import { applyDuel, advanceDuels, leaveDuels, type Duel, type DuelAction } from "./duels";
 import type { Card } from '../types';
-import { createActivities, advanceActivities, applyActivity, activityBusy, acceptProfile, leaveActivities, type Activities, type ActivityAction, type Mutation } from './activities';
+import { createActivities, advanceActivities, applyActivity, activityBusy, acceptProfile, grant, leaveActivities, type Activities, type ActivityAction, type Mutation } from './activities';
 import { cloneRpgAdventureSetup, isRpgAdventureSetup, normalizeRpgAdventureSetup, type RpgAdventureSetup } from "./setup";
 import { getEncounterEnemyNamePool } from "../services/geminiService";
 import type { VisualThemeId } from "../data/visualThemes";
@@ -68,6 +71,8 @@ export interface RpgRankingAward {
   score: number;
 }
 export interface Site {
+  dimension?:RealmId;
+  dimensionIndex?:number;
   subsurface?: CavernId;
   storyVariant?:number;
   storyId?: string;
@@ -103,6 +108,7 @@ export interface NativeProfile {
 }
 export interface NativeScene {
   homeBonus?:HomeBattleBonus;
+  beaconWard?:number;
   token: string;
   siteId: string;
   damage: number;
@@ -110,6 +116,8 @@ export interface NativeScene {
   teamPower: number;
 }
 export interface Adventurer {
+  creativeFlight?:true;
+  realm?:RealmVisit;
   gliding?: Gliding;
   packTraining?: PackTraining;
   transportAt?: number;
@@ -157,6 +165,9 @@ export interface Adventurer {
   npcEventResults?: Record<string, { choiceId: string; outcome: 'normal' | 'win' | 'lose' | 'fallback' }>;
 }
 export interface World {
+  creative?:true;
+  realms?:Partial<Record<RealmId,RealmState>>;
+  dimensionId?:RealmId;
   hostId?:string;
   /** New games only; absent on existing saves to preserve all elevations. */
   terrainStyle?:1;
@@ -241,7 +252,7 @@ export const distance = (
 export const isBattleSite = (s: Site) =>
   ["enemy", "guardian", "boss"].includes(s.kind);
 export const isSharedSite = (s: Site) =>
-  s.kind === "guardian" || s.kind === "boss" || !!s.subsurface;
+  s.kind === "guardian" || s.kind === "boss" || !!s.subsurface || !!s.dimension;
 export function siteUnavailable(
   w: World,
   p: Adventurer,
@@ -250,7 +261,7 @@ export function siteUnavailable(
   if (p.nativeScene || activityBusy(w,p)) return "現在のシーンを完了してください。";
   if (w.ended)
     return w.endReason === "timeout" ? "時間切れ！" : "魔王を倒しました！";
-  if (w.won&&!w.city) return "魔王を倒しました！";
+  if (w.won&&!w.city&&!w.dimensionId) return "魔王を倒しました！";
   if (s.cleared) return "討伐済みです。";
   if (s.kind === "treasure" && p.claimed.includes(s.id))
     return "この宝箱は開封済みです。";
@@ -338,7 +349,7 @@ function applyNativeAction(
   if (action.type === "native-enter") {
     const site = w.sites.find((s) => s.id === action.siteId);
     if (!site || !["enemy","guardian","boss","town","rest","event","treasure"].includes(site.kind) ||
-      distance(site, p) > 2 || !cavernSiteReachable(w,p,site)) return false;
+      distance(site,p)>2 || !cavernSiteReachable(w,p,site) || site.dimension&&!realmBattleReach(w,p,site)) return false;
     const reason = siteUnavailable(w, p, site);
     if (reason) return tell(reason);
     if (["town", "rest", "event"].includes(site.kind))
@@ -362,6 +373,10 @@ function applyNativeAction(
       teamPower,
       homeBonus:homeBattleBonus(w,p.id),
     };
+    if(w.timeLimitMinutes===0&&site.kind==='enemy'&&!isSharedSite(site)){
+      const tier=activeBeaconAt(w,p);
+      if(tier>=3)p.nativeScene.beaconWard=tier;
+    }
     return tell("本編のシーンをプレイ中です。");
   }
   if (!("token" in action) || action.token !== p.nativeScene?.token)
@@ -437,9 +452,9 @@ function applyNativeAction(
     ) {
       if (isSharedSite(site) && !site.cleared) return false;
       p.completedBattles = (p.completedBattles || 0) + 1;
-      if (site.kind === "enemy" && !site.subsurface) rotateEnemyName(w, site);
+      if (site.kind === "enemy" && !site.subsurface&&!site.dimension) rotateEnemyName(w, site);
     }
-    if (action.outcome === "defeat") {
+    if (action.outcome === "defeat"&&!site.dimension) {
       const town = w.sites.find(s=>s.kind === "town")!;
       p.x = town.x;
       p.y = town.y;
@@ -742,6 +757,43 @@ export function applyAction(
   )
     return false;
   advanceWorld(w, now);
+  const changed=applyWorldAction(w,p,action,now);
+  if(changed&&w.creative&&!['move','voxel-move','voxel-jump','voxel-dive','voxel-snap'].includes(action.type))fillCreativeStock(p);
+  return changed;
+}
+
+function applyWorldAction(w:World,p:Adventurer,action:Action,now:number) {
+  if(w.creative&&action.type!=='native-profile'&&
+    (action.type.startsWith('native-')||action.type.startsWith('duel-')||action.type.startsWith('dungeon-')||
+       action.type.startsWith('arcade-')||action.type==='life-game'||action.type==='ending-progress'||
+       action.type==='voxel-cave'&&action.command==='challenge'))return false;
+  if(p.creativeFlight&&w.creative&&['voxel-dimension','voxel-transport','voxel-pack-animal','voxel-climb','life-enter'].includes(action.type))return false;
+  if(action.type==='voxel-dimension')return applyRealmTravel(w,p,action,now);
+  if(p.realm){
+    const managesWorld=action.type==='voxel-admin'&&action.command==='option';
+    if(managesWorld)return applyActionHere(w,p,action,now);
+    if(action.type!=='move'&&action.type!=='hero-set'&&action.type!=='social-memory'&&!action.type.startsWith('native-')&&
+      (!action.type.startsWith('voxel-')||['voxel-cave','voxel-landmark','voxel-building-survey','voxel-pack-animal'].includes(action.type)))return false;
+    const id=p.realm.id,view=realmView(w,id);
+    if(!view.dimensionId)return false;
+    const changed=applyActionHere(view,p,action,now);
+    commitRealm(w,id,view);
+    if(changed&&action.type==='native-finish'&&action.outcome==='defeat')realmReturn(w,p,now);
+    return changed;
+  }
+  return action.type==='team'?applyActionHere(w,p,action,now):withSurfacePlayers(w,()=>applyActionHere(w,p,action,now));
+}
+
+function withSurfacePlayers<T>(world:World,fn:()=>T):T {
+  if(!world.realms)return fn();
+  const all=world.players, view=realmView(world);
+  if(view===world)return fn();
+  world.players=view.players;
+  try{return fn();}finally{world.players=all;}
+}
+
+function applyActionHere(w:World,p:Adventurer,action:Action,now:number) {
+  const {id}=p;
   const tell = (text: string) => {
     p.message = text;
     w.revision++;
@@ -759,6 +811,16 @@ export function applyAction(
     log(w, "参加者が集合し、冒険が始まりました！");
     w.revision++;
     return true;
+  }
+  if(action.type==='voxel-creative-flight')return toggleCreativeFlight(w,p);
+  if(w.creative&&p.creativeFlight&&p.position3D){
+    if(action.type==='move'){
+      if(!Number.isInteger(action.dx)||!Number.isInteger(action.dy)||Math.abs(action.dx)+Math.abs(action.dy)!==1)return false;
+      return steerCreativeFlight(w,p,action.dx,0,action.dy,true,now);
+    }
+    if(action.type==='voxel-move')return steerCreativeFlight(w,p,action.dx,0,action.dy,false,now);
+    if(action.type==='voxel-jump'||action.type==='voxel-dive')return steerCreativeFlight(w,p,0,action.type==='voxel-jump'?1:-1,0,!!p.position3D.surface2D,now);
+    if(action.type==='voxel-snap'){p.position3D.surface2D=true;w.revision++;return true;}
   }
   if(traveling(w,p)) {
     if(action.type==='move'||action.type==='voxel-move') {
@@ -926,22 +988,54 @@ function endWorld(w: World, reason: RpgEndReason, now = Date.now()) {
   w.revision++;
 }
 
+const beaconRespite=new WeakMap<Adventurer,number>();
+function advanceBeaconCare(w:World) {
+  if(!w.started||w.ended||w.gameMode!=='COOP'||w.timeLimitMinutes>0||!w.voxels?.machinery)return;
+  for(const p of Object.values(w.players)){
+    const tier=!p.spectator&&!p.nativeScene&&p.profile&&p.hp<p.maxHp&&!activityBusy(w,p)&&!traveling(w,p)?activeBeaconAt(w,p):0;
+    if(tier<2){beaconRespite.delete(p);continue;}
+    const due=beaconRespite.get(p);
+    if(due===undefined){beaconRespite.set(p,w.life.time+15);continue;}
+    if(w.life.time<due)continue;
+    beaconRespite.set(p,w.life.time+15);
+    grant(p,{remove:[],cards:[],gold:0,heal:tier});
+    w.revision++;
+  }
+}
+
 export function advanceWorld(w: World, now = Date.now()) {
   if (w.started && !w.ended && w.timeLimitMinutes > 0 && now >= w.deadlineAt) endWorld(w, "timeout", now);
-  advanceVoxelWater(w,now);
-  advanceLife(w,now);
-  advanceMachinery(w,now);
-  advanceFluids(w);
-  advanceBuildPhysics(w,now);
-  advanceTransport(w,now);
-  advancePackAnimals(w,now);
-  advanceSocial(w,now);
-  advanceTown(w,now);
-  advanceWildlife(w,now);
-  advanceFarm(w);
-  advanceCity(w);
-  advanceActivities(w,now);
-  advanceDuels(w,now);
+  withSurfacePlayers(w,()=>{
+    advanceVoxelWater(w,now);
+    advanceLife(w,now);
+    advanceMachinery(w,now);
+    advanceFluids(w);
+    advanceBuildPhysics(w,now);
+    advanceTransport(w,now);
+    advancePackAnimals(w,now);
+    advanceBeaconCare(w);
+    advanceSocial(w,now);
+    advanceTown(w,now);
+    advanceWildlife(w,now);
+    advanceFarm(w);
+    advanceCity(w);
+    if(!w.creative){
+      advanceActivities(w,now);
+      advanceDuels(w,now);
+    }
+  });
+  for(const id of Object.keys(w.realms??{}) as RealmId[]){
+    const view=realmView(w,id);
+    if(!Object.keys(view.players).length)continue;
+    advanceVoxelWater(view,now);
+    advanceMachinery(view,now);
+    advanceFluids(view);
+    advanceBuildPhysics(view,now);
+    advanceTransport(view,now);
+    advanceBeaconCare(view);
+    advanceWildlife(view,now);
+    commitRealm(w,id,view);
+  }
   if (
     w.ended &&
     w.rewardAt !== null &&

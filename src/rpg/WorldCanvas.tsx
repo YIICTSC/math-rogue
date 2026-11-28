@@ -5,12 +5,15 @@ import { packAnimals, ridingAnimal } from './packAnimals';
 import { isMachinePart } from './machineryParts';
 import { visibleWildlife, WILDLIFE } from './lifestyle/wildlife';
 import { drawCreature } from './lifestyle/creatureArt';
-import { playerHeight } from './voxel';
+import { collarColor } from './farm/animalLook';
+import { walkingPet } from './farm/companions';
+import { animalPose } from './lifestyle/animalMotion';
+import { blockAt, playerHeight, terrainHeight, voxelWater } from './voxel';
+import { inRealm, REALM_EDGE, REALM_GATE, realmWardenArt } from './realmTerrain';
 import {residentAppearance,npcAppearance} from './town/wardrobe';
 import {mapPosition,drawLandscapeTile,drawLandscapeVegetation,drawLandscapeBuildings,landscapeGate} from './landscapeMap';
 import {legacyRegion,WORLD_SCALE,landscapeEnvironment,landscapeColor,LANDMARKS} from './worldLandscape';
 import {furnitureImage} from './homeCatalog';
-import {drawFarmSprite} from './farm/draw';
 import {VOXEL_COLORS,type TerrainBlock} from './voxel';
 import {storyForSite} from './stories';
 import {residentsOf} from './town/residents';
@@ -20,6 +23,7 @@ import {drawFarms} from './farm/draw';
 import {occupiedFarmTile} from './farm/model';
 import {CITY_SPRITES} from './city/spriteRects';
 import {occupiedCityTile} from './city/model';
+import {cityWorkerPortrait, cityWorkers} from './city/works';
 import {rpgPreferences} from './preferences';
 import {cityBuilding} from './city/catalog';
 import {calendar,flowerAt} from './town/model';
@@ -291,14 +295,18 @@ export default function WorldCanvas({
       canvas.width = Math.max(1, Math.round(sw));
       canvas.height = Math.max(1, Math.round(sh));
       const pos=mapPosition(p),expanded=!!p.position3D&&!legacyRegion(pos.x,pos.z);
-      const width=expanded?1280:WIDTH,height=expanded?1280:HEIGHT,origin=expanded?-512:0;
+      const realm=w.dimensionId;
+      canvas.dataset.dimension=realm??'surface';
+      const width=realm?REALM_EDGE.right-REALM_EDGE.left+1:expanded?1280:WIDTH;
+      const height=realm?REALM_EDGE.back-REALM_EDGE.front+1:expanded?1280:HEIGHT;
+      const originX=realm?REALM_EDGE.left:expanded?-512:0,originZ=realm?REALM_EDGE.front:expanded?-512:0;
       const scale = overview
         ? Math.min(sw / (width * T), sh / (height * T))
         : phoneLandscape.matches || sw < 600 || sh < 350
           ? 2*prefs.zoom
           : 3*prefs.zoom;
-      const cx=overview?origin*T+(width*T-sw/scale)/2:pos.x*T-sw/scale/2;
-      const cy=overview?origin*T+(height*T-sh/scale)/2:pos.z*T-sh/scale/2;
+      const cx=overview?originX*T+(width*T-sw/scale)/2:pos.x*T-sw/scale/2;
+      const cy=overview?originZ*T+(height*T-sh/scale)/2:pos.z*T-sh/scale/2;
       camera.current = { x: cx, y: cy, scale };
       c.imageSmoothingEnabled = false;
       c.fillStyle = "#101f24";
@@ -314,6 +322,7 @@ export default function WorldCanvas({
         drawMachineLayer(c, w, T, viewBounds, layer);
         drawMachineCarts(c, w, T, viewBounds, layer.height);
         drawWatercraft(c,w,T,viewBounds,time,layer.height);
+        if(realm&&Math.abs(terrainHeight(w,REALM_GATE.x,REALM_GATE.z)-layer.height)<=1)drawCavernMark(c,REALM_GATE.x,REALM_GATE.z,'#9aebee','↥');
         const cavern=currentCavern(w,p);
         if (cavern && Math.abs(layer.height-CAVERNS[cavern.id].floor)<=1) {
           const cache=cavernCache(cavern), entry=cavernEntrance(cavern);
@@ -335,6 +344,16 @@ export default function WorldCanvas({
       const stride=overview&&expanded?16:1;
       for (let y = minY; y < maxY; y+=stride)
         for (let x = minX; x < maxX; x+=stride) {
+          if(realm){
+            if(!inRealm(x,y))continue;
+            const height=terrainHeight(w,x,y),tile=blockAt(w,x,height-1,y),pool=voxelWater(w,x,y,height);
+            const lava=blockAt(w,x,height,y)==='cave-lava';
+            const color=pool?'#397c91':lava?'#d65b38':tile?VOXEL_COLORS[tile]:'#322639';
+            rect(c,x*T,y*T,T,T,color);
+            rect(c,x*T,y*T,T,1,'#ffffff2a'); rect(c,x*T,y*T+T-1,T,1,'#12162552');
+            if(pool||lava)rect(c,x*T+((Math.floor(time/400)+x+2*y)%9),y*T+6,6,1,pool?'#9adddf':'#ffc564');
+            continue;
+          }
           if(!legacyRegion(x,y)){if(stride>1){const e=landscapeEnvironment(w.seed,x,y);c.fillStyle=e.water?'#377f95':landscapeColor(w.seed,x,y);c.fillRect(x*T,y*T,T*stride,T*stride);}else drawLandscapeTile(c,w,x,y,T,time);continue;}
           const biome = biomeSurface(x,y);
           const tile = w.tiles[y * WIDTH + x],
@@ -379,11 +398,12 @@ export default function WorldCanvas({
             }
           }
         }
-      if(!overview)for(let z=minY;z<maxY;z++)for(let x=minX;x<maxX;x++)drawLandscapeVegetation(c,w,x,z,T);
-      drawLandscapeBuildings(c,w,p,T,{minX,maxX,minY,maxY},s=>trans(s,languageMode));
+      if(!realm&&!overview)for(let z=minY;z<maxY;z++)for(let x=minX;x<maxX;x++)drawLandscapeVegetation(c,w,x,z,T);
+      if(!realm)drawLandscapeBuildings(c,w,p,T,{minX,maxX,minY,maxY},s=>trans(s,languageMode));
+      if(realm)drawCavernMark(c,REALM_GATE.x,REALM_GATE.z,'#9aebee','↥');
       if(w.city){const roads=new Set(w.city.roads);for(const tile of w.city.roads){const x=tile%WIDTH,y=Math.floor(tile/WIDTH);if(x<minX||x>=maxX||y<minY||y>=maxY)continue;rect(c,x*T,y*T,T,T,'#bbbaa1');rect(c,x*T+3,y*T+3,10,10,'#596166');for(const [dx,dy]of [[0,-1],[1,0],[0,1],[-1,0]])if(roads.has((y+dy)*WIDTH+x+dx)||w.tiles[(y+dy)*WIDTH+x+dx]==='road')rect(c,x*T+(dx<0?0:dx>0?8:3),y*T+(dy<0?0:dy>0?8:3),dx?8:10,dy?8:10,'#596166');rect(c,x*T+7,y*T+7,2,2,'#decfa0');}}
       for(let y=Math.max(0,minY);!overview&&y<Math.min(HEIGHT,maxY);y++)for(let x=Math.max(0,minX);x<Math.min(WIDTH,maxX);x++){
-        if(!legacyRegion(x,y))continue;const tile=y*WIDTH+x;if(occupiedCityTile(w,tile)||occupiedFarmTile(w,tile))continue;const node=natureAt(w,tile);if(!node){if(w.tiles[tile]==='forest'&&!landscapeGate(x,y))tree(c,x*T,y*T);continue;}
+        if(realm||!legacyRegion(x,y))continue;const tile=y*WIDTH+x;if(occupiedCityTile(w,tile)||occupiedFarmTile(w,tile))continue;const node=natureAt(w,tile);if(!node){if(w.tiles[tile]==='forest'&&!landscapeGate(x,y))tree(c,x*T,y*T);continue;}
         if(!resourceReady(w,tile)){rect(c,x*T+5,y*T+10,7,4,node.rock?'#89968b':'#8a6946');continue;}
         const effect=Object.values(w.players).find(q=>q.life?.effect?.tile===tile&&w.life.now-q.life.effect.at<350)?.life?.effect;
         const shake=effect?Math.sin((w.life.now-effect.at)/25)*2:0;
@@ -399,7 +419,21 @@ export default function WorldCanvas({
         drawMachineCarts(c, w, T, viewBounds);
         drawWatercraft(c,w,T,viewBounds,prefs.reducedMotion?0:time);
       }
-      for(const room of w.voxelRooms||[]){for(const f of room.furniture){const path=assetUrl(furnitureImage(f.item));let img=characterImages.get(path);if(!img){img=new Image();img.src=path;characterImages.set(path,img);}if(img?.complete&&img.naturalWidth)c.drawImage(img,f.x*T,f.y*T-12,24,24);}for(const farm of Object.values(w.farm?.people||{}))for(const pet of farm.pets)if(pet.homeId===room.id&&pet.roomPos)drawFarmSprite(c,'pet',pet.kind,pet.roomPos.x*T+8,pet.roomPos.y*T+15,22);}
+      for(const room of w.voxelRooms??[]){
+        for(const f of room.furniture){
+          const path=assetUrl(furnitureImage(f.item));
+          let img=characterImages.get(path);
+          if(!img){img=new Image();img.src=path;characterImages.set(path,img);}
+          if(img.complete&&img.naturalWidth)c.drawImage(img,f.x*T,f.y*T-12,24,24);
+        }
+        for(const [id,farm] of Object.entries(w.farm?.people??{})){
+          const owner=w.players[id],outside=owner&&!owner.life?.indoors&&!owner.spectator;
+          for(const pet of farm.pets){
+            if(pet.homeId!==room.id||!pet.roomPos||outside&&farm.activePet===pet.id||pet.awayUntil>w.life.time)continue;
+            drawCreature(c,pet.kind,(pet.roomPos.x+.5)*T,(pet.roomPos.y+.9)*T,22,animalPose(pet,w.life.time),'front',prefs.reducedMotion?0:time);
+          }
+        }
+      }
       drawFarms(c,w,time,!prefs.reducedMotion,{minX,maxX,minY,maxY});
       if (!overview) {
         const viewer=mapPosition(p);
@@ -417,6 +451,15 @@ export default function WorldCanvas({
       }
       for(const h of w.life?.houses||[]){if(h.biome==='snow'||h.biome==='desert')prop(c,h.biome==='snow'?19:20,h.x*T,h.y*T,48);else prop(c,7,h.x*T,h.y*T,48,craftAtlas,4,3);rect(c,h.x*T+5,h.y*T+13,6,3,'#f5d28d');}
       for(const lot of w.city?.lots||[]){if(lot.x<minX||lot.x>=maxX||lot.y<minY||lot.y>=maxY)continue;const b=cityBuilding(lot.kind);if(b&&cityAtlas?.complete&&cityAtlas.naturalWidth){const r=CITY_SPRITES[b.index],size=24,ratio=r[2]/r[3];c.drawImage(cityAtlas,r[0],r[1],r[2],r[3],lot.x*T+8-size*ratio/2,lot.y*T+16-size,size*ratio,size);}if(lot.damage)rect(c,lot.x*T+4,lot.y*T,8,8,'#e66d43');}
+      if(!overview)for(const worker of cityWorkers(w,viewBounds)){
+        const path=assetUrl(cityWorkerPortrait(worker.id,worker.guardian));
+        let image=characterImages.get(path);
+        if(!image){image=new Image();image.src=path;characterImages.set(path,image);}
+        if(image.complete&&image.naturalWidth){
+          const size=worker.guardian?32:22,width=Math.min(size,size*image.naturalWidth/image.naturalHeight);
+          c.drawImage(image,worker.x*T-width/2,worker.z*T+5-size,width,size);
+        }
+      }
       for(const resident of residentsOf(w)){const pos=residentPosition(w,resident.id);if(pos.siteId)continue;if(pos.x<minX||pos.x>=maxX||pos.y<minY||pos.y>=maxY)continue;const custom=w.town?.customResidents?.find(r=>r.id===resident.id),path=custom?.hero?.frames.idle[(prefs.reducedMotion?0:Math.floor(time/240))%Math.max(1,custom.hero.frames.idle.length)]||residentAppearance(w,resident.id,resident.portrait);let image=characterImages.get(path);if(!image){image=new Image();image.src=assetUrl(path);characterImages.set(path,image);}if(image.complete&&image.naturalWidth){const height=28,width=Math.min(24,height*image.naturalWidth/image.naturalHeight);c.drawImage(image,pos.x*T+8-width/2,pos.y*T+16-height,width,height);}if(prefs.labels&&Math.abs(pos.x-p.x)+Math.abs(pos.y-p.y)<=4){c.fillStyle='#fff0c1';c.font='bold 9px sans-serif';c.textAlign='center';c.fillText(resident.name[languageMode==='ENGLISH'?'en':languageMode==='HIRAGANA'?'hi':'ja'],pos.x*T+8,pos.y*T-15);}}
 
       for(const q of Object.values(w.players)){
@@ -429,8 +472,26 @@ export default function WorldCanvas({
         if (entry.x>=minX&&entry.x<maxX&&entry.z>=minY&&entry.z<maxY) drawCavernMark(c,entry.x,entry.z,CAVERNS[cave.id].color,'↓');
       }
       const visibleSites = w.sites.filter(s => !s.subsurface && (s.kind !== "fragment" || w.activities.secretsFound.includes(s.id) || Math.abs(s.x-p.x)+Math.abs(s.y-p.y)<=4));
-      visibleSites.forEach((s) => landmark(c, s, time,w));
+      for(const s of visibleSites){
+        if(s.dimension&&s.dimensionIndex===0&&!s.cleared&&!overview){
+          const path=assetUrl(realmWardenArt(s.dimension));
+          let image=characterImages.get(path);
+          if(!image){image=new Image();image.src=path;characterImages.set(path,image);}
+          if(image.complete&&image.naturalWidth){c.drawImage(image,s.x*T-14,s.y*T-28,44,44);continue;}
+        }
+        landmark(c,s,time,w);
+      }
       drawBeaconMarkers(c,w,T,viewBounds,overview);
+      if(!overview)for(const [owner,farm] of Object.entries(w.farm?.people??{})){
+        const adventurer=w.players[owner];
+        if(!adventurer||adventurer.x<minX-1||adventurer.x>=maxX+1||adventurer.y<minY-1||adventurer.y>=maxY+1)continue;
+        const companion=walkingPet(w,adventurer,farm);
+        if(!companion)continue;
+        const {pet,x,z,facing,walk}=companion;
+        const pose=pet.moment&&pet.moment.until>w.life.time?pet.moment.pose:walk?'walk':animalPose(pet,w.life.time);
+        drawCreature(c,pet.kind,x*T,z*T+5,20,pose,facing,prefs.reducedMotion?0:time);
+        if(pet.collar)rect(c,x*T-2,z*T-6,4,2,collarColor[pet.collar]);
+      }
       for(const animal of packAnimals(w))if(!overview&&animal.x>=minX&&animal.x<maxX&&animal.z>=minY&&animal.z<maxY){
         const direction=['back','right','front','left'] as const;
         const facing=direction[(Math.round(animal.dir*2/Math.PI)%4+4)%4];
@@ -442,9 +503,9 @@ export default function WorldCanvas({
         .sort((a, b) => mapPosition(a).z - mapPosition(b).z)
         .forEach((q) => person(c, q, prefs.reducedMotion?0:time, ridingAnimal(w,q.id)?11:0));
       c.restore();
-      if(!overview&&!prefs.reducedMotion){c.save();const weather=season.weather;c.globalAlpha=.55;for(let i=0;i<20;i++){const x=(i*89+time/(season.season===3?55:30))%sw,y=(i*61+time/(weather===2?8:75))%sh;if(weather===2){c.strokeStyle='#afd5e3';c.beginPath();c.moveTo(x,y);c.lineTo(x-3,y+10);c.stroke();}else if(season.season===3&&weather===4){c.fillStyle='#f3f8ed';c.beginPath();c.arc(x,y,2,0,Math.PI*2);c.fill();}else if(season.season===0&&weather===1){c.fillStyle='#edb9c5';c.fillRect(x,y,3,2);}else if(season.season===2&&weather===1){c.fillStyle='#d4aa59';c.fillRect(x,y,3,2);}}if(season.phase===3){c.globalAlpha=.1;c.fillStyle='#152140';c.fillRect(0,0,sw,sh);}c.restore();}
+      if(!realm&&!overview&&!prefs.reducedMotion){c.save();const weather=season.weather;c.globalAlpha=.55;for(let i=0;i<20;i++){const x=(i*89+time/(season.season===3?55:30))%sw,y=(i*61+time/(weather===2?8:75))%sh;if(weather===2){c.strokeStyle='#afd5e3';c.beginPath();c.moveTo(x,y);c.lineTo(x-3,y+10);c.stroke();}else if(season.season===3&&weather===4){c.fillStyle='#f3f8ed';c.beginPath();c.arc(x,y,2,0,Math.PI*2);c.fill();}else if(season.season===0&&weather===1){c.fillStyle='#edb9c5';c.fillRect(x,y,3,2);}else if(season.season===2&&weather===1){c.fillStyle='#d4aa59';c.fillRect(x,y,3,2);}}if(season.phase===3){c.globalAlpha=.1;c.fillStyle='#152140';c.fillRect(0,0,sw,sh);}c.restore();}
       if(overview&&expanded){c.font='bold 12px sans-serif';c.textAlign='center';for(const l of LANDMARKS){const x=(l.x*T-cx)*scale,y=(l.z*T-cy)*scale;const text=trans(l.label,languageMode),width=c.measureText(text).width+12;c.fillStyle='#142b35';c.fillRect(x-width/2,y-14,width,20);c.fillStyle='#ffdf8c';c.fillText(text,x,y);}}
-      if (overview&&!expanded&&prefs.labels) {
+      if (overview&&!expanded&&!realm&&prefs.labels) {
         c.font='bold 13px sans-serif'; c.textAlign='center';
         for(const biome of BIOMES) {
           const bx=(biome.x*T-cx)*scale,by=((biome.y-12)*T-cy)*scale;

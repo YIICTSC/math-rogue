@@ -322,7 +322,7 @@ export function applyCity(w: World, p: Adventurer, a: CityAction, now: number) {
         origin: { x: p.x, y: p.y },
         revision: 0,
       };
-    w.sites=w.sites.filter(site=>site.kind!=="enemy");
+    w.sites=w.sites.filter(site=>site.kind!=="enemy"||site.subsurface);
     w.activities.event.finished=true;
     w.activities.nextEventAt=now+60000;
     w.ended = false;

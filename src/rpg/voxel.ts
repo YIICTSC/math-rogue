@@ -5,6 +5,9 @@ import { potionSeconds, toolLimit, wearTool } from './explorationEquipment';
 import { applySandboxSettings, recordSandboxEvent, sandboxAllows, sandboxHost, type SandboxAction } from './sandboxAccess';
 import { applyTransport, boardedBoat, occupiedByBoat, traveling, type TransportAction } from './transport';
 import { applyPackAction, type PackAction } from './packAnimals';
+import type { RealmAction } from './realms';
+import type { CreativeAction } from './creative';
+import { inRealm, realmBlock, realmHeight, realmProtected, realmWater } from './realmTerrain';
 import { applyCavern, cavernBlock, cavernStructure, cavernWater, type CavernAction } from './subsurface';
 import { applyBuildingAction, buildingSupport, isClimbingBlock, openDecoration, recordBuildingEdit, terrainJumpFactor, terrainMoveFactor,
  type BuildingAction, type BuildingDetails } from './buildingPhysics';
@@ -30,7 +33,7 @@ export const VOXEL_COLORS:Record<TerrainBlock,string>={...Object.fromEntries(BLO
 export type TerrainBlock=Block|'bedrock'|'oasis-water'|'cave-lava'|'door-top'|'piston_head';
 export const MIN_DEPTH=-18,MAX_HEIGHT=WORLD_SCALE.ceiling,EYE_HEIGHT=WORLD_SCALE.eyeHeight;
 export interface VoxelWorld {edits:Record<string,Block|null>;revision:number;placedBy?:Record<string,string>;terrainVersion?:2;legacyFlat?:string[];rotations?:Record<string,number>;containers?:Record<string,VoxelContainer>;machinery?:MachineryState;fluids?:PlacedFluids;details?:BuildingDetails}
-export type VoxelAction=WorkshopAction|MachineCommand|FluidAction|ResearchAction|BlueprintAction|SandboxAction|TransportAction|CavernAction|BuildingAction|PackAction|{type:'voxel-landmark'}|{type:'voxel-building-survey'}|{type:'voxel-move';dx:number;dy:number}|{type:'voxel-snap';preserveHeight?:true}|{type:'voxel-jump'}|{type:'voxel-dive'}|{type:'voxel-break'|'voxel-place';x:number;y:number;z:number;block?:Block;rotation?:number};
+export type VoxelAction=WorkshopAction|MachineCommand|FluidAction|ResearchAction|BlueprintAction|SandboxAction|TransportAction|CavernAction|BuildingAction|PackAction|RealmAction|CreativeAction|{type:'voxel-landmark'}|{type:'voxel-building-survey'}|{type:'voxel-move';dx:number;dy:number}|{type:'voxel-snap';preserveHeight?:true}|{type:'voxel-jump'}|{type:'voxel-dive'}|{type:'voxel-break'|'voxel-place';x:number;y:number;z:number;block?:Block;rotation?:number};
 export const voxelKey=(x:number,y:number,z:number)=>`${x},${y},${z}`;
 const springCache=new WeakMap<World,{revision:number;cells:Map<string,SpringWater>}>();
 function springWater(w:World,x:number,z:number){
@@ -44,6 +47,7 @@ function springWater(w:World,x:number,z:number){
  return cached.cells.get(Math.floor(x)+','+Math.floor(z))||null;
 }
 export function naturalVoxelWater(w:World,x:number,z:number){
+ if(w.dimensionId)return realmWater(w.dimensionId,w.seed,Math.floor(x),Math.floor(z));
  const spring=springWater(w,x,z);if(spring)return spring;
  if(!originalRegion(x,z)&&legacyRegion(x,z)&&waterProfile(x,z))return waterProfile(x,z);
  if(!legacyRegion(x,z))return waterProfile(x,z);
@@ -63,10 +67,11 @@ export function traceVoxel(w:World,origin:{x:number;y:number;z:number},direction
  for(let i=0;i<64;i++){const axis=axes.reduce((a,b)=>next[a]<next[b]?a:b);const distance=next[axis];if(distance>reach)return null;next[axis]+=delta[axis];if(axis==='x')x+=step.x;if(axis==='y')y+=step.y;if(axis==='z')z+=step.z;const block=blockAt(w,x,y,z);if(block){const normal={x:0,y:0,z:0};normal[axis]=-step[axis];return {x,y,z,block,normal,distance};}}
  return null;
 }
-export function protectedVoxel(w:World,x:number,z:number){if(STRUCTURES.some(l=>Math.abs(x-l.x)<l.width/2+1&&Math.abs(z-l.z)<l.depth/2+1))return true;if(!legacyRegion(x,z))return !landscapeRegion(x,z)||STRUCTURES.some(l=>Math.abs(x-l.x)<l.width/2+1&&Math.abs(z-l.z)<l.depth/2+1);return x<1||z<1||x>=WIDTH-1||z>=HEIGHT-1||occupiedFarmTile(w,z*WIDTH+x)||occupiedCityTile(w,z*WIDTH+x)||w.sites.some(s=>!s.subsurface&&Math.abs(s.x-x)+Math.abs(s.y-z)<=1)||w.life.houses.some(h=>Math.abs(h.x-x)+Math.abs(h.y-z)<=1);}
+export function protectedVoxel(w:World,x:number,z:number){if(w.dimensionId)return realmProtected(x,z);if(STRUCTURES.some(l=>Math.abs(x-l.x)<l.width/2+1&&Math.abs(z-l.z)<l.depth/2+1))return true;if(!legacyRegion(x,z))return !landscapeRegion(x,z)||STRUCTURES.some(l=>Math.abs(x-l.x)<l.width/2+1&&Math.abs(z-l.z)<l.depth/2+1);return x<1||z<1||x>=WIDTH-1||z>=HEIGHT-1||occupiedFarmTile(w,z*WIDTH+x)||occupiedCityTile(w,z*WIDTH+x)||w.sites.some(s=>!s.subsurface&&Math.abs(s.x-x)+Math.abs(s.y-z)<=1)||w.life.houses.some(h=>Math.abs(h.x-x)+Math.abs(h.y-z)<=1);}
 const heightCache=new Map<number,Int8Array>();
 const finalHeightCache=new WeakMap<World,{revision:number;heights:Int8Array;grades?:Uint8Array;editedColumns:Set<string>;flat:Set<string>}>();
 export function terrainHeight(w:World,x:number,z:number){
+ if(w.dimensionId)return realmHeight(w.dimensionId,w.seed,Math.floor(x),Math.floor(z));
  if(!legacyRegion(x,z))return 0;
  let cache=finalHeightCache.get(w);if(!cache||cache.revision!==w.revision){cache={revision:w.revision,heights:new Int8Array(WIDTH*HEIGHT).fill(-128),grades:w.terrainStyle===1?adventureRoadGrades(w.tiles,WIDTH,HEIGHT):undefined,editedColumns:new Set(Object.keys(w.voxels?.edits||{}).map(k=>{const [x,,z]=k.split(',');return `${x},${z}`;})),flat:new Set(w.voxels?.legacyFlat||[])};finalHeightCache.set(w,cache);}const cell=z*WIDTH+x;if(cache.heights[cell]!==-128)return cache.heights[cell];
  const save=(h:number)=>(cache!.heights[cell]=h);
@@ -97,7 +102,7 @@ export function oasisCenters(w:World){let centers=oasisCache.get(w.seed);if(!cen
 export function undergroundOasis(w:World,x:number,y:number,z:number){return oasisCenters(w).find(c=>((x+.5-c.x)/5.5)**2+((z+.5-c.z)/5.5)**2+((y+.5-c.depth)/2.8)**2<1);}
 /** Natural vegetation uses the same editable cells as player-built blocks. */
 export function vegetationCells(w:World,x:number,z:number):{x:number;y:number;z:number;block:Block}[]{
- if(!legacyRegion(x,z))return [];
+ if(w.dimensionId||!legacyRegion(x,z))return [];
  const node=natureAt(w,z*WIDTH+x);if(!node||w.life.nodes[z*WIDTH+x]?.regrowAt||protectedVoxel(w,x,z))return [];
  const h=terrainHeight(w,x,z),cell=(dx:number,dy:number,dz:number,block:Block)=>({x:x+dx,y:h+dy,z:z+dz,block});
  if(node.rock)return [cell(0,0,0,node.material as Block)];
@@ -129,6 +134,14 @@ function vegetationAt(w:World,x:number,y:number,z:number):Block|null{
 }
 export function blockAt(w:World,x:number,y:number,z:number):TerrainBlock|null {
  if(y>MAX_HEIGHT)return null;
+ if(w.dimensionId){
+  if(!inRealm(x,z))return null;
+  const key=voxelKey(x,y,z);
+  if(hasPistonHead(w,key))return 'piston_head';
+  if(w.voxels&&Object.hasOwn(w.voxels.edits,key))return w.voxels.edits[key];
+  if(w.voxels?.edits[voxelKey(x,y-1,z)]==='door')return 'door-top';
+  return realmBlock(w.dimensionId,w.seed,x,y,z);
+ }
  if(hasPistonHead(w,voxelKey(x,y,z)))return 'piston_head';
  if(!legacyRegion(x,z)){if(!landscapeRegion(x,z))return null;const key=voxelKey(x,y,z);if(w.voxels&&Object.hasOwn(w.voxels.edits,key))return w.voxels.edits[key];if(w.voxels?.edits[voxelKey(x,y-1,z)]==='door')return 'door-top';return y<=MIN_DEPTH?'bedrock':landscapeBlock(w.seed,x,y,z);}
  const key=voxelKey(x,y,z);if(w.voxels&&Object.hasOwn(w.voxels.edits,key))return w.voxels.edits[key];
@@ -196,6 +209,7 @@ export function miningCost(block:TerrainBlock,p:Adventurer,w?:World){
   const potion=w&&potionSeconds(w,p,'miner_draught')>0?.78:1;
   return Math.max(rank>=0&&tool!=='pickaxe'?.02:.1,Math.round(base*[1,.75,.5,.3,.18][rank+1]*(1-bonus*.06)*enchantment*potion*100)/100);
 }
+export const voxelPlaceCost=(w:World,p:Adventurer)=>activeBeaconAt(w,p)>=3?.08:.1;
 export function voxelWalkable(w:World,x:number,z:number,maxTop=terrainHeight(w,Math.floor(x),Math.floor(z))+1){return floorAt(w,Math.floor(x),Math.floor(z),maxTop)!==null;}
 function upgrade(w:World){const v=w.voxels??={edits:{},revision:0,terrainVersion:2};if(!v.terrainVersion){v.legacyFlat=[...new Set(Object.keys(v.edits).map(k=>{const [x,,z]=k.split(',');return `${x},${z}`;}))];v.terrainVersion=2;}return v;}
 function undoSandboxPlacement(w:World,p:Adventurer,number:number) {
@@ -221,6 +235,8 @@ function undoSandboxPlacement(w:World,p:Adventurer,number:number) {
  return true;
 }
 export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
+ if(a.type==='voxel-creative-flight')return false;
+ if(a.type==='voxel-dimension')return false;
  if(a.type==='voxel-pack-animal')return !farmBusy(w,p)&&applyPackAction(w,p,a,now,!!p.gliding||!!boardedBoat(w,p.id));
  if(a.type==='voxel-climb'||a.type==='voxel-sign')return !ridingCart(w,p.id)&&!farmBusy(w,p)&&applyBuildingAction(w,p,a,now);
  if(a.type==='voxel-cave')return !farmBusy(w,p)&&applyCavern(w,p,a);
@@ -247,7 +263,7 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
   if(a.type!=='voxel-snap'||!p.position3D||p.position3D.surface2D)return false;
   p.position3D.surface2D=true;w.revision++;return true;
  }
- if(a.type==='voxel-craft'||a.type==='voxel-storage'||a.type==='voxel-compost'||a.type==='voxel-seeds'||a.type==='voxel-tools'||a.type==='voxel-potion'||a.type==='voxel-bottle-honey'){
+ if(a.type==='voxel-craft'||a.type==='voxel-storage'||a.type==='voxel-compost'||a.type==='voxel-seeds'||a.type==='voxel-tools'||a.type==='voxel-potion'||a.type==='voxel-bottle-honey'||a.type==='voxel-summon'){
   const revision=w.voxels?.revision;
   const changed=applyWorkshop(w,p,a,now);
   if(changed&&a.type==='voxel-storage'&&w.voxels?.revision!==revision)recordSandboxEvent(w,p,{kind:'storage',tile:{x:a.x,y:a.y,z:a.z}});
@@ -335,7 +351,7 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
  const pos=p.position3D??{x:p.x+.5,z:p.y+.5};if(Math.hypot(x+.5-pos.x,y+.5-(playerHeight(w,p)+EYE_HEIGHT),z+.5-pos.z)>4.5)return false;
  if(!sandboxAllows(w,p.id,{x,y,z},a.type==='voxel-break'?'break':'build'))return false;
  const lp=lifePlayer(p),existing=blockAt(w,x,y,z),state=upgrade(w);
- const cost=a.type==='voxel-break'&&existing?miningCost(existing,p,w):activeBeaconAt(w,p)>=3?.08:.1;
+ const cost=a.type==='voxel-break'&&existing?miningCost(existing,p,w):voxelPlaceCost(w,p);
  const before=state.edits[voxelKey(x,y,z)]===null?null:undefined;
  if(Object.keys(state.edits).length>=18000&&!Object.hasOwn(state.edits,voxelKey(x,y,z)))return tell('このワールドのブロック編集上限に達しました。');
  if(a.type==='voxel-break'){
@@ -350,7 +366,7 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
    (existing==='ore'||existing==='crystal'||existing.endsWith('_ore'))&&(landscapeHash(x+y*17,z,w.seed)<.25);
   const drop=BLOCK_DROPS[existing as Block]??existing as Material;
   lp.bag[drop]=(lp.bag[drop]||0)+(fortune?2:1);
-  if(w.gameMode==='COOP')wearTool(p,tool,tier);
+  if(w.gameMode==='COOP')wearTool(p,tool,tier,activeBeaconAt(w,p)>=2?.75:1);
   state.edits[id]=null;if(state.placedBy)delete state.placedBy[id];
   if(state.rotations)delete state.rotations[voxelKey(x,y,z)];if(state.containers)delete state.containers[voxelKey(x,y,z)];
   // Do not erase an entire crown when only its trunk or one leaf was harvested.
@@ -376,7 +392,7 @@ export function applyVoxel(w:World,p:Adventurer,a:VoxelAction,now:number){
  recordSandboxEvent(w,p,{kind:a.type==='voxel-place'?'place':'break',tile:{x,y,z},block:existing??a.block,before});
  lp.energy=Math.round((energyOf(lp)-cost)*100)/100;p.message=a.type==='voxel-break'?(existing==='steel'?'未知の鋼材ブロックを発見しました！':'ブロックから素材を獲得しました。'):'ブロックを設置しました。';p.voxelAt=now;state.revision++;w.revision++;
  // Mining under one's feet causes a fall to the next solid floor.
- for(const q of Object.values(w.players))if(q.position3D){const next=floorAt(w,Math.floor(q.position3D.x),Math.floor(q.position3D.z),playerHeight(w,q));if(next!==null&&!q.position3D.vy&&!voxelWater(w,q.position3D.x,q.position3D.z))q.position3D.y=next;}
+ for(const q of Object.values(w.players))if(q.position3D&&!(w.creative&&q.creativeFlight)){const next=floorAt(w,Math.floor(q.position3D.x),Math.floor(q.position3D.z),playerHeight(w,q));if(next!==null&&!q.position3D.vy&&!voxelWater(w,q.position3D.x,q.position3D.z))q.position3D.y=next;}
  return true;
 }
 
@@ -413,11 +429,12 @@ export function findLandscapeRoute(w:World,p:Adventurer,x:number,z:number){
 export function advanceVoxelWater(w:World,now:number){
  if(!w.started||w.ended)return;
  for(const p of Object.values(w.players)){
-  const pos=p.position3D;if(!pos||p.spectator||p.nativeScene||p.life?.indoors||ridingCart(w,p.id)||traveling(w,p))continue;
+  const pos=p.position3D;if(!pos||p.spectator||p.nativeScene||p.life?.indoors||w.creative&&p.creativeFlight||ridingCart(w,p.id)||traveling(w,p))continue;
   const dt=Math.min(1,Math.max(0,(now-(pos.waterAt??now))/1000));pos.waterAt=now;
   const pool=voxelWater(w,pos.x,pos.z,pos.y),submerged=!!pool&&(pos.y??0)+EYE_HEIGHT<pool.surface;
   const air=potionSeconds(w,p,'air_draught')>0;
-  const oxygen=Math.min(20,Math.max(0,(pos.oxygen??20)+(submerged&&!air?-dt:dt*4)));
+  const breathLoss=submerged&&!air?dt*(1-activeBeaconAt(w,p)*.06):0;
+  const oxygen=Math.min(20,Math.max(0,(pos.oxygen??20)+(submerged&&!air?-breathLoss:dt*4)));
   if(pos.oxygen!==oxygen){pos.oxygen=oxygen;w.revision++;}
   if(oxygen===0&&pool){
    // Find a clear surface, including beside a bridge; never push into a solid deck.

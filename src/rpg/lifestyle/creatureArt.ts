@@ -26,8 +26,8 @@ const motionAtlas = (kind:string) => `sprites/rpg/creatures/${kind}-motion.webp`
 export type CreatureFacing = 'front' | 'back' | 'left' | 'right';
 const directions:CreatureFacing[]=['front','back','left','right'];
 
-const poseRows = ['greet','roll','sleep','hop'];
-export const creaturePoseIndex = (pose:string) => Math.max(0,poseRows.indexOf(pose));
+const poseRows:Record<string,number>={greet:0,roll:1,groom:1,sleep:2,sit:2,hop:3,paw:3,bow:1,drink:1};
+export const creaturePoseIndex = (pose:string) => poseRows[pose]??0;
 const loaded = new Map<string, HTMLImageElement>();
 function sheet(path:string) {
   let strip = loaded.get(path);
@@ -45,7 +45,7 @@ export function drawCreature(ctx:CanvasRenderingContext2D,kind:string,x:number,y
     const atlas=sheet(motionAtlas(kind));
     if (atlas.complete && atlas.naturalWidth) {
       const width=atlas.naturalWidth/8,height=atlas.naturalHeight/4;
-      const frame=pose==='walk'?4+(Math.floor(time/150)%2):pose==='run'?6:pose==='eat'?7:creaturePoseIndex(pose);
+      const frame=pose==='walk'?4+(Math.floor(time/150)%2):pose==='run'?6:['eat','drink','groom','bow'].includes(pose)?7:creaturePoseIndex(pose);
       ctx.drawImage(atlas,width*frame,height*directions.indexOf(facing),width,height,x-size/2,y-size,size,size);
       return true;
     }

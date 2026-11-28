@@ -240,6 +240,11 @@ try {
   assert.equal(send({...link,home:shop.id}),false);
   assert(send(link));
   assert(send({...link,lot:generator.id,cell:'22,0,19'}));
+  const viewport={minX:17,maxX:42,minY:17,maxY:39};
+  const workerAt=(time)=>W.cityWorkers({...w,life:{...w.life,time}},viewport).find(walker=>walker.id===shop.id);
+  assert.deepEqual(workerAt(0),{id:shop.id,x:housing.x+.5,z:housing.y+.5,guardian:false});
+  assert.deepEqual(workerAt(15),{id:shop.id,x:shop.x+.5,z:shop.y+.5,guardian:false});
+  assert.notDeepEqual(workerAt(5),workerAt(0),'Commuters visibly move between home and work.');
   p.x=22;p.y=19;p.position3D={x:22.5,y:0,z:19.5,surface2D:true};
   assert(send({type:'voxel-device',command:'use',x:22,y:0,z:18}));
   for(let i=0;i<32;i++)E.advanceWorld(w,now+=1000);

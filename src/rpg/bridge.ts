@@ -45,6 +45,8 @@ export function siteNode(site: Site, battles: number): MapNode {
         ? NodeType.EVENT
         : site.kind === "treasure"
           ? NodeType.TREASURE
+          : site.dimension&&site.dimensionIndex===0
+            ? NodeType.ELITE
           : site.kind === "guardian" || site.kind === "boss" || site.subsurface
             ? NodeType.BOSS
             : NodeType.COMBAT;

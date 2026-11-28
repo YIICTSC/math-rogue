@@ -42,3 +42,5 @@ export function ranchPosition(w:World, farm:FarmPlayer, animal:FarmAnimal, index
     facing:Math.cos(phase)>0 ? 'right' as const : 'left' as const,
   };
 }
+
+export const collarColor={teal:'#5fe1cf',amber:'#efb057'};

@@ -13,6 +13,7 @@ import {vrInviteCode,VR_ROOM_PARAM} from './mini-games/gakurogear/invite';
 import {prepareCraftedFirstStrike,craftedFirstStrikeActive,consumeCraftedFirstStrike} from './rpg/craftedRelics';
 import {golfInviteCode} from './mini-games/gakuro-golf/invite';
 import type {RpgWorldSave} from './rpg/worldSave';
+import type {RpgStartIntent} from './rpg/creative';
 import {homeBattleBonus,applyHomeBattleBonus} from './rpg/furnitureBenefits';
 import RpgHeroSelection from "./rpg/HeroSelection";
 import {resumeRpgState} from "./rpg/sessionState";
@@ -341,6 +342,9 @@ import { demonName, canTransformEnemy, nextDemonPhase } from './rpg/demonKing';
 import { nativeProfile, siteNode, type RpgEncounter, type RpgSnapshot } from './rpg/bridge';
 import { getRpgSiteDisplayName } from './rpg/enemyNames';
 import { isSharedSite } from './rpg/engine';
+import { resolveWorldSite } from './rpg/realms';
+import { REALMS } from './rpg/realmTerrain';
+import { realmWardenIntent, realmWardenType } from './rpg/realmBattles';
 import type { RpgRoom } from './rpg/network';
 import { getRpgRoomCodeFromUrl } from './rpg/invite';
 import { kartInviteCode } from './mini-games/gakuro-kart/invite';
@@ -1366,6 +1370,8 @@ const getNamedEnemyIntent = (enemy: Enemy, turn: number, isAct2Plus: boolean): E
 
 const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
     const type = enemy.enemyType;
+    const guardian=realmWardenIntent(type,turn);
+    if(guardian)return guardian;
     const localTurn = turn % 3;
     const isAct2Plus = (enemy.maxHp > 60);
     // Authored endless bosses have their own deterministic action cycle.  Do
@@ -1692,7 +1698,7 @@ const App: React.FC = () => {
     const rpgStarterRelicRef=useRef<Relic|null>(null);
     const rpgCustomHeroRef=useRef<import("./rpg/customHero").CustomHero|null>(null);
     const rpgEditingProblemsRef=useRef(false);
-    const [rpgStartIntent,setRpgStartIntent]=useState<'solo'|'online'|'join'>('solo');
+    const [rpgStartIntent,setRpgStartIntent]=useState<RpgStartIntent>('solo');
     const [rpgResumeSave,setRpgResumeSave]=useState<RpgWorldSave|null>(null);
     const [rpgSceneError, setRpgSceneError] = useState('');
     const rpgSnapshotRef = useRef<RpgSnapshot | null>(null);
@@ -7101,7 +7107,7 @@ const App: React.FC = () => {
         }));
     };
 
-    const launchNewAdventure = (themeOverride: VisualThemeId = visualTheme, rpgOnline = false, inviteByCode = false, entry: 'solo'|'online'|'join' = 'solo') => {
+    const launchNewAdventure = (themeOverride: VisualThemeId = visualTheme, rpgOnline = false, inviteByCode = false, entry: RpgStartIntent = 'solo') => {
         setRpgResumeSave(null);
         setPendingRpgTitle(false);
         if(rpgOnline){setRpgPreparationComplete(false);rpgStarterRelicRef.current=null;rpgCustomHeroRef.current=null;rpgEditingProblemsRef.current=false;}
@@ -7137,7 +7143,7 @@ const App: React.FC = () => {
             // Skip the separate problem/mode selector and continue with the
             // adventure-specific difficulty selection instead.
             screen: rpgOnline
-                ? (entry==='solo'&&!isRpgInviteParticipant
+                ? (entry==='creative' ? GameScreen.CHARACTER_SELECTION : entry==='solo'&&!isRpgInviteParticipant
                     ? (shouldSkipAssignmentModeSelection ? GameScreen.DIFFICULTY_SELECTION : GameScreen.MODE_SELECTION)
                     : GameScreen.MAP)
                 : shouldSkipAssignmentModeSelection
@@ -7213,7 +7219,7 @@ const App: React.FC = () => {
         rpgInviteAssignmentRef.current=setup?.assignment||null;
         rpgAwardHandledRef.current=null;rpgClearBgmRef.current=null;
         rpgCorrectAnswersRef.current=save.world.players[save.selfId].correctAnswers||0;
-        setRpgResumeSave(resumedSave);setRpgStartIntent('solo');setRpgTitleOpen(false);
+        setRpgResumeSave(resumedSave);setRpgStartIntent(save.world.creative?'creative':'solo');setRpgTitleOpen(false);
         if(setup)setVisualTheme(setup.visualTheme);
         setGameState(resumeRpgState(save.player,setup));
     };
@@ -8899,6 +8905,11 @@ const App: React.FC = () => {
         };
         void audioService.setBgmTheme(getBgmThemeForPlayer(visualTheme, initialPlayerState));
         if (gameState.rpgOnline) {
+            if(rpgStartIntent==='creative'){
+                setGameState(prev=>({...prev,screen:GameScreen.MAP,player:{...initialPlayerState,customHero:rpgCustomHeroRef.current||undefined},narrativeLog:logs}));
+                setRpgPreparationComplete(true);
+                return;
+            }
             // Every RPG entry prepares its own relic and an optional copy of a reward card.
             setRpgPreparationComplete(false);rpgStarterRelicRef.current=null;
             setGameState(prev => ({ ...prev, screen: GameScreen.RELIC_SELECTION, player: {...initialPlayerState,customHero:rpgCustomHeroRef.current||undefined}, map: [], currentMapNodeId: null, narrativeLog: logs, activeEffects: [] }));
@@ -9530,13 +9541,14 @@ const App: React.FC = () => {
                 }
 
                 if (enemies.length === 0) {
-                    const numEnemies = node.type === NodeType.BOSS ? 1 : Math.floor(Math.random() * Math.min(3, 1 + Math.floor(node.y / 3))) + 1;
+                    const numEnemies = node.type === NodeType.BOSS || rpgEncounter?.site.dimension ? 1 : Math.floor(Math.random() * Math.min(3, 1 + Math.floor(node.y / 3))) + 1;
                     const hpOffsets = numEnemies > 1
                         ? Array.from({ length: numEnemies }, (_, idx) => idx - (numEnemies - 1) / 2)
                             .sort(() => Math.random() - 0.5)
                         : [0];
                     for (let i = 0; i < numEnemies; i++) {
                         let baseHp = (node.type === NodeType.BOSS ? 150 : 20) * actMultiplier + floorDifficulty * 2 + (node.type === NodeType.ELITE ? 40 : 0);
+                        if(rpgEncounter?.site.dimension&&rpgEncounter.site.dimensionIndex===0)baseHp+=75;
 
                         if (node.type === NodeType.BOSS && maxAtkDmg > baseHp) {
                             const multiplier = 2 + actMultiplier;
@@ -9557,7 +9569,7 @@ const App: React.FC = () => {
                         const name = rpgEncounter?.site.kind === 'boss'
                             ? demonName(1)
                             : (rpgEncounter?.site.kind === 'enemy'||rpgEncounter?.site.kind === 'guardian')
-                                ? getRpgSiteDisplayName(rpgEncounter.site, nextState.visualTheme || visualTheme)
+                                ? getRpgSiteDisplayName(rpgEncounter.site, nextState.visualTheme || visualTheme,languageMode)
                                 : await generateEnemyName(node.y, actMultiplier, nextState.visualTheme || visualTheme);
                         const isBoss = node.type === NodeType.BOSS;
 
@@ -9579,7 +9591,10 @@ const App: React.FC = () => {
                         const isRpgHeadmaster = rpgEncounter?.site.kind === 'boss';
                         const cavernType = rpgEncounter?.site.subsurface === 'ruins' ? 'RPG_CRYSTAL_WARDEN'
                             : rpgEncounter?.site.subsurface === 'shrine' ? 'RPG_STONE_WARDEN' : null;
-                        const type = cavernType ?? (isRpgHeadmaster ? 'RPG_DEMON' : rpgEncounter?.site.kind==='guardian'?'RPG_EXAMINER':determineEnemyType(e.name, node.type === NodeType.BOSS));
+                        const dimension=rpgEncounter?.site.dimension;
+                        const realmIndex=rpgEncounter?.site.dimensionIndex??0;
+                        const realmType=dimension?(realmIndex?REALMS[dimension].sentryTypes[realmIndex-1]:realmWardenType(dimension)):undefined;
+                        const type = realmType ?? cavernType ?? (isRpgHeadmaster ? 'RPG_DEMON' : rpgEncounter?.site.kind==='guardian'?'RPG_EXAMINER':determineEnemyType(e.name, node.type === NodeType.BOSS));
                         if (!nextState.rpgOnline) storageService.saveDefeatedEnemy(e.name);
                         const scaledEnemy = { ...e, ...(rpgEncounter?.site.kind==='guardian'?{name:rpgEncounter.site.name}:{}), enemyType: type, strength: e.strength + difficulty.enemyStrengthBonus, ...(isRpgHeadmaster ? {phase:1} : {}) };
                         return { ...scaledEnemy, nextIntent: getNextEnemyIntent(scaledEnemy, 1) };
@@ -9589,12 +9604,12 @@ const App: React.FC = () => {
                 if (rpgEncounter && isSharedSite(rpgEncounter.site)) {
                     rpgRoomRef.current?.send({ type: 'native-ready', token: rpgEncounter.token, maxHp: enemies[0].maxHp });
                     const deadline = Date.now() + 15000;
-                    while (!rpgSnapshotRef.current?.world.sites.find(s => s.id === rpgEncounter.site.id)?.nativeInitialized) {
+                    while (!resolveWorldSite(rpgSnapshotRef.current?.world,rpgEncounter.site.id)?.nativeInitialized) {
                         if (Date.now() > deadline || rpgEncounterRef.current?.token !== rpgEncounter.token)
                             throw new Error('共有戦闘の接続が切れました。');
                         await new Promise(resolve => window.setTimeout(resolve, 50));
                     }
-                    const shared = rpgSnapshotRef.current!.world.sites.find(s => s.id === rpgEncounter.site.id)!;
+                    const shared = resolveWorldSite(rpgSnapshotRef.current?.world,rpgEncounter.site.id)!;
                     const bossPhase = rpgEncounter.site.kind === 'boss' ? (shared.bossPhase || 1) : undefined;
                     if (bossPhase) rpgEncounter.phase = bossPhase;
                     const syncedEnemy = { ...enemies[0], maxHp: shared.maxHp, currentHp: shared.hp, ...(bossPhase ? {phase:bossPhase} : {}), ...(bossPhase ? {enemyType:'RPG_DEMON',name:demonName(bossPhase)} : {}) };
@@ -9616,14 +9631,19 @@ const App: React.FC = () => {
                 const battleBackgroundScene = gameState.rpgOnline && rpgDungeonRef.current
                     ? getRpgCoopDungeonBattleBackgroundScene(nextState.floor, node.type)
                     : rpgBattleSite
-                        ? biomeBattleBackground(rpgBattleSite)
+                        ? biomeBattleBackground(rpgBattleSite,languageMode)
                         : chooseBattleBackgroundScene(node.type, actMultiplier, nextState.floor, activeBattleVisualTheme, nextState.player.appearanceMode);
                 const flavor = getBattleBackgroundFlavor(battleBackgroundScene, actMultiplier * 100 + nextState.floor);
 
                 const p = preparePlayerForBattle(nextState.player, node.type);
                 if (rpgEncounter && rpgSnapshotRef.current) {
                     const { world, selfId } = rpgSnapshotRef.current;
-                    p.strength += world.players[selfId]?.nativeScene?.teamPower || 0;
+                    const scene=world.players[selfId]?.nativeScene;
+                    p.strength += scene?.teamPower || 0;
+                    if(scene?.beaconWard){
+                        p.block+=scene.beaconWard*2;
+                        if(scene.beaconWard>=4)p.powers.ARTIFACT=(p.powers.ARTIFACT||0)+1;
+                    }
                 }
                 if (isAzukiBoss) {
                     p.turnFlags[AZUKI_BOSS_FLAG] = true;
@@ -10056,7 +10076,8 @@ const App: React.FC = () => {
         if (!snapshot || !me) return;
         const encounter = rpgEncounterRef.current;
         if (!encounter && me.nativeScene && me.nativeScene.token !== rpgLastTokenRef.current) {
-            const site = snapshot.world.sites.find(s => s.id === me.nativeScene!.siteId)!;
+            const site = resolveWorldSite(snapshot.world,me.nativeScene.siteId);
+            if(!site)return;
             const request: RpgEncounter = { token: me.nativeScene.token, site, outcome: 'complete', entered: false, localDamage: 0, damage: 0, sequence: 0 };
             rpgEncounterRef.current = request;
             setRpgSceneError('');
@@ -10108,7 +10129,7 @@ const App: React.FC = () => {
         const enemy = gameState.enemies[0];
         if (encounter.lastHp === undefined) return;
         const snapshot = rpgSnapshotRef.current;
-        const shared = snapshot?.world.sites.find(s => s.id === encounter.site.id);
+        const shared = resolveWorldSite(snapshot?.world,encounter.site.id);
         const scene = snapshot?.world.players[snapshot.selfId]?.nativeScene;
         if (!shared?.nativeInitialized || scene?.token !== encounter.token) return;
         const localHp = enemy?.currentHp ?? 0;

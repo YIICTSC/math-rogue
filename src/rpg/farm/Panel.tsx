@@ -567,13 +567,14 @@ export function FarmContent({
             )}
           </button>
           <div className="farm-grid">
-            {f.pets.filter(pet=>pet.homeId===(p.life?.indoors||currentVoxelRoom(world,p)?.id)).map((pet) => (
+            {f.pets.filter(pet=>f.activePet===pet.id||!pet.homeId||pet.homeId===(p.life?.indoors||currentVoxelRoom(world,p)?.id)).map((pet) => (
               <article className="farm-card" key={pet.id}>
                 <AnimalStage animal={pet} kind="pet" time={world.life.time}/><PetTricks world={world} selfId={selfId} pet={pet} send={send} languageMode={languageMode} available={available}/>
                 <h3>{pet.name}</h3>
                 <small>
                   {C(petById(pet.kind)!.name)} ·{" "}
-                  {L('おうちで自由に暮らす','Roaming at home','おうちでじゆうにくらす')}
+                  {pet.awayUntil>world.life.time?L('おつかい中','Out looking for supplies','おつかいちゅう'):
+                    f.activePet===pet.id?L('散歩中','Out for a walk','さんぽちゅう'):L('おうちで自由に暮らす','Roaming at home','おうちでじゆうにくらす')}
                 </small>
                 {meter(pet.bond, L("絆", "Bond", "きずな"))}
                 {meter(pet.hunger, L("満腹", "Hunger", "まんぷく"))}
@@ -604,8 +605,26 @@ export function FarmContent({
                       </button>
                     ),
                   )}
-                  <button disabled={!available} onClick={()=>send({type:'farm-pet-care',id:pet.id,care:'stay'})}>{L('おうちでくつろぐ','Relax at home','おうちでくつろぐ')}</button>
+                  <button disabled={!available||pet.awayUntil>world.life.time||f.activePet!==pet.id&&pet.hunger<20}
+                    onClick={()=>send({type:'farm-pet-care',id:pet.id,care:f.activePet===pet.id?'stay':'follow'})}>
+                    {f.activePet===pet.id?L('散歩を終える','End walk','さんぽをおえる'):L('散歩に連れていく','Take for a walk','さんぽにつれていく')}
+                  </button>
+                  {!!pet.homeId&&pet.homeId===(p.life?.indoors||currentVoxelRoom(world,p)?.id)&&
+                    <button disabled={!available||!f.feed||pet.bond<30||pet.hunger<25||pet.awayUntil>world.life.time||pet.cares.trip===cal.day}
+                      onClick={()=>send({type:'farm-pet-care',id:pet.id,care:'trip'})}>{L('おつかいを頼む','Send to find supplies','おつかいをたのむ')}</button>}
                 </div>
+                <label>{L('首輪','Collar','くびわ')}
+                  <select aria-label={L('首輪の色','Collar color','くびわのいろ')} value={pet.collar??''}
+                    disabled={!available||pet.awayUntil>world.life.time}
+                    onChange={event=>{
+                      const color=event.target.value;
+                      if(color==='teal'||color==='amber'||color==='')send({type:'farm-pet-collar',id:pet.id,color:color||null});
+                    }}>
+                    <option value="">{L('なし','None','なし')}</option>
+                    <option value="teal" disabled={(p.life?.bag.thread??0)<2&&pet.collar!=='teal'}>{L('青緑 · 糸2','Teal · 2 thread','あおみどり · いと2')}</option>
+                    <option value="amber" disabled={(p.life?.bag.thread??0)<2&&pet.collar!=='amber'}>{L('琥珀 · 糸2','Amber · 2 thread','こはく · いと2')}</option>
+                  </select>
+                </label>
                 <Rename
                   id={pet.id}
                   name={pet.name}

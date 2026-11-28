@@ -144,10 +144,16 @@ export function applyBlueprint(w:World,p:Adventurer,action:BlueprintAction,now:n
   if(receipt.some(cell=>isMachinePart(cell.block))&&!canAddMachinePart(w))return false;
   // The room remains unchanged when a later cell fails its collision or support check.
   const draft=structuredClone(w), builder=draft.players[p.id];
-  for(const cell of receipt){
-    builder.voxelAt=now-221;
-    applyVoxel(draft,builder,{type:'voxel-place',...cell},now);
-    if(draft.voxels?.edits[key(cell)]!==cell.block)return false;
+  let pending=receipt;
+  while(pending.length){
+    const blocked:BlueprintReceipt[]=[];
+    for(const cell of pending){
+      builder.voxelAt=now-221;
+      applyVoxel(draft,builder,{type:'voxel-place',...cell},now);
+      if(draft.voxels?.edits[key(cell)]!==cell.block)blocked.push(cell);
+    }
+    if(blocked.length===pending.length)return false;
+    pending=blocked;
   }
   w.voxels=draft.voxels;
   life.bag=builder.life!.bag;

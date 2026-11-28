@@ -1,4 +1,5 @@
 import { assetUrl } from '../utils/assetPaths';
+import { REALMS, type RealmId } from './realmTerrain';
 export const BIOMES = [
   { id: 'meadow', name: '木漏れ日の草原', color: '#799c60', shade: '#6b8d53', trees: .08, x: 30, y: 64, flavor: '風車の音と草の香り。旅人たちの道がここで交わる。' },
   { id: 'forest', name: 'ささやきの森', color: '#37664e', shade: '#305842', trees: .38, x: 30, y: 20, flavor: '枝葉の隙間に、小さな道しるべが光っている。' },
@@ -35,7 +36,11 @@ export function riverAt(x:number,y:number) {
   const tributary=58+Math.sin(x/18)*8+Math.sin(x/7)*2;
   return Math.abs(x-main)<1.8 || (x>18&&x<170&&Math.abs(y-tributary)<1.1);
 }
-export function biomeBattleBackground(site: {x:number;y:number}) {
+export function biomeBattleBackground(site: {x:number;y:number;dimension?:RealmId},language='JAPANESE') {
+  if(site.dimension){
+    const id=site.dimension, name=REALMS[id].name[language==='ENGLISH'?1:language==='HIRAGANA'?2:0];
+    return {id:`rpg-realm-${id}`,image:assetUrl(`sprites/rpg/realms/${id}.webp`),flavorTexts:[name]};
+  }
   const biome = biomeAt(site.x, site.y);
   return {id:`rpg-${biome.id}`,image:assetUrl(`sprites/rpg/${biome.id}.webp`),flavorTexts:[biome.flavor]};
 }

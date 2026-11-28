@@ -52,6 +52,7 @@ export interface Work {tile:number;kind:'gather'|'fish';started:number;target:nu
 export interface LifePlayer {blueprintReceipt?:BlueprintReceipt[];research?:string[];buildingGoals?:string[];buildingSurvey?:BuildingSurvey;relicEquipment?:string[];tools?:Partial<Record<ToolKind,ToolTier>>;toolWear?:Partial<Record<ToolKind,number>>;toolImprints?:Partial<Record<ToolKind,import('./explorationEquipment').ToolImprint>>;potionUntil?:Partial<Record<import('./explorationEquipment').ExplorationPotion,number>>;imprintStudy?:number;workshopAt?:number;hoe?:boolean;pickaxe?:ToolTier;fishRecords?:FishRecords;fishCastCount?:number;lastCatch?:FishCatch;energy?:number;bag:Bag;homeId?:string;indoors?:string;roomPos?:{x:number;y:number};roomMoveAt?:number;work?:Work;lastAction:number;crafted:string[];effect?:{tile:number;at:number;kind:string;perfect:boolean}}
 export interface House {id:string;owner:string;ownerName:string;x:number;y:number;biome:BiomeId;home:Home;interior?:Interior;invitedAt:number}
 export interface LifeWorld {furnitureLearning?:Record<string,FurnitureLearner>;nodes:Record<number,{hits:number;regrowAt:number}>;houses:House[];games:Record<string,HomeGame>;now:number;time:number;lastTick:number}
+export const gatherCost=(w:World,p:Adventurer,fish=false)=>Math.round(GATHER_ENERGY_COST*(1-(fish?0:activeBeaconAt(w,p))*.06)*100)/100;
 export type LifeAction = {type:'life-home-music';id:string;track:string}|{type:'life-work'|'life-cast';tile:number}|{type:'life-reel';phaseTarget?:number}|{type:'life-hit'|'life-cancel'|'life-leave'|'life-build'|'life-invite'}|{type:'life-craft';recipe:string}|{type:'life-enter';houseId:string}|{type:'life-game';command:GameCommand}|{type:'life-room-move';dx:number;dy:number}|{type:'life-furniture-craft';item:string}|{type:'life-place';item:string;x:number;y:number;rotation:0|1|2|3;flipped?:boolean}|{type:'life-pack';id:string}|{type:'life-rotate';id:string;direction?:1|-1;flip?:boolean};
 export const createLife=(now:number):LifeWorld=>({nodes:{},houses:[],games:{},now,time:0,lastTick:now});
 export const lifePlayer=(p:Adventurer):LifePlayer=>p.life??={energy:GATHER_ENERGY_MAX,bag:{wood:4,stone:2},lastAction:0,crafted:[]};
@@ -181,11 +182,10 @@ export function applyLifeAction(w:World,p:Adventurer,a:LifeAction,now:number):bo
   const x=a.tile%WIDTH,y=Math.floor(a.tile/WIDTH);if(x<1||y<1||x>=WIDTH-1||y>=HEIGHT-1||distance(p,{x,y})>2)return false;
   if(a.type==='life-work'&&(!natureAt(w,a.tile)||!resourceReady(w,a.tile)))return tell('この資源は再生を待っています。');
   if(a.type==='life-cast'&&w.tiles[a.tile]!=='water')return false;
-  const tier=a.type==='life-work'?activeBeaconAt(w,p):0;
-  const cost=Math.round(GATHER_ENERGY_COST*(1-tier*.06)*100)/100;
+  const fish=a.type==='life-cast',cost=gatherCost(w,p,fish);
   if(energyOf(lp)+1e-8<cost)return tell('エネルギーが足りません。問題に正解して回復しましょう。');
   lp.energy=Math.round((energyOf(lp)-cost)*100)/100;
-  life.now=now;const fish=a.type==='life-cast',target=now+(fish?1700+((w.seed+a.tile+w.revision)%1300):900);
+  life.now=now;const target=now+(fish?1700+((w.seed+a.tile+w.revision)%1300):900);
   const nonce=lp.fishCastCount||0;if(fish)lp.fishCastCount=nonce+1;const species=fish?chooseFish(w.seed,a.tile,nonce):undefined;
   lp.work={tile:a.tile,kind:fish?'fish':'gather',started:now,target,expires:target+(fish?Math.max(900,reelWindow(species!.id)*2):1400),...(fish?{fishing:{id:species!.id,phase:'bite' as const,beat:0,hits:0,perfect:0,nonce}}:{})};lp.lastAction=now;return tell(fish?'浮きが沈んだら引き上げよう！':'光るタイミングで道具を振ろう！');
  }

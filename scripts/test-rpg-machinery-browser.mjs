@@ -61,6 +61,16 @@ try {
         w.packAnimals={[id]:{id,kind:'horse',owner:p.id,x:18.5,y:0,z:17.5,follow:false,dir:0,cargo:{},fedAt:w.life.time}};
         w.revision++;r.emit();
       };
+      window.seedRealmGate=()=>{
+        const w=r.world,p=w.players.local;
+        p.x=18;p.y=18;p.position3D={x:18.5,y:0,z:18.5,surface2D:true,layered2D:true};
+        for(const [x,z,block] of [[19,18,'waygate'],[19,19,'crystal_lever']]){
+          const key=x+',0,'+z;
+          w.voxels.edits[key]=block;w.voxels.placedBy[key]=p.id;recordMachineEdit(w,x,0,z,null,block);
+          if(block==='crystal_lever')w.voxels.machinery.devices[key].enabled=true;
+        }
+        p.life.bag.crystal_powder=6;w.voxels.revision++;w.revision++;r.emit();
+      };
       window.seedSandbox=()=>{
       const w=r.world,p=w.players.local;
       w.sites=w.sites.filter(s=>Math.abs(s.x-20)+Math.abs(s.y-20)>12);
@@ -338,8 +348,29 @@ try {
   await page.screenshot({path:`${out}/pack-animal-3d.png`});
   await page.getByRole('button',{name:'騎乗をやめる',exact:true}).click();
   await page.waitForFunction(()=>!Object.values(window.snapshot.world.packAnimals??{})[0]?.rider);
+  await page.getByRole('button',{name:'2D / 3D'}).click();
+  await page.evaluate(()=>window.seedRealmGate());
+  await page.getByRole('button',{name:'高さ断面',exact:true}).click();
+  await canvas.press('ArrowRight');
+  await page.getByRole('button',{name:'調べる',exact:true}).click();
+  await page.getByLabel('異世界への接続',{exact:true}).selectOption('geode');
+  await page.waitForFunction(()=>window.snapshot.world.voxels.machinery.devices['19,0,18']?.realm==='geode');
+  await page.getByRole('button',{name:/^異世界へ渡る/}).click();
+  await page.waitForFunction(()=>document.querySelector('.rpg-canvas')?.dataset.dimension==='geode');
+  await page.screenshot({path:`${out}/amethyst-realm-2d.png`});
+  await page.getByRole('button',{name:'2D / 3D'}).click();
+  await page.waitForFunction(()=>document.querySelector('[data-testid=rpg-world-3d]')?.dataset.dimension==='geode');
+  await page.screenshot({path:`${out}/amethyst-realm-3d.png`});
+  await page.getByRole('button',{name:'部屋と操作の詳細',exact:true}).click();
+  await page.getByRole('button',{name:'ワールドを保存する',exact:true}).click();
+  await page.waitForFunction(async()=>(await window.readSandboxSave())?.world.players.local.realm?.id==='geode');
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>document.querySelector('.rpg-canvas')?.dataset.dimension==='geode');
+  await page.getByRole('button',{name:'地上へ戻る',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('.rpg-canvas')?.dataset.dimension==='surface');
+  assert.equal(await page.evaluate(()=>window.snapshot.world.players.local.x),18);
   assert.deepEqual(errors,[]);
-  console.log('PASS 2D/3D circuitry, blueprints, mouse lock/drag, creature journal, IndexedDB, sailing, flight, caves, signs, climbing and riding.');
+  console.log('PASS 2D/3D circuits, blueprints, mouse lock/drag, creatures, transport, caves, construction, riding and entering, saving and returning from a realm.');
 } catch (error) {
   console.error('Browser errors:', errors, (await page?.locator('body').innerText({timeout:3000}).catch(() => ''))?.slice(0,1600));
   console.error(await page?.evaluate(() => {

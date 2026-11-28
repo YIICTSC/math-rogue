@@ -4,7 +4,7 @@ import type { LanguageMode } from '../types';
 import type { World } from './engine';
 import { beaconRadius, canAutomate, canStore, cargoCart, circuitConnections, connectedStations, inspectMachine, machineCarts, machineStorage, NOTE_REPEATS, railConnections, storageLimits, waygateEndpoints, type MachineCell, type MachineCommand } from './machinery';
 import { validFarmMachineJob } from './farm/model';
-import { CROPS } from './farm/catalog';
+import { CROPS, PRODUCTS } from './farm/catalog';
 import { copy } from './town/catalog';
 import { isFilteredPart, isMachinePart, isProcessor, isRail, manuallyOpenedGate, MACHINE_PARTS, PROCESSOR } from './machineryParts';
 import { ALL_MATERIAL_NAMES, CART_NAMES, WORKSHOP_RECIPES, type CartItem, type VoxelItem } from './voxelCatalog';
@@ -13,6 +13,8 @@ import { trans } from '../utils/textUtils';
 import { isWatercraftItem, WATERCRAFT } from './transportCatalog';
 import { ARCHITECTURAL_MATERIALS, DETAIL_BLOCKS, type ArchitecturalBlock } from './architecturalMaterials';
 import { isSign, type BuildingAction } from './buildingPhysics';
+import { REALMS, type RealmId } from './realmTerrain';
+import { realmName, type RealmAction } from './realms';
 
 const extraNames = {
   crystal_powder: ['魔晶回路粉', 'Crystal powder', 'ましょうかいろこ'],
@@ -39,8 +41,15 @@ const extraNames = {
   air_draught: ['水肺のしずく','Waterbreath draught','すいはいのしずく'],
   stride_draught: ['風脚のしずく','Windstep draught','かぜあしのしずく'],
   miner_draught: ['石砕きのしずく','Stonebreaker draught','いしくだきのしずく'],
+  herbal_essence: ['薬草エキス','Herbal essence','やくそうエキス'],
+  heal_draught: ['花蜜のしずく','Nectar draught','はなみつのしずく'],
   smoked_fish: ['魚の燻製','Smoked fish','さかなのくんせい'],
   bottled_honey: ['ハチミツの瓶','Bottled honey','ハチミツのびん'],
+  emberstone: ['熔炉石','Emberstone','ようろいし'],
+  skyshale: ['白雲石','Cloudshale','しらくもいし'],
+  amethyststone: ['紫晶石','Amethyst stone','ししょうせき'],
+  echostone: ['残響石','Echostone','ざんきょうせき'],
+  prismstone: ['潮光石','Tidal prismstone','ちょうこうせき'],
   glider_wing: ['滑空翼','Glider wing','かっくうよく'],
   glider_boost: ['風の加速筒','Glider booster','かぜのかそくとう'],
 } as const;
@@ -69,7 +78,7 @@ type Props = {
   selfId: string;
   position: MachineCell;
   languageMode?: LanguageMode;
-  send: (a: MachineCommand | BuildingAction | { type: 'voxel-storage'; x: number; y: number; z: number; item: VoxelItem; amount: number; direction: 'deposit' | 'withdraw' }) => void;
+  send: (a: MachineCommand | BuildingAction | RealmAction | { type: 'voxel-storage'; x: number; y: number; z: number; item: VoxelItem; amount: number; direction: 'deposit' | 'withdraw' }) => void;
 };
 
 type Operation = MachineCommand extends infer Action ? Action extends MachineCommand ? Omit<Action, 'type' | 'x' | 'y' | 'z'> : never : never;
@@ -146,8 +155,19 @@ export default function MachineryInspector({ world, selfId, position, languageMo
             <option value="">{L('未接続','Unlinked','つながっていない')}</option>
             {endpoints.map(point=><option key={point.key} value={point.key}>{point.x}, {point.y}, {point.z}{point.active?' ◆':''}</option>)}
           </select></label>}
-        <button disabled={!destination?.active||!device.signal} onClick={()=>dispatch({command:'waygate-travel'})}>
-          {L('転送する','Travel','てんそうする')}</button>
+        {!device.realm&&<button disabled={!destination?.active||!device.signal} onClick={()=>dispatch({command:'waygate-travel'})}>
+          {L('転送する','Travel','てんそうする')}</button>}
+        {owned&&!world.dimensionId&&<label>{L('異世界への接続','Realm attunement','いせかいへのせつぞく')}
+          <select aria-label={L('異世界への接続','Realm attunement','いせかいへのせつぞく')} value={device.realm??''} onChange={e=>dispatch({command:'waygate-realm',value:e.target.value})}>
+            <option value="">{L('未接続','Unlinked','つながっていない')}</option>
+            {(Object.keys(REALMS) as RealmId[]).map(id=>{
+              const {key,toll}=REALMS[id];
+              return <option key={id} value={id} disabled={id!==device.realm&&(bag[key]??0)<toll}>
+                {realmName(id,languageMode??'JAPANESE')} · {sandboxItemName(key,languageMode)} ×{toll}</option>;
+            })}
+          </select></label>}
+        {device.realm&&<button disabled={!device.signal} onClick={()=>send({type:'voxel-dimension',command:'enter',...position})}>
+          {L('異世界へ渡る','Enter realm','いせかいへわたる')} · {realmName(device.realm,languageMode??'JAPANESE')}</button>}
       </>}
       {owned && <button onClick={() => dispatch({ command: 'rotate' })} aria-label={L('装置を回転', 'Rotate device', 'そうちをかいてん')}><RotateCw size={15} /></button>}
       {owned && (block==='piston' || block==='sticky_piston') && <button disabled={device.opened} onClick={()=>dispatch({command:'piston-axis'})}>
@@ -194,8 +214,12 @@ export default function MachineryInspector({ world, selfId, position, languageMo
           <option value="fertilize">{L('施肥','Fertilize','せひ')}</option>
           <option value="ranch">{L('給餌と集荷','Feed and collect','えさやりとしゅうか')}</option>
           <optgroup label={L('種まき','Sow','たねまき')}>{CROPS.map(crop=><option key={crop.id} value={`plant:${crop.id}`}>{copy(crop.name,languageMode || 'JAPANESE')}</option>)}</optgroup>
+          <optgroup label={L('出荷','Ship produce','しゅっか')}>{[...CROPS,...PRODUCTS].map(item=><option key={item.id} value={`ship:${item.id}`}>{copy(item.name,languageMode || 'JAPANESE')}</option>)}</optgroup>
         </select>
       </label>}
+      {block==='farm_machine'&&device.farmJob?.startsWith('ship:')&&<small>{L(
+        '大型チェストに向けて通電すると、指定した通常品を1日3個まで出荷します。','Point it at a warehouse chest and switch it on to sell up to three standard items per day.',
+        'おおがたチェストにむけてしんごうをおくると、えらんだふつうのしなを1にち3こまでしゅっかします。')}</small>}
       {owned && block==='station_rail' && <button aria-pressed={!!device.stationSignal} onClick={()=>dispatch({command:'station-signal'})}>
         {L('時刻表でも発車信号が必要','Require departure signal for timetable','じこくひょうでもはっしゃしんごうがひつよう')}
       </button>}
@@ -220,7 +244,11 @@ export default function MachineryInspector({ world, selfId, position, languageMo
     {block === 'crystal_beacon' && <small>{device?.tier
       ? <><b style={{color:device.beamColor}}>{L(`稼働中 · 段階 ${device.tier} · 半径 ${beaconRadius(device.tier)} m`, `Active · Tier ${device.tier} · radius ${beaconRadius(device.tier)} m`, `さどうちゅう · ${device.tier}だん · はんけい ${beaconRadius(device.tier)} m`)}</b><br/>
         {L('移動・ジャンプ強化、採掘と採取の消費軽減','Faster movement, higher jumps, and lower mining and gathering costs','いどう・ジャンプきょうか、さいくつとさいしゅのしょうひけいげん')}
-        {device.tier>=3&&L('、建築の消費軽減',', and lower placement cost','、けんちくのしょうひけいげん')}</>
+        {device.tier>=2&&<><br/>{L('農作業の消費と道具の摩耗を軽減','Reduced tilling cost and tool wear','のうさぎょうのしょうひとどうぐのまもうをけいげん')}</>}
+        {device.tier>=3&&<><br/>{L('建築の消費軽減','Reduced placement cost','けんちくのしょうひけいげん')}</>}
+        {device.tier>=2&&world.timeLimitMinutes===0&&<><br/>{L('範囲内に留まるとHP回復','Remain nearby to recover HP','はんいないにとどまるとHPかいふく')}
+          {device.tier>=3&&L('、通常戦闘の開始時に防御',' · Start regular battles with Block','、つうじょうせんとうのかいしじにぼうぎょ')}
+          {device.tier>=4&&L('・弱体防止',' and debuff protection','・じゃくたいぼうし')}</>}</>
       : L('停止中 · 専用土台・空への通り道・ダイヤが必要', 'Inactive · needs a mineral pyramid, open sky and one diamond', 'ていしちゅう · どだい・そらへのとおりみち・ダイヤがひつよう')}</small>}
     {(cart || isRail(block)) && <div className="rpg-device-actions">
       {!cart && owned && carried.map(value=><button key={value} onClick={() => dispatch({ command: 'cart-place',value })}><TrainFront size={16} /> {sandboxItemName(value,languageMode)} {L('を置く','· Place','をおく')}</button>)}

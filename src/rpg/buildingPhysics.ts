@@ -11,7 +11,7 @@ export type BuildingAction={type:'voxel-climb';direction:-1|1}|
 
 const gravityBlocks=new Set(['sand','gravel','concrete_powder']);
 const thinDecor=new Set(['ladder','hanging_rope','scaffold','carpet','signboard','hanging_sign','display_frame','field_banner',
-  'chain','flowerpot','garden_bed','candle','bronze_bell','glowcap']);
+  'chain','flowerpot','garden_bed','hydroponic_bed','candle','bronze_bell','glowcap']);
 const climbs=new Set(['ladder','hanging_rope','scaffold']);
 export const openDecoration=(block:unknown)=>typeof block==='string'&&thinDecor.has(block);
 export const isClimbingBlock=(block:unknown)=>typeof block==='string'&&climbs.has(block);

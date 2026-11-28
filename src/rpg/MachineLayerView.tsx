@@ -9,7 +9,7 @@ import MachineryInspector, { sandboxItemName, sandboxText } from './MachineryIns
 import type { MachineLayerView as LayerFilter } from './machineLayer';
 import { fluidAt, fluidCanScoop } from './placedFluids';
 import type { BlueprintPreview } from './blueprints';
-import { blockAt, MAX_HEIGHT, MIN_DEPTH, miningCost, playerHeight, protectedVoxel, type Block, type VoxelAction } from './voxel';
+import { blockAt, MAX_HEIGHT, MIN_DEPTH, miningCost, playerHeight, protectedVoxel, voxelPlaceCost, type Block, type VoxelAction } from './voxel';
 import { VoxelWorkshopPanel } from './VoxelWorkshopPanel';
 import { currentCavern } from './subsurface';
 
@@ -61,7 +61,7 @@ export default function MachineLayerView(props: Props) {
   };
   const change = (kind: 'voxel-place' | 'voxel-break') => {
     if (!target || locked || !(kind==='voxel-place'?canPlace:canBreak)) return;
-    const cost = kind === 'voxel-break' && existing ? miningCost(existing, player, world) : .1;
+    const cost = kind === 'voxel-break' && existing ? miningCost(existing, player, world) : voxelPlaceCost(world,player);
     if (energyOf(player.life) < cost && Number.isFinite(cost)) { props.onEnergyRequest?.(); return; }
     send({ type: kind, ...target, block: selectedBlock, rotation });
   };

@@ -15,6 +15,7 @@ export interface CreatedResident {
   voice: ConversationVoice;
 }
 export function residentsOf(w: World) {
+  if(w.dimensionId)return [];
   return [
     ...RESIDENTS,
     ...(w.town?.customResidents || []).map((r) => ({

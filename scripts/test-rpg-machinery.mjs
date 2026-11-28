@@ -495,6 +495,29 @@ try {
   const legacy=S.restoreWorldSave(save,now+500000);
   assert(!legacy.voxels.machinery);
   console.log('PASS beacon structure and bounded effect; timers, settings and inventory survive save; old worlds load');
+
+  for(const [x,z,tier] of [[23,43,3],[16,43,2]]){
+    for(let level=1;level<=tier;level++)for(let dz=-level;dz<=level;dz++)for(let dx=-level;dx<=level;dx++){
+      w.voxels.edits[V.voxelKey(x+dx,-level,z+dz)]='steel';
+    }
+    if(x===16){
+      place('crystal_beacon',x,z);
+      bag.diamond=1;moveNear(a,x-1,z);
+      assert(command('use',x,z));
+    }
+  }
+  moveNear(a,27,43);
+  a.profile={...a.profile,hp:60};
+  a.hp=60;a.maxHp=72;
+  step(2);
+  assert.equal(M.activeBeaconAt(w,a),3,'Overlapping beacon fields use the highest tier.');
+  step(52);
+  assert.equal(a.hp,63);
+  assert.equal(a.mutationRevision,1);
+  moveNear(a,55,43);
+  step(52);
+  assert.equal(a.hp,63,'Leaving the field stops healing.');
+  console.log('PASS overlapping beacon fields and the strongest healing pulse');
 } finally {
   await server.close();
 }

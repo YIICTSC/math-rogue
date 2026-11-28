@@ -1,4 +1,5 @@
 import type { Adventurer, World } from '../engine';
+import type { RealmId } from '../realmTerrain';
 import { WIDTH, HEIGHT } from '../engine';
 import { biomeAt, type BiomeId } from '../biomes';
 import { blockAt, naturalVoxelWater, protectedVoxel, solid, terrainHeight } from '../voxel';
@@ -70,6 +71,10 @@ export const WILDLIFE: Record<string, WildlifeProfile> = {
 };
 
 export type WildAnimal = { id:string;kind:string;x:number;y:number;z:number;bond:0;moment:AnimalMoment;facing:CreatureFacing };
+const realmFauna:Record<RealmId,readonly string[]>={
+  embers:['stone-golem','cave-bat'],sky:['eagle','cloud-spirit'],geode:['crystal-slime','cave-bat'],
+  echo:['owl','stone-golem'],tidal:['tropical-fish','reef-squid','octopus','shore-crab'],
+};
 const REGION = 12;
 const roamingOffsets=[[0,0],[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1]] as const;
 const habitats = new Map<Habitat,string[]>();
@@ -87,9 +92,9 @@ function safeTile(w:World,x:number,z:number) {
 /** A bounded set of deterministic animals. The local and remote views share the same clock and tiles. */
 export function visibleWildlife(w:World, x:number, z:number, radius:number, height=0):WildAnimal[] {
   if (!w.started || w.gameMode==='BATTLE_ROYALE' || !Number.isFinite(x) || !Number.isFinite(z)) return [];
-  const {phase,season}=calendar(w), fauna:WildAnimal[]=[];
+  const clock=calendar(w),phase=w.dimensionId==='echo'?3:clock.phase,season=clock.season,fauna:WildAnimal[]=[];
   const underground=legacyRegion(x,z)&&height<terrainHeight(w,Math.floor(x),Math.floor(z))-3;
-  const highSky=!underground&&height>=30;
+  const highSky=!underground&&(height>=30||w.dimensionId==='sky');
   const motion=Math.floor(w.life.time/3.5);
   for (let cz=Math.max(-1,Math.floor((z-radius)/REGION));cz<=Math.min(Math.floor(HEIGHT/REGION)+1,Math.floor((z+radius)/REGION));cz++) {
     for (let cx=Math.max(-1,Math.floor((x-radius)/REGION));cx<=Math.min(Math.floor(WIDTH/REGION)+1,Math.floor((x+radius)/REGION));cx++) {
@@ -99,9 +104,9 @@ export function visibleWildlife(w:World, x:number, z:number, radius:number, heig
       const biome=biomeAt(ax,az).id;
       const coast=!legacyRegion(ax,az);
       const aquatic=!underground&&!highSky&&(coast||!!naturalVoxelWater(w,ax,az));
-      const list=habitats.get(underground?'cave':highSky?'sky':coast?'coast':aquatic?'river':biome);
+      const list=w.dimensionId?realmFauna[w.dimensionId]:habitats.get(underground?'cave':highSky?'sky':coast?'coast':aquatic?'river':biome);
       if (!list?.length) continue;
-      const kind=aquatic&&!coast ? biome==='ruins'?'reef-fish':'trout' : list[(n>>>8)%list.length];
+      const kind=aquatic&&!coast&&!w.dimensionId ? biome==='ruins'?'reef-fish':'trout' : list[(n>>>8)%list.length];
       if (w.packAnimals?.[`${id}:${kind}`]) continue;
       if (kind==='butterfly' && (phase===3 || season===3)) continue;
       const habitatType=WILDLIFE[kind];
@@ -121,6 +126,7 @@ export function visibleWildlife(w:World, x:number, z:number, radius:number, heig
         if (!underground && !highSky && aquatic!==!!water) continue;
         if (underground && (!solid(blockAt(w,nx,altitude-1,nz)) || solid(blockAt(w,nx,altitude,nz)))) continue;
         if (!underground && !highSky && !water && solid(blockAt(w,nx,altitude,nz))) continue;
+        if(w.dimensionId&&(habitatType.art==='aquatic'&&!water||blockAt(w,nx,altitude,nz)==='cave-lava'))continue;
         const ny=highSky ? Math.max(altitude+1,height+.8) : water ? water.surface-(kind==='dolphin'?.35:.48) : altitude+(WILDLIFE[kind].art==='flying'?.25:0);
         const facing:CreatureFacing=dx<0?'left':dx>0?'right':dz<0?'back':'front';
         if (Math.hypot(nx+.5-x,nz+.5-z)<=radius) fauna.push({id:id+':'+kind,kind,x:nx+.5,y:ny,z:nz+.5,bond:0,moment,facing});

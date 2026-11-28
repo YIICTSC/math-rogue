@@ -5,6 +5,7 @@ export const POTIONS={
   air_draught:{seconds:90,copy:['水中で息が減らなくなる','Stops breath loss underwater','すいちゅうでいきがへらなくなる']},
   stride_draught:{seconds:75,copy:['探索中の移動が速くなる','Increases travel speed','たんさくちゅうのいどうがはやくなる']},
   miner_draught:{seconds:90,copy:['採掘エネルギーの消費を抑える','Reduces mining energy cost','さいくつエネルギーをせつやくする']},
+  heal_draught:{seconds:0,heal:8,copy:['探索中にHPを8回復する','Restores 8 HP while exploring','たんさくちゅうにHPを8かいふくする']},
 } as const;
 export type ExplorationPotion=keyof typeof POTIONS;
 export const IMPRINTS={
@@ -26,10 +27,10 @@ export function toolLimit(p:Adventurer,tool:ToolKind,tier:ToolTier) {
   return p.life?.toolImprints?.[tool]==='endurance' ? Math.round(max*1.5) : max;
 }
 
-export function wearTool(p:Adventurer,tool:ToolKind,tier:ToolTier|undefined) {
+export function wearTool(p:Adventurer,tool:ToolKind,tier:ToolTier|undefined,amount=1) {
   if (!p.life || !tier) return;
   const wear=p.life.toolWear??={};
-  wear[tool]=Math.min(toolLimit(p,tool,tier),(wear[tool]??0)+1);
+  wear[tool]=Math.min(toolLimit(p,tool,tier),(wear[tool]??0)+amount);
 }
 
 export function restoreEquipment(w:World,p:Adventurer) {
@@ -38,7 +39,7 @@ export function restoreEquipment(w:World,p:Adventurer) {
   if (life.toolImprints) life.toolImprints=Object.fromEntries(Object.entries(life.toolImprints).filter(([tool,id])=>
     WORKSHOP_TOOLS.some(kind=>kind===tool)&&Object.hasOwn(IMPRINTS,id)));
   if (life.toolWear) life.toolWear=Object.fromEntries(Object.entries(life.toolWear).filter(([tool,count])=>
-    WORKSHOP_TOOLS.some(kind=>kind===tool)&&Number.isSafeInteger(count)&&count>=0&&count<=216));
+    WORKSHOP_TOOLS.some(kind=>kind===tool)&&Number.isFinite(count)&&Number.isSafeInteger(count*4)&&count>=0&&count<=216));
   if (life.potionUntil) life.potionUntil=Object.fromEntries(Object.entries(life.potionUntil).filter(([id,until])=>
     Object.hasOwn(POTIONS,id)&&Number.isFinite(until)&&until>w.life.time&&until<=w.life.time+90));
   if (life.imprintStudy && (!Number.isSafeInteger(life.imprintStudy)||life.imprintStudy<0)) life.imprintStudy=0;

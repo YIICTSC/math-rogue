@@ -2,6 +2,7 @@ import * as T from 'three';
 import type { World } from './engine';
 import { machineCarts, railConnections } from './machinery';
 import { isRail, isTransportLane } from './machineryParts';
+import { REALM_GATE, realmFloorAnchor } from './realmTerrain';
 
 const DEVICE_VIEW_DISTANCE = 24;
 
@@ -102,6 +103,11 @@ export class MachineryEffects {
         this.box(this.beams,x+.5,y+.48,z+.5,sideways?.035:.53,.57,sideways?.53:.035,'#72e1f1');
         this.box(this.signals,x+.5,y+.82,z+.5,.11,.07,.11,'#bdfbde');
       }
+    }
+    if(w.dimensionId&&Math.hypot(focus.x-REALM_GATE.x,focus.z-REALM_GATE.z)<=DEVICE_VIEW_DISTANCE){
+      const {x,z}=REALM_GATE,y=realmFloorAnchor(w.dimensionId);
+      this.box(this.beams,x+.5,y+.48,z+.5,.53,.57,.035,'#a2e6f4');
+      this.box(this.signals,x+.5,y+.82,z+.5,.12,.08,.13,'#c1ffef');
     }
     const flows = w.voxels?.fluids?.cells ?? {};
     for (const [key, flow] of Object.entries(flows)) {

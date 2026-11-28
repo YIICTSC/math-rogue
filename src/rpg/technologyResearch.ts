@@ -133,9 +133,73 @@ export const TECH_PLANS:Plan[]=[
     result:(w,at,p)=>read(w,at(0,1))?.played!==undefined&&machineCarts(w).some(cart=>cart.rider===p.id&&cart.cell===key(at(1,2,1)))},
 ];
 
-export function earnedBlueprint(plan:Plan,name:string) {
-  const left=Math.min(...plan.parts.map(cell=>cell.x)), bottom=Math.min(...plan.parts.map(cell=>cell.y)), front=Math.min(...plan.parts.map(cell=>cell.z));
-  const cells=plan.parts.map(cell=>({...cell,x:cell.x-left,y:cell.y-bottom,z:cell.z-front}));
+export const SHOWCASE_PROJECTS=[
+  'pressure-door','street-grid','night-light','piston-door','castle-gate','metro','viaduct','rail-loop',
+  'freight','rail-signal','sorter','smelter','crafter','harvester','ranch-care','piston-lift','water-lift',
+  'fountain','beacon','notes','logic-subtract','rail-attraction',
+] as const;
+
+function house(x:number,z:number,material:CatalogBlock='plank'):Part[] {
+  const walls:Part[]=[],roof:Part[]=[];
+  for(let run=0;run<4;run++){
+    for(const side of [-1,1])for(let height=0;height<2;height++)
+      walls.push(part(height===1&&run===1?'glass':material,x+run,z+side,height));
+    for(const side of [-1,1,0])roof.push(part('woodslab',x+run,z+side,2));
+  }
+  for(let height=0;height<2;height++)walls.push(part(material,x+3,z,height));
+  return walls.concat(roof);
+}
+
+const construction:Partial<Record<typeof SHOWCASE_PROJECTS[number],Part[]>>={
+  'pressure-door':house(1,0),
+  'street-grid':[
+    ...house(-1,3,'birchplank').filter(({x,y})=>x<1||y<2),
+    part('bambooplank',4,2),part('bambooplank',6,2),part('bambooplank',4,2,1),
+    part('bambooplank',6,2,1),part('glass',5,2,1),part('woodslab',4,2,2),part('woodslab',5,2,2),
+    part('woodslab',6,2,2),part('bronze_bell',0,2),part('flowerpot',4,1),
+  ],
+  'night-light':[part('stonewall',2,1),part('stonewall',2,1,1),part('signboard',3,1)],
+  'piston-door':[part('stonebrick',2,1),part('stonebrick',3,1),part('stonebrick',2,-1),part('stonebrick',3,-1),
+    part('sandstone',2,1,1),part('sandstone',3,1,1),part('sandstone',2,-1,1),part('sandstone',3,-1,1)],
+  'castle-gate':[part('stonebrick',-1,0,2),part('stonebrick',2,0,2),...[-1,0,1,2].map(x=>part('stonebrick',x,0,3)),part('field_banner',2,-1)],
+  metro:[...Array.from({length:4},(_,x)=>[part('stonebrick',x,1),part('stonebrick',x,-1),part('stonebrick',x,1,1),part('stonebrick',x,-1,1)]).flat(),
+    part('lantern',2,1,2),part('signboard',3,-1,2)],
+  viaduct:[part('stonewall',2,-1),part('stonewall',2,-1,1),part('stonewall',2,-1,2),part('stonebrick',1,-1),part('chain',1,-1,1)],
+  freight:[part('warehouse_chest',0,1),part('warehouse_chest',2,1),part('signboard',3,1)],
+  sorter:house(-1,1,'birchplank').filter(p=>p.y<2||p.x>1),
+  smelter:[part('brick',-1,-1),part('brick',2,-1),part('brick',-1,-1,1),part('brick',2,-1,1),part('copper_block',0,-1),part('lantern',0,-1,1)],
+  crafter:[part('bambooplank',-1,2),part('bambooplank',2,2),part('bambooplank',-1,2,1),part('bambooplank',2,2,1),part('signboard',-2,2)],
+  harvester:[part('bamboo_fence',-1,2),part('bamboo_fence',0,2),part('bamboo_fence',1,2),part('garden_bed',2,2)],
+  'ranch-care':[part('birch_fence',-1,2),part('birch_fence',0,2),part('birch_fence',1,2),part('hay',2,2)],
+  fountain:[part('stonewall',0,2,-1),part('stonewall',1,2,-1),part('garden_bed',2,2,-1),part('candle',0,2)],
+  beacon:[part('frostplank',2,2,-1),part('frostplank',3,2,-1),part('frostplank',2,2),part('glass',3,2),
+    part('woodslab',2,2,1),part('woodslab',3,2,1),part('acaciaplank',-2,2,-1),part('acaciaplank',-3,2,-1),
+    part('acaciaplank',-2,2),part('glass',-3,2),part('woodslab',-2,2,1),part('woodslab',-3,2,1),
+    part('luminous_tile',0,3,-1),part('luminous_tile',0,4,-1),part('garden_bed',-1,2,-1),part('garden_bed',1,2,-1)],
+  notes:[part('stonewall',-1,2),part('stonewall',2,2),part('bronze_bell',-1,2,1),part('lantern',2,2,1)],
+  'rail-loop':[part('stonewall',1,3),part('signboard',2,3),part('lantern',1,3,1)],
+  'rail-signal':[part('plank',-1,0),part('plank',-1,0,1),part('woodslab',-1,0,2),part('woodslab',0,0,2)],
+  'piston-lift':[part('stonebrick',2,0),part('stonebrick',2,0,1),part('stonebrick',2,0,2),part('stonebrick',2,0,3),
+    part('copper_block',1,1),part('woodstairs',2,1)],
+  'water-lift':[-1,1].flatMap(x=>[-1,0,1,2].map(y=>part('glass',x,0,y))),
+  'logic-subtract':[part('copper_block',-1,2),part('copper_block',0,2),part('copper_block',1,2),part('signboard',1,1)],
+  'rail-attraction':[part('violetwool',-1,2),part('violetwool',3,2),part('orangewool',-1,2,1),part('orangewool',3,2,1),
+    part('blueglass',-1,2,2),part('blueglass',3,2,2),part('luminous_tile',3,1)],
+};
+
+export function showcaseParts(plan:Plan) {
+  const parts=new Map(plan.parts.map(piece=>[key(piece),piece]));
+  for(const piece of construction[plan.id as keyof typeof construction]??[]){
+    if(!parts.has(key(piece)))parts.set(key(piece),piece);
+  }
+  return [...parts.values()];
+}
+
+
+export function earnedBlueprint(plan:Plan,name:string,showcase=false) {
+  const parts=showcase?showcaseParts(plan):plan.parts;
+  const left=Math.min(...parts.map(cell=>cell.x)), bottom=Math.min(...parts.map(cell=>cell.y)), front=Math.min(...parts.map(cell=>cell.z));
+  const cells=parts.map(cell=>({...cell,x:cell.x-left,y:cell.y-bottom,z:cell.z-front}));
   return normalizeBlueprint({version:1,name:name.slice(0,32),cells});
 }
 

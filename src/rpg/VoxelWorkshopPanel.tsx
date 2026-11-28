@@ -32,6 +32,9 @@ export function VoxelWorkshopPanel({world,selfId,languageMode,send,onChoose,onCl
    alchemy:L('魔法設備','Magic stations','まほうせつび')};
  const station=(s:string)=>s==='hand'?L('手作業','By hand','てさぎょう'):name(s);
  const purpose=(id:string)=>{
+  if(id==='hydroponic_bed')return L('地表に置き、クワで農地にする。隣に水を流すか、灌漑タンクで給水します。','Place at ground level and till it with a hoe. Supply water from an adjacent channel or an irrigation tank.','ちひょうにおいてクワでのうちにします。となりのみずか、かんがいタンクできゅうすいします。');
+  if(id==='brew_cauldron')return L('薬草エキスや探索用ポーションを作れます。','Make herbal essence and exploration potions here.','やくそうエキスやたんさくようポーションをつくれます。');
+  if(id==='summoning_altar')return L('近くで装備と薬を開くと、異世界の素材で使い魔を呼べます。','Open Tools and potions nearby to summon a familiar with realm materials.','ちかくでそうびとくすりをひらくと、いせかいのそざいでつかいまをよべます。');
   const special:Record<string,string>={shovel:L('土・砂・雪・粘土・砂利の採掘を省エネルギー化。','Reduces energy for digging soil, sand, snow, clay and gravel.','つち・すな・ゆきなどをすくないエネルギーでほれます。'),axe:L('木材や木製設備の解体を省エネルギー化。','Reduces energy for chopping wood and wooden stations.','きやもくせいのせつびをすくないエネルギーでこわせます。'),pickaxe:L('石材・鉱石の採掘を省エネルギー化。','Reduces energy for mining stone and ores.','いしやこうせきをすくないエネルギーでほれます。'),hoe:L('地面を耕して農地を作る。','Tills ground into farmland.','じめんをたがやしてはたけをつくります。'),workbench:L('道具・建材・設備を加工する作業設備。','Crafting station for tools, blocks and equipment.'),furnace:L('燃料を消費して鉱石や砂などを精錬する。','Smelts ores and sand using fuel.'),chest:L('素材を共有・保管する。','Stores and shares materials.'),composter:L('葉や果実から有機肥料を加工する。','Processes leaves and fruit into fertilizer.'),irrigator:L('近くの水源から周囲の畑に給水する。','Irrigates nearby farmland using a water source.'),fertilizer:L('1個を農園の堆肥3個に変換する。','Converts one item into three farm compost.'),coal:L('精錬の燃料・たいまつの材料。','Smelting fuel and torch ingredient.'),charcoal:L('精錬の燃料・たいまつの材料。','Smelting fuel and torch ingredient.')};
   if(special[id])return special[id];
   const uses=WORKSHOP_RECIPES.filter(r=>Object.hasOwn(r.cost,id));

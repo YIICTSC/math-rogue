@@ -11,6 +11,7 @@ import { ALL_MATERIAL_NAMES, type VoxelItem } from './voxelCatalog';
 import { bodyClear, floorAt, MIN_DEPTH, naturalVoxelWater, playerHeight, protectedVoxel } from './voxel';
 import { landscapeRegion, legacyRegion, WORLD_SCALE } from './worldLandscape';
 import { ridingAnimal, steerPackAnimal } from './packAnimals';
+import { inRealm } from './realmTerrain';
 
 type Point = { x: number; y: number; z: number };
 type Cargo = Partial<Record<VoxelItem, number>>;
@@ -54,7 +55,7 @@ export const watercraft = boatValues;
 export const boardedBoat = (w: World, id: string) => w.transport && boatValues(w).find(boat => boat.rider === id);
 export const traveling = (w: World, p: Adventurer) => !!(p.gliding || boardedBoat(w, p.id) || ridingAnimal(w,p.id));
 const col = (x: number, z: number) => ({ x: Math.floor(x), z: Math.floor(z) });
-const inMap = (x: number, z: number) => legacyRegion(x,z) || landscapeRegion(x,z);
+const inMap = (w:World,x:number,z:number) => w.dimensionId?inRealm(x,z):legacyRegion(x,z)||landscapeRegion(x,z);
 const nearby = (position: Point, target: Point) => Math.hypot(position.x-target.x, position.y-target.y, position.z-target.z) <= reach;
 const centerOf = (w: World, p: Adventurer): Point => ({
   x: p.position3D?.x ?? p.x+.5, y: playerHeight(w,p), z: p.position3D?.z ?? p.y+.5,
@@ -66,12 +67,12 @@ export function closeWatercraft(w: World, p: Adventurer) {
 }
 
 function waterSurface(w: World, x: number, z: number, height: number) {
-  if (!inMap(x,z)) return null;
+  if (!inMap(w,x,z)) return null;
   const water = placedWater(w,x,z,height) ?? naturalVoxelWater(w,x,z);
   if (!water || water.depth < .34 || Math.abs(height-water.surface) > .85) return null;
   for (const [dx,dz] of [[-radius,-radius],[-radius,radius],[radius,-radius],[radius,radius]]) {
     const cell=col(x+dx,z+dz);
-    if (!inMap(cell.x,cell.z) || !bodyClear(w,cell.x,cell.z,water.surface-.24,water.surface+1.97)) return null;
+    if (!inMap(w,cell.x,cell.z) || !bodyClear(w,cell.x,cell.z,water.surface-.24,water.surface+1.97)) return null;
   }
   return water.surface;
 }
@@ -113,7 +114,7 @@ function mooringSpot(w: World, boat: Watercraft): Point | null {
   const pos=col(boat.x,boat.z), swim: Point[]=[];
   for (const {dx,dz} of [...compass,{dx:0,dz:0}]) {
     const x=pos.x+dx,z=pos.z+dz;
-    if (!inMap(x,z)) continue;
+    if (!inMap(w,x,z)) continue;
     const ground=floorAt(w,x,z,boat.y+1.35);
     const pool=placedWater(w,x,z,boat.y) ?? naturalVoxelWater(w,x,z);
     if (ground!==null && ground>=boat.y-.9 && (!pool || ground>=pool.surface)) return {x:x+.5,y:ground,z:z+.5};
@@ -126,7 +127,7 @@ export function launchGlide(w: World, p: Adventurer, heading: number): Point | n
   if (!Number.isInteger(heading) || !compass[heading] || !p.life?.bag.glider_wing || traveling(w,p) || ridingCart(w,p.id)) return null;
   const pos=centerOf(w,p), {dx,dz}=compass[heading];
   const x=Math.floor(pos.x)+dx, z=Math.floor(pos.z)+dz;
-  if (!inMap(x,z) || !bodyClear(w,x,z,pos.y)) return null;
+  if (!inMap(w,x,z) || !bodyClear(w,x,z,pos.y)) return null;
   const ground=floorAt(w,x,z,pos.y+.01);
   if (ground===null || pos.y-ground<2.6) return null;
   return {x:x+.5,y:pos.y,z:z+.5};
@@ -229,7 +230,7 @@ export function steerTransport(w: World, p: Adventurer, dx: number, dz: number, 
 function glideStep(w: World, pos: Point, glide: Gliding, dt: number) {
   const speed=GLIDER_SPEED*(glide.boost>0?1.65:1);
   let x=pos.x+glide.dx*speed*dt,z=pos.z+glide.dz*speed*dt;
-  if (!inMap(x,z) || !bodyClear(w,Math.floor(x),Math.floor(z),pos.y)) {x=pos.x;z=pos.z;}
+  if (!inMap(w,x,z) || !bodyClear(w,Math.floor(x),Math.floor(z),pos.y)) {x=pos.x;z=pos.z;}
   const y=pos.y-GLIDER_DESCENT*dt;
   const cell=col(x,z), ground=floorAt(w,cell.x,cell.z,pos.y+.01,y);
   const water=placedWater(w,x,z,pos.y) ?? naturalVoxelWater(w,x,z);
@@ -295,7 +296,7 @@ export function restoreTransport(w: World, now: number) {
     for (const [id,boat] of Object.entries(saved.boats ?? {}).slice(0,WATERCRAFT_LIMIT)) {
       if (!/^boat-[1-9]\d{0,7}$/.test(id) || !boat || !isWatercraftItem(boat.item) ||
         typeof boat.owner!=='string' || ![boat.x,boat.y,boat.z,boat.heading].every(Number.isFinite) ||
-        !inMap(boat.x,boat.z) || boat.y < MIN_DEPTH || boat.y > WORLD_SCALE.ceiling) continue;
+        !inMap(w,boat.x,boat.z) || boat.y < MIN_DEPTH || boat.y > WORLD_SCALE.ceiling) continue;
       const slots=WATERCRAFT[boat.item].slots, cargo: Cargo={};
       for (const [item,count] of Object.entries(boat.cargo ?? {})) {
         if (Object.keys(cargo).length>=slots) break;

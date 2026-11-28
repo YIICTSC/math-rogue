@@ -6,6 +6,7 @@ import { IMPRINTS, POTIONS, WORKSHOP_TOOLS, potionSeconds, toolLimit, type Explo
 import { sandboxItemName, sandboxText } from './MachineryInspector';
 import type { ToolKind } from './voxelCatalog';
 import { activeTools, nearbyWorkshop, repairMaterial, type WorkshopAction } from './voxelWorkshop';
+import { canSummonFamiliar, FAMILIAR_COST } from './farm/model';
 
 export default function WorkshopEquipmentPanel({world,player,languageMode,send}:{world:World;player:Adventurer;
   languageMode:LanguageMode;send:(action:WorkshopAction)=>void}) {
@@ -56,11 +57,18 @@ export default function WorkshopEquipmentPanel({world,player,languageMode,send}:
       const potion=POTIONS[id], duration=potionSeconds(world,player,id);
       return <article key={id}>
         <strong><FlaskConical size={15} /> {item(id)}</strong>
-        <small>{localized(potion.copy)} · {potion.seconds} s</small>
-        <button disabled={!!duration||!life?.bag[id]} onClick={()=>send({type:'voxel-potion',item:id})}>
+        <small>{localized(potion.copy)}{potion.seconds>0&&` · ${potion.seconds} s`}</small>
+        <button disabled={!!duration||!life?.bag[id]||id==='heal_draught'&&(!player.profile||player.hp>=player.maxHp)} onClick={()=>send({type:'voxel-potion',item:id})}>
           {duration ? `${L('効果中','Active','こうかちゅう')} ${Math.ceil(duration)} s` : `${L('飲む','Drink','のむ')} · ${life?.bag[id]||0}`}
         </button>
       </article>;
     })}</div>
+    <h3>{L('使い魔の祭壇','Familiar altar','つかいまのさいだん')}</h3>
+    <p>{L('異世界の素材とハチミツで、ちびドラゴンを仲間にします。迎えた使い魔は農園のペットから世話できます。',
+      'Offer realm materials and honey to recruit a baby dragon. Care for it in your farm’s pet menu.',
+      'いせかいのそざいとハチミツで、ちびドラゴンをなかまにします。のうえんのペットからせわできます。')}</p>
+    <ul className="rpg-research-supplies">{Object.entries(FAMILIAR_COST).map(([id,count])=><li key={id}>{item(id)} ×{count}</li>)}</ul>
+    <button disabled={!nearbyWorkshop(world,player,'summoning_altar')||!canSummonFamiliar(world,player)}
+      onClick={()=>send({type:'voxel-summon'})}>{L('ちびドラゴンを呼ぶ','Summon a baby dragon','ちびドラゴンをよぶ')}</button>
   </section>;
 }

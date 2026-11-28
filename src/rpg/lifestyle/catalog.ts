@@ -1,11 +1,11 @@
 import { c } from "../town/catalog";
 export const PET_TRICKS = [
-  ["sit", "おすわり", "Sit", "おすわり", 0, "greet"],
-  ["wave", "おて", "Paw", "おて", 5, "greet"],
+  ["sit", "おすわり", "Sit", "おすわり", 0, "sit"],
+  ["wave", "おて", "Paw", "おて", 5, "paw"],
   ["spin", "くるりん", "Spin", "くるりん", 10, "hop"],
   ["roll", "ごろん", "Roll over", "ごろん", 15, "roll"],
   ["fetch", "ボール遊び", "Fetch", "ぼーるあそび", 20, "hop"],
-  ["bow", "おじぎ", "Bow", "おじぎ", 25, "greet"],
+  ["bow", "おじぎ", "Bow", "おじぎ", 25, "bow"],
   ["dance", "ダンス", "Dance", "だんす", 30, "hop"],
   ["nap", "一緒にお昼寝", "Nap together", "いっしょにおひるね", 35, "sleep"],
   ["jump", "ジャンプ", "Jump", "じゃんぷ", 40, "hop"],

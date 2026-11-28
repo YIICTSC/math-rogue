@@ -7,6 +7,8 @@ import { getThemedHumanoidEnemySpritePath, getThemedMajorBossEnemySpritePath, ge
 import { assetUrl } from '../utils/assetPaths';
 import { ENDLESS_BOSSES, getEndlessBossById, getEndlessBossSpritePath } from '../data/endlessMode';
 import { creaturePortrait } from '../rpg/lifestyle/creatureArt';
+import { realmWardenArt } from '../rpg/realmTerrain';
+import { realmWardenId } from '../rpg/realmBattles';
 
 interface EnemyIllustrationProps {
   name: string;
@@ -66,7 +68,8 @@ const EnemyIllustration: React.FC<EnemyIllustrationProps> = ({ name, seed, alias
     : null;
   const cavernWarden = enemyType === 'RPG_STONE_WARDEN' ? 'stone-golem'
     : enemyType === 'RPG_CRYSTAL_WARDEN' ? 'crystal-slime' : null;
-  const imagePaths = cavernWarden
+  const realmWarden=realmWardenId(enemyType);
+  const imagePaths = realmWarden ? [assetUrl(realmWardenArt(realmWarden))] : cavernWarden
     ? [assetUrl(creaturePortrait(cavernWarden))]
     : endlessSpritePath
     ? [endlessSpritePath, getEndlessBossSpritePath(endlessBoss!, 'idle')]

@@ -195,8 +195,23 @@ try {
   assert.ok(send({type:'farm-pet-adopt',kind:'shiba',name:'ポチ'}));const pet=f.pets[0];assert.equal(pet.homeId,petHome.id);
   for(const care of ['feed','pat','play','train'])assert.ok(send({type:'farm-pet-care',id:pet.id,care}));
   assert.equal(send({type:'farm-pet-care',id:pet.id,care:'play'}),false);
-  pet.hunger=80;pet.bond=50;p.moveCount+=20;F.advanceFarm(w);assert.equal(pet.bond,50,'Outdoor walking no longer rewards home pets');
-  send({type:'farm-pet-care',id:pet.id,care:'trip'});assert.equal(pet.awayUntil,0);
+  pet.hunger=80;pet.bond=50;p.moveCount+=20;F.advanceFarm(w);assert.equal(pet.bond,50,'Only an invited pet goes for a walk.');
+  assert.ok(send({type:'farm-pet-care',id:pet.id,care:'follow'}));
+  delete p.life.indoors;
+  p.moveCount+=20;F.advanceFarm(w);
+  assert.equal(f.activePet,pet.id);assert.equal(pet.bond,54);
+  p.life.bag.thread=2;
+  assert.ok(send({type:'farm-pet-collar',id:pet.id,color:'teal'}));
+  assert.equal(pet.collar,'teal');assert.equal(p.life.bag.thread,0);
+  p.life.indoors=petHome.id;
+  f.feed=3;
+  assert.ok(send({type:'farm-pet-care',id:pet.id,care:'trip'}));
+  assert(pet.awayUntil>w.life.time);
+  assert.equal(f.activePet,undefined);
+  const errands=pet.trips;
+  w.life.time+=46;F.advanceFarm(w);
+  assert.equal(pet.trips,errands+1);
+  assert.equal(pet.awayUntil,0);
   assert.ok(send({type:'farm-name',id:pet.id,name:'コムギ'}));assert.equal(pet.name,'コムギ');delete p.life.indoors;
   // Cooking consumes actual crop and animal products once, then shares the existing authoritative timing action.
   const home = {
@@ -278,6 +293,83 @@ try {
   assert.equal(send({ type: "farm-seed", crop: "carrot", amount: 1 }), false);
   delete p.nativeScene;
   assert.equal(f.coins, before);
+  {
+  const farmWorld=E.createWorld(42,undefined,0,now);
+  E.addPlayer(farmWorld,'a','Grower');
+  const grower=farmWorld.players.a;
+  farmWorld.sites=[];
+  farmWorld.voxels={edits:{},placedBy:{},terrainVersion:2,revision:0,legacyFlat:[]};
+  for(let z=35;z<49;z++)for(let x=29;x<45;x++){
+    farmWorld.tiles[z*E.WIDTH+x]='grass';
+    farmWorld.voxels.legacyFlat.push(`${x},${z}`);
+    for(let y=0;y<3;y++)farmWorld.voxels.edits[V.voxelKey(x,y,z)]=null;
+  }
+  const go=(x,z)=>Object.assign(grower,{x,y:z,position3D:{x:x+.5,y:0,z:z+.5,surface2D:true}});
+  const act=(action)=>assert(E.applyAction(farmWorld,'a',action,now+=300),JSON.stringify(action));
+  const failed=(action)=>assert.equal(E.applyAction(farmWorld,'a',action,now+=300),false);
+  const place=(block,x,z,rotation=0)=>{
+    go(x-1,z+1);grower.life.bag[block]=1;grower.life.energy=6;
+    act({type:'voxel-place',block,x,y:0,z,rotation});
+    assert.equal(V.blockAt(farmWorld,x,0,z),block);
+  };
+  const day=(date)=>{
+    farmWorld.town.day=date;
+    farmWorld.town.elapsed=date*N.DAY_SECONDS;
+    F.advanceFarm(farmWorld);
+  };
+  day(14);
+  place('hydroponic_bed',32,38);
+  go(31,38);grower.life.hoe=true;
+  act({type:'farm-till',dx:1,dy:0});
+  const hydro=F.farmOf(farmWorld,grower);
+  const bed=hydro.plots.find(plot=>plot.x===32&&plot.y===38);
+  assert(bed.hydroponic);
+  hydro.seeds.mushroom=1;
+  act({type:'farm-plant',slot:bed.slot,crop:'mushroom'});
+  day(15);
+  assert.equal(bed.growth,0,'The tray requires a supply of water.');
+  grower.life.bag.water_bucket=1;
+  act({type:'voxel-fluid',command:'water',x:33,y:0,z:38});
+  for(let dayNumber=16;dayNumber<=18;dayNumber++)day(dayNumber);
+  assert.equal(bed.growth,3);
+  act({type:'farm-harvest',slot:bed.slot});
+  assert.equal(hydro.pantry.mushroom.normal,3);
+
+  place('farm_machine',38,45,1);
+  place('crystal_lever',38,46);
+  place('warehouse_chest',39,45);
+  go(37,45);
+  hydro.pantry.mushroom.normal=7;
+  const wallet=hydro.coins;
+  act({type:'voxel-device',command:'farm-job',x:38,y:0,z:45,value:'ship:mushroom'});
+  act({type:'voxel-device',command:'use',x:38,y:0,z:46});
+  const pulse=()=>{for(let i=0;i<12;i++)E.advanceWorld(farmWorld,now+=350);};
+  pulse();pulse();
+  assert.equal(hydro.pantry.mushroom.normal,4);
+  assert.equal(hydro.coins,wallet+60);
+  day(19);pulse();
+  assert.equal(hydro.pantry.mushroom.normal,1);
+
+  place('brew_cauldron',39,42);
+  Object.assign(grower.life.bag,{herb:3,reed:1,glass:1,bottled_honey:2});
+  act({type:'voxel-craft',recipe:'herbal_essence',amount:1});
+  assert.equal(grower.life.bag.herbal_essence,2);
+  act({type:'voxel-craft',recipe:'heal_draught',amount:1});
+  act({type:'native-profile',profile:{...p.profile,hp:55}});
+  act({type:'voxel-potion',item:'heal_draught'});
+  assert.equal(grower.hp,63);
+  act({type:'native-profile',profile:{...grower.profile,mutationRevision:grower.mutationRevision}});
+  failed({type:'voxel-potion',item:'heal_draught'});
+  place('summoning_altar',40,42);
+  Object.assign(grower.life.bag,{emberstone:3,crystal_powder:2});
+  act({type:'voxel-summon'});
+  assert.equal(hydro.pets.find(pet=>pet.id===hydro.activePet)?.kind,'dragon');
+  assert.equal(grower.life.bag.emberstone,0);
+  Object.assign(grower.life.bag,{emberstone:3,crystal_powder:2,bottled_honey:1});
+  failed({type:'voxel-summon'});
+  assert.equal(grower.life.bag.emberstone,3);
+  console.log('PASS hydroponic mushrooms, daily automated shipping, cauldron recipes, healing and the one-per-player familiar.');
+  }
   for (const c of C.CROPS)
     assert.ok(fs.existsSync(`public/sprites/rpg/farm/crops/${c.id}.webp`));
   for (const a of C.LIVESTOCK)

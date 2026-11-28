@@ -43,12 +43,12 @@ try {
   practiceRoom.practice("練習", setup);
   assert(
     practicedWorld.sites
-      .filter((site) => site.kind === "enemy")
+      .filter((site) => site.kind === "enemy" && !site.subsurface)
       .every((site) => getEncounterEnemyNamePool("high-school").includes(site.name)),
     "solo practice creates map enemies for the selected chapter",
   );
   practiceRoom.close();
-  const enemySites = setupWorld.sites.filter((site) => site.kind === "enemy");
+  const enemySites = setupWorld.sites.filter((site) => site.kind === "enemy" && !site.subsurface);
   assert.equal(enemySites.length, 18, "map generates three ordinary encounters per biome");
   assert(
     enemySites.every((site) =>
@@ -108,8 +108,8 @@ try {
         queue.push(k);
       }
     assert(
-      generated.sites.every((s) => seen.has(s.y * WIDTH + s.x)),
-      `all sites reachable, seed ${seed}`,
+      generated.sites.filter(s=>!s.subsurface).every((s) => seen.has(s.y * WIDTH + s.x)),
+      `all surface sites reachable, seed ${seed}`,
     );
   }
   const capacity = createWorld(1);
@@ -157,7 +157,7 @@ try {
   assert.equal(WIDTH * HEIGHT, 64 * 44 * 6);
   assert.equal(w.tiles.length, WIDTH * HEIGHT);
   assert(w.sites.some(s=>s.x>64) && w.sites.some(s=>s.y>44));
-  assert.equal(w.sites.filter(s=>s.kind!=="story").length, 64);
+  assert.equal(w.sites.filter(s=>s.kind!=="story"&&!s.subsurface).length, 64);
   assert.equal(w.sites.filter(s=>s.kind==="story").length, 12);
   const roamingNpcs = w.sites.filter(s=>s.kind==="npc");
   assert.equal(roamingNpcs.length, 6, "one roaming NPC appears in each biome");

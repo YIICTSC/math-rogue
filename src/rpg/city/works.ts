@@ -1,10 +1,12 @@
 import type { Adventurer, World } from '../engine';
 import { operateFarmMachine } from '../farm/model';
 import { sandboxAllows } from '../sandboxAccess';
-import { c } from '../town/catalog';
+import { c, RESIDENTS } from '../town/catalog';
+import { creaturePortrait } from '../lifestyle/creatureArt';
 import type { VoxelItem } from '../voxelCatalog';
 import { cityBuilding } from './catalog';
 import type { CityLot } from './model';
+import { cityCommute } from './commutes';
 
 export const CITY_WORKS = {
   farm: { blocks:['farm_machine'], job:c('農場の世話','Farmhand','のうじょうのせわ') },
@@ -44,7 +46,7 @@ export function cityWorkHardware(w:World, lot:CityLot) {
 
 export function cityWorkHomes(w:World,lot:CityLot) {
   return w.city?.lots.filter(home=>home.connected&&!home.damage&&!!cityBuilding(home.kind)?.capacity&&
-    Math.abs(home.x-lot.x)+Math.abs(home.y-lot.y)<=20)??[];
+    Math.abs(home.x-lot.x)+Math.abs(home.y-lot.y)<=20&&cityCommute(w,home,lot).length>0)??[];
 }
 
 export function applyCityWorks(w:World,p:Adventurer,action:CityWorksAction) {
@@ -58,7 +60,8 @@ export function applyCityWorks(w:World,p:Adventurer,action:CityWorksAction) {
     const {cell,home}=action;
     const residence=cityWorkHomes(w,lot).find(choice=>choice.id===home);
     if(typeof cell!=='string'||typeof home!=='string'||!linkedHardware(w,lot,cell)||
-      !residence||Object.entries(s.works?.links??{}).filter(([id,link])=>id!==lot.id&&link.home===home).length>=cityBuilding(residence.kind)!.capacity*residence.level||
+      !residence||
+      Object.entries(s.works?.links??{}).filter(([id,link])=>id!==lot.id&&link.home===home).length>=cityBuilding(residence.kind)!.capacity*residence.level||
       Object.entries(s.works?.links??{}).some(([id,link])=>id!==lot.id&&link.cell===cell))return false;
     const links=(s.works??={links:{}}).links;
     const previous=links[lot.id];
@@ -75,6 +78,33 @@ function staffed(w:World,lot:CityLot,link:CityWorkLink) {
   const assignments=Object.entries(w.city!.works!.links).filter(([id,entry])=>entry.home===home.id&&
     w.city!.lots.some(other=>other.id===id&&!other.damage&&other.connected)).map(([id])=>id);
   return assignments.indexOf(lot.id)<home.people;
+}
+
+export function cityWorkers(w:World,settings:{minX:number;maxX:number;minY:number;maxY:number}) {
+  const city=w.city;
+  if(!city?.works)return [];
+  const {minX,maxX,minY,maxY}=settings;
+  const close=(lot:CityLot)=>lot.x>=minX-7&&lot.x<=maxX+7&&lot.y>=minY-7&&lot.y<=maxY+7;
+  const progress=(w.life.time%30)/30, walks=progress<.28?progress/.28:progress>.8?(1-progress)/.2:1;
+  return city.lots.flatMap(lot=>{
+    const link=city.works!.links[lot.id],home=link&&city.lots.find(entry=>entry.id===link.home);
+    if(!home||!link||!close(lot)&&!close(home)||!staffed(w,lot,link))return [];
+    const route=cityCommute(w,home,lot),index=(route.length-1)*walks;
+    const from=route[Math.floor(index)],to=route[Math.ceil(index)];
+    const weight=index-Math.floor(index),x=from.x+(to.x-from.x)*weight+.5,z=from.z+(to.z-from.z)*weight+.5;
+    const people=[{id:lot.id,x,z,guardian:false}];
+    if(lot.kind==='police'&&link.units&&link.lastMonth===city.month){
+      const [gx,,gz]=link.cell.split(',').map(Number);
+      people.push({id:lot.id+'-guardian',x:gx+.5,z:gz+.5,guardian:true});
+    }
+    return people;
+  });
+}
+
+export function cityWorkerPortrait(id:string,guardian:boolean) {
+  if(guardian)return creaturePortrait('stone-golem');
+  const pick=[...id].reduce((sum,char)=>Math.imul(sum,31)+char.charCodeAt(0),0)>>>0;
+  return RESIDENTS[pick%RESIDENTS.length].portrait;
 }
 
 export function recordCityRailArrival(w:World,cell:string,owner:string) {

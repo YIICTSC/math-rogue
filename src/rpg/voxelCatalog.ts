@@ -27,6 +27,9 @@ export const VOXEL_CATALOG={
  ...architecture,
  ...details,
  red_crystal_ore:b('赤魔晶石鉱石','#bd5578','natural','ore'),
+ emberstone:b('熔炉石','#894754','stone','ore'),skyshale:b('白雲石','#d6dae9','stone','stone'),
+ amethyststone:b('紫晶石','#8951a8','stone','ore'),echostone:b('残響石','#655f79','stone','brick'),
+ prismstone:b('潮光石','#5c9994','stone','ore'),
  wood:b('木材','#98704a','wood','log'),stone:b('石材','#829096','stone','stone'),plank:b('木の板','#c39a63','wood','plank'),brick:b('レンガ','#ae6550','stone','brick'),
  frostwood:b('霜木','#c5dee0','wood','log'),ore:b('鉄鉱石','#a99177','natural','ore'),crystal:b('魔晶石','#9e75ce','natural','ore','cube',{light:true}),dirt:b('土','#89734e','natural'),sand:b('砂','#d7ba79','natural'),snow:b('雪','#dbe9ef','natural'),steel:b('鋼材','#648c9a','stone','metal'),
  leaves:b('木の葉','#508741','natural','leaf'),frostleaves:b('雪積もる葉','#bad5c7','natural','leaf'),fruit:b('果実','#729443','natural','fruit'),bush:b('茂み','#639943','natural','leaf'),reed:b('葦','#88a85b','farm','log'),herb:b('薬草','#72aa66','farm','leaf'),cactus:b('サボテン','#438754','farm','log'),door:b('ドア','#b38958','wood','door'),
@@ -54,7 +57,7 @@ export const CATALOG_BLOCKS=Object.keys(VOXEL_CATALOG) as CatalogBlock[];
 export const CART_NAMES={minecart:'トロッコ',minecart_chest:'貨物トロッコ',minecart_hopper:'集荷トロッコ',minecart_engine:'動力トロッコ',minecart_work:'作業トロッコ'} as const;
 export type CartItem=keyof typeof CART_NAMES;
 const watercraftNames=Object.fromEntries(Object.entries(WATERCRAFT).map(([id,def])=>[id,def.name[0]])) as Record<WatercraftItem,string>;
-export const RESOURCE_NAMES={fish:'魚',housekit:'家の建築キット',stick:'棒',coal:'石炭',charcoal:'木炭',iron_ingot:'鉄インゴット',copper_ingot:'銅インゴット',gold_ingot:'金インゴット',diamond:'ダイヤ',lapis:'青金石',quartz:'水晶',paper:'紙',thread:'糸',fertilizer:'有機肥料',crystal_powder:'魔晶回路粉',...CART_NAMES,...watercraftNames,glider_wing:'滑空翼',glider_boost:'風の加速筒',bucket:'バケツ',water_bucket:'水入りバケツ',lava_bucket:'溶岩入りバケツ',imprint_book:'魔刻の書',air_draught:'水肺のしずく',stride_draught:'風脚のしずく',miner_draught:'石砕きのしずく',smoked_fish:'魚の燻製',bottled_honey:'ハチミツの瓶'} as const;
+export const RESOURCE_NAMES={fish:'魚',housekit:'家の建築キット',stick:'棒',coal:'石炭',charcoal:'木炭',iron_ingot:'鉄インゴット',copper_ingot:'銅インゴット',gold_ingot:'金インゴット',diamond:'ダイヤ',lapis:'青金石',quartz:'水晶',paper:'紙',thread:'糸',fertilizer:'有機肥料',crystal_powder:'魔晶回路粉',...CART_NAMES,...watercraftNames,glider_wing:'滑空翼',glider_boost:'風の加速筒',bucket:'バケツ',water_bucket:'水入りバケツ',lava_bucket:'溶岩入りバケツ',imprint_book:'魔刻の書',air_draught:'水肺のしずく',stride_draught:'風脚のしずく',miner_draught:'石砕きのしずく',herbal_essence:'薬草エキス',heal_draught:'花蜜のしずく',smoked_fish:'魚の燻製',bottled_honey:'ハチミツの瓶'} as const;
 export type VoxelItem=CatalogBlock|keyof typeof RESOURCE_NAMES;
 export const ALL_MATERIAL_NAMES={...Object.fromEntries(CATALOG_BLOCKS.map(k=>[k,VOXEL_CATALOG[k].name])) as Record<CatalogBlock,string>,...RESOURCE_NAMES};
 export const BLOCK_GROUPS:Record<BlockGroup,string>={natural:'天然素材',wood:'木材・建具',stone:'石材・鉱物',color:'色付き素材',glass:'ガラス',workshop:'作業設備',farm:'農業資材',circuit:'魔晶回路',machines:'信号装置',railway:'鉄道',logistics:'物流・加工',fluids:'流体',alchemy:'魔法設備'};
@@ -115,6 +118,8 @@ export const WORKSHOP_RECIPES:WorkshopRecipe[]=[
  r('air_draught',1,{glass:1,reed:2,lapis:1},'brew_table'),
  r('stride_draught',1,{glass:1,herb:2,fruit:2},'brew_table'),
  r('miner_draught',1,{glass:1,herb:2,quartz:1},'brew_table'),
+ r('herbal_essence',2,{herb:3,reed:1},'brew_table'),
+ r('heal_draught',1,{glass:1,herbal_essence:1,bottled_honey:1},'brew_table'),
  r('auto_furnace',1,{furnace:1,crystal_powder:3,iron_ingot:2}),r('auto_crafter',1,{workbench:1,crystal_powder:3,copper_ingot:2}),
  r('blast_furnace',1,{auto_furnace:1,steel:3}),r('smoker',1,{auto_furnace:1,plank:4,iron_ingot:2}),
  r('auto_composter',1,{composter:1,hopper:1,crystal_powder:2}),r('stonecutter',1,{steel:1,workbench:1,crystal_powder:2}),

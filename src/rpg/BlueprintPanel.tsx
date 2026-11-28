@@ -7,7 +7,7 @@ import { playerHeight, VOXEL_COLORS } from './voxel';
 import { sandboxItemName, sandboxText } from './MachineryInspector';
 import type { VoxelItem } from './voxelCatalog';
 import { copy } from './town/catalog';
-import { earnedBlueprint, TECH_PLANS } from './technologyResearch';
+import { earnedBlueprint, SHOWCASE_PROJECTS, TECH_PLANS } from './technologyResearch';
 import { blueprintCost, captureBlueprint, normalizeBlueprint, transformBlueprint,
   type Blueprint, type BlueprintAction, type BlueprintPreview } from './blueprints';
 
@@ -43,6 +43,7 @@ export default function BlueprintPanel({world,player,languageMode,send,onPreview
   const floors=[...new Set(pattern?.cells.map(cell=>cell.y)??[])].sort((a,b)=>a-b);
   const columns=Math.max(0,...(pattern?.cells.map(cell=>cell.x)??[]))+1;
   const earned=TECH_PLANS.filter(plan=>player.life?.research?.includes(plan.id));
+  const projects=TECH_PLANS.filter(plan=>(world.creative||earned.includes(plan))&&SHOWCASE_PROJECTS.some(id=>id===plan.id));
   function save(next:Blueprint[]) {
     setLibrary(next);
     try { localStorage.setItem(STORAGE_KEY,JSON.stringify(next)); }
@@ -88,6 +89,16 @@ export default function BlueprintPanel({world,player,languageMode,send,onPreview
       }}>
         <option value="" disabled>{L('選んで保存','Choose to save','えらんでほぞん')}</option>
         {earned.map(plan=><option key={plan.id} value={plan.id}>{copy(plan.title,languageMode)}</option>)}
+      </select>
+    </label>}
+    {!!projects.length&&<label>{L('完成見本の設計図','Finished project blueprints','かんせいみほんのせっけいず')}
+      <select value="" onChange={event=>{
+        const project=projects.find(plan=>plan.id===event.target.value);
+        const pattern=project&&earnedBlueprint(project,copy(project.title,languageMode),true);
+        if(pattern)add(pattern);
+      }}>
+        <option value="" disabled>{L('選んで保存','Choose to save','えらんでほぞん')}</option>
+        {projects.map(plan=><option key={plan.id} value={plan.id}>{copy(plan.title,languageMode)}</option>)}
       </select>
     </label>}
     <details>

@@ -6,6 +6,22 @@
   color: #fff0cc;
   font-size: 13px;
 }
+.rpg-realm-dock {
+  position: absolute;
+  right: 8px;
+  top: 96px;
+  z-index: 7;
+  display: grid;
+  gap: 5px;
+  padding: 7px 9px;
+  border: 1px solid #8aafa9;
+  border-radius: 8px;
+  background: #152f37ed;
+  color: #fff0cc;
+  font-size: 13px;
+}
+.rpg-transport-dock ~ .rpg-realm-dock { top: 142px; }
+.rpg-realm-dock button { display: flex; gap: 5px; align-items: center; min-height: 36px; }
 
 .rpg-cavern-dock {
   position: absolute;
@@ -107,3 +123,22 @@
   .rpg-transport-dock, .rpg-cavern-dock { top: 51px; }
   .rpg-transport-dock + .rpg-cavern-dock { top: 94px; }
 }
+
+.rpg-map-container > .rpg-creative-controls {
+  position: absolute;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  color: #fff2c8;
+  white-space: nowrap;
+}
+.rpg-creative-controls button, .rpg-creative-controls span {
+  border: 1px solid #adbb93;
+  border-radius: 8px;
+  background: #193f3ae8;
+  padding: 4px 9px;
+}
+.rpg-creative-controls button { min-width: 44px; min-height: 44px; font-weight: 700; }
+.rpg-creative-controls button[aria-pressed="true"] { background: #3b6650; border-color: #ffe1a2; }

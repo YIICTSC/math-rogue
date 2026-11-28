@@ -47,6 +47,23 @@ export function architecturalGeometry() {
   create('garden',[
     box(0,-.42,0,.91,.16,.91),...[-.27,.26].flatMap(x=>[-.25,.25].map(z=>new T.IcosahedronGeometry(.17,0).translate(x,-.24,z))),
   ]);
+  create('hydroponic',[
+    box(0,-.43,0,.95,.14,.96),...[-.42,.42].flatMap(edge=>[
+      box(edge,-.32,0,.10,.22,.95),box(0,-.32,edge,.84,.22,.10),
+    ]),
+    ...[-.26,0,.26].map(z=>box(0,-.30,z,.83,.055,.13)),
+  ]);
+  create('cauldron',[
+    new T.CylinderGeometry(.32,.21,.30,12).translate(0,-.26,0),
+    new T.CylinderGeometry(.39,.32,.29,12,1,true).translate(0,.035,0),
+    new T.TorusGeometry(.384,.043,6,14).rotateX(Math.PI/2).translate(0,.18,0),
+    ...[-.32,.32].map(x=>new T.TorusGeometry(.12,.028,5,9).rotateY(Math.PI/2).translate(x,-.06,0)),
+  ]);
+  create('altar',[
+    box(0,-.42,0,.94,.16,.91),box(0,-.21,0,.61,.28,.58),box(0,-.025,0,.82,.09,.77),
+    ...[-.27,.27].flatMap(x=>[-.25,.25].map(z=>new T.OctahedronGeometry(.12,0).scale(.72,1.65,.72).translate(x,.14,z))),
+    new T.OctahedronGeometry(.18,0).scale(.85,1.40,.85).translate(0,.21,0),
+  ]);
   create('candle',[
     new T.CylinderGeometry(.14,.14,.075,8).translate(0,-.45,0),
     new T.CylinderGeometry(.067,.077,.32,7).translate(0,-.27,0),

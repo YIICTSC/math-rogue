@@ -4,7 +4,8 @@ import {WIDTH,HEIGHT} from './engine';
 import {blockAt,playerHeight,voxelKey,voxelWater} from './voxel';
 import {lifePlayer,canAfford,type Bag} from './life';
 import {energyOf} from './energy';
-import {consumeFarm,farmBusy,farmOf} from './farm/model';
+import {consumeFarm,farmBusy,farmOf,summonFamiliar} from './farm/model';
+import {grant} from './activities';
 import {cropById} from './farm/catalog';
 import {terrainHeight} from './voxel';
 import {IMPRINTS,POTIONS,WORKSHOP_TOOLS,potionSeconds,type ExplorationPotion,type ToolImprint} from './explorationEquipment';
@@ -15,13 +16,17 @@ export type WorkshopAction={type:'voxel-craft';recipe:string;amount:number}|{typ
  | {type:'voxel-tools';tool:ToolKind;operation:'repair'|'clean'}
  | {type:'voxel-tools';tool:ToolKind;operation:'imprint';imprint:ToolImprint}
  | {type:'voxel-potion';item:ExplorationPotion}
- | {type:'voxel-bottle-honey'};
+ | {type:'voxel-bottle-honey'}
+ | {type:'voxel-summon'};
 export interface VoxelContainer{items:Bag}
 export function nearbyWorkshop(w:World,p:Adventurer,block:string){
  if(block==='workbench'&&cartWorkbench(w,p.id))return {x:p.x,y:Math.floor(playerHeight(w,p)),z:p.y};
  const feet=playerHeight(w,p),px=p.position3D?.x??p.x+.5,pz=p.position3D?.z??p.y+.5;
- for(let y=Math.floor(feet)-1;y<=Math.floor(feet)+2;y++)for(let z=Math.floor(pz)-3;z<=Math.floor(pz)+3;z++)for(let x=Math.floor(px)-3;x<=Math.floor(px)+3;x++)
-  if(Math.hypot(x+.5-px,y+.5-(feet+1),z+.5-pz)<=3.5&&blockAt(w,x,y,z)===block&&sandboxAllows(w,p.id,{x,y,z},'device'))return {x,y,z};
+ for(let y=Math.floor(feet)-1;y<=Math.floor(feet)+2;y++)for(let z=Math.floor(pz)-3;z<=Math.floor(pz)+3;z++)for(let x=Math.floor(px)-3;x<=Math.floor(px)+3;x++){
+  if(Math.hypot(x+.5-px,y+.5-(feet+1),z+.5-pz)>3.5)continue;
+  const found=blockAt(w,x,y,z);
+  if((found===block||block==='brew_table'&&found==='brew_cauldron')&&sandboxAllows(w,p.id,{x,y,z},'device'))return {x,y,z};
+ }
 }
 export const activeTools=(p:Adventurer):Partial<Record<ToolKind,ToolTier>>=>({...p.life?.tools,...(p.life?.pickaxe?{pickaxe:p.life.pickaxe}:{})});
 const repairMaterials:Record<ToolTier,VoxelItem>={stone:'stone',iron:'iron_ingot',steel:'steel',diamond:'diamond'};
@@ -46,10 +51,17 @@ export function applyWorkshop(w:World,p:Adventurer,a:WorkshopAction,now:number){
   lp.workshopAt=now;
   return tell('ハチミツを瓶に詰めました。');
  }
+ if(a.type==='voxel-summon'){
+  if(w.gameMode!=='COOP'||!nearbyWorkshop(w,p,'summoning_altar')||!summonFamiliar(w,p))return false;
+  lp.workshopAt=now;
+  return tell('ちびドラゴンが仲間になりました。');
+ }
  if(a.type==='voxel-potion'){
   if(w.gameMode!=='COOP'||!Object.hasOwn(POTIONS,a.item)||!lp.bag[a.item]||potionSeconds(w,p,a.item)>0)return false;
+  if(a.item==='heal_draught'&&(!p.profile||p.hp>=p.maxHp))return false;
   lp.bag[a.item]!--;
-  (lp.potionUntil??={})[a.item]=w.life.time+POTIONS[a.item].seconds;
+  if(a.item==='heal_draught')grant(p,{remove:[],cards:[],gold:0,heal:POTIONS.heal_draught.heal});
+  else (lp.potionUntil??={})[a.item]=w.life.time+POTIONS[a.item].seconds;
   lp.workshopAt=now;w.revision++;
   return true;
  }

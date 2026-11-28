@@ -13,6 +13,7 @@ import { legacyRegion } from './worldLandscape';
 import { sandboxAllows } from './sandboxAccess';
 import { occupiedByBoat } from './transport';
 import { recordBuildingEdit } from './buildingPhysics';
+import { REALMS, realmId, type RealmId } from './realmTerrain';
 
 export type MachineCell = { x: number; y: number; z: number };
 export type MachineMode = 'compare' | 'subtract';
@@ -21,6 +22,7 @@ export const NOTE_REPEATS = [0,1,2,3,4,6,8,12,16] as const;
 export type MachineCommand =
   | (MachineCell & { type: 'voxel-device'; command: 'use' | 'rotate' | 'piston-axis' | 'cart-ride' | 'cart-drive' | 'cart-stop' | 'cart-remove' | 'station-signal' | 'waygate-travel' })
   | (MachineCell & { type: 'voxel-device'; command: 'waygate-link'; value: string })
+  | (MachineCell & { type: 'voxel-device'; command: 'waygate-realm'; value: string })
   | (MachineCell & { type: 'voxel-device'; command: 'cart-place'; value?: CartItem })
   | (MachineCell & { type: 'voxel-device'; command: 'cart-cargo'; item: VoxelItem; direction: 'load' | 'unload'; amount: number })
   | (MachineCell & { type: 'voxel-device'; command: 'station-name'; value: string })
@@ -63,6 +65,7 @@ interface Device {
   vertical?: boolean;
   workTick?: number;
   waygate?: string;
+  realm?:RealmId;
 }
 type CartTimetable = { stops: string[]; dwellSeconds: number };
 interface Cart {
@@ -655,7 +658,7 @@ function updateDevice(w: World, state: MachineryState, work: CircuitWork, key: s
       const owner=w.voxels?.placedBy?.[key], target=offset(cell,horizontal[direction]);
       signal=rawInput();
       if (owner && signal && state.tick%4===0 && Math.abs(target.y-terrainHeight(w,target.x,target.z))<=1) {
-        changed=operateFarmMachine(w,owner,target.x,target.z,device.farmJob ?? 'harvest');
+        changed=operateFarmMachine(w,owner,target.x,target.z,device.farmJob ?? 'harvest',target.y);
         if (changed) device.workTick=state.tick;
       }
       break;
@@ -998,6 +1001,22 @@ export function applyMachineCommand(w: World, p: Adventurer, command: MachineCom
       if (!positionKey.test(command.value) || command.value===key || kindAt(w,command.value)!=='waygate' ||
         !sameOwner(w,command.value,p.id) || !sandboxAllows(w,p.id,fromKey(command.value),'device')) return false;
       device.waygate=command.value;
+      delete device.realm;
+      break;
+    }
+    case 'waygate-realm': {
+      if(w.dimensionId||w.gameMode!=='COOP'||!owner||kind!=='waygate'||!device)return false;
+      if(command.value===''){
+        if(!device.realm)return false;
+        delete device.realm;
+        break;
+      }
+      if(!realmId(command.value)||device.realm===command.value)return false;
+      const spec=REALMS[command.value];
+      if((lp.bag[spec.key]??0)<spec.toll)return false;
+      lp.bag[spec.key]!-=spec.toll;
+      device.realm=command.value;
+      delete device.waygate;
       break;
     }
     case 'waygate-travel': {
@@ -1252,6 +1271,7 @@ export function restoreMachinery(w: World) {
     if (block==='note_block'&&NOTE_REPEATS.some(period=>period===state.notePeriod)) device.notePeriod=state.notePeriod;
     if (block==='waygate'&&typeof state.waygate==='string'&&state.waygate!==key&&positionKey.test(state.waygate)&&
       voxels.edits[state.waygate]==='waygate'&&voxels.placedBy?.[state.waygate]===voxels.placedBy?.[key]) device.waygate=state.waygate;
+    if(block==='waygate'&&!w.dimensionId&&realmId(state.realm)&&!device.waygate)device.realm=state.realm;
     if (state.instrument && ['bell','wood','reed'].includes(state.instrument)) device.instrument = state.instrument;
     if (whole(state.played, 0, tick)) device.played = state.played;
     if (state.mode === 'compare' || state.mode === 'subtract') device.mode = state.mode;

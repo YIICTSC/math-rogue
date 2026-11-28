@@ -112,6 +112,19 @@ function icon(ctx: CanvasRenderingContext2D, w: World, x: number, y: number, z: 
       ctx.strokeStyle = device.beamColor??'#81fff0'; ctx.lineWidth = 1.2;
       ctx.strokeRect(-tile / 2, -tile / 2, tile, tile);
     }
+  } else if(block==='hydroponic_bed'){
+    ctx.fillStyle='#2c7180';
+    ctx.fillRect(-5,-5,10,10);
+    ctx.fillStyle='#91d7cf';
+    for(const line of [-3,0,3])ctx.fillRect(-5,line,10,1);
+  } else if(block==='brew_cauldron'||block==='summoning_altar'){
+    ctx.fillStyle='#243835';
+    ctx.beginPath();
+    if(block==='brew_cauldron')ctx.arc(0,0,5,0,Math.PI*2);
+    else{ctx.moveTo(0,-6);ctx.lineTo(5,0);ctx.lineTo(0,6);ctx.lineTo(-5,0);ctx.closePath();}
+    ctx.fill();
+    ctx.fillStyle=block==='brew_cauldron'?'#c6ca8a':'#efbded';
+    ctx.fillRect(-2,-2,4,4);
   } else {
     ctx.fillStyle = '#ffffff33';
     ctx.fillRect(-tile / 2 + 2, -tile / 2 + 2, tile - 4, 1);

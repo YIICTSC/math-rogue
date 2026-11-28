@@ -20,7 +20,7 @@ const server = await createServer({
         s.middlewares.use("/__network", (req, res) => {
           res.setHeader("Content-Type", "text/html");
           res.end(
-            '<html><body><script type="module">import{RpgRoom}from"/src/rpg/network.ts";window.RpgRoom=RpgRoom;</script></body></html>',
+            '<html><body><script type="module">import{RpgRoom}from"/src/rpg/network.ts";import{recordMachineEdit}from"/src/rpg/machinery.ts";window.RpgRoom=RpgRoom;window.recordMachineEdit=recordMachineEdit;</script></body></html>',
           );
         });
       },
@@ -285,6 +285,62 @@ try {
   console.log(
     "Invite setup normalization and delayed admission passed; 40 real WebRTC clients: native scene tokens, shared damage and replay protection, rewards/profile sync, capacity and disconnect passed.",
   );
+  const migration=await page.evaluate(async()=>{
+    const rooms=Array.from({length:3},()=>new window.RpgRoom(()=>{},()=>{}));
+    const [host,explorer,watcher]=rooms;
+    await host.create('First host',undefined,0);
+    await explorer.join(host.code,'Realm explorer');
+    await watcher.join(host.code,'Surface explorer');
+    window.migration={rooms,code:host.code};
+    host.send({type:'rpg-start'});
+    const w=host.world;
+    w.sites=w.sites.filter(site=>Math.abs(site.x-20)+Math.abs(site.y-20)>9);
+    w.voxels={revision:1,edits:{},placedBy:{},terrainVersion:2,legacyFlat:['20,20','20,19','20,21','21,21']};
+    for(const [key,block] of [['20,0,20','waygate'],['20,0,19','crystal_lever']]){
+      w.voxels.edits[key]=block;w.voxels.placedBy[key]=host.selfId;
+      window.recordMachineEdit(w,...key.split(',').map(Number),null,block);
+    }
+    for(const [member,x] of [[host,20],[explorer,21]]){
+      const p=w.players[member.selfId];p.x=x;p.y=21;p.position3D={x:x+.5,y:0,z:21.5,surface2D:true,layered2D:true};
+    }
+    w.players[host.selfId].life.bag.crystal_powder=6;
+    w.players[explorer.selfId].life.bag.wood=3;
+    host.send({type:'voxel-device',command:'waygate-realm',value:'geode',x:20,y:0,z:20});
+    return {former:host.selfId,traveler:explorer.selfId,watcher:watcher.selfId};
+  });
+  await page.waitForFunction(()=>window.migration.rooms[1].world.voxels?.machinery?.devices['20,0,20']?.realm==='geode');
+  await page.waitForFunction(()=>{
+    const host=window.migration.rooms[0];
+    return Date.now()-host.world.players[host.selfId].voxelDeviceAt>190;
+  });
+  await page.evaluate(()=>window.migration.rooms[0].send({type:'voxel-device',command:'use',x:20,y:0,z:19}));
+  await page.waitForFunction(()=>window.migration.rooms[2].world.voxels.machinery.devices['20,0,20'].signal===15);
+  await page.evaluate(()=>window.migration.rooms[1].send({type:'voxel-dimension',command:'enter',x:20,y:0,z:20}));
+  await page.waitForFunction(id=>window.migration.rooms[2].world.players[id]?.realm?.id==='geode',migration.traveler);
+  await page.evaluate(()=>window.migration.rooms[1].send({type:'voxel-place',block:'wood',x:32,y:2,z:51}));
+  await page.waitForFunction(()=>window.migration.rooms[2].world.realms?.geode?.voxels.edits['32,2,51']==='wood');
+  await page.evaluate(()=>window.migration.rooms[1].connections.get('host').close());
+  await page.waitForFunction(id=>{
+    const [host,guest]=window.migration.rooms;
+    return guest.connections.get('host')?.open&&host.world.players[id]?.realm?.id==='geode';
+  },migration.traveler);
+  await page.evaluate(()=>window.migration.rooms[0].close(false));
+  await page.waitForFunction(({former,traveler})=>{
+    const peers=window.migration.rooms.slice(1);
+    return peers.filter(room=>room.host).length===1&&peers.every(room=>room.world?.hostId!==former&&
+      room.world?.players[traveler]?.realm?.id==='geode'&&room.world.realms.geode.voxels.edits['32,2,51']==='wood');
+  },migration,{timeout:45_000});
+  await page.evaluate(()=>window.migration.rooms[1].send({type:'native-learning',correctAnswers:1}));
+  await page.waitForFunction(id=>window.migration.rooms[2].world.players[id]?.correctAnswers===1,migration.traveler);
+  await page.evaluate(async()=>{
+    const late=new window.RpgRoom(()=>{},()=>{});
+    await late.join(window.migration.code,'Late explorer');
+    window.migration.rooms.push(late);
+  });
+  await page.waitForFunction(()=>window.migration.rooms[3].world?.realms?.geode?.voxels.edits['32,2,51']==='wood');
+  await page.evaluate(()=>window.migration.rooms.forEach(room=>room.close(false)));
+  assert.deepEqual(errors, []);
+  console.log('PASS real WebRTC guest reconnect, host migration, namespace deltas, and joining by the original invitation after migration.');
 } finally {
   await browser.close();
   await server.close();
