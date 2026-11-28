@@ -45,19 +45,6 @@ export const isMiniGameUnlocked = (
 
 export const MINI_GAMES: MiniGameConfig[] = [
   {
-    id: 'PIXEL_RPG',
-    name: '知識の旅人と失われた世界',
-    titleLines: ['知識の旅人と', '失われた世界'],
-    description: '四人の仲間と、デッキとジョブを育てながら記憶を失う世界を旅するピクセルRPG。',
-    screen: GameScreen.MINI_GAME_PIXEL_RPG,
-    threshold: 0,
-    typeLabel: 'PIXEL RPG',
-    typeColor: 'bg-teal-900',
-    glowColor: 'rgba(220,190,119,0.50)',
-    icon: Compass,
-    clearAction: () => { void import('./mini-games/pixel-rpg/save').then(save => save.clearPixelRpgSaves()); },
-  },
-  {
     id: 'CARD_CLUB',
     name: 'トランプゲーム集',
     titleLines: ['トランプゲーム集'],
@@ -234,6 +221,19 @@ export const MINI_GAMES: MiniGameConfig[] = [
     glowColor: 'rgba(85,187,204,0.55)',
     icon: Plane,
     clearAction: () => { localStorage.removeItem(FLIGHT_LOG_KEY); localStorage.removeItem(FLIGHT_COMBAT_LOG_KEY); localStorage.removeItem(FLIGHT_ROUTE_LOG_KEY); },
+  },
+  {
+    id: 'PIXEL_RPG',
+    name: '知識の旅人と失われた世界',
+    titleLines: ['知識の旅人と', '失われた世界'],
+    description: '四人の仲間と、デッキとジョブを育てながら記憶を失う世界を旅するピクセルRPG。',
+    screen: GameScreen.MINI_GAME_PIXEL_RPG,
+    threshold: 5500,
+    typeLabel: 'PIXEL RPG',
+    typeColor: 'bg-teal-900',
+    glowColor: 'rgba(220,190,119,0.50)',
+    icon: Compass,
+    clearAction: () => { void import('./mini-games/pixel-rpg/save').then(save => save.clearPixelRpgSaves()); },
   },
   {
     id: 'SHOGI',
