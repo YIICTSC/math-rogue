@@ -209,8 +209,27 @@ try {
       return rect;
     });
   },saved.state);
-  assert(actionSources.every(rect=>rect?.[2]===64&&rect[3]===64),'Each battle action draws a decoded generated sprite');
+  assert(actionSources.every(rect=>rect?.[2]===64&&rect[3]>=32&&rect[3]<=61),'Each action draws only the visible height of its decoded sprite');
   assert.equal(new Set(actionSources.map(rect=>rect.join(','))).size,3,'Attack, skill and damage use different crops in Akari’s Guardian outfit');
+  const poseHeights=await page.evaluate(async()=>{
+    const {illustration}=await import('/src/mini-games/pixel-rpg/art.ts');
+    const {drawBattleActor,preloadBattleActionArt}=await import('/src/mini-games/pixel-rpg/battleActionArt.ts');
+    const hero='magic-ren', job='beast', source=illustration(hero,job);
+    await preloadBattleActionArt(hero).decode();
+    const canvas=document.createElement('canvas');canvas.width=192;canvas.height=96;
+    const ctx=canvas.getContext('2d');
+    drawBattleActor(ctx,hero,job,source,96,72,1,undefined,.5,true);
+    const standing=new Image();standing.src=source;await standing.decode();
+    return [undefined,'attack','skill','damage'].map(action=>{
+      ctx.clearRect(0,0,192,96);
+      if(!drawBattleActor(ctx,hero,job,source,96,72,1,action,.5,true))throw new Error('Sprite is not decoded');
+      const pixels=ctx.getImageData(0,0,192,96).data;
+      const rows=Array.from({length:96},(_,y)=>y).filter(y=>Array.from({length:192},(_,x)=>pixels[(y*192+x)*4+3]).some(a=>a>=128));
+      return [rows.at(-1)-rows[0]+1,rows.at(-1)];
+    });
+  });
+  assert(poseHeights.every(([height,foot])=>Math.abs(height-poseHeights[0][0])<=1&&foot===poseHeights[0][1]),
+    `The wide attack and other action poses match the standing height and foot line: ${JSON.stringify(poseHeights)}`);
   await layout('.pr-arena');await layout('.pr-endturn');
   await shot('06-battle-phone');
   await button(/^(連携|Link)$/).click();
@@ -376,15 +395,42 @@ try {
   await battleReady();
   let secondPhase=false;
   for(let round=0;round<16&&!await page.locator('.pr-outcome').count();round++){
-    const n=await page.locator('.pr-unit-ally:enabled').count();
+    if(await page.locator('.pr-link-ready').count()){
+      await page.locator('.pr-link-ready').click();
+      await page.getByRole('button',{name:/旅路の呼吸|On the Same Road/}).click();
+      await combatInputReady();
+    }
+    const allies=page.locator('.pr-unit-ally');
+    const n=await allies.count();
     for(let a=0;a<n&&!await page.locator('.pr-outcome').count();a++){
-      const ally=page.locator('.pr-unit-ally:enabled').nth(a);
-      if(!await ally.count())break;
+      const ally=allies.nth(a);
+      if(await ally.isDisabled())continue;
       await ally.click();
+      const health=async member=>(await member.locator('div > span').first().innerText()).match(/(\d+)\/(\d+)/).slice(1).map(Number);
+      const [hp,max]=await health(ally);
+      const down=allies.filter({has:page.locator('div > span:first-child').filter({hasText:/^\s*0\//})}).first();
+      if(hp<max*.70||await down.count()){
+        const revive=await down.count()>0;
+        await page.locator('.pr-battle-actions').getByRole('button',{name:/^(道具|Items)$/}).click();
+        const supply=dialog().getByRole('button',{name:revive?/夜明けの雫|Dawndew/:/旅の薬|Travel Tonic/});
+        if(await supply.isEnabled()){
+          await supply.click();
+          await (revive?down:ally).click();
+          await combatInputReady();
+          if(!await ally.evaluate(node=>node.classList.contains('pr-unit-selected')))await ally.click();
+        }else await dialog().locator('button[data-pr-close]').click();
+      }
       for(let c=0;c<4&&!await page.locator('.pr-outcome').count();c++){
-        const hand=page.locator('.pr-hand-card[aria-disabled="false"]').filter({hasText:/威力|Power/});
-        if(!await hand.count())break;
-        await hand.first().click();
+        if(!await ally.evaluate(node=>node.classList.contains('pr-unit-selected')))break;
+        const available=page.locator('.pr-hand-card[aria-disabled="false"]');
+        const attack=available.filter({hasText:/威力|Power/}).first();
+        const guard=available.filter({hasText:/防御|Block/}).first();
+        const threat=await page.locator('.pr-intent em').allTextContents();
+        const name=await ally.getAttribute('aria-label');
+        const defend=c===0&&hp<max*.66&&threat.some(target=>target===name||/味方全体|All travelers/.test(target));
+        const card=defend&&await guard.count()?guard:await attack.count()?attack:undefined;
+        if(!card)break;
+        await card.click();
         await combatInputReady();
         if(!secondPhase&&(await page.locator('.pr-combat-top').innerText()).match(/第二形態|Second phase/)){
           secondPhase=true;await shot('12-boss-phase-two');

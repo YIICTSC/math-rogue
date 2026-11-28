@@ -168,13 +168,15 @@ export default function BattleScreen({battle,actor,setActor,onCommand,onStudy,on
       </div>
       {alive.map((e,index)=>{
         const aimed=e.id===aimedEnemy, highlighted=preview==='foes'||aimed&&preview==='foe', target=HEROES[e.target];
+        const partyAttack=e.intent==='charge'&&e.spec.boss&&e.phase===2;
         const slot=animation?.enemyOrder?.indexOf(e.id)??index;
         return <button key={e.id} style={positionStyle('enemy',slot<0?index:slot)} className={`pr-unit pr-unit-enemy ${aimed?'pr-enemy-aimed':''} ${highlighted?'pr-target':''}`}
           aria-pressed={aimed} onClick={()=>{setEnemyCursor(e.id);setPreview(undefined);}} aria-label={l(e.spec.name)} disabled={inactive||!!item}>
           {aimed&&<span className="pr-enemy-cursor" aria-hidden="true"><ChevronDown size={17} /></span>}
           <b>{e.spec.part?'◇ ':''}{l(e.spec.name)}</b><Meter value={e.hp} max={e.max} className="pr-meter-red" />
           <small>{e.hp}/{e.max}{e.block>0&&` · ◈${e.block}`} · {l(elementLabel(e.weakness))}</small>
-          <span className="pr-intent">{e.intent==='charge'&&<Flame size={11}/>} {l(describeIntent(e))}{target&&['attack','charge','venom','seal','jam'].includes(e.intent)&&!(e.intent==='charge'&&e.spec.boss&&e.phase===2)&&<em>{l(target.name)}</em>}</span>
+          <span className="pr-intent">{e.intent==='charge'&&<Flame size={11}/>} {l(describeIntent(e))}
+            {partyAttack?<em>{t('味方全体','All travelers')}</em>:target&&['attack','charge','venom','seal','jam'].includes(e.intent)&&<em>{l(target.name)}</em>}</span>
         </button>;
       })}
       {battle.party.map((p,index)=>{

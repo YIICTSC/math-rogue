@@ -1,6 +1,7 @@
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import sharp from 'sharp';
+import { writeActionExtents } from './measure-action-frames.mjs';
 
 const [source, groupsPath, rosterPath, standingPath, out, registryPath] = process.argv.slice(2);
 if(!registryPath)throw Error('Expected source, groups, roster, standing reference, output folder and registry file');
@@ -210,7 +211,9 @@ for(const [hero,jobArt] of poses){
     .composite(tiles).webp({quality:87,alphaQuality:100,smartSubsample:true}).toFile(join(out,file));
   actors[hero]={file,costumes};
 }
-await writeFile(registryPath,JSON.stringify({frameWidth:size,frameHeight:size,columns,actors},null,2)+'\n');
+const registry={frameWidth:size,frameHeight:size,columns,actors};
+await writeFile(registryPath,JSON.stringify(registry,null,2)+'\n');
+await writeActionExtents(out,registry,join(dirname(registryPath),'generatedActionExtents.json'));
 
 const akari=await readImage(standingPath);
 const cleaned=join(out,'akari-standing');

@@ -1,6 +1,7 @@
 import type { Pulse } from './battle';
 import { assetUrl } from '../../utils/assetPaths';
 import registry from './generatedBattleArt.json';
+import extents from './generatedActionExtents.json';
 
 export const BATTLE_ACTIONS = ['attack','skill','damage'] as const;
 export type BattleAction = typeof BATTLE_ACTIONS[number];
@@ -8,6 +9,7 @@ type ActorAtlas={file:string;costumes:Record<string,Partial<Record<BattleAction,
 const actors=new Map(Object.entries(registry.actors) as [string,ActorAtlas][]);
 const sheets = new Map<string,HTMLImageElement>();
 const standing = new Map<string, HTMLImageElement>();
+const verticalBounds:Readonly<Record<string,readonly (readonly number[])[]>>=extents;
 
 export function battleActionForActor(pulses:readonly Pulse[],id:string,limit=false):BattleAction|undefined {
   if(pulses.some(p=>p.to===id&&(p.value??0)>0&&(p.art==='hit'||p.art==='status')))return 'damage';
@@ -19,6 +21,15 @@ export function battleActionForActor(pulses:readonly Pulse[],id:string,limit=fal
 
 export function actionFrame(id:string,job:string,action:BattleAction):number|undefined {
   return actors.get(id)?.costumes[job]?.[action];
+}
+
+export function actionFrameBounds(id:string,index:number){
+  const atlas=actors.get(id);
+  if(!atlas)return;
+  const bounds=verticalBounds[atlas.file]?.[index];
+  if(!bounds)return;
+  const [top,bottom]=bounds;
+  return {top,height:bottom-top};
 }
 
 export function preloadBattleActionArt(id:string) {
@@ -40,7 +51,8 @@ export function drawBattleActor(c:CanvasRenderingContext2D,id:string,job:string,
   const width=registry.frameWidth,height=registry.frameHeight;
   const index=action?actionFrame(id,job,action):undefined;
   const sheet=preloadBattleActionArt(id);
-  const direct=index!==undefined&&sheet?.complete&&sheet.naturalWidth>0;
+  const frame=index!==undefined?actionFrameBounds(id,index):undefined;
+  const direct=!!frame&&sheet?.complete&&sheet.naturalWidth>0;
   let portrait=standing.get(source);
   if(!portrait){
     if(standing.size>=96)standing.delete(standing.keys().next().value!);
@@ -63,8 +75,9 @@ export function drawBattleActor(c:CanvasRenderingContext2D,id:string,job:string,
   }
   const dh=Math.ceil(44*scale);
   if(direct){
-    const dw=Math.ceil(dh*width/height);
-    c.drawImage(sheet!,index!%registry.columns*width,Math.floor(index!/registry.columns)*height,width,height,Math.round(-dw/2),-dh,dw,dh);
+    // Match the visible standing height rather than the height of the padded atlas cell.
+    const dw=Math.ceil(dh*width/frame.height);
+    c.drawImage(sheet!,index!%registry.columns*width,Math.floor(index!/registry.columns)*height+frame.top,width,frame.height,Math.round(-dw/2),-dh,dw,dh);
   }else{
     const dw=Math.ceil(dh*portrait.naturalWidth/portrait.naturalHeight);
     c.drawImage(portrait,Math.round(-dw/2),-dh,dw,dh);

@@ -12,7 +12,7 @@ try{
     stdin:{contents:`
       export * from './src/mini-games/pixel-rpg/adventure';
       export * from './src/mini-games/pixel-rpg/battle';
-      export { BATTLE_ACTIONS, actionFrame, battleActionForActor } from './src/mini-games/pixel-rpg/battleActionArt';
+      export { BATTLE_ACTIONS, actionFrame, actionFrameBounds, battleActionForActor } from './src/mini-games/pixel-rpg/battleActionArt';
       export { resolveBattleVoice } from './src/mini-games/pixel-rpg/battleVoice';
       export { guestSpriteUrl } from './src/mini-games/pixel-rpg/guestArt';
       export { TOWN_SHOPS } from './src/mini-games/pixel-rpg/towns';
@@ -90,6 +90,8 @@ try{
     const frames=m.JOB_LIST.flatMap(job=>m.BATTLE_ACTIONS.map(art=>{
       const frame=m.actionFrame(hero.id,job.id,art);
       assert(Number.isInteger(frame),`${hero.id}/${job.id} missing ${art}`);
+      const bounds=m.actionFrameBounds(hero.id,frame);
+      assert(bounds?.height>=32&&bounds.top>=0&&bounds.top+bounds.height<=64,`${hero.id}/${job.id}/${art} has invalid height metadata`);
       return frame;
     }));
     assert.equal(new Set(frames).size,frames.length,`${hero.id} reuses an action frame`);
@@ -277,7 +279,6 @@ try{
       for(const actor of state.party){
         for(let n=0;n<6&&!b.outcome;n++){
           const p=m.fighter(b,actor);if(!p)break;
-          const ally=b.party.slice().sort((x,y)=>x.hp/x.max-y.hp/y.max).find(x=>x.hp>0);
           const down=b.party.find(x=>x.hp<=0);
           if(down&&b.items.dew>0&&p.freeItem)b=m.battleItem(b,'dew',actor,down.id);
           if(p.hp/p.max<.5&&b.items.tonic>0&&p.freeItem)b=m.battleItem(b,'tonic',actor,p.id);
@@ -289,18 +290,22 @@ try{
             combo=true;
             if(b.outcome)break;
           }
-          if(p.limit>=m.LIMIT_MAX){
-            b=m.useLimit(b,p.id,enemy.id);
+          if(m.fighter(b,actor)?.limit>=m.LIMIT_MAX){
+            b=m.useLimit(b,p.id,m.cursorTarget(b,p.id,m.HEROES[p.id].limit.target,m.living(b)[0].id));
             if(b.outcome)break;
           }
+          const active=m.fighter(b,actor);
+          if(!active)break;
+          const ally=b.party.filter(x=>x.hp>0).sort((x,y)=>x.hp/x.max-y.hp/y.max)[0];
           const score=card=>{
             const resolved=m.inspect(card);
             return resolved.parts.reduce((sum,x)=>sum+(x.skill.damage??0)*(x.skill.repeats??1)+(x.skill.heal&&ally.hp/ally.max<.64?28:0)+
               (x.skill.block??0)*.32+(x.skill.poison??0)*1.6+(x.skill.draw??0)*1.5,0);
           };
-          const card=m.fighter(b,actor)?.hand.filter(c=>m.canPlay(b,m.fighter(b,actor),c)).sort((a,b)=>score(b)-score(a))[0];
+          const card=active.hand.filter(c=>m.canPlay(b,active,c)).sort((a,b)=>score(b)-score(a))[0];
           if(!card)break;
-          const target=m.inspect(card).target==='ally'?ally.id:enemy.id;
+          const type=m.inspect(card).target;
+          const target=m.cursorTarget(b,actor,type,m.living(b).slice().sort((x,y)=>x.hp-y.hp)[0].id,type==='ally'?ally.id:undefined);
           const next=m.playCard(b,actor,card.id,target);
           assert(next!==b);
           phase||=next.enemies.some(e=>e.phase===2);
@@ -310,10 +315,11 @@ try{
       if(!b.outcome)b=m.endTurn(b);
     }
     assert.equal(b.outcome,'win',`Could not win r${encounter.region} ${encounter.boss} with study=${useStudy}. Last turns: ${JSON.stringify(b.history.slice(0,5))}`);
+    const itemsUsed=Object.keys(b.items).reduce((sum,id)=>sum+state.items[id]-b.items[id],0);
     state={...state,items:b.items,rng:b.rng};
-    return {reward:m.completeBattle(state,encounter,m.victory(b)),phase,combo};
+    return {reward:m.completeBattle(state,encounter,m.victory(b)),phase,combo,turns:b.turn,itemsUsed};
   }
-  let fights=0,phases=0,links=0;
+  let fights=0,phases=0,links=0,bossSupplies=0;
   const run=(e,withStudy=false)=>{
     const win=finishBattle(s,e,withStudy);
     s=win.reward.state; fights++;phases+=Number(win.phase);links+=Number(win.combo);
@@ -364,6 +370,8 @@ try{
     const boss=event.effect;
     assert.equal(boss.type,'battle');
     const win=run(boss.encounter);
+    assert(win.phase&&win.turns>=4&&win.turns<=12,`Chapter ${region+1} must leave time to respond to both phases`);
+    bossSupplies+=win.itemsUsed;
     if(region===5)assert.equal(win.reward.effect.type,'ending');
     assert.equal(s.stage,region+1);
     const checkpoint=m.recover(s);
@@ -383,6 +391,7 @@ try{
     assert.equal(s.map,m.mapId(region+1,0));
   }
   assert(s.ending&&s.stage===7);
+  assert(bossSupplies>=8,'The normal campaign uses supplies to survive the guardian battles');
   assert(fights>=20&&phases>=5&&links>=7);
   assert(featured.size>=6);
   assert.equal(m.newAdventure(s.leader,123,{},s).cycle,1);

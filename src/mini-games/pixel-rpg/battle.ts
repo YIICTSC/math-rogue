@@ -26,27 +26,30 @@ const PATTERNS: Intent[][][] = [
   [['venom','heal'],['ward','mirror','charge'],['seal','venom','attack'],['shift','charge','summon']],
 ];
 const BOSS_PHASES: [Species,Intent[],Intent[],Element,string][] = [
-  ['lantern',['ward','attack','charge'],['mirror','charge','attack'],'storm','#cfa666'],
-  ['machine',['summon','ward','charge'],['jam','attack','seal','charge'],'storm','#b69066'],
-  ['drake',['shift','mirror','attack'],['shift','charge','venom','attack'],'dark','#9b92f2'],
-  ['squid',['venom','seal','attack'],['venom','heal','charge','jam'],'storm','#59c2b3'],
-  ['roc',['ward','shift','charge'],['charge','seal','summon','charge'],'ice','#6ba7df'],
-  ['book',['summon','jam','mirror','charge'],['shift','charge','seal','venom','charge'],'light','#c697de'],
-  ['machine',['shift','summon','jam','charge'],['mirror','charge','heal','charge','seal'],'fire','#e4c38d'],
+  ['lantern',['attack','ward','charge'],['charge','mirror','attack'],'storm','#cfa666'],
+  ['machine',['summon','attack','charge','ward'],['charge','jam','attack','charge'],'storm','#b69066'],
+  ['drake',['shift','attack','charge','mirror'],['charge','shift','venom','charge'],'dark','#9b92f2'],
+  ['squid',['attack','venom','charge','seal'],['charge','venom','heal','charge'],'storm','#59c2b3'],
+  ['roc',['attack','shift','charge','ward'],['charge','seal','summon','charge'],'ice','#6ba7df'],
+  ['book',['summon','attack','charge','mirror'],['charge','shift','venom','charge','seal'],'light','#c697de'],
+  ['machine',['attack','summon','charge','shift'],['charge','mirror','charge','heal','seal'],'fire','#e4c38d'],
 ];
+// Tuned independently against the party's expected progression through each chapter.
+const BOSS_STATS = [[295,22],[465,33],[605,39],[745,47],[835,54],[1030,59],[1225,67]] as const;
 const COLORS=['#8cbd6c','#c8ae77','#a78ed4','#65b9b6','#a0c9e1','#947a9f','#edb98b'];
 const WEAKNESSES: Element[]=['fire','storm','dark','storm','ice','light','fire'];
 export const FOES: Record<string,Enemy> = Object.fromEntries(REGIONS.flatMap((r,i)=>{
   const [art,first,second,weakTo,color]=BOSS_PHASES[i];
   const regular=FOE_NAMES[i].map((name,j):Enemy=>({
-    id:`r${i}foe${j}`,name,region:i,hp:16+i*8+j*4,power:5+i*3+j,first:PATTERNS[i][j],
+    id:`r${i}foe${j}`,name,region:i,hp:20+i*10+j*5,power:7+i*4+j,first:PATTERNS[i][j],
     weakTo:j===2?'light':WEAKNESSES[i],color:COLORS[i],art:SPECIES[i][j],
   }));
-  regular.push({id:`r${i}boss`,name:r.boss,region:i,hp:94+i*52,power:9+i*4,first,second,weakTo,color,art,boss:true});
+  const [hp,power]=BOSS_STATS[i];
+  regular.push({id:`r${i}boss`,name:r.boss,region:i,hp,power,first,second,weakTo,color,art,boss:true});
   if(i>=2)regular.push({id:`r${i}part`,name:[
     ['','','反照竜の鏡片','深潮の小鐘','災翼の張り弦','忘却機関の制御書','星喰いの星砂'][i],
     ['','','Drake’s Mirror Scale','Undertone Bell','Cloudstring Rig','Engine’s Control Volume','Star-Eater’s Crown'][i],
-  ],region:i,hp:30+i*9,power:5+i*2,first:['ward','seal','attack'],weakTo:i%2===0?'storm':'wind',color,art:i===3?'lantern':i===5?'book':'sentinel',part:true});
+  ],region:i,hp:36+i*11,power:7+i*3,first:['ward','seal','attack'],weakTo:i%2===0?'storm':'wind',color,art:i===3?'lantern':i===5?'book':'sentinel',part:true});
   return regular.map(enemy=>[enemy.id,enemy]);
 }));
 export type Status = { block:number; poison:number; weak:number; expose:number; reflect:number; power:number; sealed:number; };
@@ -432,7 +435,7 @@ function actEnemy(b:Battle,e:Opponent){
   if(!target)return;
   if(e.intent==='attack')hitParty(b,e,target,1,'steel');
   if(e.intent==='charge'){
-    if(e.spec.boss&&e.phase===2){for(const p of b.party.filter(ALIVE))hitParty(b,e,p,.85,'dark');}
+    if(e.spec.boss&&e.phase===2){for(const p of b.party.filter(ALIVE))hitParty(b,e,p,.98+e.spec.region*.02,'dark');}
     else hitParty(b,e,target,1.8,'steel');
   }
   if(e.intent==='ward'){e.block=Math.min(30,e.block+e.spec.power+4);animate(b,e.id,'block','ice');}
