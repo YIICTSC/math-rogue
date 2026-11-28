@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext,useState} from 'react';
 import {Capacitor} from '@capacitor/core';
 import {assetUrl} from '../../utils/assetPaths';
 import {normalizeRoomInput} from '../../services/onlineTransport';
@@ -9,10 +9,13 @@ import {CARD_CLUB_ROOM_CAPACITY,clubSeatsFor,recommendedClubGames} from './lobby
 import {CARD_CLUB_HEROES,type ClubLobby} from './session';
 import {LADDER_RULES,ladderOptions,type LadderOptions} from './ladderOptions';
 import {cardClubInviteCode,cardClubInviteUrl,normalizeCardClubCode} from './invite';
+import {LocalTablePortraits} from '../shared/localTableMatch';
 
 type Copy = (jp:string,en:string)=>string;
 
 export function Face({hero}:{hero:string}){
+  const portrait=useContext(LocalTablePortraits)[hero];
+  if(portrait)return <span className="cc-face cc-face-guest" aria-hidden="true">{portrait}</span>;
   return <span className="cc-face" aria-hidden="true" style={{backgroundImage:`url("${assetUrl(`sprites/after-school-poker/portraits/${hero}.webp`)}")`}}/>;
 }
 

@@ -23,6 +23,7 @@ import { copyInviteUrl } from '../shared/copyInviteUrl';
 import { tableRoomCode, tableInviteUrl } from '../shared/tableInvite';
 import { classicTableCall } from './declarations';
 import { useTableVoice } from '../shared/useTableVoice';
+import { duelResult, type LocalTableMatch } from '../shared/localTableMatch';
 import { TableBoard } from './Boards';
 import { RulesText, Tutorial } from './Tutorial';
 import { tableArt } from './Pieces';
@@ -185,15 +186,16 @@ function Seats({ view: v, language }: { view: TableView; language: LanguageMode 
 export default function TraditionalGames({
   onBack,
   languageMode = 'JAPANESE',
-}: MiniGameComponentProps) {
+  localMatch,
+}: Pick<MiniGameComponentProps, 'onBack' | 'languageMode'> & {localMatch?: LocalTableMatch<TableGame>}) {
   const l = (ja: string, en: string, kana?: string) => say(languageMode, [ja, en, kana]);
   const [inviteCode] = useState(() =>
-    OFFLINE_DISTRIBUTABLE ? '' : traditionalInviteCode(location.href),
+    localMatch || OFFLINE_DISTRIBUTABLE ? '' : traditionalInviteCode(location.href),
   );
   const [page, setPage] = useState<'title' | 'select' | 'host' | 'join' | 'tutorial'>(
-    inviteCode ? 'join' : 'title',
+    localMatch ? 'select' : inviteCode ? 'join' : 'title',
   );
-  const [game, setGame] = useState<TableGame | null>(null);
+  const [game, setGame] = useState<TableGame | null>(localMatch?.game ?? null);
   const [dominoPickerOpen, setDominoPickerOpen] = useState(false);
   const dominoPickerHeading = useRef<HTMLHeadingElement>(null);
   const [hero, setHero] = useState(() => {
@@ -205,7 +207,7 @@ export default function TraditionalGames({
   });
   const [name, setName] = useState(() => l('プレイヤー', 'Player', 'プレイヤー'));
   const [code, setCode] = useState(inviteCode);
-  const [count, setCount] = useState(4);
+  const [count, setCount] = useState(localMatch ? 2 : 4);
   const [dominoCategory, setDominoCategory] = useState<DominoCategory | 'all'>('all');
   const [beginnerOnly, setBeginnerOnly] = useState(false);
   const [dominoSort, setDominoSort] = useState<'level' | 'category' | 'name'>('level');
@@ -224,7 +226,7 @@ export default function TraditionalGames({
   const event = current?.event;
   const classicCall = !current?.declarations && classicTableCall(event);
   useTableVoice(
-    current
+    current && !localMatch
       ? {
           ...current,
           hero: current.players[current.self].hero,
@@ -237,13 +239,29 @@ export default function TraditionalGames({
       : null,
   );
 
-  useEffect(() => () => room.current?.close(), []);
+  useEffect(() => {
+    if (!localMatch) return () => room.current?.close();
+    let settled = false;
+    const active = new TraditionalRoom((next) => {
+      if (room.current !== active) return;
+      setPacket(next);
+      if (settled || next.phase !== 'game' || next.view.phase !== 'result') return;
+      settled = true;
+      localMatch.onResult(duelResult(next.view.winners, next.view.self));
+    }, setError);
+    room.current = active;
+    void audioService.preloadTraditionalSounds();
+    active.practice(localMatch.player);
+    active.configure(localMatch.game, 2);
+    active.start(localMatch.opponent);
+    return () => { room.current = null; active.close(); };
+  }, [localMatch]);
   useEffect(() => {
     if (dominoPickerOpen) dominoPickerHeading.current?.focus();
   }, [dominoPickerOpen]);
   useEffect(
-    () => audioService.acquireBgmScene(current ? 'poker_play' : 'poker_shop', undefined, 24),
-    [!!current],
+    () => localMatch ? undefined : audioService.acquireBgmScene(current ? 'poker_play' : 'poker_shop', undefined, 24),
+    [!!current, localMatch],
   );
 
   function chooseHero(id: string) {
@@ -323,10 +341,11 @@ export default function TraditionalGames({
     setError('');
     setRules(false);
     setDominoPickerOpen(false);
-    if (inviteCode) onBack();
+    if (localMatch || inviteCode) onBack();
     else setPage('title');
   }
   function back() {
+    if (localMatch) { onBack(); return; }
     if (dominoPickerOpen) {
       setDominoPickerOpen(false);
       return;
@@ -592,9 +611,9 @@ export default function TraditionalGames({
       ) : (
         <>
           <header className="tt-nav">
-            <button onClick={back}>
+            <button onClick={back} data-gamepad-back={localMatch?true:undefined}>
               <ArrowLeft size={18} />
-              {l('戻る', 'Back', 'もどる')}
+              {localMatch?l('民家へ戻る','Return to the house','みんかへ もどる'):l('戻る', 'Back', 'もどる')}
             </button>
             {dominoPickerOpen ? (
               <h1 ref={dominoPickerHeading} tabIndex={-1}>

@@ -1,5 +1,6 @@
 import { FEATURES, REGIONS, SERVICES, type Climate, type Copy, type Feature, type Service, type Vehicle } from './campaign';
 import { DUNGEON_HEIGHT, DUNGEON_LAYOUTS, DUNGEON_WIDTH } from './dungeonLayouts';
+import { HOUSE_INTERIORS, SHOP_INTERIORS, type FurniturePiece, type HouseGame } from './interiors';
 import { TOWN_SHOPS, townProfile, type TownNpc } from './towns';
 
 export type Point = { x: number; y: number };
@@ -16,11 +17,13 @@ export function noise(x: number,y: number,seed = 0) {
 }
 
 export const enum Tile { Deep, Sea, Shallow, Sand, Grass, Flowers, Forest, Rock, Hill, Path, Wood, Stone, Wall, Cave, Bridge, Ice, Water, Trap, Void, Hidden, Carpet, Rotor, Waterfall }
-export type Kind = 'site' | 'door' | 'exit' | 'keeper' | 'resident' | 'recruit' | 'service' | 'chest' | 'seal' | 'feature' | 'gate' | 'stairs' | 'enemy' | 'boss' | 'shortcut' | 'rock' | 'plate' | 'secret' | 'trial' | 'camp' | 'sign';
+export type Kind = 'site' | 'door' | 'exit' | 'keeper' | 'resident' | 'recruit' | 'service' | 'chest' | 'seal' | 'feature' | 'gate' | 'stairs' | 'enemy' | 'boss' | 'shortcut' | 'rock' | 'plate' | 'secret' | 'trial' | 'camp' | 'sign' | 'house-game';
 export type Landmark = Point & { id: string; label: Copy; kind: Kind; link?: string; destination?: Point; feature?: Feature; service?: Service; variant?: number; npc?: TownNpc; portrait?: string };
 export type Area = {
   id: string; region: number; name: Copy; climate: Climate; place: 'world'|'town'|'indoors'|'wild'|'dungeon';
   width: number; height: number; tiles: Uint8Array; start: Point; points: Landmark[];
+  furniture?: readonly FurniturePiece[];
+  houseGame?: HouseGame;
 };
 const EXIT: Copy = ['外へ出る','Leave'];
 const CAMP: Copy = ['道中の灯火','Wayfarer’s Lamp'];
@@ -49,6 +52,9 @@ function createArea(id: string, region: number, name: Copy, place: Area['place']
   return { id,region,name,place,climate:REGIONS[region]?.climate??'meadow',width,height,tiles:new Uint8Array(width*height).fill(initial),start,points:[] };
 }
 export const tileAt = (a: Area, p: Point): Tile => p.x>=0&&p.y>=0&&p.x<a.width&&p.y<a.height ? a.tiles[p.y*a.width+p.x] : Tile.Void;
+export function furnitureAt(a: Area, p: Point) {
+  return a.furniture?.find(([,x,y,width=1,height=1])=>p.x>=x&&p.x<x+width&&p.y>=y&&p.y<y+height);
+}
 function stamp(area: Area, p: Point,tile:Tile) { if (p.x>=0 && p.y>=0 && p.x<area.width && p.y<area.height) area.tiles[p.y*area.width+p.x]=tile; }
 function rectangle(area: Area,left: number,top: number,width: number,height: number,tile: Tile) {
   for(let y=top;y<top+height;y++) for(let x=left;x<left+width;x++) stamp(area,{x,y},tile);
@@ -122,7 +128,8 @@ function makeTown(region: number,site: number,id: string,name:Copy) {
     rectangle(a,cx-2,cy-2,5,4,Tile.Wall);
     stamp(a,{x:cx,y:cy+1},Tile.Wood);
     stamp(a,{x:cx,y:cy+2},Tile.Path);
-    thing(a,service,'door',cx,cy+1,SERVICES[service],{link:`${id}/${service}`,service,variant:index});
+    const label=service==='home'?HOUSE_INTERIORS[`${region}:${site}`].name:SERVICES[service];
+    thing(a,service,'door',cx,cy+1,label,{link:`${id}/${service}`,service,variant:index});
   });
   const r=REGIONS[region];
   const locals=townProfile(region,site);
@@ -136,17 +143,27 @@ function makeTown(region: number,site: number,id: string,name:Copy) {
 }
 
 function makeInterior(region: number,site: number,id: string, service: Service): Area {
-  const a=createArea(id,region,SERVICES[service],'indoors',17,12,Tile.Wall,{x:8,y:9});
-  rectangle(a,2,2,13,8,service==='library'||service==='guild'||service==='armory'?Tile.Stone:Tile.Wood);
-  rectangle(a,6,4,5,4,Tile.Carpet);
-  thing(a,service,'service',8,4,SERVICES[service],{service});
-  const resident=townProfile(region,site).rooms[service];
-  thing(a,'resident','resident',12,5,resident.name,{npc:resident});
+  const house=service==='home'?HOUSE_INTERIORS[`${region}:${site}`]:undefined;
+  const shop=service==='home'?undefined:SHOP_INTERIORS[service];
+  const plan=house??shop!;
+  const a=createArea(id,region,house?.name??SERVICES[service],'indoors',17,12,Tile.Wall,{x:8,y:9});
+  a.furniture=house?[...plan.furniture,house.game.table]:plan.furniture;
+  a.houseGame=house?.game;
+  rectangle(a,2,2,13,8,plan.floor==='stone'?Tile.Stone:Tile.Wood);
+  for(const patch of plan.rugs??[])rectangle(a,...patch,Tile.Carpet);
+  for(const patch of plan.walls??[])rectangle(a,...patch,Tile.Wall);
+  if(shop)thing(a,service,'service',...shop.counter,SERVICES[service],{service});
+  const originalResident=townProfile(region,site).rooms[service];
+  const resident=house?{...originalResident,portrait:house.portrait}:originalResident;
+  thing(a,'resident','resident',...plan.resident,resident.name,{npc:resident});
   thing(a,'exit','exit',8,10,EXIT,{link:mapId(region,site)});
   stamp(a,{x:8,y:10},Tile.Wood);
-  for(const x of [3,13]) { stamp(a,{x,y:3},Tile.Wall);stamp(a,{x,y:7},Tile.Wall); }
-  if(service==='guild')thing(a,'job-trial','trial',12,7,['奥の演習場','Guild training ground'],{variant:2});
-  if(service==='home') thing(a,'cupboard','secret',3,3,['鏡台の脇の小箱','Box beside the dresser']);
+  if(shop?.trial)thing(a,'job-trial','trial',...shop.trial,['奥の演習場','Guild training ground'],{variant:2});
+  if(house){
+    thing(a,'cupboard','secret',...house.keepsake,['家の小箱','Household keepsake']);
+    const [,x,y,,height=1]=house.game.table;
+    thing(a,'game','house-game',x,y+height-1,house.game.name);
+  }
   return a;
 }
 

@@ -21,6 +21,12 @@ try{
       export * from './src/mini-games/pixel-rpg/save';
       export * from './src/mini-games/pixel-rpg/world';
       export * from './src/mini-games/pixel-rpg/music';
+      export * from './src/mini-games/pixel-rpg/houseFurniture';
+      export { definition as cardGame } from './src/mini-games/card-club/catalog';
+      export { ClubSession } from './src/mini-games/card-club/session';
+      export { seatsFor } from './src/mini-games/traditional-games/model';
+      export { TraditionalSession } from './src/mini-games/traditional-games/session';
+      export { gameCommand, tickGames } from './src/mini-games/gakuro-craft/homeGames';
       export { PROTAGONISTS } from './src/three/protagonistCatalog';
       export { ABYSS_HEROES } from './src/components/school-dungeon/dungeons2/roster';
       export { buildLesson } from './src/mini-games/gakuro-kart/questions';
@@ -48,10 +54,14 @@ try{
     for(const map of [base,...m.TOWN_SHOPS.map(service=>`${base}/${service}`)]){
       const landmark=m.area(map).points.find(point=>point.kind==='resident');
       assert(landmark?.npc,`${map} must have its own resident`);
-      const dialogue=m.interact({...roaming,map},landmark).effect;
-      assert.equal(dialogue?.type,'dialog');
-      assert.deepEqual(dialogue.scenes[0].speaker,landmark.label);
-      names.add(landmark.label[0]);lines.add(dialogue.scenes[0].line[0]);
+      const action=m.interact({...roaming,map},landmark).effect;
+      if(m.area(map).houseGame)assert.deepEqual(action,{type:'house-invitation',house:map});
+      else{
+        assert.equal(action?.type,'dialog');
+        assert.deepEqual(action.scenes[0].speaker,landmark.label);
+        assert.deepEqual(action.scenes[0].line,landmark.npc.line);
+      }
+      names.add(landmark.label[0]);lines.add(landmark.npc.line[0]);
     }
   }));
   assert.equal(names.size,88);assert.equal(lines.size,88);
@@ -125,6 +135,82 @@ try{
     assert(next.state!==s||next.effect,`Interaction failed ${p.id}`);
     return next;
   };
+  const layouts=new Map(), assets=new Set(), families={furniture:0,cards:0,traditional:0};
+  let householdSave;
+  for(const [r,region] of m.REGIONS.entries())for(const [i,site] of region.sites.entries()){
+    if(site.type!=='town')continue;
+    for(const service of m.TOWN_SHOPS){
+      const town=m.mapId(r,i),room=m.area(`${town}/${service}`);
+      const base=m.area(town),door=base.points.find(p=>p.link===room.id);
+      const inside=m.interact(at({...roaming,map:town,at:base.start},door),door).state;
+      assert.equal(inside.map,room.id);
+      assert(m.same(inside.at,room.start));
+      const signature=JSON.stringify(room.furniture);
+      const layout=service==='home'?room.id:service;
+      const previous=layouts.get(layout);
+      if(previous)assert.equal(signature,previous);
+      else assert(![...layouts.values()].includes(signature),`Shared layout for ${room.id}`);
+      layouts.set(layout,signature);
+      for(const piece of room.furniture)assets.add(piece[0]);
+      for(const point of room.points){
+        if(point.kind==='house-game')continue;
+        assert(!m.furnitureAt(room,point),`${point.id} is under furniture`);
+        assert(m.same(at(inside,point).at,point),`${point.id} is unreachable`);
+      }
+      const exit=point(inside,'exit');
+      assert.equal(m.interact(at(inside,exit),exit).state.map,town);
+      if(!room.houseGame)continue;
+      const house=room.houseGame,board=point(inside,'house-game'),owner=point(inside,'resident');
+      const {gold,item,quantity}=house.reward;
+      families[house.family]++;
+      assert.equal(m.furnitureAt(room,board),house.table);
+      assert.deepEqual(at(inside,owner).at,{x:owner.x,y:owner.y});
+      const beside=near(inside,board);
+      const direction=directions.find(d=>m.same(m.add(beside.at,m.OFFSETS[d]),board));
+      assert.deepEqual(m.interact({...beside,direction}).effect,{type:'house-invitation',house:room.id});
+      const win=m.grantHouseReward(inside,room.id).state;
+      assert.equal(win.gold,inside.gold+gold);
+      assert.equal(win.items[item],inside.items[item]+quantity);
+      assert.strictEqual(m.grantHouseReward(win,room.id).state,win);
+      assert.strictEqual(m.grantHouseReward(inside,town).state,inside);
+      assert.equal(m.grantHouseReward({...inside,items:{...inside.items,[item]:999}},room.id).state.items[item],999);
+      const restored=m.restoreAdventure({...win,at:board,trail:[board]});
+      assert(!m.furnitureAt(room,restored.at));
+      assert(m.same(at(restored,exit).at,exit),'Old saves inside furniture can reach the exit');
+      if(r===0)householdSave=restored;
+      if(house.family==='furniture')continue;
+      const seats=house.family==='cards'?m.cardGame(house.game).players:m.seatsFor(house.game);
+      assert(seats.includes(2));
+      let packet;
+      const session=house.family==='cards'?new m.ClubSession('hero','',(_,v)=>packet=v):new m.TraditionalSession('hero','',(_,v)=>packet=v);
+      const resident={name:owner.label[1],hero:'pixel-rpg-resident'};
+      assert(session.join({id:'hero',name:'Akari',hero:'magic-akari',cpu:false}));
+      assert(session.configure(house.game,2));
+      assert(session.start(123,resident));
+      assert.equal(packet.view.game,house.game);
+      assert.equal(packet.view.players.length,2);
+      assert.equal(packet.view.players[1].name,resident.name);
+      assert.equal(packet.view.players[1].hero,resident.hero);
+      assert(session.state.players[1].cpu);
+    }
+  }
+  assert.equal(layouts.size,17);assert.deepEqual(families,{furniture:2,cards:3,traditional:3});
+  for(const art of assets)assert((await stat(`public/sprites/rpg/furniture/${art}.webp`)).size>0);
+  const {world,player,game}=m.startHouseBoard('connectfour','Akari');
+  for(const cell of [3,1,2,0]){
+    m.gameCommand(world,player,{type:'game_board',key:game.key,cell,round:game.round});
+    world.time+=.8;m.tickGames(world,.8);
+  }
+  assert.equal(game.party.board.filter(v=>v===2).length,3);
+  assert.equal(m.houseBoardResult(game),'win');
+  const reversi=m.startHouseBoard('reversi','Akari');
+  m.gameCommand(reversi.world,reversi.player,{type:'game_board',key:reversi.game.key,cell:19,round:reversi.game.round});
+  assert(reversi.game.party.cpuTurn);
+  reversi.world.time=1;m.tickGames(reversi.world,1);
+  assert.equal(reversi.game.party.board.filter(Boolean).length,6);
+  const tiedBoard=Array.from({length:42},(_,i)=>1+(Math.floor(i%7/2)+Math.floor(i/7))%2);
+  assert.equal(m.houseBoardResult({...game,party:{...game.party,board:tiedBoard}}),'draw');
+  console.log('PASS nine shop plans, eight distinct accessible houses, new furniture, CPU seats and genuine furniture board matches');
   let s=m.newAdventure('high-school-warrior',8517,{encounters:'symbol'});
   assert.equal(s.party.length,1);
   s=use(s,'keeper').state;
@@ -374,6 +460,10 @@ try{
   assert(m.clearSlot(1,mock));
   assert.equal(m.readSave(2,mock).length,1);
   assert.equal(mock.getItem('learning-rogue:main:player'),'untouched');
+  assert(m.writeSave(3,householdSave,'manual',mock));
+  const restoredHouse=m.readSave(3,mock)[0].state;
+  assert(m.houseRewardClaimed(restoredHouse,householdSave.map));
+  assert.strictEqual(m.grantHouseReward(restoredHouse,restoredHouse.map).state,restoredHouse);
   const tracks=[...Object.values(m.PIXEL_RPG_MUSIC),...Object.values(m.PIXEL_RPG_MUSIC_FALLBACKS)];
   assert.equal(Object.keys(m.PIXEL_RPG_MUSIC).length,26);
   for(const file of new Set(tracks)){

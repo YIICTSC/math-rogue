@@ -370,6 +370,68 @@
 .pr-service-host b { color: var(--pr-gold-pale); font-size: .88em; }
 .pr-service-host p { font-size: .82em; line-height: 1.4; }
 .pr-story p { font: 675 clamp(15px,2.4vw,21px)/1.8 var(--pr-serif); max-width: 35em; padding: 4px; }
+.pr-house-invitation { background: linear-gradient(120deg,#413c2a80,#1c2d33); }
+.pr-house-invitation .pr-dialog-portrait { height: clamp(92px,26vh,184px); }
+.pr-house-invitation p:first-child { font: inherit; color: #d2caba; }
+.pr-house-prize { display: flex; gap: 8px; align-items: center; margin-top: 10px; padding: 8px 10px; border: 1px solid #9b8559; border-radius: 5px; color: var(--pr-gold-pale); background: #2c3028; }
+.pr-house-prize svg { flex: none; }
+.pr-house-invite-actions { gap: 7px; }
+.pr-house-match {
+  position: absolute; inset: 0; z-index: 10; isolation: isolate; overflow: hidden;
+  color: #f6e6c7; background: #1b2529;
+  font: 500 clamp(13px,2vw,16px)/1.5 "Noto Sans JP",system-ui,sans-serif;
+}
+.pr-house-match-game { position: absolute; inset: 0; }
+.pr-house-match .cc-face-guest { overflow: hidden; }
+.pr-house-match .cc-seat-table[data-seat-count="2"] { --cc-seat-width: clamp(112px,37cqw,180px); }
+.pr-house-match .cc-seat-table .cc-player-ring .cc-face-guest { display: block; flex: 0 0 clamp(19px,5cqh,34px); }
+.pr-house-match .cc-face-guest>img,.pr-house-match .cc-face-guest>svg,
+.pr-house-match .cc-face-guest .conversation-portrait,.pr-house-match .cc-face-guest .conversation-portrait>svg {
+  display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 22%;
+}
+.pr-house-board {
+  --pr-board-size: min(100%, 460px, max(225px, 58dvh));
+  position: absolute; inset: 0; overflow: auto; overscroll-behavior: contain;
+  padding: max(9px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));
+  background: radial-gradient(ellipse at 50% 8%,#514434,#1f2d2f 72%);
+}
+.pr-house-board>header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 auto; max-width: 620px; }
+.pr-house-board h2,.pr-house-result h2 { font: 800 clamp(18px,4vw,28px)/1.2 "Noto Serif JP", "Yu Mincho", Georgia,serif; color: #f8dda5; margin: 0; }
+.pr-house-board .gc-party { max-width: 620px; margin: 10px auto; }
+.pr-house-board .gc-party>p { text-align: center; padding: 2px; margin: 5px 0; }
+.pr-house-board .gc-party-rules { width: var(--pr-board-size); margin: 0 auto; padding: 5px 9px; cursor: pointer; background: #243334; }
+.pr-house-board .gc-party-board,.pr-house-board .gc-party-columns { width: var(--pr-board-size); }
+.pr-house-board .gc-party-columns button,.pr-house-button {
+  min-height: 38px; border: 1px solid #9b895d; border-radius: 6px; background: #243337; color: #fff0c9; font: inherit; cursor: pointer;
+}
+.pr-house-board .gc-party-columns button:disabled { opacity: .55; cursor: default; }
+.pr-house-button { display: inline-flex; gap: 8px; align-items: center; justify-content: center; padding: 6px 12px; }
+.pr-house-button:focus-visible,.pr-house-board button:focus-visible { outline: 2px solid #ffe58d; outline-offset: 2px; }
+.pr-house-loading { display: grid; align-content: center; justify-items: center; gap: 12px; min-height: 100%; background: #1c2e31; }
+.pr-house-result {
+  position: absolute; inset: 0; z-index: 20; display: grid; place-items: center; overflow: auto;
+  padding: max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));
+  background: #101a21b5;
+}
+.pr-house-result>section {
+  width: min(100%,520px); display: grid; grid-template-columns: minmax(0,90px) 1fr; align-items: center; gap: 12px;
+  padding: clamp(12px,4vw,26px); border: 1px solid #a69062; border-radius: 10px;
+  background: linear-gradient(138deg,#414236,#1e3335 75%); box-shadow: 0 15px 48px #080e15ab;
+}
+.pr-house-result-portrait { width: 100%; height: clamp(74px,22vh,118px); overflow: hidden; }
+.pr-house-result-portrait>svg,.pr-house-result-portrait .conversation-portrait,.pr-house-result-portrait .conversation-portrait>svg { display: block; width: 100%; height: 100%; }
+.pr-house-result>section:not(:has(.pr-house-result-portrait)) { grid-template-columns: 1fr; }
+.pr-house-result p { margin: 7px 0 0; }
+.pr-house-result .pr-house-result-name { color: #e1cca0; margin: 0 0 5px; }
+.pr-house-reward { display: flex; align-items: center; gap: 7px; font-weight: 700; }
+.pr-house-reward svg { flex: none; color: #f7d580; }
+.pr-house-continue { grid-column: 1 / -1; justify-self: end; color: #2d2619; background: #edca85; font-weight: 800; }
+@media (orientation: landscape) and (max-height: 470px) {
+  .pr-house-board .gc-party { margin-block: 2px; }
+  .pr-house-board .gc-party>p { margin: 0; padding: 0; }
+  .pr-house-board .gc-party-columns { margin-block: 3px; }
+  .pr-house-board .gc-party-columns button { min-height: 30px; }
+}
 .pr-story-ending { background: linear-gradient(115deg,#45515e,#795b4b99); }
 .pr-select-label { display: flex; flex-wrap: wrap; gap: 5px 8px; align-items: center; border: 1px solid #677970; padding: 5px 8px; border-radius: 4px; }
 .pr-member-select { margin: 6px 0 10px; }

@@ -10,6 +10,7 @@ import { TOWN_SHOPS } from './towns';
 import { activeTile, visible, worldSymbol, type Adventure } from './adventure';
 import { OFFSETS, Tile, WORLD_ID, area, climateAt, noise, same, tileAt, type Direction, type Landmark, type Point } from './world';
 import type { ActionCue, Battle, Enemy, Pulse } from './battle';
+import type { FurniturePiece, HouseGame } from './interiors';
 
 type Canvas = CanvasRenderingContext2D;
 type Palette={grass:string; vegetation:string; shade:string; highlight:string; water:string; foam:string; path:string; stone:string; wall:string; roof:string; sky:string};
@@ -159,12 +160,54 @@ function building(c:Canvas,x:number,y:number,p:Palette,small=false,kind=0){
   if(!small){box(c,'#64646c',left+w-15,top-9,6,12);box(c,'#b4968d',left+w-16,top-10,8,2);}
 }
 let shopSignAtlas:HTMLImageElement|undefined;
+const roomArt=new Map<string,HTMLImageElement>();
+const lampFurniture=new Set(['fireplace','stove','bakingOven','floorlamp','candelabrum','lantern']);
+function roomFurniture(c:Canvas,[id,,,tilesWide=1,tilesDeep=1]:FurniturePiece,x:number,y:number,game?:HouseGame) {
+  let image=roomArt.get(id);
+  if(!image){
+    image=new Image();image.src=assetUrl(`sprites/rpg/furniture/${id}.webp`);roomArt.set(id,image);
+  }
+  if(!image.complete||!image.naturalWidth)return;
+  const center=x+tilesWide*8, foot=y+tilesDeep*16-2;
+  const scale=Math.min((tilesWide*16+6)/image.naturalWidth,(tilesDeep*16+16)/image.naturalHeight);
+  const width=image.naturalWidth*scale,height=image.naturalHeight*scale;
+  ellipse(c,'#231b2448',center,foot-1,tilesWide*6,3);
+  c.save();
+  c.imageSmoothingEnabled=true;
+  c.drawImage(image,center-width/2,foot-height,width,height);
+  c.restore();
+  if(game?.family!=='traditional')return;
+  const boardY=Math.round(foot-height*.7);
+  if(game.game==='crokinole'){
+    ellipse(c,'#633c32',center,boardY,11,5);
+    ellipse(c,'#deb680',center,boardY,9,4);
+    ellipse(c,'#795044',center,boardY,4,2);
+    ellipse(c,'#eacfa4',center-5,boardY+1,1.5,1);
+    ellipse(c,'#833c37',center+5,boardY-1,1.5,1);
+    return;
+  }
+  for(const [index,dx] of [-7,-2,3].entries()){
+    const top=boardY-3+index%2;
+    box(c,'#654633',center+dx,top,4,7);
+    box(c,'#eddbb2',center+dx,top,4,6);
+    box(c,game.game==='peeper'?'#526680':'#603b42',center+dx+1,top+1,2,1);
+    box(c,'#654633',center+dx+2,top+4,1,1);
+  }
+}
 function prop(c:Canvas,l:Landmark,x:number,y:number,p:Palette,t:number){
   if(l.kind==='site'){
     if(l.variant===0||l.variant===3)building(c,x,y+5,p,true,l.variant);
     else if(l.variant===4){crag(c,x-7,y-7,p);polygon(c,INK,[x-6,y+6,x-4,y,x,y-4,x+4,y,x+6,y+6]);box(c,'#f2c985',x-1,y+3,2,1);}
     else if(l.variant===1)tree(c,x-7,y-5,p,Math.floor(x),0);
     else {box(c,p.stone,x-7,y-7,14,13);box(c,p.highlight,x-5,y-9,10,2);box(c,p.shade,x-3,y-4,6,10);}
+    return;
+  }
+  if(l.kind==='house-game')return;
+  if(l.kind==='service'){
+    ellipse(c,'#21192163',x,y+3,7,3);
+    polygon(c,'#483a33',[x,y-8,x+6,y-3,x,y+2,x-6,y-3]);
+    polygon(c,'#d7b57a',[x,y-7,x+4,y-3,x,y+1,x-4,y-3]);
+    box(c,'#fff1bc',x-1,y-5,2,3);
     return;
   }
   if(l.kind==='door'){
@@ -210,7 +253,7 @@ function prop(c:Canvas,l:Landmark,x:number,y:number,p:Palette,t:number){
     return;
   }
   const coatColors=['#82a6a6','#bd9e76','#a79bb9','#82996a','#bd887e','#8fa1cc'];
-  const coat=l.npc?coatColors[l.npc.name[1].charCodeAt(0)%coatColors.length]:l.kind==='keeper'?'#ae8a62':l.kind==='service'?'#7b9fa0':'#a38eaa';
+  const coat=l.npc?coatColors[l.npc.name[1].charCodeAt(0)%coatColors.length]:l.kind==='keeper'?'#ae8a62':'#a38eaa';
   const bob=Math.floor(t/650)%2;
   ellipse(c,'#353b44',x,y+7,6,2);
   polygon(c,INK,[x-4,y-4,x+4,y-4,x+6,y+1,x+5,y+7,x-5,y+7,x-6,y+1]);
@@ -407,6 +450,18 @@ export function fieldFrame(c:Canvas,s:Adventure,width:number,height:number,now:n
     if(tile===Tile.Rock||tile===Tile.Hill)front.push({y:v+14,draw:()=>crag(c,u,v,pal,tile===Tile.Rock)});
     if(worldSymbol(s,pos))front.push({y:v+14,draw:()=>prop(c,{...pos,id:'symbol',label:['',''],kind:'enemy'},u+8,v+8,pal,now)});
   }
+  for(const piece of a.furniture??[]){
+    const [id,x,y,width=1,depth=1]=piece;
+    if(x+width<edgeX||x>endX||y+depth<edgeY||y>endY+1)continue;
+    const left=centerX+x*16,top=centerY+y*16,foot=top+depth*16-2;
+    if(lampFurniture.has(id)){
+      const cx=left+width*8;
+      const glow=c.createRadialGradient(cx,foot-5,3,cx,foot-5,32);
+      glow.addColorStop(0,'#ffd28165');glow.addColorStop(1,'#ffc36200');
+      c.fillStyle=glow;c.fillRect(cx-32,foot-37,64,64);
+    }
+    front.push({y:foot,draw:()=>roomFurniture(c,piece,left,top,a.houseGame?.table===piece?a.houseGame:undefined)});
+  }
   for(const l of a.points){
     if(!visible(s,l)||l.kind==='gate'&&s.flags.includes(a.id+':mechanism'))continue;
     const rock=l.kind==='rock'?s.rocks[a.id]??l:l;
@@ -425,6 +480,11 @@ export function fieldFrame(c:Canvas,s:Adventure,width:number,height:number,now:n
       const dy=s.settings.reduceFx?0:Math.floor(Math.sin(now*.005)*2);
       front.push({y:y+9,draw:()=>{box(c,'#392b34',x-2,y-22+dy,5,7);box(c,'#ffe2a3',x,y-22+dy,1,4);box(c,'#ffe2a3',x,y-17+dy,1,1);}});
     }
+    if(a.houseGame&&l.kind==='resident')front.push({y:y+10,draw:()=>{
+      box(c,'#322633',x-7,y-25,14,9);box(c,'#e7cc91',x-6,y-24,12,7);
+      box(c,'#e7cc91',x-3,y-17,3,2);
+      for(const dx of [-3,0,3])box(c,'#5e4a43',x+dx,y-21,1,1);
+    }});
   }
   const party=s.vehicle==='foot'?s.party.slice(0,Math.min(s.party.length,Math.ceil(s.trail.length/2))):s.party.slice(0,1);
   party.forEach((id,i)=>{

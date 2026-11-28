@@ -1,4 +1,4 @@
-import { PeerTableRoom } from '../shared/PeerTableRoom';
+import { PeerTableRoom, type TableProfile } from '../shared/PeerTableRoom';
 import { ClubSession, type ClubPacket } from './session';
 import type { LadderOptions } from './ladderOptions';
 import type { Action } from './model';
@@ -25,8 +25,8 @@ export class CardClubRoom extends PeerTableRoom<ClubPacket, Action, ClubSession>
   configure(game: GameId, count: number, options?: Partial<LadderOptions>) {
     if (this.host) this.session?.configure(game, count, options);
   }
-  start() {
-    if (this.host) this.session?.start(crypto.getRandomValues(new Uint32Array(1))[0]);
+  start(opponent?: TableProfile) {
+    if (this.host) this.session?.start(crypto.getRandomValues(new Uint32Array(1))[0], this.code ? undefined : opponent);
   }
   rematch() {
     if (this.host) this.session?.rematch();

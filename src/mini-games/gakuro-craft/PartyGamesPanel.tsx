@@ -6,7 +6,7 @@ import {GAME_RULES,ARRANGED_RULES,boardColor,isPartyKind,legalReversi,RACE_EFFEC
 import './partyGames.css';
 const COLORS=['#f7bd68','#70d8db','#caa0f4','#f28d9b'];
 const TREASURES=['💎','🌻','🗝','🍄','🐚','⭐','🍎','🦋','🌙','🍀','🪶','🔔'];
-export default function PartyGamesPanel({world,g,selfId,t,send}:{world:HomeGameWorld;g:HomeGame;selfId:string;t:(s:string)=>string;send:(c:GameCommand)=>void}){
+export default function PartyGamesPanel({world,g,selfId,t,send,opponentName='CPU'}:{world:HomeGameWorld;g:HomeGame;selfId:string;t:(s:string)=>string;send:(c:GameCommand)=>void;opponentName?:string}){
  const [aim,setAim]=useState(0),[power,setPower]=useState(.75),[spin,setSpin]=useState(0),[clock,setClock]=useState(world.time),s=g.party,seat=g.players.indexOf(selfId),mine=g.phase==='playing'&&seat===g.turn&&!g.party?.cpuTurn&&!world.paused;
  useEffect(()=>{setClock(world.time);if(g.kind!=='reaction'&&g.kind!=='bowling'||world.paused)return;const start=performance.now(),timer=setInterval(()=>setClock(world.time+(performance.now()-start)/1000),50);return()=>clearInterval(timer);},[world.time,g.kind,world.paused]);
  useEffect(()=>{if(g.kind!=='reaction')return;const key=(e:KeyboardEvent)=>{if(world.paused||g.phase!=='playing'||g.party?.signal?.acted[seat]||!['1','2','3','4'].includes(e.key)||['INPUT','SELECT','TEXTAREA'].includes((e.target as HTMLElement)?.tagName))return;e.preventDefault();send({type:'game_react',key:g.key,round:g.round,target:Number(e.key)-1});};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[g.kind,g.phase,g.round,world.paused,seat,send]);
@@ -14,12 +14,15 @@ export default function PartyGamesPanel({world,g,selfId,t,send}:{world:HomeGameW
  const raceEffects=s.raceEffects||RACE_EFFECTS,raceExtra=s.raceExtra||RACE_EXTRA;
  const boardSend=(cell:number)=>send({type:'game_board',key:g.key,cell,round:g.round});
  const team=boardColor(g,g.turn),legal=g.kind==='reversi'?legalReversi(s.board!,team):[],signal=s.signal,live=!!signal&&clock>=signal.at&&clock<=g.deadline,shot=s.shot;
+ const namedDuel=s.solo&&opponentName!=='CPU';
+ const activeTeam=namedDuel&&s.cpuTurn?2:team;
+ const turnName=namedDuel?(s.cpuTurn?opponentName:g.names[0]):g.arranged?g.names[g.turn]:t(team===1?'チームA':'チームB');
  const bowling=s.lanes?.[g.turn],frame=bowling?.frames.at(-1),shotProgress=shot?Math.max(0,Math.min(1,(clock-shot.start)/1.7)):0;
- return <div className="gc-party">{s.solo&&<p>CPU · {s.cpuScore||0} · {t(s.cpuTurn?'CPUが考えています':'あなたの手番')}</p>}<details className="gc-party-rules"><summary>{t('ルールと操作')}</summary><p>{t(s.solo?'ひとりでCPUと対戦。置ける場所を選び、リバーシは石の数、四目並べは縦・横・斜めの4個で勝負。':g.arranged?ARRANGED_RULES[g.kind]:GAME_RULES[g.kind])}</p></details>
- {(g.kind==='reversi'||g.kind==='connectfour')&&<>{g.phase==='playing'&&<p>{g.arranged?g.names[g.turn]:t(team===1?'チームA':'チームB')} · {g.arranged?t('手番'):t(g.kind==='reversi'?team===1?'黒の手番':'白の手番':team===1?'赤の手番':'黄の手番')}</p>}
+ return <div className="gc-party">{s.solo&&!namedDuel&&<p>CPU · {s.cpuScore||0} · {t(s.cpuTurn?'CPUが考えています':'あなたの手番')}</p>}<details className="gc-party-rules"><summary>{t('ルールと操作')}</summary><p>{t(s.solo&&!namedDuel?'ひとりでCPUと対戦。置ける場所を選び、リバーシは石の数、四目並べは縦・横・斜めの4個で勝負。':g.arranged?ARRANGED_RULES[g.kind]:GAME_RULES[g.kind])}</p></details>
+ {(g.kind==='reversi'||g.kind==='connectfour')&&<>{g.phase==='playing'&&<p aria-live={namedDuel?'polite':undefined}>{turnName} · {g.arranged?t('手番'):t(g.kind==='reversi'?activeTeam===1?'黒の手番':'白の手番':activeTeam===1?'赤の手番':'黄の手番')}</p>}
  {g.kind==='connectfour'&&<div className="gc-party-columns">{Array.from({length:7},(_,i)=><button key={i} aria-label={t('列を選ぶ')+' '+(i+1)} disabled={!mine||!!s.board![i]} onClick={()=>boardSend(i)}>↓</button>)}</div>}
  <div className={'gc-party-board '+(g.kind==='reversi'?'reversi':'connectfour')} role="group" aria-label={t(g.kind==='reversi'?'リバーシの盤面':'四目並べの盤面')}>
- {s.board!.map((v,i)=><button key={i} className={(s.last?.includes(i)?'last ':'')+(g.expedition?.marks?.includes(i)?'treasure-cell':'')} aria-label={t('マス')+' '+(i+1)+' · '+(v?(s.solo?(v===1?g.names[0]:'CPU'):g.arranged?g.names[v-1]:t(v===1?'チームA':'チームB')):t('空きマス'))} disabled={!mine||(g.kind==='reversi'?!legal.includes(i):!!s.board![i%7])} onClick={()=>boardSend(g.kind==='reversi'?i:i%7)}>{v?<i className={'piece piece-'+v}/>:g.kind==='reversi'&&legal.includes(i)?<span className="legal">·</span>:null}</button>)}
+ {s.board!.map((v,i)=><button key={i} className={(s.last?.includes(i)?'last ':'')+(g.expedition?.marks?.includes(i)?'treasure-cell':'')} aria-label={t('マス')+' '+(i+1)+' · '+(v?(s.solo?(v===1?g.names[0]:opponentName):g.arranged?g.names[v-1]:t(v===1?'チームA':'チームB')):t('空きマス'))} disabled={!mine||(g.kind==='reversi'?!legal.includes(i):!!s.board![i%7])} onClick={()=>boardSend(g.kind==='reversi'?i:i%7)}>{v?<i className={'piece piece-'+v}/>:g.kind==='reversi'&&legal.includes(i)?<span className="legal">·</span>:null}</button>)}
  </div></>}
  {g.kind==='memory'&&<div className="gc-memory-board" role="group" aria-label={t('宝物のカード')}>
  {s.cards!.map((v,i)=>{const visible=s.matched![i]||s.open!.includes(i);return <button key={i} className={(visible?'open ':'')+(s.matched![i]?'matched':'')} aria-label={visible?TREASURES[v]:t('裏向きのカード')+' '+(i+1)} disabled={!mine||visible||!!s.revealUntil} onClick={()=>boardSend(i)}>{visible?TREASURES[v]:<span>✦<small>{i+1}</small></span>}</button>;})}</div>}

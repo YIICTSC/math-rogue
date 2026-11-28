@@ -1,5 +1,5 @@
 import { CARD_CLUB_VOICE_HEROES } from '../../data/cardClubVoices';
-import { PeerTableRoom } from '../shared/PeerTableRoom';
+import { PeerTableRoom, type TableProfile } from '../shared/PeerTableRoom';
 import {
   createTable,
   applyTableAction,
@@ -66,14 +66,15 @@ export class TraditionalSession {
     this.publish();
     return true;
   }
-  start(seed: number) {
+  start(seed: number, opponent?: TableProfile) {
     if (this.state || !this.members.length || this.members[0].id !== this.hostId) return false;
     const players = [...this.members];
     for (let i = players.length; i < this.count; i++) {
+      const guest = i === 1 ? opponent : undefined;
       players.push({
         id: `cpu-${i}`,
-        name: `CPU ${i + 1}`,
-        hero: CARD_CLUB_VOICE_HEROES[(i * 7 + seed) % CARD_CLUB_VOICE_HEROES.length],
+        name: guest?.name ?? `CPU ${i + 1}`,
+        hero: guest?.hero ?? CARD_CLUB_VOICE_HEROES[(i * 7 + seed) % CARD_CLUB_VOICE_HEROES.length],
         cpu: true,
       });
     }
@@ -145,8 +146,8 @@ export class TraditionalRoom extends PeerTableRoom<TablePacket, TableAction, Tra
   configure(game: TableGame, count: number) {
     if (this.host) this.session?.configure(game, count);
   }
-  start() {
-    if (this.host) this.session?.start(crypto.getRandomValues(new Uint32Array(1))[0]);
+  start(opponent?: TableProfile) {
+    if (this.host) this.session?.start(crypto.getRandomValues(new Uint32Array(1))[0], this.code ? undefined : opponent);
   }
   rematch() {
     if (this.host) this.session?.rematch();

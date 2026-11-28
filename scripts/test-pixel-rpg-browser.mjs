@@ -300,11 +300,11 @@ try {
     return HERO_LIST.every(h=>illustration(h.id,h.job)!==illustration(h.id,h.job,'guard')
       &&illustration(h.id,h.job,'cast')!==illustration(h.id,h.job,'fallen'));
   }), 'All playable characters render distinct action poses');
-  async function approachAndUse(kind,label){
-    const plan=await page.evaluate(async ({position,kind,label})=>{
+  async function approachAndUse(kind,label,slot=1){
+    const plan=await page.evaluate(async ({position,kind,label,slot})=>{
       const w=await import('/src/mini-games/pixel-rpg/world.ts');
       const game=await import('/src/mini-games/pixel-rpg/adventure.ts');
-      const state=JSON.parse(localStorage.getItem('learning-rogue:pixel-rpg:v1:1:auto')).state;
+      const state=JSON.parse(localStorage.getItem(`learning-rogue:pixel-rpg:v1:${slot}:auto`)).state;
       const a=w.area(position.map), landmark=a.points.find(e=>e.kind===kind&&(!label||e.label[1]===label));
       if(!landmark)throw new Error('Unknown landmark '+kind+' '+label+' in '+position.map);
       const q=[{p:position,path:[]}], seen=new Set([`${position.x},${position.y}`]);
@@ -322,7 +322,7 @@ try {
         }
       }
       throw new Error(landmark.id+' unreachable from '+JSON.stringify(position));
-    },{position:await coords(),kind,label});
+    },{position:await coords(),kind,label,slot});
     for(const direction of plan.path)await key(direction);
     assert.deepEqual(await coords(),plan.target,'Approach '+kind+' '+(label??''));
     await page.locator('.pr-action-main').click();
@@ -417,13 +417,120 @@ try {
   await languagePicker.selectOption('HIRAGANA');
   await page.getByRole('dialog',{name:/たびの[ 　]?てちょう/}).waitFor();
   await shot('13-hiragana-settings');
+
+  const testSlot=2;
+  const houseSave=()=>page.evaluate(slot=>JSON.parse(localStorage.getItem(`learning-rogue:pixel-rpg:v1:${slot}:auto`)).state,testSlot);
+  async function loadHouseSlot(prepare){
+    await boot('MINI_GAME_PIXEL_RPG');
+    const resume=button(/^(旅を続ける|Continue)$/);
+    if(prepare){
+      await prepare();
+      if(await resume.isDisabled())await boot('MINI_GAME_PIXEL_RPG');
+    }
+    await resume.click();
+    await page.locator('.pr-save-list article').nth(testSlot-1).getByRole('button',{name:/自動記録|Autosave/}).click();
+    await field().waitFor();
+  }
+  async function visitTown(region){
+    await loadHouseSlot(()=>page.evaluate(async({region,slot})=>{
+      const {newAdventure}=await import('/src/mini-games/pixel-rpg/adventure.ts');
+      const {area,mapId}=await import('/src/mini-games/pixel-rpg/world.ts');
+      const {writeSave}=await import('/src/mini-games/pixel-rpg/save.ts');
+      const town=area(mapId(region,0)),s=newAdventure('magic-akari',42,{language:'JAPANESE',encounters:'symbol'});
+      writeSave(slot,{...s,map:town.id,at:town.start,trail:[town.start],stage:region},'auto');
+    },{region,slot:testSlot}));
+  }
+  const useHouse=(kind,label)=>approachAndUse(kind,label,testSlot);
+  const startHouseGame=()=>button(/^(対戦する|Play a match)$/).click();
+  const returnHome=()=>button(/^(民家へ戻る|Return to the house)$/).filter({visible:true}).click();
+  await visitTown(0);
+  await useHouse('door','Inn');
+  await page.waitForFunction(()=>document.fonts.status==='loaded');
+  await shot('14-inn');
+  await useHouse('service');
+  await page.getByRole('dialog',{name:/宿屋|Inn/}).waitFor();
+  await dialog().locator('button[data-pr-close]').click();
+  await useHouse('exit');
+  await useHouse('door','Root House');
+  await useHouse('resident');
+  const rootHouse=await coords(),beforeMatch=await houseSave();
+  await dialog().getByText(/24 G/).waitFor();
+  await shot('15-house-invitation-phone');
+  await startHouseGame();
+  const match=page.locator('.pr-house-match');
+  const houseBoard=match.locator('.gc-party-board'),columns=match.locator('.gc-party-columns button');
+  await houseBoard.waitFor();
+  await layout('.gc-party-columns');
+  await columns.nth(3).tap();
+  await houseBoard.locator('.piece-2').first().waitFor();
+  await shot('16-four-in-a-row-phone');
+  await page.setViewportSize({width:844,height:390});
+  await layout('.gc-party-board');
+  for(const i of [1,2,0])await columns.nth(i).tap();
+  await match.getByRole('status').filter({hasText:/24 G/}).waitFor();
+  await shot('17-house-win-landscape');
+  await match.locator('.pr-house-continue').click();
+  assert.deepEqual(await coords(),rootHouse);
+  const afterMatch=await houseSave();
+  assert.equal(afterMatch.gold,beforeMatch.gold+24);
+  assert.equal(afterMatch.items.tonic,beforeMatch.items.tonic+2);
+  await loadHouseSlot();
+  assert.deepEqual(await coords(),rootHouse);
+  await useHouse('resident');
+  await dialog().getByText(/受け取り済み|reward collected/).waitFor();
+  await startHouseGame();
+  for(const i of [3,1,2,0])await columns.nth(i).click();
+  await match.getByRole('status').filter({hasText:/受け取り済み|already collected/}).waitFor();
+  await match.locator('.pr-house-continue').click();
+  assert.equal((await houseSave()).gold,afterMatch.gold,'A second win cannot grant another prize');
+  await shot('18-root-house-landscape');
+
+  await page.setViewportSize({width:390,height:844});
+  await visitTown(2);
+  await useHouse('door','Window Study');
+  await useHouse('resident');
+  const studyPosition=await coords(),studyGold=(await houseSave()).gold;
+  await startHouseGame();
+  await match.locator('[data-club-game=crazyeight] [data-portrait=chronicle-puzzle]').first().waitFor();
+  const cardAction=match.locator('.cc-actions button:enabled').first();
+  const cardCpuMoves=match.locator('.cc-log-entries p').filter({hasText:/ラシェ|Rache/});
+  for(let i=0;i<8&&!await cardCpuMoves.count();i++)await cardAction.click();
+  await page.waitForFunction(()=>/ラシェ|Rache/.test(document.querySelector('.cc-log-entries')?.textContent??''));
+  await shot('19-house-card-club');
+  await returnHome();
+  assert.deepEqual(await coords(),studyPosition);
+  assert.equal((await houseSave()).gold,studyGold,'Leaving an incomplete match gives no reward');
+
+  await page.setViewportSize({width:844,height:390});
+  await visitTown(1);
+  await useHouse('door','Clock House');
+  await useHouse('resident');
+  const clockHouse=await coords();
+  await startHouseGame();
+  const domino=match.locator('[data-table-game=austrian-draw]');
+  await domino.locator('[data-portrait=chronicle-clockwork]').waitFor();
+  const dominoAction=domino.locator('.tt-hand button:enabled,.tt-play-actions button:enabled').first();
+  const cpuMove=domino.locator('.tt-last-play').filter({hasText:/エル|Ell/});
+  for(let i=0;i<16;i++){
+    await cpuMove.or(dominoAction).first().waitFor();
+    if(await cpuMove.count())break;
+    await dominoAction.click();
+    const dominoEnd=domino.locator('.tt-domino-map-end[data-target=true]').first();
+    if(await dominoEnd.count())await dominoEnd.click();
+  }
+  await page.waitForFunction(()=>/エル|Ell/.test(document.querySelector('.tt-last-play')?.textContent??''));
+  await shot('20-house-domino');
+  await returnHome();
+  assert.deepEqual(await coords(),clockHouse);
+  await shot('21-clock-house-landscape');
+
   assert(battleArt.has('battle-meadow.webp'));
   for(const track of ['menu','rest','battle','boss','victory','game_over']){
     assert(musicRequests.has(`bgm/${track}.mp3`),`Missing old elementary track ${track}; requested ${[...musicRequests]}`);
   }
   assert(![...musicRequests].some(path=>path.startsWith('bgm-new/pixel-rpg/')));
   assert.deepEqual(errors,[]);
-  console.log(`PASS real mini-game entry, hero selection, movement on keyboard/touch/pad, party joins, job/palette change, study, targeting, boss victory and defeat, audio and both save paths. Screenshots: ${output}`);
+  console.log(`PASS real mini-game entry, hero selection, movement on keyboard/touch/pad, party joins, job/palette change, study, targeting, boss victory and defeat, audio, both save paths, and all three house CPU duel families with persisted first-win rewards. Screenshots: ${output}`);
 }catch(error){
   console.error(`Pixel RPG playtest screenshots: ${output}`);
   throw error;

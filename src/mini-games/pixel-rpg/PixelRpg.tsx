@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
-import { ArrowLeft, ArrowUp, ArrowRight, ArrowDown, BookOpen, Compass, Flag, Map, Backpack, ShipWheel, Footprints, ChevronRight, Save, Swords, Shield } from 'lucide-react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
+import { ArrowLeft, ArrowUp, ArrowRight, ArrowDown, BookOpen, Compass, Flag, Map, Backpack, ShipWheel, Footprints, ChevronRight, Save, Swords, Shield, Gift } from 'lucide-react';
 import { GameMode, type AnswerMode, type AssignmentAnswerResult, type AssignmentReviewProblem, type LanguageMode } from '../../types';
 import type { MiniGameComponentProps } from '../../components/MiniGameRouter';
 import { PAD, useGameplayGamepad } from '../../hooks/useGameplayGamepad';
@@ -9,12 +9,12 @@ import { abyssHero } from '../../components/school-dungeon/dungeons2/roster';
 import { isProtagonistId } from '../../components/school-dungeon/student/content';
 import { studentSpriteUrl } from '../../components/school-dungeon/student/sprites';
 import AdventureProblemSheet from '../shared/AdventureProblemSheet';
-import { GROUPS, applyStudy, climate, completeBattle, currentLandmark, currentRegion, escape, interact, introScenes, maxHp, mount, newAdventure, recover, reviewEntry, step, type Adventure, type Change, type Encounter, type Scene, type Settings } from './adventure';
+import { GROUPS, applyStudy, climate, completeBattle, currentLandmark, currentRegion, escape, grantHouseReward, houseRewardClaimed, interact, introScenes, maxHp, mount, newAdventure, recover, reviewEntry, step, type Adventure, type Change, type Encounter, type Scene, type Settings } from './adventure';
 import { heroSelectionIllustration, illustration, type Animation } from './art';
 import { createBattle, fighter, nextActingHero, studyBonus, victory, type Battle } from './battle';
 import { playTravelerBattleVoice } from './battleVoice';
 import BattleScreen from './BattleScreen';
-import { HEROES, HERO_LIST, JOBS, PASSIVES, type WorldOfOrigin } from './catalog';
+import { HEROES, HERO_LIST, ITEMS, JOBS, PASSIVES, type WorldOfOrigin } from './catalog';
 import { REGIONS, TITLE, VEHICLES, type Copy, type Service } from './campaign';
 import { guestSpriteUrl } from './guestArt';
 import { Journal, Lessons, SaveSlots, ServicePanel, type MenuTab } from './Menus';
@@ -23,8 +23,10 @@ import { FieldCanvas, Language, Meter, Panel, useWords } from './presentation';
 import { clearSlot, readSave, SAVE_SLOTS, writeSave, type Slot, type SlotData } from './save';
 import TravelerPortrait from './TravelerPortrait';
 import { WORLD_ID, area, headline, isAir, type Direction, type Landmark } from './world';
+import type { LocalMatchResult } from '../shared/localTableMatch';
 import './pixelRpg.css';
 
+const HouseMatch=lazy(()=>import('./HouseMatch'));
 const DIRECTIONS = [
   ['up',ArrowUp,'上','Up'],['left',ArrowLeft,'左','Left'],['down',ArrowDown,'下','Down'],['right',ArrowRight,'右','Right'],
 ] as const;
@@ -33,6 +35,7 @@ type StudyState = { mode:'battle'|'seal'|'review'|'library'; review?:AssignmentR
 type Overlay =
   | {type:'journal';tab:MenuTab}
   | {type:'shop';service:Service;region:number}
+  | {type:'house-invitation'|'house-match';house:string}
   | {type:'dialog';scenes:Scene[];index:number;ending?:boolean}
   | {type:'study';data:StudyState}
   | {type:'lesson'}
@@ -197,6 +200,9 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
   const questionCount=useRef(0);
   const answered=useRef(0);
   const track=sceneMusic(state,battle,overlay,title);
+  const house=overlay?.type==='house-invitation'||overlay?.type==='house-match'?area(overlay.house):undefined;
+  const houseOwner=house?.points.find(point=>point.kind==='resident')?.npc;
+  const houseGame=house?.houseGame;
   const victoryRewards=battle?.outcome==='win'&&state?settleVictory(state,battle).rewards:undefined;
   const trackRef=useRef(track);trackRef.current=track;
   const audioScope=useRef<ReturnType<typeof audioService.acquireBgmScene>|undefined>(undefined);
@@ -291,6 +297,7 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
     if(effect.type==='dialog'||effect.type==='ending'){
       present({type:'dialog',index:0,scenes:effect.scenes,ending:effect.type==='ending'});save('auto');return;
     }
+    if(effect.type==='house-invitation'){present(effect);return;}
     present({type:'shop',service:effect.service,region:effect.region});
   };
   const updateCombat=(op:(b:Battle)=>Battle,voiceId?:string)=>{
@@ -434,6 +441,15 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
       present(returnOverlay);setReturnOverlay(undefined);
     }else present(undefined);
   };
+  const settleHouseMatch=(result:LocalMatchResult)=>{
+    const active=overlayRef.current,latest=stateRef.current;
+    if(result!=='win'||!latest||active?.type!=='house-match')return;
+    const reward=grantHouseReward(latest,active.house);
+    if(reward.state===latest)return;
+    changeState(reward.state);save('auto');
+    if(reward.sound&&houseGame?.family!=='furniture')audioService.playSound(reward.sound);
+    return reward.message;
+  };
   const journal=(tab:MenuTab)=>present({type:'journal',tab});
   const lesson=()=>{setReturnOverlay(overlayRef.current);present({type:'lesson'});};
   const readQuestion=(result:AssignmentAnswerResult,data:StudyState)=>{
@@ -456,7 +472,7 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
     else{present(undefined);if(!battleRef.current)save('auto');}
   };
 
-  return <main className="pixel-rpg" lang={language==='ENGLISH'?'en':'ja'} data-gamepad-navigation-root data-adventure-screen
+  return <><main className="pixel-rpg" lang={language==='ENGLISH'?'en':'ja'} inert={overlay?.type==='house-match'} data-gamepad-navigation-root data-adventure-screen
     data-allow-japanese={language!=='ENGLISH'&&props.languageMode==='ENGLISH'?true:undefined} data-pr-theme={state?climate(state):'meadow'} data-pr-playing={!!state}>
     {!state&&<section className="pr-title" aria-label={l(TITLE)}>
       <img className="pr-title-art" src={`${import.meta.env.BASE_URL}${titleAsset}`} alt="" fetchPriority="high" onError={event=>{
@@ -494,10 +510,22 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
       ? <BattleScreen key={battle.encounter.rush??'battle'} battle={battle} actor={actor} setActor={setActor} onCommand={updateCombat}
           onStudy={()=>void ask('battle',undefined,fighter(battle,actor)?.id??battle.party.find(x=>x.hp>0)?.id)} onOutcome={acknowledge}
           animation={animation} settings={state.settings} covered={!!overlay} encounterIntro={encounterIntro?.duration??0} rewards={victoryRewards}/>
-      : <FieldView state={state} dash={dash||pressedShift} setDash={setDash} move={d=>moving.current(d)} hold={hold} stop={stop} activate={()=>actionRef.current()} open={journal}
+      : overlay?.type!=='house-match'&&<FieldView state={state} dash={dash||pressedShift} setDash={setDash} move={d=>moving.current(d)} hold={hold} stop={stop} activate={()=>actionRef.current()} open={journal}
           travel={()=>present({type:'travel'})} message={overlay?undefined:message} covered={!!overlay}/>)}
     {state&&overlay?.type==='journal'&&<Journal key={overlay.tab} state={snapshot()??state} initial={overlay.tab} apply={apply} slot={slot} onClose={closeOverlay} onSave={()=>save('manual',true)} onLesson={lesson} onReview={()=>void ask('review')} onExit={()=>present({type:'exit'})}/>}
     {state&&overlay?.type==='shop'&&<ServicePanel state={state} service={overlay.service} region={overlay.region} apply={apply} close={closeOverlay} onJournal={journal} onStudy={()=>void ask('library')}/>}
+    {state&&overlay?.type==='house-invitation'&&houseOwner&&houseGame&&<Panel wide heading={l(houseOwner.name)} subtitle={l(houseGame.name)} close={closeOverlay}>
+      <div className="pr-story pr-house-invitation">
+        {houseOwner.portrait&&<div className="pr-dialog-portrait"><TravelerPortrait id={houseOwner.portrait} name={l(houseOwner.name)}/></div>}
+        <div><p>{l(houseOwner.line)}</p><p>{l(houseGame.invitation)}</p>
+          <div className="pr-house-prize"><Gift size={18}/><span>{houseRewardClaimed(state,overlay.house)?t('初勝利の褒美は受け取り済み','First-win reward collected')
+            :`${t('初勝利の褒美','First-win reward')} · ${houseGame.reward.gold} G · ${l(ITEMS[houseGame.reward.item].name)} ×${houseGame.reward.quantity}`}</span></div>
+        </div>
+      </div>
+      <footer className="pr-sticky pr-house-invite-actions"><button onClick={closeOverlay}>{t('また今度','Maybe later')}</button>
+        <button className="pr-primary" onClick={()=>{void audioService.unlockAudio();present({...overlay,type:'house-match'});}}>{t('対戦する','Play a match')} <ChevronRight size={16}/></button>
+      </footer>
+    </Panel>}
     {state&&overlay?.type==='lesson'&&<Lessons close={closeOverlay} onSelect={(mode,pool,answer)=>{
       const modes=[...new Set(pool?.length?pool:[mode])];
       apply(s=>({state:{...s,settings:{...s.settings,modes,answer:answer?savedAnswer(answer):s.settings.answer}}}));
@@ -531,7 +559,13 @@ function PixelRpgRun(props:MiniGameComponentProps & {setLanguage:(language:Langu
       <p>{t('今の冒険を自動記録して戻ります。','Your adventure will be autosaved before returning.')}</p><button className="pr-primary" onClick={openTitle}>{t('記録して戻る','Save and return')}</button></div></Panel>}
     {state&&overlay&&message&&<div className="pr-toast pr-toast-modal" role="status">{l(message)}</div>}
     {storageError&&<div className="pr-storage-error" role="alert">{t('この端末では冒険を記録できません。','This device could not save the adventure.')}</div>}
-  </main>;
+  </main>
+    {state&&overlay?.type==='house-match'&&houseGame&&houseOwner&&<Suspense fallback={<div className="pr-house-match pr-house-loading" data-allow-japanese={language!=='ENGLISH'||undefined}>
+      <p role="status">{t('対局を準備中…','Setting up the match…')}</p><button className="pr-house-button" onClick={closeOverlay}>{t('民家へ戻る','Return to the house')}</button>
+    </div>}>
+      <HouseMatch key={overlay.house} match={houseGame} owner={houseOwner} hero={state.party[0]} job={state.heroes[state.party[0]].job} onBack={closeOverlay} onResult={settleHouseMatch}/>
+    </Suspense>}
+  </>;
   function beginLoad(chosen:Slot,entry:SlotData){
     const s=entry.state;
     begin({...s,settings:{...s.settings,modes:defaultModes(props),answer:props.answerMode?savedAnswer(props.answerMode):s.settings.answer}},chosen,false);

@@ -4,6 +4,7 @@ import { definition, type GameId } from './catalog';
 import type { Action, ClubState, ClubView, PlayerInput } from './model';
 import { PROTAGONISTS } from '../../three/protagonistCatalog';
 import { CARD_CLUB_ROOM_CAPACITY, clubSeatsFor, recommendedClubGames } from './lobbyGames';
+import type { TableProfile } from '../shared/PeerTableRoom';
 
 export const CARD_CLUB_HEROES=PROTAGONISTS.filter(h=>!h.id.startsWith('elementary-'));
 export const validProfile=(p:unknown):p is PlayerInput=>!!p&&typeof p==='object'&&typeof (p as PlayerInput).id==='string'&&typeof (p as PlayerInput).name==='string'&&(p as PlayerInput).name.trim().length>0&&(p as PlayerInput).name.length<=32&&CARD_CLUB_HEROES.some(h=>h.id===(p as PlayerInput).hero);
@@ -26,9 +27,13 @@ export class ClubSession {
     this.publish();return true;
   }
   configure(game:GameId,count:number,options?:Partial<LadderOptions>){if(this.state||!definition(game)?.players.includes(count)||count<this.members.length)return false;this.game=game;this.count=count;if(options)this.ladderOptions=ladderOptions(options);this.publish();return true;}
-  start(seed:number){
+  start(seed:number,opponent?:TableProfile){
     if(this.state||!this.members.length||this.members[0].id!==this.hostId)return false;
-    const players=[...this.members];for(let i=players.length;i<this.count;i++)players.push({id:`cpu-${i}`,name:`CPU ${i+1}`,hero:CARD_CLUB_HEROES[(i*7)%CARD_CLUB_HEROES.length].id,cpu:true});
+    const players=[...this.members];
+    for(let i=players.length;i<this.count;i++){
+      const guest=i===1?opponent:undefined;
+      players.push({id:`cpu-${i}`,name:guest?.name??`CPU ${i+1}`,hero:guest?.hero??CARD_CLUB_HEROES[(i*7)%CARD_CLUB_HEROES.length].id,cpu:true});
+    }
     this.state=createClubGame(this.game,players,seed,this.ladderOptions);this.publish();return true;
   }
   command(id:string,action:Action,revision:number){

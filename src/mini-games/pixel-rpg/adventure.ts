@@ -2,7 +2,7 @@ import { CORE_CHAMBERS, ENDING, FEATURES, PROLOGUE, REGIONS, VEHICLES, type Copy
 import type { AssignmentReviewProblem } from '../../types';
 import { CARDS, GEAR, HEROES, HERO_LIST, ITEMS, JOBS, RELICS, starterDeck, type DeckCard, type Element, type EquipSlot, type ItemId, type RelicId, type Technique } from './catalog';
 import type { KartQuestion } from '../gakuro-kart/learning';
-import { DUNGEON_LAYOUT_VERSION, OFFSETS, Tile, WORLD_ID, add, area, areaSite, canTravel, climateAt, coordinate, distance, isAir, isRoad, isShore, isWater, mapId, nearbyLandmark, noise, regionAt, same, sitePoint, tileAt, type Direction, type Landmark, type Point } from './world';
+import { DUNGEON_LAYOUT_VERSION, OFFSETS, Tile, WORLD_ID, add, area, areaSite, canTravel, climateAt, coordinate, distance, furnitureAt, isAir, isRoad, isShore, isWater, mapId, nearbyLandmark, noise, regionAt, same, sitePoint, tileAt, type Direction, type Landmark, type Point } from './world';
 
 export type HeroState = {
   id: string; level: number; xp: number; hp: number; job: string; mastery: Record<string,number>; inherited?: string;
@@ -30,6 +30,7 @@ export type Effect =
   | { type:'service'; service:NonNullable<Landmark['service']>; region:number }
   | { type:'battle'; encounter:Encounter }
   | { type:'study'; landmark:Landmark }
+  | { type:'house-invitation'; house:string }
   | { type:'ending'; scenes:Scene[] };
 export type Change = { state: Adventure; message?: Copy; effect?: Effect; sound?: 'select'|'buff'|'win'|'damage' };
 export type Win = { xp:number; mastery:number; gold:number; enemyIds:string[]; hp:Record<string,number>; card?:string };
@@ -165,7 +166,21 @@ export function currentLandmark(s:Adventure) {
   const ahead=add(s.at,OFFSETS[s.direction]);
   const rock=a.points.find(item=>item.kind==='rock');
   if(rock && same(ahead,s.rocks[a.id]??rock))return {...rock,...(s.rocks[a.id]??rock)};
+  if(a.houseGame && furnitureAt(a,ahead)===a.houseGame.table)return a.points.find(l=>l.kind==='house-game');
   return nearbyLandmark(a,s.at,s.direction,l=>visible(s,l) && l.kind!=='rock');
+}
+export const houseRewardClaimed=(s:Adventure,house:string)=>s.flags.includes('house-game:'+house);
+export function grantHouseReward(s:Adventure,house:string):Change {
+  const reward=area(house).houseGame?.reward;
+  if(!reward||s.map!==house||houseRewardClaimed(s,house))return asIs(s);
+  const {gold,item,quantity}=reward;
+  const received=Math.min(quantity,999-s.items[item]);
+  return {
+    state:{...s,gold:s.gold+gold,items:{...s.items,[item]:s.items[item]+received},flags:got(s.flags,'house-game:'+house)},
+    message:[`初勝利の褒美 · ${gold} G${received? ` · ${ITEMS[item].name[0]} ×${received}`:''}`,
+      `First win reward · ${gold} G${received? ` · ${ITEMS[item].name[1]} ×${received}`:''}`],
+    sound:'win',
+  };
 }
 export function activeTile(s:Adventure,p:Point):Tile {
   const a=area(s.map), tile=tileAt(a,p);
@@ -278,6 +293,7 @@ export function interact(s:Adventure, landmark=currentLandmark(s)):Change {
       return scene(next,lines);
     }
     case 'resident': {
+      if(a.houseGame)return {state:s,effect:{type:'house-invitation',house:a.id}};
       const hero=s.party.find(id=>id!==s.leader)??s.leader;
       const key=`side:${hero}:${a.region}`;
       if(!l.npc)return asIs(s);
@@ -288,6 +304,7 @@ export function interact(s:Adventure, landmark=currentLandmark(s)):Change {
       }
       return scene(s,lines);
     }
+    case 'house-game': return a.houseGame?{state:s,effect:{type:'house-invitation',house:a.id}}:asIs(s);
     case 'service': {
       return {state:s,effect:{type:'service',service:l.service!,region:a.region}};
     }
@@ -332,7 +349,7 @@ export function interact(s:Adventure, landmark=currentLandmark(s)):Change {
 
 function passable(s:Adventure,p:Point) {
   const a=area(s.map),t=activeTile(s,p);
-  if(!canTravel(t,s.vehicle,s.map===WORLD_ID))return false;
+  if(!canTravel(t,s.vehicle,s.map===WORLD_ID)||furnitureAt(a,p))return false;
   if(s.map===WORLD_ID){
     const r=regionAt(p);
     if(r>s.stage&&!isWater(t)&&!isAir(s.vehicle))return false;
@@ -341,9 +358,8 @@ function passable(s:Adventure,p:Point) {
   const gate=a.points.find(l=>l.kind==='gate'&&same(p,l));
   return !gate||s.flags.includes(a.id+':mechanism');
 }
-function nearestDungeonFloor(s:Adventure,map:string,point:Point):Point {
+function nearestReachableFloor(s:Adventure,map:string,point:Point):Point {
   const a=area(map);
-  if(a.place!=='dungeon')return point;
   const local={...s,map,at:a.start,vehicle:'foot' as const};
   const rock=s.rocks[map]??a.points.find(marker=>marker.kind==='rock');
   const queue=[a.start], seen=new Set([coordinate(a.start)]);
@@ -361,21 +377,28 @@ function nearestDungeonFloor(s:Adventure,map:string,point:Point):Point {
   return nearest;
 }
 export function restoreAdventure(s:Adventure):Adventure {
-  if(s.dungeonLayout===DUNGEON_LAYOUT_VERSION)return s;
-  const rocks:Adventure['rocks']={};
-  for(const [map,position] of Object.entries(s.rocks)){
-    const a=area(map);
-    if(a.place!=='dungeon')rocks[map]=position;
-    else if(s.flags.includes(map+':mechanism')){
-      const plate=a.points.find(marker=>marker.kind==='plate');
-      if(plate)rocks[map]={x:plate.x,y:plate.y};
+  const oldDungeon=s.dungeonLayout!==DUNGEON_LAYOUT_VERSION;
+  let next=s;
+  if(oldDungeon){
+    const rocks:Adventure['rocks']={};
+    for(const [map,position] of Object.entries(s.rocks)){
+      const a=area(map);
+      if(a.place!=='dungeon')rocks[map]=position;
+      else if(s.flags.includes(map+':mechanism')){
+        const plate=a.points.find(marker=>marker.kind==='plate');
+        if(plate)rocks[map]={x:plate.x,y:plate.y};
+      }
     }
+    next={...s,rocks,dungeonLayout:DUNGEON_LAYOUT_VERSION};
   }
-  const next={...s,rocks,dungeonLayout:DUNGEON_LAYOUT_VERSION};
-  const at=nearestDungeonFloor(next,s.map,s.at);
-  return {...next,at,trail:area(s.map).place==='dungeon'?[at]:s.trail,
-    parent:s.parent.map(p=>({...p,at:nearestDungeonFloor(next,p.map,p.at)})),
-    checkpoint:{...s.checkpoint,at:nearestDungeonFloor(next,s.checkpoint.map,s.checkpoint.at)}};
+  const fit=(map:string,p:Point)=>{
+    const {place}=area(map);
+    return place==='indoors'||place==='dungeon'&&oldDungeon?nearestReachableFloor(next,map,p):p;
+  };
+  const at=fit(s.map,s.at), room=area(s.map).place;
+  return {...next,at,trail:at!==s.at||room==='dungeon'&&oldDungeon||room==='indoors'&&s.trail.some(p=>!passable(next,p))?[at]:s.trail,
+    parent:s.parent.map(p=>({...p,at:fit(p.map,p.at)})),
+    checkpoint:{...s.checkpoint,at:fit(s.checkpoint.map,s.checkpoint.at)}};
 }
 export function step(s:Adventure,direction:Direction,dash=false):Change {
   const a=area(s.map), d=OFFSETS[direction];

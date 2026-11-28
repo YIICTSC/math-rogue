@@ -7,7 +7,7 @@ import { cueStudentAction } from '../../components/school-dungeon/dungeons1/hero
 import { isProtagonistId } from '../../components/school-dungeon/student/content';
 import type { Adventure } from './adventure';
 import type { Battle } from './battle';
-import { type Direction, type Point, same } from './world';
+import { area, type Direction, type Point, same } from './world';
 
 export const Language = createContext<LanguageMode>('JAPANESE');
 export function useWords(){
@@ -56,8 +56,11 @@ export function FieldCanvas({state,dash}:{state:Adventure;dash:boolean}){
       const {width,height}=canvas.getBoundingClientRect();
       if(width<8||height<8)return;
       const ratio=width/height;
-      sceneHeight=Math.min(310,Math.max(ratio>2?86:115,Math.round(height/(ratio>2?2.25:2.35))));
-      sceneWidth=Math.min(720,Math.round(sceneHeight*ratio));
+      const baseHeight=Math.min(310,Math.max(ratio>2?86:115,Math.round(height/(ratio>2?2.25:2.35))));
+      const room=area(data.current.state.map);
+      const indoors=room.place==='indoors';
+      sceneHeight=indoors?Math.ceil(Math.max(baseHeight,room.height*16+22,(room.width*16+8)/ratio)):baseHeight;
+      sceneWidth=indoors?Math.round(sceneHeight*ratio):Math.min(720,Math.round(sceneHeight*ratio));
       const pixelRatio=Math.min(2,window.devicePixelRatio||1,2048/Math.max(width,height));
       canvas.width=Math.round(width*pixelRatio);canvas.height=Math.round(height*pixelRatio);
       ctx.setTransform(canvas.width/sceneWidth,0,0,canvas.height/sceneHeight,0,0);
@@ -90,7 +93,7 @@ export function FieldCanvas({state,dash}:{state:Adventure;dash:boolean}){
     };
     raf=requestAnimationFrame(tick);
     return ()=>{observer.disconnect();cancelAnimationFrame(raf);};
-  },[]);
+  },[state.map]);
   return <canvas ref={ref} className="pr-scene pr-field-scene" aria-hidden="true" />;
 }
 
